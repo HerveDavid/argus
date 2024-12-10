@@ -1,0 +1,20 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = "Default permissions for game engine plugin"
+permissions = ["allow-pause", "allow-resume", "allow-stop"]
+
+[[permission]]
+identifier = "allow-pause"
+description = "Allows pausing the game"
+commands.allow = ["pause"]
+
+[[permission]]
+identifier = "allow-resume"
+description = "Allows resuming the game"
+commands.allow = ["resume"]
+
+[[permission]]
+identifier = "allow-stop"
+description = "Allows stopping the game"
+commands.allow = ["stop"]
