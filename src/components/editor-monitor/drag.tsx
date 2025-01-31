@@ -1,16 +1,49 @@
-import React, { useRef, useState } from 'react';
+import { listen, TauriEvent } from "@tauri-apps/api/event";
+import { readTextFile } from "@tauri-apps/plugin-fs";
+import React, { useRef, useState, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import * as d3 from 'd3';
 
-const SVGViewer: React.FC = () => {
+const SVGViewer = () => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string>('');
 
-  const loadSVG = async (file: File) => {
+  useEffect(() => {
+    const unlisteners = [
+      listen<{ paths: string[] }>(TauriEvent.DRAG_ENTER, (event) => {
+        console.log("DRAG ENTER:", event);
+      }),
+      
+      listen<{ paths: string[] }>(TauriEvent.DRAG_DROP, async (event) => {
+        console.log("DROP:", event);
+        const filePath = event.payload.paths[0];
+        if (filePath.toLowerCase().endsWith('.svg')) {
+          try {
+            const content = await readTextFile(filePath);
+            loadSVG(content);
+          } catch (err) {
+            setError('Error reading SVG file');
+            console.error(err);
+          }
+        } else {
+          setError('Please drop a valid SVG file');
+        }
+      }),
+      
+      listen<{ paths: string[] }>(TauriEvent.DRAG_LEAVE, (event) => {
+        console.log("DRAG LEAVE:", event);
+      })
+    ];
+
+    return () => {
+      unlisteners.forEach(unlistener => unlistener.then(fn => fn()));
+    };
+  }, []);
+
+  const loadSVG = async (svgContent: string) => {
     try {
-      const text = await file.text();
       const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(text, 'image/svg+xml');
+      const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
       
       if (svgDoc.querySelector('parsererror')) {
         throw new Error('Invalid SVG format');
@@ -35,7 +68,6 @@ const SVGViewer: React.FC = () => {
         .attr('viewBox', originalSvg.getAttribute('viewBox') || null)
         .attr('preserveAspectRatio', 'xMidYMid meet');
 
-      // Copie des définitions et styles
       const defs = originalSvg.querySelector('defs');
       if (defs) {
         const newDefs = newSvg.append('defs');
@@ -49,17 +81,14 @@ const SVGViewer: React.FC = () => {
         newSvg.append('style').text(style.textContent || '');
       });
 
-      // Groupe principal pour le zoom
       const mainGroup = newSvg.append('g');
 
-      // Copie des éléments
       Array.from(originalSvg.children).forEach(child => {
         if (child.tagName !== 'defs' && child.tagName !== 'style') {
           mainGroup.node()?.appendChild(child.cloneNode(true));
         }
       });
 
-      // Configuration du zoom
       const zoom = d3.zoom<SVGSVGElement, unknown>()
         .scaleExtent([0.1, 10])
         .on('zoom', (event) => {
@@ -83,16 +112,6 @@ const SVGViewer: React.FC = () => {
     }
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file?.type === 'image/svg+xml') {
-      loadSVG(file);
-    } else {
-      setError('Please drop a valid SVG file');
-    }
-  };
-
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
@@ -104,22 +123,21 @@ const SVGViewer: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div 
-        className="p-2 text-center h-[600px] transition-colors hover:border-gray-400"
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        ref={svgContainerRef}
-      >
-        {error && (
-          <div className="text-red-500 mb-4">{error}</div>
-        )}
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
-        <p className="text-gray-600 mt-4">Glissez et déposez votre fichier SVG ici</p>
-        <p className="text-sm text-gray-500">Format accepté : .svg</p>
-      </div>
+    <div className="w-full">
+    <div 
+      className="p-2"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      ref={svgContainerRef}
+    >
+      {error && (
+        <div className="text-red-500 mb-4">{error}</div>
+      )}
+      <Upload className="mx-auto h-12 w-12 text-gray-400" />
+      <p className="text-gray-600 mt-4">Glissez et déposez votre fichier SVG ici</p>
+      <p className="text-sm text-gray-500">Format accepté : .svg</p>
     </div>
+  </div>
   );
 };
 

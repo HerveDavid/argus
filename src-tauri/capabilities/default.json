@@ -37,6 +37,13 @@
       ]
     },
     "shell:allow-open",
-    "fs:default"
+    "fs:read-all",
+    "core:path:default",
+    "core:event:default",
+    "core:window:default",
+    "core:app:default",
+    "core:image:default",
+    "core:resources:default",
+    "core:menu:default"
   ]
 }
