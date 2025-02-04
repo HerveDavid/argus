@@ -125,7 +125,7 @@ const SVGViewer = () => {
   return (
     <div className="w-full">
     <div 
-      className="p-2"
+      className="p-2 text-center transition-colors hover:border-gray-400"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       ref={svgContainerRef}
