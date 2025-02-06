@@ -1,4 +1,4 @@
-import { TopMenuBar } from '@/features/game-master/components/top-menu-bar';
+import { TopMenuBar } from "@/features/top-menu-bar";
 
 type LayoutProps = {
   children: React.ReactNode;
