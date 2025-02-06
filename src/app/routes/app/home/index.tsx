@@ -46,6 +46,7 @@ const HomeRoute: React.FC = () => {
           <Settings size={20} />
         </div>
       </div>
+      
       <div className="flex-1">
         <div className="flex items-center gap-4 p-2 bg-gray-800">
           <div className="flex-1 flex items-center gap-2 bg-gray-700 rounded px-3 py-1">

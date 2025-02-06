@@ -1,9 +1,12 @@
+import Editor from '@/features/game-master/components/editor';
 import { useParams } from 'react-router';
 
 const GameMaster = () => {
-  const { projectId } = useParams();
-
-  return <>Game Master {projectId}</>;
+  return (
+    <>
+      <Editor></Editor>
+    </>
+  )
 };
 
 export default GameMaster;

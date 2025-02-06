@@ -1,7 +1,7 @@
-import { TopMenuBar } from './top-menu-bar';
-import { CyberPhysicalList } from './cyber-physical-list';
-import { TelecomAssetList } from './telecom-asset-list';
-import { EditorMonitor } from './editor-monitor';
+import { TopMenuBar } from '../top-menu-bar';
+import { CyberPhysicalList } from '../cyber-physical-list';
+import { TelecomAssetList } from '../telecom-asset-list';
+import { EditorMonitor } from '../editor-monitor';
 
 const Editor = () => {
   
