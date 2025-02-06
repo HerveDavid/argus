@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import path from "path"
 import tailwindcss from '@tailwindcss/vite';
 import react from "@vitejs/plugin-react";
 
@@ -18,6 +19,11 @@ export default defineConfig(async () => ({
         quietDeps: true,
       }
     }
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
