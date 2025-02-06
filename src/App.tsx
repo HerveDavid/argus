@@ -1,10 +1,9 @@
-import Editor from "./components/editor";
 import "./App.css";
 
 function App() {
 
   return (
-    <Editor></Editor>
+    <h1>Simple app</h1>
   );
 }
 
