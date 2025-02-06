@@ -1,7 +1,7 @@
 import { Project } from '../types/project';
 
 const ProjectItem: React.FC<Project> = ({ name, color, path }) => (
-  <div className="flex items-center gap-3">
+  <div className="flex items-center gap-3 p-2 rounded hover:bg-blue-100 cursor-pointer transition-colors duration-200">
     <div
       className={`w-8 h-8 ${color} rounded flex items-center justify-center text-white`}
     >

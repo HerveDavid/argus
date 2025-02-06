@@ -1,8 +1,12 @@
 export const paths = {
-    app: {
-        root: {
-          path: '/',
-          getHref: () => '/',
-        },
-    }
+  home: {
+    path: '/',
+    getHref: () => '/',
+  },
+  app: {
+    root: {
+      path: '/',
+      getHref: () => '/',
+    },
+  },
 } as const;

@@ -13,8 +13,8 @@ const HomeRoute: React.FC = () => {
 
   const filteredProjects = useMemo(() => {
     const lowerTerm = searchTerm.toLowerCase();
-    return projects.filter(project => 
-      project.name.toLowerCase().includes(lowerTerm)
+    return projects.filter((project) =>
+      project.name.toLowerCase().includes(lowerTerm),
     );
   }, [projects, searchTerm]);
 
@@ -25,7 +25,7 @@ const HomeRoute: React.FC = () => {
           <div className="w-8 h-8 bg-purple-600 rounded">
             <img
               src="/api/placeholder/32/32"
-              alt="IntelliJ IDEA"
+              alt="Argus"
               className="w-full h-full"
             />
           </div>

@@ -1,10 +1,10 @@
-import HomeRoute from "./home";
+import HomeRoute from './home';
 
 const AppRoot = () => {
   return (
-  <>
-    <HomeRoute></HomeRoute>
-  </>
+    <>
+      <HomeRoute />
+    </>
   );
 };
 
