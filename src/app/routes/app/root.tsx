@@ -1,9 +1,9 @@
-import HomeRoute from './home';
+import { Outlet } from 'react-router';
 
 const AppRoot = () => {
   return (
     <>
-      <HomeRoute />
+      <Outlet />
     </>
   );
 };

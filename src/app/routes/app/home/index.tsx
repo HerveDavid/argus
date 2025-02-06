@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Search, Settings } from 'lucide-react';
 import ProjectItem from '@/features/projects/components/project-item';
 import { useProjectsStore } from '@/features/projects/stores/use-projects-store';
+import { Button } from '@/components/ui/button';
 
 const HomeRoute: React.FC = () => {
   const { projects, fetchProjects } = useProjectsStore();
@@ -57,12 +58,12 @@ const HomeRoute: React.FC = () => {
               className="bg-transparent border-none outline-none w-full text-sm"
             />
           </div>
-          <button className="px-4 py-1 bg-blue-600 rounded text-sm">
+          <Button className="px-4 py-1 bg-blue-600 rounded text-sm">
             New Project
-          </button>
-          <button className="px-4 py-1 bg-gray-700 rounded text-sm">
+          </Button>
+          <Button className="px-4 py-1 bg-gray-700 rounded text-sm">
             Open
-          </button>
+          </Button>
         </div>
         <div className="p-4 space-y-4">
           {filteredProjects.map((project) => (

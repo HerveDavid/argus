@@ -5,8 +5,12 @@ export const paths = {
   },
   app: {
     root: {
-      path: '/',
-      getHref: () => '/',
+      path: '/app',
+      getHref: () => '/app',
     },
+    gameMaster: {
+      path: 'game-master/:projectId',
+      getHref: (id: string) => `/app/game-master/${id}`
+    }
   },
 } as const;
