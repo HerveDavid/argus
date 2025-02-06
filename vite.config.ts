@@ -1,28 +1,37 @@
-import { defineConfig } from "vite";
-import path from "path"
+import { defineConfig } from 'vite';
+import { glob } from 'glob';
+import { resolve } from 'path';
+import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
-import react from "@vitejs/plugin-react";
+import react from '@vitejs/plugin-react';
 
 // @ts-expect-error process is a nodejs global
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
   css: {
     preprocessorOptions: {
       scss: {
         charset: false,
         quietDeps: true,
-      }
-    }
+      },
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: glob.sync('./features/**/tests/setup.ts'),
+    include: ['./features/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/e2e/**'],
+    coverage: {
+      include: ['src/**'],
+    },
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
 
@@ -37,14 +46,14 @@ export default defineConfig(async () => ({
     host: host || false,
     hmr: host
       ? {
-          protocol: "ws",
+          protocol: 'ws',
           host,
           port: 1421,
         }
       : undefined,
     watch: {
       // 3. tell vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+      ignored: ['**/src-tauri/**'],
     },
   },
 }));

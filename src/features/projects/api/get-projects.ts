@@ -5,12 +5,17 @@ export const getProjects = (): Promise<{data: Project[]}> => {
         {
             name: "embedded-powsybl",
             path: "~/Projects/TwinEu/Argus/embedded-powsybl",
-            color: "orange",
+            color: "bg-orange-500",
         },
         {
             name: "embedded-powsybl",
             path: "~/Projects/TwinEu/Argus/embedded-powsybl",
-            color: "red",
+            color: "bg-red-500",
+        },
+        {
+            name: "test",
+            path: "~/Projects/TwinEu/Argus/embedded-powsybl",
+            color: "bg-red-500",
         },
     ];
 
