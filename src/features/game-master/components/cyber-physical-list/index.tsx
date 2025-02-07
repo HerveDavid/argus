@@ -1,101 +1,111 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { File, Folder, Tree } from "@/components/ui/tree-view";
 
-interface TreeNodeData {
-  label: string;
-  children?: TreeNodeData[];
-}
-
-interface TreeNodeProps {
-  node: TreeNodeData;
-  searchTerm: string;
-}
-
-const TreeNode: React.FC<TreeNodeProps> = ({ node, searchTerm }) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const hasChildren = Boolean(node.children?.length);
-  
-  const matchesSearch = node.label.toLowerCase().includes(searchTerm.toLowerCase());
-  const childrenMatchSearch = node.children?.some(child => 
-    child.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    child.children?.some(grandChild => 
-      grandChild.label.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  );
-
-  if (searchTerm && !matchesSearch && !childrenMatchSearch) {
-    return null;
-  }
-
+export function CyberPhysicalList() {
   return (
-    <div className="ml-4">
-      <div 
-        className={`flex items-center space-x-2 p-1 hover:bg-gray-700 cursor-pointer ${
-          matchesSearch ? 'bg-opacity-25' : ''
-        }`}
-        onClick={() => setIsExpanded(!isExpanded)}
+    <div className="">
+      <Tree
+        className="overflow-hidden rounded-md bg-background p-2"
+        initialSelectedId="7"
+        initialExpandedItems={[
+          '1',
+          '2',
+          '3',
+          '4',
+          '5',
+          '6',
+          '7',
+          '8',
+          '9',
+          '10',
+          '11',
+        ]}
+        elements={ELEMENTS}
       >
-        {hasChildren ? 
-          (isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />) : 
-          <div className="w-4" />
-        }
-        <span className="text-sm">{node.label}</span>
-      </div>
-      
-      {(isExpanded || searchTerm) && hasChildren && node.children && (
-        <div>
-          {node.children.map((child, index) => (
-            <TreeNode key={index} node={child} searchTerm={searchTerm} />
-          ))}
-        </div>
-      )}
+        <Folder element="src" value="1">
+          <Folder value="2" element="app">
+            <File value="3">
+              <p>layout.tsx</p>
+            </File>
+            <File value="4">
+              <p>page.tsx</p>
+            </File>
+          </Folder>
+          <Folder value="5" element="components">
+            <Folder value="6" element="ui">
+              <File value="7">
+                <p>button.tsx</p>
+              </File>
+            </Folder>
+            <File value="8">
+              <p>header.tsx</p>
+            </File>
+            <File value="9">
+              <p>footer.tsx</p>
+            </File>
+          </Folder>
+          <Folder value="10" element="lib">
+            <File value="11">
+              <p>utils.ts</p>
+            </File>
+          </Folder>
+        </Folder>
+      </Tree>
     </div>
   );
-};
+}
 
-export const CyberPhysicalList = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  
-  const treeData: TreeNodeData = {
-    label: "Root",
+const ELEMENTS = [
+  {
+    id: '1',
+    isSelectable: true,
+    name: 'src',
     children: [
       {
-        label: "Load",
+        id: '2',
+        isSelectable: true,
+        name: 'app',
         children: [
-          { label: "Load 1" },
-          { label: "Load 2" }
-        ]
+          {
+            id: '3',
+            isSelectable: true,
+            name: 'layout.tsx',
+          },
+          {
+            id: '4',
+            isSelectable: true,
+            name: 'page.tsx',
+          },
+        ],
       },
       {
-        label: "Line",
+        id: '5',
+        isSelectable: true,
+        name: 'components',
         children: [
-          { label: "Line 1" },
-          { label: "Line 2" }
-        ]
+          {
+            id: '6',
+            isSelectable: true,
+            name: 'header.tsx',
+          },
+          {
+            id: '7',
+            isSelectable: true,
+            name: 'footer.tsx',
+          },
+        ],
       },
       {
-        label: "Generator",
+        id: '8',
+        isSelectable: true,
+        name: 'lib',
         children: [
-          { label: "Generator 1" },
-          { label: "Generator 2" }
-        ]
-      }
-    ]
-  };
-
-  return (
-    <div className="p-2">
-      <div className="mb-4 flex items-center space-x-2 bg-gray-800 p-2 rounded">
-        <Search className="w-4 h-4 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-transparent border-none outline-none text-sm w-full"
-        />
-      </div>
-      <TreeNode node={treeData} searchTerm={searchTerm} />
-    </div>
-  );
-}
+          {
+            id: '9',
+            isSelectable: true,
+            name: 'utils.ts',
+          },
+        ],
+      },
+    ],
+  },
+];
