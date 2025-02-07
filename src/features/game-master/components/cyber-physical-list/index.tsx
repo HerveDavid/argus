@@ -84,10 +84,10 @@ export function CyberPhysicalList() {
   };
 
   return (
-    <div className="h-full p-4">
+    <div className="h-[calc(100%-2rem)] p-2">
       <h2 className="text-xl font-bold mb-4">Network Structure</h2>
       <Tree
-        className="h-[calc(100%-2rem)] overflow-hidden rounded-md bg-background p-2" // Modification ici
+        className="overflow-hidden rounded-md bg-background p-2"
         initialSelectedId="nodes"
         initialExpandedItems={expandedItems}
         elements={elements}
