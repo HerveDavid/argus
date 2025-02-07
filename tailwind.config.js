@@ -11,7 +11,10 @@ export default {
 
       // Couleurs principales ISA-101 et shadcn
       background: 'rgb(224, 224, 224)',
-      foreground: 'rgb(63, 63, 63)',
+      foreground: {
+        DEFAULT: 'rgb(63, 63, 63)', // Couleur de texte normale
+        hover: 'rgb(38, 38, 38)', // Couleur de hover (plus foncée)
+      },
 
       card: {
         DEFAULT: 'rgb(224, 224, 224)',

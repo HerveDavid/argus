@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Timeline from 'react-calendar-timeline';
 import 'react-calendar-timeline/style.css';
 import moment from 'moment';
@@ -85,6 +85,44 @@ const customStyles = `
     background-color: rgba(0, 0, 0, 0.1);
     cursor: ew-resize;
   }
+
+  /* Playhead style */
+  .timeline-playhead {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background-color: rgb(226, 32, 40);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Controls container */
+  .timeline-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .timeline-controls button {
+    padding: 4px 8px;
+    border: 1px solid rgb(160, 160, 164);
+    background: rgb(224, 224, 224);
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .timeline-controls button:hover {
+    background: rgb(216, 216, 216);
+  }
+
+  .timeline-controls button.active {
+    background: rgb(71, 92, 167);
+    color: white;
+  }
+
 `;
 
 interface IGroup {
@@ -127,10 +165,7 @@ const AddGroupForm: React.FC<AddGroupFormProps> = ({ onAddGroup }) => {
         placeholder="Nom du groupe"
         className="p-2 border rounded"
       />
-      <Button 
-        type="submit"
-        className="px-4 py-2"
-      >
+      <Button type="submit" className="px-4 py-2">
         Ajouter un groupe
       </Button>
     </form>
@@ -138,15 +173,22 @@ const AddGroupForm: React.FC<AddGroupFormProps> = ({ onAddGroup }) => {
 };
 
 const TimelineWithTracks: React.FC = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playSpeed, setPlaySpeed] = useState(1);
+  const [currentTime, setCurrentTime] = useState(moment().valueOf());
+  const [animationFrameId, setAnimationFrameId] = useState<number | null>(null);
+
+  const lastTimeRef = useRef(Date.now());
+
   const [items, setItems] = useState<IItem[]>([]);
   const [groups, setGroups] = useState<IGroup[]>([
-    { id: 1, title: 'Groupe 1' }
+    { id: 1, title: 'Groupe 1' },
   ]);
   const [nextGroupId, setNextGroupId] = useState(2);
 
   // Ajout des styles au DOM
   React.useEffect(() => {
-    const styleSheet = document.createElement("style");
+    const styleSheet = document.createElement('style');
     styleSheet.innerText = customStyles;
     document.head.appendChild(styleSheet);
     return () => {
@@ -157,23 +199,23 @@ const TimelineWithTracks: React.FC = () => {
   const handleAddGroup = (title: string) => {
     const newGroup: IGroup = {
       id: nextGroupId,
-      title: title
+      title: title,
     };
     setGroups([...groups, newGroup]);
     setNextGroupId(nextGroupId + 1);
   };
 
   const handleRemoveGroup = (groupId: number) => {
-    setGroups(groups.filter(group => group.id !== groupId));
-    setItems(items.filter(item => item.group !== groupId));
+    setGroups(groups.filter((group) => group.id !== groupId));
+    setItems(items.filter((item) => item.group !== groupId));
   };
 
   const handleItemMove = (
     itemId: number,
     dragTime: number,
-    newGroupOrder: number
+    newGroupOrder: number,
   ) => {
-    const item = items.find(item => item.id === itemId);
+    const item = items.find((item) => item.id === itemId);
     if (!item) return;
 
     const roundTo5Seconds = (time: number) => {
@@ -184,23 +226,25 @@ const TimelineWithTracks: React.FC = () => {
     const roundedDragTime = roundTo5Seconds(dragTime);
     const diff = moment(roundedDragTime).diff(item.start_time);
 
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        return {
-          ...item,
-          start_time: moment(roundedDragTime),
-          end_time: moment(item.end_time).add(diff, 'milliseconds'),
-          group: newGroup,
-        };
-      }
-      return item;
-    }));
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            start_time: moment(roundedDragTime),
+            end_time: moment(item.end_time).add(diff, 'milliseconds'),
+            group: newGroup,
+          };
+        }
+        return item;
+      }),
+    );
   };
 
   const handleItemResize = (
     itemId: number,
     time: number,
-    edge: 'left' | 'right'
+    edge: 'left' | 'right',
   ) => {
     const roundTo5Seconds = (time: number) => {
       return Math.round(time / 5000) * 5000;
@@ -208,16 +252,18 @@ const TimelineWithTracks: React.FC = () => {
 
     const roundedTime = roundTo5Seconds(time);
 
-    setItems(items.map(item => {
-      if (item.id === itemId) {
-        return {
-          ...item,
-          start_time: edge === 'left' ? moment(roundedTime) : item.start_time,
-          end_time: edge === 'right' ? moment(roundedTime) : item.end_time,
-        };
-      }
-      return item;
-    }));
+    setItems(
+      items.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            start_time: edge === 'left' ? moment(roundedTime) : item.start_time,
+            end_time: edge === 'right' ? moment(roundedTime) : item.end_time,
+          };
+        }
+        return item;
+      }),
+    );
   };
 
   const handleCanvasClick = (groupId: number, time: number) => {
@@ -234,9 +280,9 @@ const TimelineWithTracks: React.FC = () => {
       end_time: moment(roundedTime).add(15, 'seconds'),
       canMove: true,
       canResize: true,
-      className: `group-item-${(items.length % 5) + 1}`
+      className: `group-item-${(items.length % 5) + 1}`,
     };
-    
+
     setItems([...items, newItem]);
   };
 
@@ -246,19 +292,92 @@ const TimelineWithTracks: React.FC = () => {
     hour: 1,
     day: 1,
     month: 1,
-    year: 1
+    year: 1,
   };
+
+  const startPlayback = useCallback(() => {
+    setIsPlaying(true);
+    lastTimeRef.current = Date.now();
+
+    const animate = () => {
+      const now = Date.now();
+      const delta = now - lastTimeRef.current;
+      lastTimeRef.current = now;
+
+      setCurrentTime((prevTime) => prevTime + delta * playSpeed);
+      const frameId = requestAnimationFrame(animate);
+      setAnimationFrameId(frameId);
+    };
+
+    animate();
+  }, [playSpeed]);
+
+  const stopPlayback = useCallback(() => {
+    setIsPlaying(false);
+    if (animationFrameId !== null) {
+      cancelAnimationFrame(animationFrameId);
+    }
+  }, [animationFrameId]);
+
+  const resetPlayback = useCallback(() => {
+    stopPlayback();
+    setCurrentTime(moment().valueOf());
+  }, [stopPlayback]);
+
+  const changeSpeed = useCallback(
+    (speed: number) => {
+      setPlaySpeed(speed);
+      if (isPlaying) {
+        stopPlayback();
+        startPlayback();
+      }
+    },
+    [isPlaying, startPlayback, stopPlayback],
+  );
+
+  // Nettoyage de l'animation à la destruction du composant
+  useEffect(() => {
+    return () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [animationFrameId]);
 
   return (
     <div className="p-4">
       <AddGroupForm onAddGroup={handleAddGroup} />
-      
+
+      {/* Contrôles de lecture */}
+      <div className="timeline-controls">
+        <Button
+          onClick={() => (isPlaying ? stopPlayback() : startPlayback())}
+          className={isPlaying ? 'active' : ''}
+        >
+          {isPlaying ? '⏸️' : '▶️'}
+        </Button>
+
+        <Button onClick={resetPlayback}>⏹️</Button>
+
+        <div className="border-l h-6 mx-2 border-gray-300" />
+
+        {[1, 2, 5, 10].map((speed) => (
+          <Button
+            key={speed}
+            onClick={() => changeSpeed(speed)}
+            className={playSpeed === speed ? 'active' : ''}
+          >
+            x{speed}
+          </Button>
+        ))}
+      </div>
+
       <div className="mb-4">
         <h3 className="mb-2 font-bold">Groupes actuels:</h3>
         <div className="flex flex-wrap gap-2">
-          {groups.map(group => (
-            <div 
-              key={group.id} 
+          {groups.map((group) => (
+            <div
+              key={group.id}
               className="flex items-center gap-2 p-2 bg-gray-100 rounded"
             >
               <span>{group.title}</span>
@@ -290,29 +409,40 @@ const TimelineWithTracks: React.FC = () => {
         maxZoom={60 * 60 * 1000}
         dragSnap={5 * 1000}
         lineHeight={60}
+        // traditionalZoom={true}
+        // visibleTimeStart={moment(currentTime).add(-5, 'minutes').valueOf()}
+        // visibleTimeEnd={moment(currentTime).add(5, 'minutes').valueOf()}
         itemRenderer={({ item, itemContext, getItemProps }) => {
           return (
-            <div
-              {...getItemProps({
-                style: {
-                  background: itemContext.selected ? '#228be6' : undefined,
-                  borderColor: itemContext.selected ? '#1971c2' : undefined,
-                },
-              })}
-            >
+            <>
               <div
+                className="timeline-playhead"
                 style={{
-                  height: '100%',
-                  padding: '4px 8px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  fontSize: '14px',
+                  left: `${50}%`, // La Timeline place le temps actuel au centre
                 }}
+              />
+              <div
+                {...getItemProps({
+                  style: {
+                    background: itemContext.selected ? '#228be6' : undefined,
+                    borderColor: itemContext.selected ? '#1971c2' : undefined,
+                  },
+                })}
               >
-                {item.title}
+                <div
+                  style={{
+                    height: '100%',
+                    padding: '4px 8px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontSize: '14px',
+                  }}
+                >
+                  {item.title}
+                </div>
               </div>
-            </div>
+            </>
           );
         }}
       />
