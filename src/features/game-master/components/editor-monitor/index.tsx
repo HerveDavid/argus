@@ -7,6 +7,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import TimelineWithTracks from './timeline';
 
 export const EditorMonitor = () => {
   return (
@@ -28,7 +29,7 @@ export const EditorMonitor = () => {
 
         {/* Timeline */}
         <div className="flex-1 bg-gray-850 p-2 min-h-0">
-          <TimelinePanel></TimelinePanel>
+          <TimelineWithTracks />
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>
