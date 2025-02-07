@@ -27,7 +27,7 @@ type SvgMenuProps = {
 const SvgMenu = ({ children }: SvgMenuProps) => {
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="w-full">
+      <ContextMenuTrigger className="w-full h-full">
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
@@ -79,6 +79,7 @@ const SvgMenu = ({ children }: SvgMenuProps) => {
 const SVGViewer = () => {
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string>('');
+  const [svgContent, setSvgContent] = useState<string | null>(null);
 
   useEffect(() => {
     const unlisteners = [
@@ -121,10 +122,23 @@ const SVGViewer = () => {
         throw new Error('Invalid SVG format');
       }
 
+      setSvgContent(svgContent);
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error loading SVG');
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (svgContent && svgContainerRef.current) {
       const container = d3.select(svgContainerRef.current);
       container.selectAll('*').remove();
 
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
       const originalSvg = svgDoc.documentElement;
+
       const contentDiv = container
         .append('div')
         .style('width', '100%')
@@ -177,13 +191,8 @@ const SVGViewer = () => {
             .duration(750)
             .call(zoom.transform, d3.zoomIdentity);
         });
-
-      setError('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading SVG');
-      console.error(err);
     }
-  };
+  }, [svgContent]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -196,20 +205,24 @@ const SVGViewer = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="h-full w-full">
+      <h2 className="">Grid View</h2>
       <SvgMenu>
         <div
-          className="p-2 text-center transition-colors hover:border-gray-400"
+          className="flex flex-col items-center justify-center h-full w-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           ref={svgContainerRef}
         >
-          {error && <div className="text-red-500 mb-4">{error}</div>}
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="text-gray-600 mt-4">
-            Glissez et déposez votre fichier SVG ici
-          </p>
-          <p className="text-sm text-gray-500">Format accepté : .svg</p>
+          {!svgContent && (
+            <div className="text-center">
+              {error && <div className="text-red-500 mb-4">{error}</div>}
+              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="text-gray-600 mt-4">
+                Drag and drop an SVG file here
+              </p>
+            </div>
+          )}
         </div>
       </SvgMenu>
     </div>

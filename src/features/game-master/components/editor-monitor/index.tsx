@@ -1,6 +1,5 @@
 import { GridPreview } from './grid-preview';
 import { TelecomPreview } from './telecom-preview';
-import { TimelinePanel } from './timeline-panel';
 import { TimelineControl } from './timeline-control';
 import {
   ResizableHandle,
