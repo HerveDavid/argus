@@ -28,13 +28,14 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { BusNode, Node, Edge } from './columns';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends BusNode | Node | Edge, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
@@ -65,14 +66,35 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // Détermine le type de données pour afficher le bon filtre
+  const getFilterPlaceholder = () => {
+    if (!data.length) return 'Filter...';
+    const columnId = getFilterColumn();
+    return `Filter by ${columnId}...`;
+  };
+
+  // Récupère la première colonne filtrable disponible
+  const getFilterColumn = () => {
+    const availableColumns = table.getAllColumns();
+    const firstFilterableColumn = availableColumns.find((column) =>
+      column.getCanFilter(),
+    );
+    return firstFilterableColumn?.id || availableColumns[0]?.id;
+  };
+
   return (
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn('email')?.getFilterValue() as string) ?? ''}
+          placeholder={getFilterPlaceholder()}
+          value={
+            (table.getColumn(getFilterColumn())?.getFilterValue() as string) ??
+            ''
+          }
           onChange={(event) =>
-            table.getColumn('email')?.setFilterValue(event.target.value)
+            table
+              .getColumn(getFilterColumn())
+              ?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -158,22 +180,24 @@ export function DataTable<TData, TValue>({
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} item(s) selected.
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
