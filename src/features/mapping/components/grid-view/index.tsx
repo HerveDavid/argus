@@ -4,7 +4,7 @@ import Structure from './structure';
 const GridView = () => {
   return (
     <>
-      <Tabs defaultValue="graph" className="flex-1 m-2">
+      <Tabs defaultValue="graph" className="flex-1">
         <h1 className="mb-2">Grid</h1>
         <TabsList>
           <TabsTrigger value="graph">Graph</TabsTrigger>

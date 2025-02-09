@@ -34,7 +34,7 @@ export default function Structure() {
     return <div className="container mx-auto py-10">No data available</div>;
   }
   return (
-    <div className="container mx-auto my-auto">
+    <div className="container">
       <Card className="border-none shadow-none">
         <CardHeader>
           <CardTitle>Network Structure</CardTitle>
