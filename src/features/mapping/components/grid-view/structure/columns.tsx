@@ -122,7 +122,7 @@ export const useBusNodeColumns = () => {
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           >
             SVG ID
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="" />
           </Button>
         ),
       },
@@ -130,15 +130,13 @@ export const useBusNodeColumns = () => {
         accessorKey: 'nbNeighbours',
         header: 'Neighbours',
         cell: ({ row }) => (
-          <div className="text-right">{row.getValue('nbNeighbours')}</div>
+          <div>{row.getValue('nbNeighbours')}</div>
         ),
       },
       {
         id: 'select',
         header: ({ table }) => <SelectionHeader table={table} />,
         cell: ({ row }) => <SelectionCell row={row} />,
-        enableSorting: false,
-        enableHiding: false,
       },
     ],
     [],
@@ -162,22 +160,20 @@ export const useNodeColumns = () => {
         accessorKey: 'x',
         header: 'X',
         cell: ({ row }) => (
-          <div className="text-right">{row.getValue('x')}</div>
+          <div>{row.getValue('x')}</div>
         ),
       },
       {
         accessorKey: 'y',
         header: 'Y',
         cell: ({ row }) => (
-          <div className="text-right">{row.getValue('y')}</div>
+          <div>{row.getValue('y')}</div>
         ),
       },
       {
         id: 'select',
         header: ({ table }) => <SelectionHeader table={table} />,
         cell: ({ row }) => <SelectionCell row={row} />,
-        enableSorting: false,
-        enableHiding: false,
       },
     ],
     [],
@@ -217,8 +213,6 @@ export const useEdgeColumns = () => {
         id: 'select',
         header: ({ table }) => <SelectionHeader table={table} />,
         cell: ({ row }) => <SelectionCell row={row} />,
-        enableSorting: false,
-        enableHiding: false,
       },
     ],
     [],
