@@ -117,21 +117,24 @@ export const useBusNodeColumns = () => {
       {
         accessorKey: 'svgId',
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            SVG ID
-            <ArrowUpDown className="" />
-          </Button>
+          <div className="flex items-center">
+            <h1>SVG ID</h1>
+            <Button
+              variant="ghost"
+              className="hover:bg-foreground-muted hover:text-foreground"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
         ),
       },
       {
         accessorKey: 'nbNeighbours',
         header: 'Neighbours',
-        cell: ({ row }) => (
-          <div>{row.getValue('nbNeighbours')}</div>
-        ),
+        cell: ({ row }) => <div>{row.getValue('nbNeighbours')}</div>,
       },
       {
         id: 'select',
@@ -159,16 +162,12 @@ export const useNodeColumns = () => {
       {
         accessorKey: 'x',
         header: 'X',
-        cell: ({ row }) => (
-          <div>{row.getValue('x')}</div>
-        ),
+        cell: ({ row }) => <div>{row.getValue('x')}</div>,
       },
       {
         accessorKey: 'y',
         header: 'Y',
-        cell: ({ row }) => (
-          <div>{row.getValue('y')}</div>
-        ),
+        cell: ({ row }) => <div>{row.getValue('y')}</div>,
       },
       {
         id: 'select',
@@ -191,15 +190,7 @@ export const useEdgeColumns = () => {
       },
       {
         accessorKey: 'type',
-        header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          >
-            Type
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        ),
+        header: 'Type',
       },
       {
         accessorKey: 'node1',
