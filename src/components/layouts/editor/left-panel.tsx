@@ -5,67 +5,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Code, FileText, GitBranch, Search, Settings } from 'lucide-react';
+import { FileSliders } from 'lucide-react';
 
 export const LeftPanel = () => {
   return (
     <>
-      <div className="flex-shrink-0 bg-background border-r flex flex-col items-center py-2 gap-2">
+      <div className="flex-shrink-0 border-r flex flex-col items-center gap-2">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-5 h-5">
-                <FileText className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="w-8 h-8">
+                <FileSliders className="h-8 w-8" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right">
-              <p>Explorer</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-5 h-5">
-                <Search className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Search</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-5 h-5">
-                <Code className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Code</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-5 h-5">
-                <GitBranch className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Source Control</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <div className="flex-1" />
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="w-5 h-5">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Settings</p>
+              <p>Project Settings</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -73,4 +27,3 @@ export const LeftPanel = () => {
     </>
   );
 };
-
