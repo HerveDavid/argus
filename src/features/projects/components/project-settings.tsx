@@ -1,39 +1,42 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useProjectSettings } from '@/features/projects/stores/use-project-settings-store';
 
 const formSchema = z.object({
-  gridFile: z.string(),
-  telecomFile: z.string(),
+  gridFile: z.string().refine((file) => file.endsWith('.xiidm'), {
+    message: 'Only .xiidm files are allowed',
+  }),
+  networkFile: z.string(),
 });
 
 export function ProjectSettings() {
-  // 1. Define your form.
+  const { settings, setSettings } = useProjectSettings();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gridFile: 'simple-eu.xiidm',
-      telecomFile: 'CIM.CIM',
+      gridFile: settings.gridFile,
+      networkFile: settings.networkFile,
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await setSettings({
+      gridFile: values.gridFile,
+      networkFile: values.networkFile,
+    });
+    console.log(settings);
   }
 
   return (
@@ -48,7 +51,16 @@ export function ProjectSettings() {
               <FormItem>
                 <FormLabel>Grid file</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} />
+                  <Input
+                    type="file"
+                    accept=".xiidm"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        field.onChange(file.name);
+                      }
+                    }}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -56,20 +68,19 @@ export function ProjectSettings() {
           />
           <FormField
             control={form.control}
-            name="telecomFile"
+            name="networkFile"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Telecom file</FormLabel>
+                <FormLabel>Network file</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} />
+                  <Input {...field} disabled placeholder="CIM.CIM" />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
           />
           <div className="space-x-2">
-            <Button type="submit" variant="outline">
+            <Button type="button" variant="outline">
               Cancel
             </Button>
             <Button type="submit">Submit</Button>
