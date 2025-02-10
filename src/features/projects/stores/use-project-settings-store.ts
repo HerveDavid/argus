@@ -14,3 +14,4 @@ export const useProjectSettings = create<ProjectSettingsState>((set) => ({
     error: null,
     setSettings: async (settings) => set({ settings }),
 }));
+

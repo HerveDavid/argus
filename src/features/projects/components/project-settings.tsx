@@ -17,7 +17,7 @@ const formSchema = z.object({
   gridFile: z.string().refine((file) => file.endsWith('.xiidm'), {
     message: 'Only .xiidm files are allowed',
   }),
-  networkFile: z.string(),
+  networkFile: z.string().optional(),
 });
 
 export function ProjectSettings() {
@@ -36,7 +36,6 @@ export function ProjectSettings() {
       gridFile: values.gridFile,
       networkFile: values.networkFile,
     });
-    console.log(settings);
   }
 
   return (
