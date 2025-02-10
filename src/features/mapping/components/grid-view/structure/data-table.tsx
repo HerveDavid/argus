@@ -35,6 +35,16 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
 }
 
+export const MemoizedDataTable = React.memo(
+  DataTable,
+  (prevProps, nextProps) => {
+    return (
+      prevProps.data === nextProps.data &&
+      prevProps.columns === nextProps.columns
+    );
+  },
+);
+
 export function DataTable<TData extends BusNode | Node | Edge, TValue>({
   columns,
   data,
