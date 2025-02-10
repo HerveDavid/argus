@@ -1,5 +1,5 @@
 import { Link } from '@/components/ui/link';
-import { Project } from '../types/project';
+import { Project } from '../types/project.type';
 import { paths } from '@/config/paths';
 
 const ProjectItem = ({ name, color, path }: Project) => {

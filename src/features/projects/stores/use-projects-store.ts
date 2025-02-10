@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Project } from '../types/project';
+import { Project } from '../types/project.type';
 import { getProjects } from '../api/get-projects';
 
 export interface ProjectsState {

@@ -1,4 +1,4 @@
-import { Project } from '../types/project';
+import { Project } from '../types/project.type';
 
 export const getProjects = (): Promise<{ data: Project[] }> => {
   const data: Project[] = [

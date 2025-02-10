@@ -6,6 +6,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
+import { ProjectSettings } from '@/features/projects/components/project-settings';
 
 const Editor = () => {
   return (
@@ -15,7 +16,7 @@ const Editor = () => {
         minSize={2}
         className="w-64 bg-gray border-r border-gray-700"
       >
-        <CyberPhysicalList></CyberPhysicalList>
+        <ProjectSettings></ProjectSettings>
       </ResizablePanel>
 
       <ResizableHandle withHandle />
