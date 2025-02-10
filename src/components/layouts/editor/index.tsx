@@ -9,12 +9,20 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Separator } from '@/components/ui/separator';
+import { useProjectStore } from '@/features/projects/stores/use-current-project-store';
+import { useEffect } from 'react';
 
 type LayoutProps = {
   children: React.ReactNode;
 };
 
 export const EditorLayout = ({ children }: LayoutProps) => {
+  const { project, loadStoredProject } = useProjectStore();
+
+  useEffect(() => {
+    loadStoredProject();
+  }, []);
+
   return (
     <div className="flex flex-col h-screen">
       <SidebarProvider>
@@ -26,7 +34,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink>Project Name</BreadcrumbLink>
+                    <BreadcrumbLink>{project?.name}</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>

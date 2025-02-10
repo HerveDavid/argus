@@ -11,7 +11,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useProjectSettings } from '@/features/projects/stores/use-project-settings-store';
+import { useProjectStore } from '@/features/projects/stores/use-current-project-store';
+import { useEffect } from 'react';
 
 const formSchema = z.object({
   gridFile: z.string().refine((file) => file.endsWith('.xiidm'), {
@@ -21,13 +22,20 @@ const formSchema = z.object({
 });
 
 export function ProjectSettings() {
-  const { settings, setSettings } = useProjectSettings();
+  const { settings, setSettings, loadSettings } = useProjectStore();
+
+  useEffect(() => {
+    const init = async () => {
+      await loadSettings();
+    };
+    init();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gridFile: settings.gridFile,
-      networkFile: settings.networkFile,
+      gridFile: settings?.gridFile,
+      networkFile: settings?.networkFile,
     },
   });
 
@@ -59,6 +67,7 @@ export function ProjectSettings() {
                         field.onChange(file.name);
                       }
                     }}
+                    defaultValue={field.value}
                   />
                 </FormControl>
                 <FormMessage />
@@ -72,7 +81,7 @@ export function ProjectSettings() {
               <FormItem>
                 <FormLabel>Network file</FormLabel>
                 <FormControl>
-                  <Input {...field} disabled placeholder="CIM.CIM" />
+                  <Input {...field} disabled placeholder="CIM" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,11 +1,11 @@
 import { Link } from '@/components/ui/link';
 import { Project } from '../types/project.type';
 import { paths } from '@/config/paths';
-import { useProjectCurrent } from '../stores/use-project-current-store';
+import { useProjectStore } from '../stores/use-current-project-store';
 import { Card } from '@/components/ui/card';
 
 const ProjectItem = ({ name, color, path }: Project) => {
-  const { setProject } = useProjectCurrent();
+  const { setProject } = useProjectStore();
 
   const handleClick = () => {
     setProject({ name, color, path });
