@@ -1,21 +1,29 @@
 import { Link } from '@/components/ui/link';
 import { Project } from '../types/project.type';
 import { paths } from '@/config/paths';
+import { useProjectCurrent } from '../stores/use-project-current-store';
+import { Card } from '@/components/ui/card';
 
 const ProjectItem = ({ name, color, path }: Project) => {
+  const { setProject } = useProjectCurrent();
+
+  const handleClick = () => {
+    setProject({ name, color, path });
+  };
+
   return (
-    <Link to={paths.app.gameMaster.getHref(name)}>
-      <div className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 cursor-pointer transition-colors duration-200">
+    <Link to={paths.app.gameMaster.getHref(name)} onClick={handleClick}>
+      <Card className="flex items-center m-2 hover:bg-secondary">
         <div
-          className={`w-8 h-8 ${color} rounded flex items-center justify-center text-white`}
+          className={`w-8 h-8 m-2 bg-primary rounded-sm flex items-center justify-center text-white`}
         >
           {name.charAt(0).toUpperCase()}
         </div>
         <div>
-          <div className="text-sm">{name}</div>
-          <div className="text-xs text-gray-500">{path}</div>
+          <h1>{name}</h1>
+          <h2 className="text-xs">{path}</h2>
         </div>
-      </div>
+      </Card>
     </Link>
   );
 };
