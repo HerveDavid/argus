@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
+
 import ProjectItem from '@/features/projects/components/project-item';
 import { useProjectsStore } from '@/features/projects/stores/use-projects-list-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CreateProject } from '@/features/projects/components/create-project';
 
 const HomeRoute: React.FC = () => {
   const { projects, fetchProjects } = useProjectsStore();
@@ -34,7 +36,8 @@ const HomeRoute: React.FC = () => {
               className="outline-none w-full text-sm"
             />
           </div>
-          <Button className="px-4 py-1 text-sm">New Project</Button>
+
+          <CreateProject />
           <Button variant="outline" className="px-4 py-1 text-sm">
             Open
           </Button>
