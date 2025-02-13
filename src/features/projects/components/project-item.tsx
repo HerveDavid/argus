@@ -12,7 +12,7 @@ const ProjectItem = ({ name, color, path }: Project) => {
   };
 
   return (
-    <Link to={paths.app.gameMaster.getHref(name)} onClick={handleClick}>
+    <Link to={paths.gameMaster.home.getHref(name)} onClick={handleClick}>
       <Card className="flex items-center m-2 hover:bg-secondary">
         <div
           className={`w-8 h-8 m-2 bg-primary rounded-sm flex items-center justify-center text-white`}

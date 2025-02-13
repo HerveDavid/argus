@@ -1,4 +1,3 @@
-import { CyberPhysicalList } from '../cyber-physical-list';
 import { TelecomAssetList } from '../telecom-asset-list';
 import { EditorMonitor } from '../editor-monitor';
 import {
@@ -6,20 +5,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { ProjectSettings } from '@/features/projects/components/project-settings';
 
 const Editor = () => {
   return (
     <ResizablePanelGroup direction="horizontal" className="flex flex-1">
-      {/* Left Panel - Effects List */}
-      <ResizablePanel
-        minSize={2}
-        className="w-64 bg-gray border-r border-gray-700"
-      >
-        <ProjectSettings></ProjectSettings>
-      </ResizablePanel>
-
-      <ResizableHandle withHandle />
 
       {/* Main Content */}
       <ResizablePanel defaultSize={75} className="flex flex-1 min-h-0 flex-col">

@@ -9,10 +9,9 @@ import {
 } from '@/components/ui/card';
 import { getMetadataGrid } from '@/features/mapping/api/get-metadata-grid';
 import { MetadataGrid } from '@/features/mapping/types/metadata-grid';
-import BusNodesTable from './bus-nodes-table';
-import EdgesTable from './edges-table';
-import NodesTable from './nodes-table';
-
+import BusNodesTable from './data-tables/bus-nodes-table';
+import EdgesTable from './data-tables/edges-table';
+import NodesTable from './data-tables/nodes-table';
 
 export default function Structure() {
   const [metadataGrid, setMetadataGrid] = useState<MetadataGrid | null>(null);
@@ -70,39 +69,19 @@ export default function Structure() {
   };
 
   return (
-    <div className="container">
-      <Card className="border-none shadow-none">
-        <CardHeader>
-          <CardTitle>Network Structure</CardTitle>
-          <CardDescription>
-            View and manage network components: Bus Nodes, Nodes, and Edges
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            value={currentTab}
-            className="w-full"
-            onValueChange={handleTabChange}
-          >
-            <TabsList className="grid w-full grid-cols-3">
+    <Tabs value={currentTab} className="w-full" onValueChange={handleTabChange}>
+      <TabsContent value={currentTab}>
+        <Card>
+          <CardHeader className="m-0 p-0">
+            <TabsList className="grid grid-cols-3">
               <TabsTrigger value="busNodes">Bus Nodes</TabsTrigger>
               <TabsTrigger value="nodes">Nodes</TabsTrigger>
               <TabsTrigger value="edges">Edges</TabsTrigger>
             </TabsList>
-            <TabsContent value={currentTab}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="capitalize">{currentTab}</CardTitle>
-                  <CardDescription>
-                    List of all {currentTab} in the network
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>{renderTable()}</CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+          </CardHeader>
+          <CardContent>{renderTable()}</CardContent>
+        </Card>
+      </TabsContent>
+    </Tabs>
   );
 }

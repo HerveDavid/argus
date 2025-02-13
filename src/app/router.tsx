@@ -22,13 +22,22 @@ export const createAppRouter = (queryClient: QueryClient) =>
       lazy: () => import('./routes/app/home').then(convert(queryClient)),
     },
     {
-      path: paths.app.root.path,
+      path: paths.gameMaster.root.path,
       element: <AppRoot />,
       children: [
         {
-          path: paths.app.gameMaster.path,
+          path: paths.gameMaster.home.path,
           lazy: () =>
-            import('./routes/app/game-master').then(convert(queryClient)),
+            import('./routes/app/game-master/home-page').then(
+              convert(queryClient),
+            ),
+        },
+        {
+          path: paths.gameMaster.mapping.path,
+          lazy: () =>
+            import('./routes/app/game-master/mapping-page').then(
+              convert(queryClient),
+            ),
         },
       ],
     },

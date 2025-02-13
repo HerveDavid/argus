@@ -17,7 +17,6 @@ export const getMetadataGrid = async ({
 }> => {
   const data: MetadataGrid = network;
 
-  // Paginer les données selon le type d'onglet
   const startIndex = page * pageSize;
   const paginatedData = {
     ...data,

@@ -3,14 +3,18 @@ export const paths = {
     path: '/',
     getHref: () => '/',
   },
-  app: {
+  gameMaster: {
     root: {
-      path: '/app',
-      getHref: () => '/app',
+      path: '/game-master',
+      getHref: () => '/game-master',
     },
-    gameMaster: {
-      path: 'game-master/:projectId',
-      getHref: (id: string) => `/app/game-master/${id}`
-    }
+    home: {
+      path: '/game-master/:projectId',
+      getHref: (id: string) => `/game-master/${id}`,
+    },
+    mapping: {
+      path: '/game-master/mapping/:projectId',
+      getHref: (id: string) => `/game-master/mapping/${id}`,
+    },
   },
 } as const;

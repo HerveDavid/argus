@@ -94,6 +94,7 @@ export function DataTable<TData extends BusNode | Node | Edge, TValue>({
 
   return (
     <div>
+     
       <div className="flex items-center py-4">
         <Input
           placeholder={getFilterPlaceholder()}
@@ -135,6 +136,7 @@ export function DataTable<TData extends BusNode | Node | Edge, TValue>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -185,6 +187,7 @@ export function DataTable<TData extends BusNode | Node | Edge, TValue>({
           </TableBody>
         </Table>
       </div>
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
