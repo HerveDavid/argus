@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
-import Editor from '@/features/game-master/components/editor';
+import Mapping from '@/features/mapping/components';
 import { useProjectStore } from '@/features/projects/stores/use-current-project-store';
 import { useEffect } from 'react';
 
@@ -36,14 +36,14 @@ const MappingPage = () => {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Mapping</BreadcrumbPage>
+                  <BreadcrumbPage>mapping</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </div>
         <main className="flex-1">
-          <Editor />
+          <Mapping />
         </main>
       </div>
     </EditorLayout>

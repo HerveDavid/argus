@@ -13,8 +13,8 @@ const HomePage = () => {
 
   return (
     <EditorLayout>
-      <div className="flex">
-        {project!.name}
+      <div>
+        <h1>{project!.name}</h1>
         <Link to={paths.gameMaster.mapping.getHref(project!.name)}>
           Mapping
         </Link>
