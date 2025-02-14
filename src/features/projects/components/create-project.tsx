@@ -22,6 +22,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useProjectsStore } from '../stores/use-projects-store';
+import { Link } from '@/components/ui/link';
+import { paths } from '@/config/paths';
 
 const FormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -32,6 +35,7 @@ type FormValues = z.infer<typeof FormSchema>;
 
 export function CreateProject() {
   const [open, setOpen] = useState(false);
+  const { addProject } = useProjectsStore();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -46,6 +50,11 @@ export function CreateProject() {
   } = form;
 
   function onSubmit(data: FormValues) {
+    addProject({
+      name: data.name,
+      path: data.path,
+      color: '',
+    });
     console.log('Project data:', {
       name: data.name,
       path: data.path,

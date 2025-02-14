@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 
 import ProjectItem from '@/features/projects/components/project-item';
-import { useProjectsStore } from '@/features/projects/stores/use-projects-list-store';
+import { useProjectsStore } from '@/features/projects/stores/use-projects-store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateProject } from '@/features/projects/components/create-project';

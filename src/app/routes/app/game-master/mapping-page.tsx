@@ -10,11 +10,11 @@ import {
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
 import Mapping from '@/features/mapping/components';
-import { useProjectStore } from '@/features/projects/stores/use-current-project-store';
+import { useProjectsStore } from '@/features/projects/stores/use-projects-store';
 import { useEffect } from 'react';
 
 const MappingPage = () => {
-  const { project, loadStoredProject } = useProjectStore();
+  const { currentProject, loadStoredProject } = useProjectsStore();
 
   useEffect(() => {
     loadStoredProject();
@@ -29,8 +29,10 @@ const MappingPage = () => {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink>
-                    <Link to={paths.gameMaster.home.getHref(project!.name)}>
-                      {project!.name}
+                    <Link
+                      to={paths.gameMaster.home.getHref(currentProject!.name)}
+                    >
+                      {currentProject!.name}
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>

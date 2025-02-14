@@ -11,8 +11,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useProjectStore } from '@/features/projects/stores/use-current-project-store';
-import { useEffect } from 'react';
 
 const formSchema = z.object({
   gridFile: z.string().refine((file) => file.endsWith('.xiidm'), {
@@ -22,28 +20,16 @@ const formSchema = z.object({
 });
 
 export function ProjectSettings() {
-  const { settings, setSettings, loadSettings } = useProjectStore();
-
-  useEffect(() => {
-    const init = async () => {
-      await loadSettings();
-    };
-    init();
-  }, []);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gridFile: settings?.gridFile,
-      networkFile: settings?.networkFile,
+      // gridFile: settings?.gridFile,
+      // networkFile: settings?.networkFile,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await setSettings({
-      gridFile: values.gridFile,
-      networkFile: values.networkFile,
-    });
+    console.log(values);
   }
 
   return (
