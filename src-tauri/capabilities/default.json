@@ -2,20 +2,14 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "app": {
     "security": {
       "capabilities": [
         {
           "identifier": "draggable-window",
-          "windows": [
-            "*"
-          ],
-          "permissions": [
-            "core:window:allow-start-dragging"
-          ]
+          "windows": ["*"],
+          "permissions": ["core:window:allow-start-dragging"]
         }
       ]
     }
@@ -34,6 +28,12 @@
           "name": "binaries/powsybl",
           "sidecar": true
         }
+      ]
+    },
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "http://localhost:8000/api/v1/**" }
       ]
     },
     "shell:allow-open",

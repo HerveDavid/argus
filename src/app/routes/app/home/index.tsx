@@ -6,6 +6,7 @@ import { useProjectsStore } from '@/features/projects/stores/use-projects-store'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateProject } from '@/features/projects/components/create-project';
+import SingleLineDiagram from '@/features/diagram-line/components/single-line-diagram';
 
 const HomeRoute: React.FC = () => {
   const { projects, fetchProjects } = useProjectsStore();
@@ -47,6 +48,7 @@ const HomeRoute: React.FC = () => {
             <ProjectItem key={project.path} {...project} />
           ))}
         </div>
+        <SingleLineDiagram />
       </div>
     </div>
   );

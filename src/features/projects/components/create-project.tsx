@@ -23,8 +23,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useProjectsStore } from '../stores/use-projects-store';
-import { Link } from '@/components/ui/link';
-import { paths } from '@/config/paths';
 
 const FormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
