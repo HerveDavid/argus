@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { getSingleLineDiagram } from '../../api/get-single-line-diagram';
+import { useEffect, useState } from 'react';
+import { useDiagramStore } from '../../stores/use-diagram.store'; // Ajustez le chemin d'importation selon votre structure
 
 interface SingleLineDiagramProps {
   lineId?: string;
@@ -14,47 +14,34 @@ const SingleLineDiagram = ({
   height = 'auto',
   className = '',
 }: SingleLineDiagramProps) => {
+  // Utilisation du store Zustand
+  const { svgBlob, isLoading, error, loadDiagram, resetDiagram } =
+    useDiagramStore();
+  // État local pour stocker le contenu SVG en tant que chaîne
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
+    // Charger le diagramme quand le composant est monté ou quand lineId change
+    loadDiagram(lineId);
 
-    async function loadDiagram() {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Récupérer le SVG comme Blob
-        const blob = await getSingleLineDiagram(lineId);
-
-        // Lire le contenu du Blob en tant que texte
-        const text = await blob.text();
-
-        if (isMounted) {
-          setSvgContent(text);
-          setLoading(false);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setError(
-            'Erreur lors du chargement du diagramme. Veuillez réessayer.',
-          );
-          setLoading(false);
-          console.error('Failed to load diagram:', error);
-        }
-      }
-    }
-
-    loadDiagram();
-
+    // Nettoyer quand le composant est démonté
     return () => {
-      isMounted = false;
+      resetDiagram();
     };
   }, [lineId]);
 
-  if (loading) {
+  // Convertir le blob en texte quand il est disponible
+  useEffect(() => {
+    if (svgBlob) {
+      svgBlob.text().then((text) => {
+        setSvgContent(text);
+      });
+    } else {
+      setSvgContent(null);
+    }
+  }, [svgBlob]);
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
         Chargement du diagramme...
@@ -66,7 +53,7 @@ const SingleLineDiagram = ({
     return <div className="text-red-500">{error}</div>;
   }
 
-  // Afficher le SVG directement dans le DOM
+  // Afficher le SVG en utilisant dangerouslySetInnerHTML
   if (svgContent) {
     return (
       <div
