@@ -1,29 +1,27 @@
 import { useEffect, useState } from 'react';
-import { useDiagramStore } from '../../stores/use-diagram.store';
+import { useNetworkAreaDiagramStore } from '../../stores/use-network-area-diagram.store';
 
-interface SingleLineDiagramProps {
-  lineId?: string;
+interface NetworkAreaDiagramProps {
   width?: string | number;
   height?: string | number;
   className?: string;
 }
 
-const SingleLineDiagram = ({
-  lineId = 'VLGEN',
+const NetworkAreaDiagram = ({
   width = '100%',
   height = 'auto',
   className = '',
-}: SingleLineDiagramProps) => {
+}: NetworkAreaDiagramProps) => {
   const { svgBlob, isLoading, error, loadDiagram, resetDiagram } =
-    useDiagramStore();
+    useNetworkAreaDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
 
   useEffect(() => {
-    loadDiagram(lineId);
+    loadDiagram();
     return () => {
       resetDiagram();
     };
-  }, [lineId, loadDiagram, resetDiagram]);
+  }, [loadDiagram, resetDiagram]);
 
   useEffect(() => {
     if (svgBlob) {
@@ -38,7 +36,7 @@ const SingleLineDiagram = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
-        Chargement du diagramme...
+        Chargement du diagramme de zone...
       </div>
     );
   }
@@ -59,10 +57,10 @@ const SingleLineDiagram = ({
 
   return (
     <div className="flex flex-col justify-center items-center h-40 text-gray-500">
-      <p>Aucun diagramme disponible</p>
+      <p>Aucun diagramme de zone disponible</p>
       <button
         className="mt-2 px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
-        onClick={() => loadDiagram(lineId)}
+        onClick={() => loadDiagram()}
       >
         Réessayer
       </button>
@@ -70,4 +68,4 @@ const SingleLineDiagram = ({
   );
 };
 
-export default SingleLineDiagram;
+export default NetworkAreaDiagram;
