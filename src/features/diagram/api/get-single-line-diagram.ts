@@ -5,106 +5,172 @@ import {
   getProxyUrl,
 } from '@/features/settings/proxy/stores/proxy.store';
 
+// Types
+export interface DiagramResult {
+  svgBlob: Blob;
+  metadata: MetadataGrid;
+}
+
+interface FetchOptions {
+  method: string;
+  headers: Record<string, string>;
+  proxy?: {
+    all: {
+      url: string;
+      noProxy: string;
+    };
+  };
+}
+
+// Constants
+const BASE_URL = 'http://localhost:8000/api/v1/network/diagram';
+
 /**
- * Fetches a network diagram SVG for a specific line
- * @param lineId - The ID of the line to fetch (e.g. 'VLGEN')
- * @returns Promise containing the SVG as a Blob that can be used with URL.createObjectURL
+ * Creates fetch options with proxy configuration if needed
+ * @param accept MIME type accepted for the response
+ * @returns Configured fetch options
  */
-export async function getSingleLineDiagram(lineId: string): Promise<Blob> {
+const createFetchOptions = (accept: string): FetchOptions => {
+  const proxyUrl = getProxyUrl();
+  const noProxy = getNoProxy();
+
+  const options: FetchOptions = {
+    method: 'GET',
+    headers: {
+      Accept: accept,
+    },
+  };
+
+  if (proxyUrl) {
+    options.proxy = {
+      all: {
+        url: proxyUrl,
+        noProxy: noProxy || 'localhost',
+      },
+    };
+  }
+
+  return options;
+};
+
+/**
+ * Attempts to fetch the diagram and metadata in a single request
+ * @param lineId ID of the line to retrieve
+ * @returns SVG blob and metadata, or null if the request fails
+ */
+const fetchUnifiedDiagram = async (
+  lineId: string,
+): Promise<DiagramResult | null> => {
+  const options = createFetchOptions('application/json');
+  const url = `${BASE_URL}/line/${lineId}?format=json`;
+
+  try {
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    const svgBlob = new Blob([data.svg], { type: 'image/svg+xml' });
+
+    return { svgBlob, metadata: data.metadata };
+  } catch (error) {
+    console.warn('Unified request failed, using fallback:', error);
+    return null;
+  }
+};
+
+/**
+ * Retrieves only the SVG diagram
+ * @param lineId ID of the line to retrieve
+ * @returns SVG Blob
+ */
+const fetchDiagramSvg = async (lineId: string): Promise<Blob> => {
+  const options = createFetchOptions('image/svg+xml');
+  const url = `${BASE_URL}/line/${lineId}`;
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to retrieve diagram: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return await response.blob();
+};
+
+/**
+ * Retrieves only the diagram metadata
+ * @param lineId ID of the line to retrieve
+ * @returns Diagram metadata
+ */
+const fetchDiagramMetadata = async (lineId: string): Promise<MetadataGrid> => {
+  const options = createFetchOptions('application/json');
+  const url = `${BASE_URL}/line/${lineId}/metadata`;
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to retrieve metadata: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return await response.json();
+};
+
+/**
+ * Retrieves the diagram and metadata in two separate requests
+ * @param lineId ID of the line to retrieve
+ * @returns SVG blob and metadata
+ */
+const fetchSeparateDiagramAndMetadata = async (
+  lineId: string,
+): Promise<DiagramResult> => {
+  const [svgBlob, metadata] = await Promise.all([
+    fetchDiagramSvg(lineId),
+    fetchDiagramMetadata(lineId),
+  ]);
+
+  return { svgBlob, metadata };
+};
+
+/**
+ * Retrieves a network diagram SVG with its metadata for a specific line
+ * @param lineId ID of the line to retrieve
+ * @returns Promise containing the SVG blob and metadata
+ */
+export const getSingleLineDiagramWithMetadata = async (
+  lineId: string,
+): Promise<DiagramResult> => {
+  try {
+    // First try the unified endpoint
+    const unifiedResult = await fetchUnifiedDiagram(lineId);
+    if (unifiedResult) {
+      return unifiedResult;
+    }
+
+    // Fallback to separate requests if the unified endpoint fails
+    return await fetchSeparateDiagramAndMetadata(lineId);
+  } catch (error) {
+    console.error('Error retrieving diagram with metadata:', error);
+    throw error;
+  }
+};
+
+/**
+ * Retrieves only the SVG diagram for a specific line
+ * @param lineId ID of the line to retrieve
+ * @returns Promise containing the SVG blob
+ */
+export const getSingleLineDiagram = async (lineId: string): Promise<Blob> => {
   try {
     const { svgBlob } = await getSingleLineDiagramWithMetadata(lineId);
     return svgBlob;
   } catch (error) {
-    console.error('Error fetching network diagram:', error);
+    console.error('Error retrieving network diagram:', error);
     throw error;
   }
-}
-
-export async function getSingleLineDiagramWithMetadata(
-  lineId: string,
-): Promise<{ svgBlob: Blob; metadata: MetadataGrid }> {
-  try {
-    // Retrieve proxy information from the store
-    const proxyUrl = getProxyUrl();
-    const noProxy = getNoProxy();
-
-    // Basic options for the fetch request
-    const fetchOptions: any = {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-    };
-
-    // Add proxy options if a proxy URL is configured
-    if (proxyUrl) {
-      fetchOptions.proxy = {
-        all: {
-          url: proxyUrl,
-          noProxy: noProxy || 'localhost',
-        },
-      };
-    }
-
-    // Method 1: Get SVG and metadata in one request using format=json
-    const jsonResponse = await fetch(
-      `http://localhost:8000/api/v1/network/diagram/line/${lineId}?format=json`,
-      fetchOptions,
-    );
-
-    if (jsonResponse.ok) {
-      const data = await jsonResponse.json();
-      // Convert SVG string to Blob
-      const svgBlob = new Blob([data.svg], { type: 'image/svg+xml' });
-      return { svgBlob, metadata: data.metadata };
-    }
-
-    // Prepare options for fallback requests
-    const svgFetchOptions = {
-      ...fetchOptions,
-      headers: {
-        Accept: 'image/svg+xml',
-      },
-    };
-
-    const metadataFetchOptions = {
-      ...fetchOptions,
-      headers: {
-        Accept: 'application/json',
-      },
-    };
-
-    // Fallback method: Make two separate requests if the unified endpoint fails
-    // 1. Get the SVG
-    const svgResponse = await fetch(
-      `http://localhost:8000/api/v1/network/diagram/line/${lineId}`,
-      svgFetchOptions,
-    );
-
-    if (!svgResponse.ok) {
-      throw new Error(
-        `Failed to fetch diagram: ${svgResponse.status} ${svgResponse.statusText}`,
-      );
-    }
-
-    // 2. Get the metadata
-    const metadataResponse = await fetch(
-      `http://localhost:8000/api/v1/network/diagram/line/${lineId}/metadata`,
-      metadataFetchOptions,
-    );
-
-    if (!metadataResponse.ok) {
-      throw new Error(
-        `Failed to fetch metadata: ${metadataResponse.status} ${metadataResponse.statusText}`,
-      );
-    }
-
-    const svgBlob = await svgResponse.blob();
-    const metadata = await metadataResponse.json();
-
-    return { svgBlob, metadata };
-  } catch (error) {
-    console.error('Error fetching network diagram with metadata:', error);
-    throw error;
-  }
-}
+};
