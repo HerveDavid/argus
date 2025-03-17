@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import EditorLayout from '@/components/layouts/editor';
-import SingleLineDiagram from '@/features/diagram/components/single-line-diagram';
+import SingleLineDiagram from '@/features/network/components/single-line-diagram';
 import { Search } from 'lucide-react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { fetch } from '@tauri-apps/plugin-http';

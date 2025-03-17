@@ -4,22 +4,12 @@ import {
   getNoProxy,
   getProxyUrl,
 } from '@/features/settings/proxy/stores/proxy.store';
+import { FetchOptions } from '../types/fetch-options.type';
 
 // Types
 export interface DiagramResult {
   svgBlob: Blob;
   metadata: MetadataGrid;
-}
-
-interface FetchOptions {
-  method: string;
-  headers: Record<string, string>;
-  proxy?: {
-    all: {
-      url: string;
-      noProxy: string;
-    };
-  };
 }
 
 // Constants

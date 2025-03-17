@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import EditorLayout from '@/components/layouts/editor';
-import SingleLineDiagram from '@/features/diagram/components/single-line-diagram';
+import SingleLineDiagram from '@/features/network/components/single-line-diagram';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { fetch } from '@tauri-apps/plugin-http';
 
 // Import shadcn/ui components
 import { Card } from '@/components/ui/card';
@@ -11,33 +10,11 @@ import {
   getNoProxy,
   getProxyUrl,
 } from '@/features/settings/proxy/stores/proxy.store';
+import { fetchSubstations } from '@/features/network/api/get-substations';
+import { fetchVoltageLevels } from '@/features/network/api/get-voltage-levels';
+import { VoltageLevel } from '@/features/network/types/voltage-level.type';
+import { Substation } from '@/features/network/types/substation.type';
 
-// Define TypeScript interfaces
-interface Substation {
-  country: string;
-  geo_tags: string;
-  id: string;
-  name: string;
-  tso: string;
-}
-
-interface VoltageLevel {
-  high_voltage_limit: number | null;
-  id: string;
-  low_voltage_limit: number | null;
-  name: string;
-  nominal_v: number;
-  substation_id: string;
-  topology_kind: string;
-}
-
-interface SubstationsResponse {
-  substations: Substation[];
-}
-
-interface VoltageLevelsResponse {
-  voltage_levels: VoltageLevel[];
-}
 
 interface ExpandedSubstations {
   [key: string]: boolean;
@@ -99,13 +76,7 @@ const HomeRoute: React.FC = () => {
 
         // Fetch substations with error handling
         try {
-          const substationsResponse = await fetch(
-            'http://localhost:8000/api/v1/network/substations',
-            options,
-          );
-
-          const substationsData: SubstationsResponse =
-            await substationsResponse.json();
+          const substationsData = await fetchSubstations();
 
           setSubstations(substationsData.substations);
 
@@ -118,44 +89,11 @@ const HomeRoute: React.FC = () => {
         } catch (substationError) {
           console.error('Error fetching substations:', substationError);
           setError('Failed to fetch substations. Check if the API is running.');
-
-          // Use sample data as fallback
-          const sampleSubstations: Substation[] = [
-            {
-              country: 'FR',
-              geo_tags: 'A',
-              id: 'P1',
-              name: '',
-              tso: 'RTE',
-            },
-            {
-              country: 'FR',
-              geo_tags: 'B',
-              id: 'P2',
-              name: '',
-              tso: 'RTE',
-            },
-          ];
-          setSubstations(sampleSubstations);
-
-          // Initialize expanded state for fallback substations
-          const expanded: ExpandedSubstations = {};
-          sampleSubstations.forEach((sub) => {
-            expanded[sub.id] = true;
-          });
-          setExpandedSubstations(expanded);
         }
 
         // Fetch voltage levels with error handling
         try {
-          const voltageLevelsResponse = await fetch(
-            'http://localhost:8000/api/v1/network/voltage-levels',
-            options,
-          );
-
-          const voltageLevelsData: VoltageLevelsResponse =
-            await voltageLevelsResponse.json();
-
+          const voltageLevelsData= await fetchVoltageLevels();
           setVoltageLevels(voltageLevelsData.voltage_levels);
         } catch (voltageLevelError) {
           console.error('Error fetching voltage levels:', voltageLevelError);
@@ -164,47 +102,6 @@ const HomeRoute: React.FC = () => {
               'Failed to fetch voltage levels. Check if the API is running.',
             );
           }
-
-          // Use sample data as fallback
-          const sampleVoltageLevels: VoltageLevel[] = [
-            {
-              high_voltage_limit: null,
-              id: 'VLGEN',
-              low_voltage_limit: null,
-              name: '',
-              nominal_v: 24.0,
-              substation_id: 'P1',
-              topology_kind: '',
-            },
-            {
-              high_voltage_limit: null,
-              id: 'VLHV1',
-              low_voltage_limit: null,
-              name: '',
-              nominal_v: 380.0,
-              substation_id: 'P1',
-              topology_kind: '',
-            },
-            {
-              high_voltage_limit: null,
-              id: 'VLHV2',
-              low_voltage_limit: null,
-              name: '',
-              nominal_v: 380.0,
-              substation_id: 'P2',
-              topology_kind: '',
-            },
-            {
-              high_voltage_limit: null,
-              id: 'VLLOAD',
-              low_voltage_limit: null,
-              name: '',
-              nominal_v: 150.0,
-              substation_id: 'P2',
-              topology_kind: '',
-            },
-          ];
-          setVoltageLevels(sampleVoltageLevels);
         }
 
         setLoading(false);
@@ -249,7 +146,7 @@ const HomeRoute: React.FC = () => {
     <EditorLayout>
       <div className="flex w-full h-full bg-gray-50">
         {/* Left sidebar - exactly 1/12 width */}
-        <div className="w-1/12 flex flex-col border-r border-gray-200">
+        <div className="w-2/12 flex flex-col border-r border-gray-200">
           <div className="flex flex-col border-b border-gray-200">
             <h2 className="font-semibold p-2 border-b">Network Explorer</h2>
             <div className="flex">
@@ -374,7 +271,7 @@ const HomeRoute: React.FC = () => {
         </div>
 
         {/* Main content - Takes remaining 11/12 */}
-        <div className="w-11/12 flex flex-col overflow-hidden">
+        <div className="w-10/12 flex flex-col overflow-hidden">
           {/* Align the header with the navigation tabs */}
           <div className="flex items-center border-b border-gray-200">
             <h2 className="font-semibold p-2">

@@ -38,7 +38,7 @@ const SingleLineDiagram = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
-        Chargement du diagramme...
+        Loading diagram...
       </div>
     );
   }
@@ -61,12 +61,12 @@ const SingleLineDiagram = ({
 
   return (
     <div className="flex flex-col justify-center items-center h-40 text-gray-500">
-      <p>Aucun diagramme disponible</p>
+      <p>Forbidden diagram</p>
       <button
         className="mt-2 px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
         onClick={() => loadDiagram(lineId)}
       >
-        Réessayer
+        Reload
       </button>
     </div>
   );
