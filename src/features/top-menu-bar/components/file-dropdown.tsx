@@ -15,7 +15,9 @@ const FileDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="text-sm text-foreground hover:text-foreground-hover transition-colors duration-200">File</button>
+        <button className="text-sm text-foreground hover:text-foreground-hover transition-colors duration-200">
+          File
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
@@ -30,7 +32,7 @@ const FileDropdown = () => {
             <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            Settings
+            <Link to={paths.settings.path}>Settings</Link>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>

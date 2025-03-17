@@ -1,5 +1,9 @@
 import { fetch } from '@tauri-apps/plugin-http';
 import { MetadataGrid } from '../types/metadata-diagram.type';
+import {
+  getNoProxy,
+  getProxyUrl,
+} from '@/features/settings/proxy/stores/proxy.store';
 
 /**
  * Fetches a network area diagram SVG
@@ -19,17 +23,33 @@ export async function getNetworkAreaDiagram(): Promise<Blob> {
  * Fetches a network area diagram SVG with metadata
  * @returns Promise containing both the SVG as a Blob and the metadata
  */
-export async function getNetworkAreaDiagramWithMetadata(): Promise<{ svgBlob: Blob; metadata: MetadataGrid }> {
+export async function getNetworkAreaDiagramWithMetadata(): Promise<{
+  svgBlob: Blob;
+  metadata: MetadataGrid;
+}> {
   try {
-    // Method 1: Get SVG and metadata in one request using format=json
+    const proxyUrl = getProxyUrl();
+    const noProxy = getNoProxy();
+
+    const fetchOptions: any = {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
+    if (proxyUrl) {
+      fetchOptions.proxy = {
+        all: {
+          url: proxyUrl,
+          noProxy: noProxy || 'localhost',
+        },
+      };
+    }
+
     const jsonResponse = await fetch(
       'http://localhost:8000/api/v1/network/diagram/area?format=json',
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      },
+      fetchOptions,
     );
 
     if (jsonResponse.ok) {
@@ -41,14 +61,23 @@ export async function getNetworkAreaDiagramWithMetadata(): Promise<{ svgBlob: Bl
 
     // Fallback method: Make two separate requests if the unified endpoint fails
     // 1. Get the SVG
+    const svgFetchOptions = {
+      ...fetchOptions,
+      headers: {
+        Accept: 'image/svg+xml',
+      },
+    };
+
+    const metadataFetchOptions = {
+      ...fetchOptions,
+      headers: {
+        Accept: 'application/json',
+      },
+    };
+
     const svgResponse = await fetch(
       'http://localhost:8000/api/v1/network/diagram/area',
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'image/svg+xml',
-        },
-      },
+      svgFetchOptions,
     );
 
     if (!svgResponse.ok) {
@@ -60,12 +89,7 @@ export async function getNetworkAreaDiagramWithMetadata(): Promise<{ svgBlob: Bl
     // 2. Get the metadata
     const metadataResponse = await fetch(
       'http://localhost:8000/api/v1/network/diagram/area/metadata',
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      },
+      metadataFetchOptions,
     );
 
     if (!metadataResponse.ok) {

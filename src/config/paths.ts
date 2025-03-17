@@ -3,6 +3,14 @@ export const paths = {
     path: '/',
     getHref: () => '/',
   },
+  scada: {
+    path: '/scada',
+    getHref: () => '/scada',
+  },
+  settings: {
+    path: '/settings',
+    getHref: () => '/settings',
+  },
   gameMaster: {
     root: {
       path: '/game-master',

@@ -8,7 +8,6 @@ export const EditorLayout = ({ children }: LayoutProps) => {
   return (
     <div className="flex flex-col h-screen">
       <TopMenuBar />
-
       <div className="flex flex-1 overflow-hidden">{children}</div>
     </div>
   );

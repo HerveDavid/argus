@@ -22,6 +22,10 @@ export const createAppRouter = (queryClient: QueryClient) =>
       lazy: () => import('./routes/app/home').then(convert(queryClient)),
     },
     {
+      path: paths.settings.path,
+      lazy: () => import('./routes/app/settings').then(convert(queryClient)),
+    },
+    {
       path: paths.gameMaster.root.path,
       element: <AppRoot />,
       children: [

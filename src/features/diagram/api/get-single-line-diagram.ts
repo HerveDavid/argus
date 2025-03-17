@@ -3,7 +3,7 @@ import { MetadataGrid } from '../types/metadata-diagram.type';
 import {
   getNoProxy,
   getProxyUrl,
-} from '@/features/configuration/proxy/stores/proxy.store';
+} from '@/features/settings/proxy/stores/proxy.store';
 
 /**
  * Fetches a network diagram SVG for a specific line
@@ -19,15 +19,16 @@ export async function getSingleLineDiagram(lineId: string): Promise<Blob> {
     throw error;
   }
 }
+
 export async function getSingleLineDiagramWithMetadata(
   lineId: string,
 ): Promise<{ svgBlob: Blob; metadata: MetadataGrid }> {
   try {
-    // Récupérer les informations de proxy depuis le store
+    // Retrieve proxy information from the store
     const proxyUrl = getProxyUrl();
     const noProxy = getNoProxy();
 
-    // Options de base pour la requête fetch
+    // Basic options for the fetch request
     const fetchOptions: any = {
       method: 'GET',
       headers: {
@@ -35,7 +36,7 @@ export async function getSingleLineDiagramWithMetadata(
       },
     };
 
-    // Ajouter les options de proxy si une URL de proxy est configurée
+    // Add proxy options if a proxy URL is configured
     if (proxyUrl) {
       fetchOptions.proxy = {
         all: {
@@ -58,7 +59,7 @@ export async function getSingleLineDiagramWithMetadata(
       return { svgBlob, metadata: data.metadata };
     }
 
-    // Préparer les options pour les requêtes de fallback
+    // Prepare options for fallback requests
     const svgFetchOptions = {
       ...fetchOptions,
       headers: {
@@ -100,6 +101,7 @@ export async function getSingleLineDiagramWithMetadata(
 
     const svgBlob = await svgResponse.blob();
     const metadata = await metadataResponse.json();
+
     return { svgBlob, metadata };
   } catch (error) {
     console.error('Error fetching network diagram with metadata:', error);

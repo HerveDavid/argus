@@ -49,11 +49,13 @@ const SingleLineDiagram = ({
 
   if (svgContent) {
     return (
-      <div
-        className={className}
-        style={{ width, height }}
-        dangerouslySetInnerHTML={{ __html: svgContent }}
-      />
+      <>
+        <div
+          className={className}
+          style={{ width, height }}
+          dangerouslySetInnerHTML={{ __html: svgContent }}
+        />
+      </>
     );
   }
 
