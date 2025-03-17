@@ -6,9 +6,10 @@ import { useProjectsStore } from '@/features/projects/stores/use-projects-store'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CreateProject } from '@/features/projects/components/create-project';
-import SingleLineDiagram from '@/features/diagram-line/components/single-line-diagram';
-import MetadataTable from '@/features/diagram-line/components/metadata-table';
-import NetworkAreaDiagram from '@/features/diagram-line/components/network-area-diagram';
+import SingleLineDiagram from '@/features/diagram/components/single-line-diagram';
+import MetadataTable from '@/features/diagram/components/metadata-table';
+import NetworkAreaDiagram from '@/features/diagram/components/network-area-diagram';
+import { ProxyForm, ProxyFormContainer } from '@/features/configuration/proxy/components/proxy-form';
 
 const HomeRoute: React.FC = () => {
   const { projects, fetchProjects } = useProjectsStore();
@@ -50,6 +51,7 @@ const HomeRoute: React.FC = () => {
             <ProjectItem key={project.path} {...project} />
           ))}
         </div>
+        <ProxyFormContainer />
         <SingleLineDiagram />
         <NetworkAreaDiagram />
         <MetadataTable />
