@@ -1,3 +1,4 @@
+import { Clock } from './clock';
 import FileDropdown from './file-dropdown';
 import ViewDropdown from './view-dropdown';
 
@@ -8,6 +9,7 @@ export const TopMenuBar = () => {
         <FileDropdown />
         <ViewDropdown />
       </div>
+      <Clock />
     </div>
   );
 };

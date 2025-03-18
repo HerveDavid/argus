@@ -13,7 +13,7 @@ const ViewDropdown = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="text-sm text-foreground hover:text-foreground-hover transition-colors duration-200">
+        <button className="text-sm text-foreground hover:text-foreground-hover">
           View
         </button>
       </DropdownMenuTrigger>
@@ -23,12 +23,8 @@ const ViewDropdown = () => {
             <Link to={paths.home.path}>State View</Link>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            Game Master
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            KPI
-          </DropdownMenuItem>
+          <DropdownMenuItem>Game Master</DropdownMenuItem>
+          <DropdownMenuItem>KPI</DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
