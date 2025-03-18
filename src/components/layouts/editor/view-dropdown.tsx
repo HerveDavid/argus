@@ -23,6 +23,12 @@ const ViewDropdown = () => {
             <Link to={paths.home.path}>State View</Link>
             <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
           </DropdownMenuItem>
+          <DropdownMenuItem>
+            Game Master
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            KPI
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
