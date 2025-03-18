@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import EditorLayout from '@/components/layouts/editor';
 import SingleLineDiagram from '@/features/network/components/single-line-diagram';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, AlertCircle } from 'lucide-react';
 
 // Import shadcn/ui components
 import { Card } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import {
-  getNoProxy,
-  getProxyUrl,
-} from '@/features/settings/proxy/stores/proxy.store';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { fetchSubstations } from '@/features/network/api/get-substations';
 import { fetchVoltageLevels } from '@/features/network/api/get-voltage-levels';
 import { VoltageLevel } from '@/features/network/types/voltage-level.type';
 import { Substation } from '@/features/network/types/substation.type';
-
 
 interface ExpandedSubstations {
   [key: string]: boolean;
@@ -24,95 +21,68 @@ interface VoltagesBySubstation {
   [key: string]: VoltageLevel[];
 }
 
-interface FetchOptions {
-  method: string;
-  headers: Record<string, string>;
-  proxy?: {
-    all: {
-      url: string;
-      noProxy: string;
-    };
-  };
-}
-
 const HomeRoute: React.FC = () => {
-  const [diagramId, setDiagramId] = useState<string>('VLGEN');
+  const [diagramId, setDiagramId] = useState<string>();
   const [diagramType, setDiagramType] = useState<'voltageLevel' | 'substation'>(
     'voltageLevel',
   );
   const [substations, setSubstations] = useState<Substation[]>([]);
   const [voltageLevels, setVoltageLevels] = useState<VoltageLevel[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loadingSubstations, setLoadingSubstations] = useState<boolean>(true);
+  const [loadingVoltageLevels, setLoadingVoltageLevels] = useState<boolean>(true);
   const [expandedSubstations, setExpandedSubstations] =
     useState<ExpandedSubstations>({});
-  const [error, setError] = useState<string | null>(null);
+  const [substationsError, setSubstationsError] = useState<string | null>(null);
+  const [voltageLevelsError, setVoltageLevelsError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('substations');
 
-  // Fetch data from API
-  useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setError(null);
+  // Separate fetch functions for better error handling
+  const loadSubstations = async () => {
+    try {
+      setLoadingSubstations(true);
+      setSubstationsError(null);
+      const substationsData = await fetchSubstations();
+      
+      setSubstations(substationsData);
 
-        const proxyUrl = getProxyUrl();
-        const noProxy = getNoProxy();
+      // Initialize expanded state for all substations
+      const expanded: ExpandedSubstations = {};
+      substationsData.forEach((sub) => {
+        expanded[sub.id] = true;
+      });
+      setExpandedSubstations(expanded);
+    } catch (error) {
+      console.error('Error fetching substations:', error);
+      setSubstationsError(`Failed to fetch substations: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setLoadingSubstations(false);
+    }
+  };
 
-        const options: FetchOptions = {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-        };
-
-        if (proxyUrl) {
-          options.proxy = {
-            all: {
-              url: proxyUrl,
-              noProxy: noProxy || 'localhost',
-            },
-          };
-        }
-
-        // Fetch substations with error handling
-        try {
-          const substationsData = await fetchSubstations();
-
-          setSubstations(substationsData.substations);
-
-          // Initialize expanded state for all substations
-          const expanded: ExpandedSubstations = {};
-          substationsData.substations.forEach((sub) => {
-            expanded[sub.id] = true;
-          });
-          setExpandedSubstations(expanded);
-        } catch (substationError) {
-          console.error('Error fetching substations:', substationError);
-          setError('Failed to fetch substations. Check if the API is running.');
-        }
-
-        // Fetch voltage levels with error handling
-        try {
-          const voltageLevelsData= await fetchVoltageLevels();
-          setVoltageLevels(voltageLevelsData.voltage_levels);
-        } catch (voltageLevelError) {
-          console.error('Error fetching voltage levels:', voltageLevelError);
-          if (!error) {
-            setError(
-              'Failed to fetch voltage levels. Check if the API is running.',
-            );
-          }
-        }
-
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in data fetching process:', error);
-        setError('An unexpected error occurred while fetching data.');
-        setLoading(false);
+  const loadVoltageLevels = async () => {
+    try {
+      setLoadingVoltageLevels(true);
+      setVoltageLevelsError(null);
+      const voltageLevelsData = await fetchVoltageLevels();
+      
+      // Check for expected data structure
+      if (voltageLevelsData && voltageLevelsData.voltage_levels) {
+        setVoltageLevels(voltageLevelsData.voltage_levels);
+      } else {
+        throw new Error('Unexpected response format');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching voltage levels:', error);
+      setVoltageLevelsError(`Failed to fetch voltage levels: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      setLoadingVoltageLevels(false);
+    }
+  };
 
-    fetchData();
+  // Initial data loading
+  useEffect(() => {
+    loadSubstations();
+    loadVoltageLevels();
   }, []);
 
   // Group voltage levels by substation
@@ -142,6 +112,27 @@ const HomeRoute: React.FC = () => {
     });
   };
 
+  const renderError = (error: string | null, retryFunction: () => void) => {
+    if (!error) return null;
+    
+    return (
+      <Alert variant="destructive" className="m-2">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="text-xs flex items-center justify-between">
+          <span>{error}</span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={retryFunction}
+            className="ml-2 h-6 text-xs"
+          >
+            Retry
+          </Button>
+        </AlertDescription>
+      </Alert>
+    );
+  };
+
   return (
     <EditorLayout>
       <div className="flex w-full h-full bg-gray-50">
@@ -169,83 +160,94 @@ const HomeRoute: React.FC = () => {
             </div>
           </div>
 
-          {error && (
-            <div className="p-2 m-2 text-xs bg-red-100 text-red-800 rounded-md">
-              {error}
-            </div>
-          )}
+          {renderError(substationsError, loadSubstations)}
+          {renderError(voltageLevelsError, loadVoltageLevels)}
 
           <div className="flex-1 overflow-y-auto p-2">
-            {loading ? (
-              <div className="flex items-center justify-center h-full">
-                <p>Loading...</p>
-              </div>
-            ) : activeTab === 'substations' ? (
-              <div className="space-y-1">
-                {substations.map((substation) => (
-                  <Card key={substation.id} className="p-0 shadow-sm">
-                    <div
-                      className={`cursor-pointer p-2 ${
-                        diagramId === substation.id &&
-                        diagramType === 'substation'
-                          ? 'bg-blue-100'
-                          : 'hover:bg-gray-100'
-                      }`}
-                      onClick={() =>
-                        handleItemClick(substation.id, 'substation')
-                      }
-                    >
-                      <div className="flex items-center">
-                        <button
-                          className="p-1 mr-1"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleSubstation(substation.id);
-                          }}
-                        >
-                          {expandedSubstations[substation.id] ? (
-                            <ChevronDown className="h-3 w-3" />
-                          ) : (
-                            <ChevronRight className="h-3 w-3" />
-                          )}
-                        </button>
-                        <span className="font-medium truncate text-sm">
-                          {substation.id} ({substation.country})
-                        </span>
-                      </div>
-                    </div>
-
-                    <Collapsible
-                      open={expandedSubstations[substation.id]}
-                      className="border-t border-gray-100"
-                    >
-                      <CollapsibleContent className="p-0">
-                        {voltagesBySubstation[substation.id]?.map((vl) => (
-                          <div
-                            key={vl.id}
-                            className={`py-1 px-2 pl-6 text-sm cursor-pointer ${
-                              diagramId === vl.id &&
-                              diagramType === 'voltageLevel'
-                                ? 'bg-blue-100'
-                                : 'hover:bg-gray-100'
-                            }`}
-                            onClick={() =>
-                              handleItemClick(vl.id, 'voltageLevel')
-                            }
+            {activeTab === 'substations' ? (
+              loadingSubstations ? (
+                <div className="flex items-center justify-center h-full">
+                  <p>Loading substations...</p>
+                </div>
+              ) : substations.length === 0 ? (
+                <div className="text-center p-4 text-gray-500">
+                  {substationsError ? 'Error loading substations' : 'No substations found'}
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {substations.map((substation) => (
+                    <Card key={substation.id} className="p-0 shadow-sm">
+                      <div
+                        className={`cursor-pointer p-2 ${
+                          diagramId === substation.id &&
+                          diagramType === 'substation'
+                            ? 'bg-blue-100'
+                            : 'hover:bg-gray-100'
+                        }`}
+                        onClick={() =>
+                          handleItemClick(substation.id, 'substation')
+                        }
+                      >
+                        <div className="flex items-center">
+                          <button
+                            className="p-1 mr-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSubstation(substation.id);
+                            }}
                           >
-                            <span className="truncate block">
-                              {vl.id} - {vl.nominal_v} kV
-                            </span>
-                          </div>
-                        )) || (
-                          <div className="text-xs p-2 pl-6 text-gray-500">
-                            No voltage levels
-                          </div>
-                        )}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  </Card>
-                ))}
+                            {expandedSubstations[substation.id] ? (
+                              <ChevronDown className="h-3 w-3" />
+                            ) : (
+                              <ChevronRight className="h-3 w-3" />
+                            )}
+                          </button>
+                          <span className="font-medium truncate text-sm">
+                            {substation.id} ({substation.country})
+                          </span>
+                        </div>
+                      </div>
+
+                      <Collapsible
+                        open={expandedSubstations[substation.id]}
+                        className="border-t border-gray-100"
+                      >
+                        <CollapsibleContent className="p-0">
+                          {voltagesBySubstation[substation.id]?.map((vl) => (
+                            <div
+                              key={vl.id}
+                              className={`py-1 px-2 pl-6 text-sm cursor-pointer ${
+                                diagramId === vl.id &&
+                                diagramType === 'voltageLevel'
+                                  ? 'bg-blue-100'
+                                  : 'hover:bg-gray-100'
+                              }`}
+                              onClick={() =>
+                                handleItemClick(vl.id, 'voltageLevel')
+                              }
+                            >
+                              <span className="truncate block">
+                                {vl.id} - {vl.nominal_v} kV
+                              </span>
+                            </div>
+                          )) || (
+                            <div className="text-xs p-2 pl-6 text-gray-500">
+                              No voltage levels
+                            </div>
+                          )}
+                        </CollapsibleContent>
+                      </Collapsible>
+                    </Card>
+                  ))}
+                </div>
+              )
+            ) : loadingVoltageLevels ? (
+              <div className="flex items-center justify-center h-full">
+                <p>Loading voltage levels...</p>
+              </div>
+            ) : voltageLevels.length === 0 ? (
+              <div className="text-center p-4 text-gray-500">
+                {voltageLevelsError ? 'Error loading voltage levels' : 'No voltage levels found'}
               </div>
             ) : (
               <div className="space-y-1">
