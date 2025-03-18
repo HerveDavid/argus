@@ -15,11 +15,13 @@ import {
 import { useProxyStore } from '../../stores/proxy.store';
 import { Proxy } from '../../types/proxy.type';
 
-// Define the form validation schema with optional username and password
+/**
+ * Validation schema for the proxy configuration form
+ */
 const proxyFormSchema = z.object({
   username: z.string().optional(),
   password: z.string().optional(),
-  noProxy: z.string().optional().default(''),
+  no_proxy: z.string().optional().default(''),
   url: z.string().url({
     message: 'Please enter a valid URL',
   }),
@@ -27,20 +29,56 @@ const proxyFormSchema = z.object({
 
 type ProxyFormValues = z.infer<typeof proxyFormSchema>;
 
-export function ProxyForm() {
-  // Get proxy data and actions from Zustand store
-  const { proxy, setProxy } = useProxyStore();
+/**
+ * Form field configuration for rendering
+ */
+const FORM_FIELDS = [
+  {
+    name: 'url' as const,
+    label: 'Proxy URL',
+    placeholder: 'https://proxy.example.com:8080',
+    description:
+      'Enter the URL of the proxy server including port if required.',
+    type: 'text',
+  },
+  {
+    name: 'username' as const,
+    label: 'Username (Optional)',
+    placeholder: 'Enter username',
+    description: "Leave blank if proxy doesn't require authentication.",
+    type: 'text',
+  },
+  {
+    name: 'password' as const,
+    label: 'Password (Optional)',
+    placeholder: 'Enter password',
+    description: "Leave blank if proxy doesn't require authentication.",
+    type: 'password',
+  },
+  {
+    name: 'no_proxy' as const,
+    label: 'No Proxy',
+    placeholder: 'localhost,127.0.0.1,.internal.domain',
+    description: 'Comma-separated list of hosts that should bypass the proxy.',
+    type: 'text',
+  },
+];
 
-  // Initialize the form with react-hook-form
+/**
+ * Proxy configuration form component
+ */
+export function ProxyForm() {
+  const { proxy, setProxy, applyProxy } = useProxyStore();
+
   const form = useForm<ProxyFormValues>({
     resolver: zodResolver(proxyFormSchema),
-    defaultValues: proxy, // Use values from the store as default values
+    defaultValues: proxy,
   });
 
-  // Handler for form submission
   function handleSubmit(data: ProxyFormValues) {
     setProxy(data as Proxy);
-    console.log('Proxy settings saved to Zustand store:', data);
+    applyProxy();
+    console.log('Proxy settings saved to Zustand store and AppState:', data);
   }
 
   return (
@@ -50,88 +88,35 @@ export function ProxyForm() {
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-2"
       >
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Proxy URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="https://proxy.example.com:8080"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Enter the URL of the proxy server including port if required.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Username (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter username" {...field} />
-              </FormControl>
-              <FormDescription>
-                Leave blank if proxy doesn't require authentication.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password (Optional)</FormLabel>
-              <FormControl>
-                <Input
-                  type="password"
-                  placeholder="Enter password"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Leave blank if proxy doesn't require authentication.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="noProxy"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>No Proxy</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="localhost,127.0.0.1,.internal.domain"
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                Comma-separated list of hosts that should bypass the proxy.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {FORM_FIELDS.map((field) => (
+          <FormField
+            key={field.name}
+            control={form.control}
+            name={field.name}
+            render={({ field: formField }) => (
+              <FormItem>
+                <FormLabel>{field.label}</FormLabel>
+                <FormControl>
+                  <Input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    {...formField}
+                  />
+                </FormControl>
+                <FormDescription>{field.description}</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ))}
       </form>
     </Form>
   );
 }
 
+/**
+ * Container component for the proxy form with actions
+ */
 export function ProxyFormContainer() {
   const { resetProxy } = useProxyStore();
 
@@ -151,6 +136,29 @@ export function ProxyFormContainer() {
   );
 }
 
+/**
+ * Current settings display for a proxy configuration field
+ */
+interface ProxySettingProps {
+  label: string;
+  value: string | undefined;
+  isPassword?: boolean;
+}
+
+function ProxySetting({ label, value, isPassword = false }: ProxySettingProps) {
+  const displayValue = !value ? 'Not set' : isPassword ? '••••••••' : value;
+
+  return (
+    <>
+      <div className="text-sm font-semibold">{label}:</div>
+      <div className="text-sm">{displayValue}</div>
+    </>
+  );
+}
+
+/**
+ * Complete proxy management component with current settings and form
+ */
 export function ProxyManager() {
   const { proxy, resetProxy } = useProxyStore();
 
@@ -161,19 +169,10 @@ export function ProxyManager() {
       <div className="mb-6 p-4 bg-gray-50 rounded-md">
         <h3 className="text-lg font-medium mb-2">Current Settings</h3>
         <div className="grid grid-cols-2 gap-2">
-          <div className="text-sm font-semibold">URL:</div>
-          <div className="text-sm">{proxy.url || 'Not set'}</div>
-
-          <div className="text-sm font-semibold">Username:</div>
-          <div className="text-sm">{proxy.username || 'Not set'}</div>
-
-          <div className="text-sm font-semibold">Password:</div>
-          <div className="text-sm">
-            {proxy.password ? '••••••••' : 'Not set'}
-          </div>
-
-          <div className="text-sm font-semibold">No Proxy:</div>
-          <div className="text-sm">{proxy.noProxy || 'Not set'}</div>
+          <ProxySetting label="URL" value={proxy.url} />
+          <ProxySetting label="Username" value={proxy.username} />
+          <ProxySetting label="Password" value={proxy.password} isPassword />
+          <ProxySetting label="No Proxy" value={proxy.no_proxy} />
         </div>
       </div>
 
