@@ -1,4 +1,4 @@
-import { TopMenuBar } from '@/features/top-menu-bar';
+import { TopMenuBar } from './top-menu-bar';
 
 type LayoutProps = {
   children: React.ReactNode;

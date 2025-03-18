@@ -71,7 +71,7 @@ const HomeRoute: React.FC = () => {
       <div className="flex w-full h-full bg-gray-50">
         <div className="w-2/12 flex flex-col border-r border-gray-200">
           <div className="flex flex-col border-b border-gray-200">
-            <h2 className="font-semibold p-2 border-b">Network Explorer</h2>
+            <h2 className="font-semibold p-2">Network Explorer</h2>
           </div>
 
           {renderError(substationsError, loadSubstations)}
@@ -113,7 +113,7 @@ const HomeRoute: React.FC = () => {
         </div>
 
         <div className="w-10/12 flex flex-col overflow-hidden">
-          <div className="flex items-center border-b border-gray-200">
+          <div className="flex items-center justify-center border-b border-gray-200">
             <h2 className="font-semibold p-2">
               {diagramId ? `Substation: ${diagramId}` : 'Select a substation'}
             </h2>
