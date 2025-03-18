@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDiagramStore } from '../../stores/use-diagram.store';
+import * as d3 from 'd3';
 
 interface SingleLineDiagramProps {
-  lineId?: string;
+  lineId: string;
   width?: string | number;
   height?: string | number;
   className?: string;
 }
 
-const SingleLineDiagram = ({
-  lineId = 'VLGEN',
+const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
+  lineId,
   width = '100%',
   height = 'auto',
   className = '',
@@ -17,6 +18,7 @@ const SingleLineDiagram = ({
   const { svgBlob, isLoading, error, loadDiagram, resetDiagram } =
     useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadDiagram(lineId);
@@ -35,6 +37,77 @@ const SingleLineDiagram = ({
     }
   }, [svgBlob]);
 
+  // Simple effect to make the SVG fit perfectly within the card container
+  useEffect(() => {
+    if (svgContent && svgContainerRef.current) {
+      const svgElement = svgContainerRef.current.querySelector('svg');
+
+      if (svgElement) {
+        // Ensure that the SVG fits perfectly within the card container
+        d3.select(svgElement)
+          .attr('width', '100%')
+          .attr('height', '100%')
+          .attr('preserveAspectRatio', 'xMidYMid meet')
+          .style('max-width', '100%')
+          .style('max-height', '100%')
+          .style('overflow', 'hidden');
+
+        // Find the existing viewBox or create one if necessary
+        const viewBox = svgElement.getAttribute('viewBox');
+        if (!viewBox) {
+          const bbox = (svgElement as SVGSVGElement).getBBox();
+          // Add some padding to ensure content is visible
+          const padding = 5;
+          svgElement.setAttribute(
+            'viewBox',
+            `${bbox.x - padding} ${bbox.y - padding} ${
+              bbox.width + padding * 2
+            } ${bbox.height + padding * 2}`,
+          );
+        }
+
+        // Make sure the SVG scales to fit the container perfectly
+        const containerWidth = svgContainerRef.current.clientWidth;
+        const containerHeight = svgContainerRef.current.clientHeight;
+
+        if (containerWidth && containerHeight) {
+          // Set viewBox to maintain aspect ratio while fitting perfectly
+          const currentViewBox = svgElement
+            .getAttribute('viewBox')
+            ?.split(' ')
+            .map(Number) || [0, 0, 100, 100];
+          const viewBoxWidth = currentViewBox[2];
+          const viewBoxHeight = currentViewBox[3];
+
+          const svgAspectRatio = viewBoxWidth / viewBoxHeight;
+          const containerAspectRatio = containerWidth / containerHeight;
+
+          if (containerAspectRatio > svgAspectRatio) {
+            // Container is wider than SVG
+            const newWidth = viewBoxHeight * containerAspectRatio;
+            const xOffset = (newWidth - viewBoxWidth) / 2;
+            svgElement.setAttribute(
+              'viewBox',
+              `${currentViewBox[0] - xOffset} ${
+                currentViewBox[1]
+              } ${newWidth} ${viewBoxHeight}`,
+            );
+          } else {
+            // Container is taller than SVG
+            const newHeight = viewBoxWidth / containerAspectRatio;
+            const yOffset = (newHeight - viewBoxHeight) / 2;
+            svgElement.setAttribute(
+              'viewBox',
+              `${currentViewBox[0]} ${
+                currentViewBox[1] - yOffset
+              } ${viewBoxWidth} ${newHeight}`,
+            );
+          }
+        }
+      }
+    }
+  }, [svgContent]);
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-40">
@@ -49,13 +122,23 @@ const SingleLineDiagram = ({
 
   if (svgContent) {
     return (
-      <>
+      <div
+        ref={svgContainerRef}
+        className={`relative ${className}`}
+        style={{
+          width,
+          height,
+          overflow: 'hidden', // Prevents overflow
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <div
-          className={className}
-          style={{ width, height }}
+          className="w-full h-full"
           dangerouslySetInnerHTML={{ __html: svgContent }}
         />
-      </>
+      </div>
     );
   }
 
