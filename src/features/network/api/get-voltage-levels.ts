@@ -4,7 +4,7 @@ import {
   getProxyUrl,
 } from '@/features/settings/proxy/stores/proxy.store';
 import { FetchOptions } from '../types/fetch-options.type';
-import { VoltageLevels } from '../types/voltage-level.type';
+import { VoltageLevel, VoltageLevels } from '../types/voltage-level.type';
 
 // Constants
 const BASE_URL = 'http://localhost:8000/api/v1/network/voltage-levels';
@@ -37,7 +37,7 @@ const createFetchOptions = (accept: string): FetchOptions => {
   return options;
 };
 
-export const fetchVoltageLevels = async (): Promise<VoltageLevels> => {
+export const fetchVoltageLevelsList = async (): Promise<VoltageLevels> => {
   const options = createFetchOptions('application/json');
   const url = `${BASE_URL}`;
 
@@ -50,4 +50,26 @@ export const fetchVoltageLevels = async (): Promise<VoltageLevels> => {
   }
 
   return await response.json();
+};
+
+export interface VoltageLevelsResponse {
+  substation_id: string,
+  voltage_levels: VoltageLevels
+}
+
+export const fetchVoltageLevels = async (id: string): Promise<VoltageLevels> => {
+  const options = createFetchOptions('application/json');
+  const url = `http://localhost:8000/api/v1/network/substations/${id}/voltage-levels`;
+
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to retrieve substations: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  let res: VoltageLevelsResponse = await response.json();
+
+  return res.voltage_levels;
 };

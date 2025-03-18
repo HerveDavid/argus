@@ -9,6 +9,11 @@ pub struct Substation {
     pub tso: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Substations {
+    pub substations: Vec<Substation>,
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct VoltageLevel {
     pub high_voltage_limit: Option<f64>,
@@ -21,6 +26,6 @@ pub struct VoltageLevel {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Substations {
-    pub substations: Vec<Substation>,
+pub struct VoltageLevels {
+    pub voltage_levels: Vec<VoltageLevel>,
 }

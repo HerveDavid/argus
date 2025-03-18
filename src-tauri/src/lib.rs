@@ -3,13 +3,8 @@ use tauri::Manager;
 mod network;
 mod state;
 
-use network::commands::get_substations;
+use network::commands::{get_substations, get_voltage_levels};
 use state::AppState;
-
-#[tauri::command(rename_all = "snake_case")]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,7 +15,10 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, get_substations])
+        .invoke_handler(tauri::generate_handler![
+            get_substations,
+            get_voltage_levels
+        ])
         .setup(|app| {
             app.manage(AppState::default());
             Ok(())

@@ -4,7 +4,7 @@ import { Substation, Substations } from '../types/substation.type';
 export const fetchSubstations = async (): Promise<Substation[]> => {
   try {
     // Invoke the Rust function
-    const response = await invoke<Substations | Substation[]>('get_substations');
+    const response = await invoke<Substation[]>('get_substations');
     
     // Check if the response is an object with a substations property
     if (response && typeof response === 'object' && 'substations' in response) {
