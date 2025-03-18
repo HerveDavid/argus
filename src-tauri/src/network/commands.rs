@@ -38,7 +38,7 @@ pub async fn get_substations(state: State<'_, AppState>) -> Result<Vec<Substatio
         Err(_) => {
             // Try parsing as direct array of substations
             serde_json::from_str(&text)
-                .map_err(|e| format!("JSON parsing error: invalid type: map, expected a sequence at line 1 column 0. Raw response: {}", text))?
+                .map_err(|_e| format!("JSON parsing error: invalid type: map, expected a sequence at line 1 column 0. Raw response: {}", text))?
         }
     };
 

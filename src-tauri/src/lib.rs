@@ -1,9 +1,11 @@
 use tauri::Manager;
 
 mod network;
+mod settings;
 mod state;
 
 use network::commands::{get_substations, get_voltage_levels};
+use settings::proxy::load_client;
 use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -16,6 +18,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
+            load_client,
             get_substations,
             get_voltage_levels
         ])
