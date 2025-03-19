@@ -16,7 +16,7 @@ pub enum NetworkError {
     LockError,
 }
 
-// Implement Serialize for ProxyError for Tauri command compatibility
+// Implement Serialize for NetworkError for Tauri command compatibility
 impl Serialize for NetworkError {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

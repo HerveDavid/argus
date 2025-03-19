@@ -5,7 +5,7 @@ mod settings;
 mod state;
 
 use network::commands::{get_substations, get_voltage_levels};
-use settings::proxy::load_client;
+use settings::commands::load_client;
 use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
