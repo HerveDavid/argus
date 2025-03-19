@@ -6,7 +6,7 @@ mod state;
 
 use network::commands::{
     get_paginated_substations, get_single_line_diagram, get_single_line_diagram_with_metadata,
-    get_substations, get_voltage_levels,
+    get_substation_by_id, get_substations, get_voltage_levels, load_substations,
 };
 use settings::commands::load_client;
 use state::AppState;
@@ -22,7 +22,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             load_client,
+            load_substations,
             get_substations,
+            get_substation_by_id,
             get_paginated_substations,
             get_voltage_levels,
             get_single_line_diagram,

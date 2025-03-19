@@ -23,3 +23,9 @@ pub struct PaginatedResponse<T> {
     pub per_page: usize,
     pub total_pages: usize,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FetchStatus {
+    pub success: bool,
+    pub message: String,
+}
