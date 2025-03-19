@@ -3,8 +3,8 @@ import { useDiagramStore } from '../../stores/use-diagram.store';
 import * as d3 from 'd3';
 import ContextMenu from './context-menu';
 
-// Ajout des styles CSS pour les animations
-import './diagram-animations.css'; // Assurez-vous de créer ce fichier avec le CSS fourni
+// Import uniquement des styles d'animation
+import './diagram-animations.css';
 
 interface SingleLineDiagramProps {
   lineId: string;
@@ -98,13 +98,16 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     setContextMenu((prev) => ({ ...prev, visible: false }));
   };
 
-  // Effect for SVG manipulation
+  // Effect for SVG manipulation with Tailwind font integration
   useEffect(() => {
     if (svgContent && svgContainerRef.current) {
       const svgElement = svgContainerRef.current.querySelector('svg');
 
       if (svgElement) {
-        // Ensure that the SVG fits perfectly within the card container
+        // Appliquer la police système à tous les éléments textuels du SVG
+        d3.select(svgElement).selectAll('text').style('font-family', 'inherit'); // Utilise la police héritée de l'élément parent
+
+        // S'assurer que le SVG s'adapte parfaitement au conteneur
         d3.select(svgElement)
           .attr('width', '100%')
           .attr('height', '100%')
@@ -113,11 +116,11 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           .style('max-height', '100%')
           .style('overflow', 'hidden');
 
-        // Find the existing viewBox or create one if necessary
+        // Trouver ou créer le viewBox
         const viewBox = svgElement.getAttribute('viewBox');
         if (!viewBox) {
           const bbox = (svgElement as SVGSVGElement).getBBox();
-          // Add some padding to ensure content is visible
+          // Ajouter un peu de padding pour s'assurer que le contenu est visible
           const padding = 5;
           svgElement.setAttribute(
             'viewBox',
@@ -127,12 +130,12 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           );
         }
 
-        // Make sure the SVG scales to fit the container perfectly
+        // S'assurer que le SVG s'adapte parfaitement au conteneur
         const containerWidth = svgContainerRef.current.clientWidth;
         const containerHeight = svgContainerRef.current.clientHeight;
 
         if (containerWidth && containerHeight) {
-          // Set viewBox to maintain aspect ratio while fitting perfectly
+          // Définir le viewBox pour maintenir le ratio d'aspect
           const currentViewBox = svgElement
             .getAttribute('viewBox')
             ?.split(' ')
@@ -144,7 +147,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           const containerAspectRatio = containerWidth / containerHeight;
 
           if (containerAspectRatio > svgAspectRatio) {
-            // Container is wider than SVG
+            // Le conteneur est plus large que le SVG
             const newWidth = viewBoxHeight * containerAspectRatio;
             const xOffset = (newWidth - viewBoxWidth) / 2;
             svgElement.setAttribute(
@@ -154,7 +157,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
               } ${newWidth} ${viewBoxHeight}`,
             );
           } else {
-            // Container is taller than SVG
+            // Le conteneur est plus haut que le SVG
             const newHeight = viewBoxWidth / containerAspectRatio;
             const yOffset = (newHeight - viewBoxHeight) / 2;
             svgElement.setAttribute(
@@ -167,10 +170,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
         }
       }
 
-      // Add context menu event listener to SVG elements and hover effect to labels and breakers
+      // Ajouter les écouteurs d'événements pour le menu contextuel et les effets de survol
       const addEventListeners = () => {
         if (svgContainerRef.current) {
-          // Add context menu to all SVG elements
+          // Ajouter le menu contextuel à tous les éléments SVG
           const svgElements =
             svgContainerRef.current.querySelectorAll('svg, svg *');
           svgElements.forEach((element) => {
@@ -180,19 +183,18 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
             );
           });
 
-          // Add hover effect to sld-label elements
+          // Ajouter l'effet de survol aux éléments sld-label
           const labelElements =
             svgContainerRef.current.querySelectorAll('.sld-label');
           labelElements.forEach((label) => {
-            // Save original style
+            // Sauvegarder le style original
             const originalFill = label.getAttribute('fill') || 'black';
             const originalFont = label.getAttribute('font') || '';
 
-            // Add hover effects
+            // Ajouter les effets de survol
             label.addEventListener('mouseenter', () => {
               label.setAttribute('fill', '#FF5500');
               label.setAttribute('font-weight', 'bold');
-              // Fix type error by checking if the element has style property
               if (label instanceof SVGElement || label instanceof HTMLElement) {
                 label.style.cursor = 'pointer';
               }
@@ -206,21 +208,20 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
               }
             });
 
-            // Add click event for labels
+            // Ajouter l'événement de clic pour les étiquettes
             label.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
 
-              // Get the text content of the label
+              // Obtenir le texte de l'étiquette
               const labelText: string = label.textContent || '';
 
-              // Show a small tooltip or perform an action when label is clicked
-              // For now, we'll use the context menu functionality
+              // Afficher une infobulle ou effectuer une action lors du clic sur l'étiquette
               handleContextMenu(e, true, label as SVGElement, labelText);
             });
           });
 
-          // Add hover effect and click handling to breakers and disconnectors
+          // Ajouter l'effet de survol et la gestion des clics aux disjoncteurs et sectionneurs
           const switchableElements = svgContainerRef.current.querySelectorAll(
             '.sld-breaker, .sld-disconnector',
           );
@@ -248,7 +249,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
               }
             });
 
-            // Add click event to toggle directly
+            // Ajouter l'événement de clic pour basculer directement
             element.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -278,10 +279,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
         return current;
       };
 
-      // Add all event listeners
+      // Ajouter tous les écouteurs d'événements
       addEventListeners();
 
-      // Cleanup function
+      // Fonction de nettoyage
       return () => {
         if (svgContainerRef.current) {
           const svgElements =
@@ -298,7 +299,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     }
   }, [svgContent]);
 
-  // Handle context menu events (right-click or label click)
+  // Gérer les événements du menu contextuel (clic droit ou clic sur l'étiquette)
   const handleContextMenu = (
     e: Event,
     isLabelClick = false,
@@ -316,13 +317,13 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       const relativeX = mouseEvent.clientX - containerRect.left;
       const relativeY = mouseEvent.clientY - containerRect.top;
 
-      // Si c'est un clic sur un label, utiliser le label comme target
+      // Si c'est un clic sur une étiquette, utiliser l'étiquette comme cible
       // sinon utiliser l'élément ciblé par l'événement
       const targetElement = isLabelClick
         ? labelElement
         : (e.target as SVGElement | null);
 
-      // Trouver le parent le plus proche qui contient un ID si le target n'est pas un label
+      // Trouver le parent le plus proche qui contient un ID si la cible n'est pas une étiquette
       let element: SVGElement | null = targetElement;
       if (!isLabelClick && element) {
         while (element && !element.id && element.parentElement) {
@@ -345,25 +346,25 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
+      <div className="flex justify-center items-center h-40 font-sans">
         Loading diagram...
       </div>
     );
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500 font-sans">{error}</div>;
   }
 
   if (svgContent) {
     return (
       <div
         ref={svgContainerRef}
-        className={`relative ${className}`}
+        className={`relative font-sans ${className}`}
         style={{
           width,
           height,
-          overflow: 'hidden', // Prevents overflow
+          overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -384,8 +385,8 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           />
         )}
 
-        {/* Légende pour les disjoncteurs */}
-        <div className="absolute bottom-2 right-2 bg-white p-2 rounded shadow-md text-xs">
+        {/* Légende pour les disjoncteurs avec classes Tailwind */}
+        <div className="absolute bottom-2 right-2 bg-white p-2 rounded shadow-md text-xs font-sans">
           <div className="font-semibold mb-1">Interactions:</div>
           <div className="flex items-center mb-1">
             <div className="w-4 h-4 mr-1 border border-blue-500 flex items-center justify-center">
@@ -405,7 +406,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-40 text-gray-500">
+    <div className="flex flex-col justify-center items-center h-40 text-gray-500 font-sans">
       <p>Forbidden diagram</p>
       <button
         className="mt-2 px-4 py-1 text-sm bg-gray-200 hover:bg-gray-300 rounded"
