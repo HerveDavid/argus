@@ -20,8 +20,8 @@ interface ProxyStore {
 }
 
 const defaultProxy: Proxy = {
-  no_proxy: '',
-  url: '',
+  no_proxy: 'localhost',
+  url: 'http://localhost',
 };
 
 export const useProxyStore = create<ProxyStore>()(

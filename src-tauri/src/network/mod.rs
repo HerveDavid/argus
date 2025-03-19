@@ -1,3 +1,4 @@
+mod diagrams;
 mod substations;
 mod voltage_levels;
 

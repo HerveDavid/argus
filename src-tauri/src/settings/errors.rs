@@ -23,11 +23,6 @@ impl Serialize for SettingsError {
     }
 }
 
-// Convenience conversion for returning errors from Tauri commands
-impl From<SettingsError> for String {
-    fn from(err: SettingsError) -> Self {
-        err.to_string()
-    }
-}
+
 
 pub type SettingResult<T> = Result<T, SettingsError>;

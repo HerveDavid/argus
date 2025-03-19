@@ -4,7 +4,10 @@ mod network;
 mod settings;
 mod state;
 
-use network::commands::{get_substations, get_voltage_levels};
+use network::commands::{
+    get_single_line_diagram, get_single_line_diagram_with_metadata, get_substations,
+    get_voltage_levels,
+};
 use settings::commands::load_client;
 use state::AppState;
 
@@ -20,7 +23,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             load_client,
             get_substations,
-            get_voltage_levels
+            get_voltage_levels,
+            get_single_line_diagram,
+            get_single_line_diagram_with_metadata
         ])
         .setup(|app| {
             app.manage(AppState::default());

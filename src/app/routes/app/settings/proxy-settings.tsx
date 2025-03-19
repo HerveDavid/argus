@@ -23,8 +23,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { useProxyStore } from '@/features/settings/proxy/stores/proxy.store';

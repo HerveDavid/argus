@@ -26,4 +26,11 @@ impl Serialize for NetworkError {
     }
 }
 
+// Convenience conversion for returning errors from Tauri commands
+impl From<NetworkError> for String {
+    fn from(err: NetworkError) -> Self {
+        err.to_string()
+    }
+}
+
 pub type NetworkResult<T> = Result<T, NetworkError>;
