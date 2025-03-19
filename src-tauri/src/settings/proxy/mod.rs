@@ -2,9 +2,9 @@ use super::entities::Proxy;
 use super::errors::{SettingResult, SettingsError};
 use crate::state::AppState;
 
+use reqwest;
 use serde::Serialize;
 use tauri::State;
-use tauri_plugin_http::reqwest;
 
 #[derive(Debug, Serialize)]
 pub struct ProxyResponse {

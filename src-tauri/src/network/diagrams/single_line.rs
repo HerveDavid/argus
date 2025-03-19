@@ -1,9 +1,9 @@
 use crate::network::errors::{NetworkError, NetworkResult};
 use crate::state::AppState;
+use reqwest;
 use serde::de::Error;
 use serde::{Deserialize, Serialize};
 use tauri::State;
-use tauri_plugin_http::reqwest;
 
 /// Metadata and SVG result structure
 #[derive(Serialize, Deserialize)]

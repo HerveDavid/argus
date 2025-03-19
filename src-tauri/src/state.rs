@@ -1,6 +1,6 @@
 use crate::network::entities::{Substation, VoltageLevel};
 
-use tauri_plugin_http::reqwest;
+use reqwest;
 
 #[derive(Debug)]
 pub struct AppStateInner {
