@@ -3,6 +3,9 @@ import { useDiagramStore } from '../../stores/use-diagram.store';
 import * as d3 from 'd3';
 import ContextMenu from './context-menu';
 
+// Ajout des styles CSS pour les animations
+import './diagram-animations.css'; // Assurez-vous de créer ce fichier avec le CSS fourni
+
 interface SingleLineDiagramProps {
   lineId: string;
   width?: string | number;
@@ -49,7 +52,23 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     }
   }, [svgBlob]);
 
-  // Fonction pour basculer l'état d'un disjoncteur
+  // Fonction améliorée pour appliquer l'effet de clignotement
+  const applyBlinkEffect = (element: SVGElement, isClosing: boolean) => {
+    // Déterminer quelle animation appliquer
+    const animationClass = isClosing
+      ? 'sld-switching-close'
+      : 'sld-switching-open';
+
+    // Appliquer la classe d'animation
+    element.classList.add('sld-switching', animationClass);
+
+    // Nettoyer après la fin de l'animation
+    setTimeout(() => {
+      element.classList.remove('sld-switching', animationClass);
+    }, 650); // Légèrement plus long que la durée de l'animation
+  };
+
+  // Fonction modifiée pour basculer l'état d'un disjoncteur avec effet de clignotement
   const toggleBreaker = (breakerId: string, isClosed: boolean) => {
     if (!svgContainerRef.current) return;
 
@@ -59,16 +78,21 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     );
     if (!breakerElement || !(breakerElement instanceof SVGElement)) return;
 
-    // Changer l'état
-    if (isClosed) {
-      // Si fermé → ouvrir
-      breakerElement.classList.remove('sld-closed');
-      breakerElement.classList.add('sld-open');
-    } else {
-      // Si ouvert → fermer
-      breakerElement.classList.remove('sld-open');
-      breakerElement.classList.add('sld-closed');
-    }
+    // Appliquer l'effet de clignotement
+    applyBlinkEffect(breakerElement, !isClosed);
+
+    // Changer l'état après un court délai pour que l'effet soit visible
+    setTimeout(() => {
+      if (isClosed) {
+        // Si fermé → ouvrir
+        breakerElement.classList.remove('sld-closed');
+        breakerElement.classList.add('sld-open');
+      } else {
+        // Si ouvert → fermer
+        breakerElement.classList.remove('sld-open');
+        breakerElement.classList.add('sld-closed');
+      }
+    }, 600); // Le délai correspond à la durée de l'animation
 
     // Fermer le menu contextuel
     setContextMenu((prev) => ({ ...prev, visible: false }));
@@ -188,7 +212,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
               e.stopPropagation();
 
               // Get the text content of the label
-              const labelText: string = label.textContent;
+              const labelText: string = label.textContent || '';
 
               // Show a small tooltip or perform an action when label is clicked
               // For now, we'll use the context menu functionality
@@ -196,40 +220,45 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
             });
           });
 
-          // Add hover effect and click handling to breakers
-          const breakerElements =
-            svgContainerRef.current.querySelectorAll('.sld-breaker');
-          breakerElements.forEach((breaker) => {
-            breaker.addEventListener('mouseenter', () => {
+          // Add hover effect and click handling to breakers and disconnectors
+          const switchableElements = svgContainerRef.current.querySelectorAll(
+            '.sld-breaker, .sld-disconnector',
+          );
+
+          switchableElements.forEach((element) => {
+            element.addEventListener('mouseenter', () => {
               if (
-                breaker instanceof SVGElement ||
-                breaker instanceof HTMLElement
+                element instanceof SVGElement ||
+                element instanceof HTMLElement
               ) {
-                breaker.style.cursor = 'pointer';
-                breaker.style.filter = 'brightness(1.2)';
+                element.style.cursor = 'pointer';
+                element.style.filter = 'brightness(1.2)';
               }
             });
 
-            breaker.addEventListener('mouseleave', () => {
+            element.addEventListener('mouseleave', () => {
               if (
-                breaker instanceof SVGElement ||
-                breaker instanceof HTMLElement
+                element instanceof SVGElement ||
+                element instanceof HTMLElement
               ) {
-                breaker.style.filter = 'none';
+                // Ne pas réinitialiser le filtre si l'animation est en cours
+                if (!element.classList.contains('sld-switching')) {
+                  element.style.filter = 'none';
+                }
               }
             });
 
-            // Add click event to toggle breaker directly
-            breaker.addEventListener('click', (e) => {
+            // Add click event to toggle directly
+            element.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
 
-              // Trouver le parent du disjoncteur qui contient l'ID
-              const breakerGroup = findParentWithId(breaker as Element);
+              // Trouver le parent qui contient l'ID
+              const switchGroup = findParentWithId(element as Element);
 
-              if (breakerGroup && breakerGroup.id) {
-                const isClosed = breakerGroup.classList.contains('sld-closed');
-                toggleBreaker(breakerGroup.id, isClosed);
+              if (switchGroup && switchGroup.id) {
+                const isClosed = switchGroup.classList.contains('sld-closed');
+                toggleBreaker(switchGroup.id, isClosed);
               }
             });
           });
