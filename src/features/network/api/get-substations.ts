@@ -1,5 +1,10 @@
 import { invoke } from '@tauri-apps/api/core';
-import { Substation, Substations } from '../types/substation.type';
+import {
+  PaginatedResponse,
+  PaginationParams,
+  Substation,
+  Substations,
+} from '../types/substation.type';
 
 export const fetchSubstations = async (): Promise<Substation[]> => {
   try {
@@ -19,3 +24,16 @@ export const fetchSubstations = async (): Promise<Substation[]> => {
     throw error; // Re-throw to allow component to handle the error
   }
 };
+
+/**
+ * Fetches substations with pagination
+ * @param params Optional pagination parameters
+ * @returns Promise with paginated substations
+ */
+export async function getPaginatedSubstations(
+  params?: PaginationParams,
+): Promise<PaginatedResponse<Substation[]>> {
+  return invoke<PaginatedResponse<Substation[]>>('get_paginated_substations', {
+    pagination: params,
+  });
+}

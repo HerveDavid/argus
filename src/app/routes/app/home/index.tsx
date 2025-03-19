@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import EditorLayout from '@/components/layouts/editor';
 import SingleLineDiagram from '@/features/network/components/single-line-diagram';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 // Import shadcn/ui components
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { fetchSubstations } from '@/features/network/api/get-substations';
+import { getPaginatedSubstations } from '@/features/network/api/get-substations';
 import { Substation } from '@/features/network/types/substation.type';
+import { PaginatedResponse } from '@/features/network/types/substation.type';
 
 const HomeRoute: React.FC = () => {
   const [diagramId, setDiagramId] = useState<string>();
@@ -16,14 +17,28 @@ const HomeRoute: React.FC = () => {
   const [loadingSubstations, setLoadingSubstations] = useState<boolean>(true);
   const [substationsError, setSubstationsError] = useState<string | null>(null);
 
-  // Fetch substations only
-  const loadSubstations = async () => {
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+  const [totalItems, setTotalItems] = useState<number>(0);
+
+  // Fetch paginated substations
+  const loadSubstations = async (page: number = 1, perPage: number = 20) => {
     try {
       setLoadingSubstations(true);
       setSubstationsError(null);
-      const substationsData = await fetchSubstations();
 
-      setSubstations(substationsData);
+      const paginatedData: PaginatedResponse<Substation[]> =
+        await getPaginatedSubstations({
+          page: page,
+          per_page: perPage,
+        });
+
+      setSubstations(paginatedData.items);
+      setCurrentPage(paginatedData.page);
+      setTotalPages(paginatedData.total_pages);
+      setTotalItems(paginatedData.total);
     } catch (error) {
       console.error('Error fetching substations:', error);
       setSubstationsError(
@@ -38,11 +53,23 @@ const HomeRoute: React.FC = () => {
 
   // Initial data loading
   useEffect(() => {
-    loadSubstations();
-  }, []);
+    loadSubstations(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]);
 
   const handleItemClick = (id: string): void => {
     setDiagramId(id);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
   };
 
   const renderError = (error: string | null, retryFunction: () => void) => {
@@ -74,7 +101,9 @@ const HomeRoute: React.FC = () => {
             <h2 className="font-semibold p-2">Network Explorer</h2>
           </div>
 
-          {renderError(substationsError, loadSubstations)}
+          {renderError(substationsError, () =>
+            loadSubstations(currentPage, itemsPerPage),
+          )}
 
           <div className="flex-1 overflow-y-auto p-2">
             {loadingSubstations ? (
@@ -88,26 +117,66 @@ const HomeRoute: React.FC = () => {
                   : 'No substations found'}
               </div>
             ) : (
-              <div className="space-y-1">
-                {substations.map((substation) => (
-                  <Card key={substation.id} className="p-0 shadow-sm">
-                    <div
-                      className={`cursor-pointer p-2 ${
-                        diagramId === substation.id
-                          ? 'bg-blue-100'
-                          : 'hover:bg-gray-100'
-                      }`}
-                      onClick={() => handleItemClick(substation.id)}
-                    >
-                      <div className="flex items-center">
-                        <span className="font-medium truncate text-sm">
-                          {substation.id} ({substation.country})
-                        </span>
+              <>
+                <div className="space-y-1">
+                  {substations.map((substation) => (
+                    <Card key={substation.id} className="p-0 shadow-sm">
+                      <div
+                        className={`cursor-pointer p-2 ${
+                          diagramId === substation.id
+                            ? 'bg-blue-100'
+                            : 'hover:bg-gray-100'
+                        }`}
+                        onClick={() => handleItemClick(substation.id)}
+                      >
+                        <div className="flex items-center">
+                          <span className="font-medium truncate text-sm">
+                            {substation.id} ({substation.country})
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Pagination controls */}
+                <div className="flex items-center justify-between mt-4 px-1">
+                  <div className="text-xs text-gray-500">
+                    {totalItems > 0 ? (
+                      <span>
+                        {(currentPage - 1) * itemsPerPage + 1}-
+                        {Math.min(currentPage * itemsPerPage, totalItems)} of{' '}
+                        {totalItems}
+                      </span>
+                    ) : (
+                      <span>0 items</span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={goToPreviousPage}
+                      disabled={currentPage <= 1 || loadingSubstations}
+                    >
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <span className="text-xs px-1">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={goToNextPage}
+                      disabled={currentPage >= totalPages || loadingSubstations}
+                    >
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         </div>
