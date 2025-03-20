@@ -1,12 +1,11 @@
-use crate::network::entities::{Substation, VoltageLevel};
+use crate::network::state::NetworkState;
 
 use reqwest;
 
 #[derive(Debug)]
 pub struct AppStateInner {
     pub client: reqwest::Client,
-    pub substations: Vec<Substation>,
-    pub voltage_levels: Vec<VoltageLevel>,
+    pub network: NetworkState,
 }
 
 impl Default for AppStateInner {
@@ -24,8 +23,7 @@ impl Default for AppStateInner {
 
         Self {
             client,
-            substations: Vec::default(),
-            voltage_levels: Vec::default(),
+            network: NetworkState::default(),
         }
     }
 }

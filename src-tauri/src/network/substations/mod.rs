@@ -1,10 +1,6 @@
-mod entities;
-
-use entities::*;
-
 use super::errors::NetworkError;
 
-use crate::network::entities::{Substation, Substations};
+use crate::network::entities::*;
 use crate::network::errors::NetworkResult;
 use crate::state::AppState;
 
@@ -45,12 +41,20 @@ pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Su
         }
     };
 
-    // Update the app state with the new substations
+    // Convert to HashMap and update the app state
     {
         let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.substations = substations.clone();
+        // Clear existing substations and add new ones
+        app_state.network.substations.clear();
+        for substation in &substations {
+            app_state
+                .network
+                .substations
+                .insert(substation.id.clone(), substation.clone());
+        }
     }
 
+    // Return Vec<Substation> for backward compatibility
     Ok(substations)
 }
 
@@ -89,10 +93,17 @@ pub async fn load_substations(state: State<'_, AppState>) -> NetworkResult<Fetch
         }
     };
 
-    // Update the app state with the new substations
+    // Convert to HashMap and update the app state
     {
         let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.substations = substations;
+        // Clear existing substations and add new ones
+        app_state.network.substations.clear();
+        for substation in substations {
+            app_state
+                .network
+                .substations
+                .insert(substation.id.clone(), substation);
+        }
     }
 
     Ok(FetchStatus {
@@ -113,8 +124,12 @@ pub fn get_paginated_substations(
     // Access state with a lock
     let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
 
-    // Get total count without cloning the entire vector
-    let total = app_state.substations.len();
+    // Convert HashMap values to a Vec for pagination
+    let all_substations: Vec<Substation> =
+        app_state.network.substations.values().cloned().collect();
+
+    // Get total count
+    let total = all_substations.len();
     let total_pages = (total + params.per_page - 1) / params.per_page;
 
     // Calculate indices for the requested page
@@ -123,7 +138,7 @@ pub fn get_paginated_substations(
 
     // Only clone the elements we need for this page
     let page_items = if start_index < total {
-        app_state.substations[start_index..end_index].to_vec()
+        all_substations[start_index..end_index].to_vec()
     } else {
         Vec::new()
     };
@@ -146,8 +161,8 @@ pub fn get_substation_by_id(
 ) -> NetworkResult<Option<Substation>> {
     let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
 
-    // Find and clone only the specific substation needed
-    let substation = app_state.substations.iter().find(|s| s.id == id).cloned();
+    // Directly get the substation from the HashMap by ID and clone it
+    let substation = app_state.network.substations.get(&id).cloned();
 
     Ok(substation)
 }
