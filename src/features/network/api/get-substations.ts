@@ -12,7 +12,6 @@ export const fetchSubstations = async (): Promise<Substation[]> => {
     const response = await invoke<Substation[]>('get_substations');
 
     if (response && typeof response === 'object' && 'substations' in response) {
-      console.log('Received substations object:', response);
       return (response as Substations).substations;
     }
 

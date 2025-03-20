@@ -90,7 +90,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
           size="sm"
           onClick={handleLoadAllSubstations}
           disabled={loadAllSubstationsMutation.isPending}
-          title="Reload substations data"
+          title="Reload substations"
           className="h-7 w-7 p-0"
         >
           <RefreshCw
