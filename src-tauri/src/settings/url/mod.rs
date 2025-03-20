@@ -23,6 +23,7 @@ pub async fn set_server_url(
     app_state.settings.server_url = if server_url.is_empty() {
         None
     } else {
+        println!("received");
         Some(server_url.clone())
     };
 

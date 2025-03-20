@@ -3,6 +3,7 @@ import { useState } from 'react';
 import ProxySettings from './proxy-settings';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
+import ServerUrlSettings from './server-url-settings';
 
 const HomeSettings = () => {
   const [activeTab, setActiveTab] = useState('billing');
@@ -10,7 +11,7 @@ const HomeSettings = () => {
   const tabs = [
     { id: 'profile', label: 'Profile' },
     { id: 'notifications', label: 'Notifications', badge: '4' },
-    { id: 'connection', label: 'Connections' },
+    { id: 'connections', label: 'Connections' },
     { id: 'proxy', label: 'Proxy' },
   ];
 
@@ -64,6 +65,7 @@ const HomeSettings = () => {
 
           <div className="mt-8 pb-12 w-full">
             <div className="max-w-5xl mx-auto">
+              {activeTab === 'connections' && <ServerUrlSettings />}
               {activeTab === 'proxy' && <ProxySettings />}
               {/* Add other tab content here when needed */}
             </div>
