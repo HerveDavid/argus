@@ -4,7 +4,6 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Link } from '@/components/ui/link';
@@ -19,18 +18,18 @@ const FileDropdown = () => {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Project</DropdownMenuLabel>
         <DropdownMenuGroup>
+          <DropdownMenuItem>
+            <Link to={paths.home.path}>Home</Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <Link to={paths.settings.path}>Settings</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuSeparator />
+        <DropdownMenuLabel>Help</DropdownMenuLabel>
         <DropdownMenuItem>GitHub</DropdownMenuItem>
         <DropdownMenuItem>Support</DropdownMenuItem>
-        <DropdownMenuSeparator />
       </DropdownMenuContent>
     </DropdownMenu>
   );
