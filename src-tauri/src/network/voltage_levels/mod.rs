@@ -3,6 +3,7 @@ use super::errors::NetworkError;
 use crate::network::entities::*;
 use crate::network::errors::NetworkResult;
 use crate::state::AppState;
+
 use tauri::State;
 
 /// Get all voltage levels from the API
@@ -123,24 +124,19 @@ pub fn get_paginated_voltage_levels(
     // Access state with a lock
     let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
 
-    // Convert HashMap values to a Vec for pagination
-    let all_voltage_levels: Vec<VoltageLevel> =
-        app_state.network.voltage_levels.values().cloned().collect();
-
-    // Get total count
-    let total = all_voltage_levels.len();
+    // Get total count directly from HashMap size
+    let total = app_state.network.voltage_levels.len();
     let total_pages = (total + params.per_page - 1) / params.per_page;
 
-    // Calculate indices for the requested page
-    let start_index = (params.page - 1) * params.per_page;
-    let end_index = std::cmp::min(start_index + params.per_page, total);
-
-    // Only clone the elements we need for this page
-    let page_items = if start_index < total {
-        all_voltage_levels[start_index..end_index].to_vec()
-    } else {
-        Vec::new()
-    };
+    // Collect only the needed items for the current page
+    let page_items: Vec<VoltageLevel> = app_state
+        .network
+        .voltage_levels
+        .values()
+        .skip((params.page - 1) * params.per_page)
+        .take(params.per_page)
+        .cloned()
+        .collect();
 
     // Return the paginated response
     Ok(PaginatedResponse {

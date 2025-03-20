@@ -124,24 +124,19 @@ pub fn get_paginated_substations(
     // Access state with a lock
     let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
 
-    // Convert HashMap values to a Vec for pagination
-    let all_substations: Vec<Substation> =
-        app_state.network.substations.values().cloned().collect();
-
-    // Get total count
-    let total = all_substations.len();
+    // Get total count directly from HashMap size
+    let total = app_state.network.substations.len();
     let total_pages = (total + params.per_page - 1) / params.per_page;
 
-    // Calculate indices for the requested page
-    let start_index = (params.page - 1) * params.per_page;
-    let end_index = std::cmp::min(start_index + params.per_page, total);
-
-    // Only clone the elements we need for this page
-    let page_items = if start_index < total {
-        all_substations[start_index..end_index].to_vec()
-    } else {
-        Vec::new()
-    };
+    // Collect only the needed items for the current page
+    let page_items: Vec<Substation> = app_state
+        .network
+        .substations
+        .values()
+        .skip((params.page - 1) * params.per_page)
+        .take(params.per_page)
+        .cloned()
+        .collect();
 
     // Return the paginated response
     Ok(PaginatedResponse {
