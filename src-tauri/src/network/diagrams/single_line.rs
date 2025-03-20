@@ -21,7 +21,7 @@ pub async fn get_single_line_diagram_with_metadata(
     // Clone the client to avoid holding MutexGuard across await
     let client = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.client.clone()
+        app_state.settings.client.clone()
     };
 
     // First try the unified endpoint

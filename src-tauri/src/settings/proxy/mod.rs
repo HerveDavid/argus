@@ -27,7 +27,7 @@ pub fn load_client(state: State<'_, AppState>, proxy: Proxy) -> SettingResult<Pr
         .lock()
         .map_err(|e| SettingsError::StateLock(e.to_string()))?;
 
-    app_state.client = client;
+    app_state.settings.client = client;
 
     // Return a meaningful response with configuration details from the original input
     Ok(ProxyResponse {

@@ -12,7 +12,7 @@ pub async fn get_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Vec
     // Clone the client to avoid holding MutexGuard across await
     let client = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.client.clone()
+        app_state.settings.client.clone()
     };
 
     // Use the cloned client for the request
@@ -64,7 +64,7 @@ pub async fn load_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Fe
     // Clone the client to avoid holding MutexGuard across await
     let client = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.client.clone()
+        app_state.settings.client.clone()
     };
 
     // Use the cloned client for the request
