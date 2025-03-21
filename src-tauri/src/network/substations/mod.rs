@@ -9,15 +9,20 @@ use tauri::State;
 /// Get all substations from the API
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Substation>> {
-    // Clone the client to avoid holding MutexGuard across await
-    let client = {
+    // Clone the client and check for server_url
+    let (client, server_url) = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.settings.client.clone()
+        let server_url = app_state
+            .settings
+            .server_url
+            .clone()
+            .ok_or(NetworkError::ServerUrlNotConfigured)?;
+        (app_state.settings.client.clone(), server_url)
     };
 
-    // Use the cloned client for the request
+    // Use the cloned client for the request with server_url
     let response = client
-        .get("http://localhost:8000/api/v1/network/substations")
+        .get(format!("{}/api/v1/network/substations", server_url))
         .send()
         .await?;
 
@@ -61,15 +66,20 @@ pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Su
 /// Load all substations from the API and store them in the application state
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_substations(state: State<'_, AppState>) -> NetworkResult<FetchStatus> {
-    // Clone the client to avoid holding MutexGuard across await
-    let client = {
+    // Clone the client and check for server_url
+    let (client, server_url) = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.settings.client.clone()
+        let server_url = app_state
+            .settings
+            .server_url
+            .clone()
+            .ok_or(NetworkError::ServerUrlNotConfigured)?;
+        (app_state.settings.client.clone(), server_url)
     };
 
-    // Use the cloned client for the request
+    // Use the cloned client for the request with server_url
     let response = client
-        .get("http://localhost:8000/api/v1/network/substations")
+        .get(format!("{}/api/v1/network/substations", server_url))
         .send()
         .await?;
 

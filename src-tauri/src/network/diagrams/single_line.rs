@@ -19,18 +19,23 @@ pub async fn get_single_line_diagram_with_metadata(
     line_id: String,
 ) -> NetworkResult<DiagramResult> {
     // Clone the client to avoid holding MutexGuard across await
-    let client = {
+    let (client, server_url) = {
         let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
-        app_state.settings.client.clone()
+        let server_url = app_state
+            .settings
+            .server_url
+            .clone()
+            .ok_or(NetworkError::ServerUrlNotConfigured)?;
+        (app_state.settings.client.clone(), server_url)
     };
 
     // First try the unified endpoint
-    match fetch_unified_diagram(&client, &line_id).await {
+    match fetch_unified_diagram(&client, &server_url, &line_id).await {
         Ok(result) => Ok(result),
         Err(err) => {
             // Log the error and fallback to separate requests
             println!("Unified request failed, using fallback: {}", err);
-            fetch_separate_diagram_and_metadata(&client, &line_id).await
+            fetch_separate_diagram_and_metadata(&client, &server_url, &line_id).await
         }
     }
 }
@@ -49,11 +54,12 @@ pub async fn get_single_line_diagram(
 /// Attempts to fetch the diagram and metadata in a single request
 async fn fetch_unified_diagram(
     client: &reqwest::Client,
+    server_url: &str,
     line_id: &str,
 ) -> NetworkResult<DiagramResult> {
     let url = format!(
-        "http://localhost:8000/api/v1/network/diagram/line/{}?format=json",
-        line_id
+        "{}/api/v1/network/diagram/line/{}?format=json",
+        server_url, line_id
     );
 
     let response = client.get(&url).send().await?;
@@ -90,11 +96,12 @@ async fn fetch_unified_diagram(
 }
 
 /// Retrieves only the SVG diagram
-async fn fetch_diagram_svg(client: &reqwest::Client, line_id: &str) -> NetworkResult<String> {
-    let url = format!(
-        "http://localhost:8000/api/v1/network/diagram/line/{}",
-        line_id
-    );
+async fn fetch_diagram_svg(
+    client: &reqwest::Client,
+    server_url: &str,
+    line_id: &str,
+) -> NetworkResult<String> {
+    let url = format!("{}/api/v1/network/diagram/line/{}", server_url, line_id);
     let response = client.get(url).send().await?;
 
     if !response.status().is_success() {
@@ -107,11 +114,12 @@ async fn fetch_diagram_svg(client: &reqwest::Client, line_id: &str) -> NetworkRe
 /// Retrieves only the diagram metadata
 async fn fetch_diagram_metadata(
     client: &reqwest::Client,
+    server_url: &str,
     line_id: &str,
 ) -> NetworkResult<serde_json::Value> {
     let url = format!(
-        "http://localhost:8000/api/v1/network/diagram/line/{}/metadata",
-        line_id
+        "{}/api/v1/network/diagram/line/{}/metadata",
+        server_url, line_id
     );
 
     let response = client.get(url).send().await?;
@@ -126,11 +134,12 @@ async fn fetch_diagram_metadata(
 /// Retrieves the diagram and metadata in two separate requests
 async fn fetch_separate_diagram_and_metadata(
     client: &reqwest::Client,
+    server_url: &str,
     line_id: &str,
 ) -> NetworkResult<DiagramResult> {
     // Execute both requests in parallel
-    let svg_future = fetch_diagram_svg(client, line_id);
-    let metadata_future = fetch_diagram_metadata(client, line_id);
+    let svg_future = fetch_diagram_svg(client, server_url, line_id);
+    let metadata_future = fetch_diagram_metadata(client, server_url, line_id);
 
     let (svg, metadata) = futures::join!(svg_future, metadata_future);
 
