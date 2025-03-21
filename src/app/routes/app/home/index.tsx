@@ -1,78 +1,62 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Search, Settings } from 'lucide-react';
-import ProjectItem from '@/features/projects/components/project-item';
-import { useProjectsStore } from '@/features/projects/stores/use-projects-store';
-import { Button } from '@/components/ui/button';
+import EditorLayout from '@/components/layouts/editor';
+import { Card, CardContent } from '@/components/ui/card';
+import { Link } from '@/components/ui/link';
+import { paths } from '@/config/paths';
 
-const HomeRoute: React.FC = () => {
-  const { projects, fetchProjects } = useProjectsStore();
-  const [searchTerm, setSearchTerm] = useState('');
-
-  useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-
-  const filteredProjects = useMemo(() => {
-    const lowerTerm = searchTerm.toLowerCase();
-    return projects.filter((project) =>
-      project.name.toLowerCase().includes(lowerTerm),
-    );
-  }, [projects, searchTerm]);
-
+const HomeRoute = () => {
   return (
-    <div className="h-screen flex bg-gray-900 text-gray-300">
-      <div className="w-64 flex flex-col bg-gray-800">
-        <div className="p-4 flex items-center gap-2">
-          <div className="w-8 h-8 bg-purple-600 rounded">
-            <img
-              src="/api/placeholder/32/32"
-              alt="Argus"
-              className="w-full h-full"
-            />
-          </div>
-          <div>
-            <div className="text-sm">Argus</div>
-            <div className="text-xs text-gray-500">0.0.1</div>
-          </div>
+    <EditorLayout>
+      <div className="flex flex-col w-full gap-2 p-10">
+        {/* Top cards section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Game Master Card */}
+          <Card className="overflow-hidden">
+            <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+            <CardContent className="p-4 bg-white">
+              <h3 className="text-xl font-medium text-center">Game Master</h3>
+            </CardContent>
+          </Card>
+
+          {/* State View Card */}
+          <Card className="overflow-hidden">
+            <Link to={paths.views.stateView.path}>
+              <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+              <CardContent className="p-4 bg-white hover:bg-accent hover:text-white">
+                <h3 className="text-xl font-medium text-center">State View</h3>
+              </CardContent>
+            </Link>
+          </Card>
+
+          {/* KPI Card */}
+          <Card className="overflow-hidden">
+            <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+            <CardContent className="p-4 bg-white">
+              <h3 className="text-xl font-medium text-center">KPI</h3>
+            </CardContent>
+          </Card>
         </div>
-        <nav className="flex-1">
-          <div className="p-2">
-            <div className="bg-blue-600 text-white px-4 py-2 rounded">
-              Projects
+
+        {/* Divider */}
+        <div className="w-full h-px bg-gray-200"></div>
+
+        {/* Status Section */}
+        <Card className="w-full">
+          <CardContent className="pt-6">
+            <h2 className="text-2xl font-medium mb-6">Status :</h2>
+            <div className="space-y-4 pl-6">
+              <div className="flex items-center gap-3">
+                <span className="text-lg">- connected</span>
+                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-lg">- iidm loaded</span>
+                <div className="w-4 h-4 rounded-full bg-green-500"></div>
+              </div>
             </div>
-          </div>
-        </nav>
-        <div className="p-4">
-          <Settings size={20} />
-        </div>
+          </CardContent>
+        </Card>
       </div>
-      
-      <div className="flex-1">
-        <div className="flex items-center gap-4 p-2 bg-gray-800">
-          <div className="flex-1 flex items-center gap-2 bg-gray-700 rounded px-3 py-1">
-            <Search size={16} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search projects"
-              className="bg-transparent border-none outline-none w-full text-sm"
-            />
-          </div>
-          <Button className="px-4 py-1 bg-blue-600 rounded text-sm">
-            New Project
-          </Button>
-          <Button className="px-4 py-1 bg-gray-700 rounded text-sm">
-            Open
-          </Button>
-        </div>
-        <div className="p-4 space-y-4">
-          {filteredProjects.map((project) => (
-            <ProjectItem key={project.path} {...project} />
-          ))}
-        </div>
-      </div>
-    </div>
+    </EditorLayout>
   );
 };
 

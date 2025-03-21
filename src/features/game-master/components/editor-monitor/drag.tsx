@@ -206,7 +206,6 @@ const SVGViewer = () => {
 
   return (
     <div className="h-full w-full">
-      <h2 className="">Grid View</h2>
       <SvgMenu>
         <div
           className="flex flex-col items-center justify-center h-full w-full border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"

@@ -1,4 +1,4 @@
-import { TopMenuBar } from "@/features/top-menu-bar";
+import { TopMenuBar } from './top-menu-bar';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -6,9 +6,11 @@ type LayoutProps = {
 
 export const EditorLayout = ({ children }: LayoutProps) => {
   return (
-    <div className="flex flex-col fixed inset-0 bg-gray-900 text-gray-200 overflow-hidden">
+    <div className="flex flex-col h-screen">
       <TopMenuBar />
-      {children}
+      <div className="flex flex-1 overflow-hidden">{children}</div>
     </div>
   );
 };
+
+export default EditorLayout;

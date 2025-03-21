@@ -1,0 +1,152 @@
+/* Fichier: isa101-animations.css */
+
+/* =================================================================
+ * ANIMATIONS DE CLIGNOTEMENT CONFORMES À LA NORME ISA-101
+ * =================================================================
+ * ISA-101 est une norme pour les interfaces homme-machine (IHM)
+ * dans les systèmes d'automatisation industrielle.
+ * 
+ * Principes clés pour les animations:
+ * - Cohérence visuelle
+ * - Hiérarchie claire des alertes
+ * - Modération pour éviter la fatigue visuelle
+ * - Signification bien définie pour chaque type d'animation
+ */
+
+/* ----------------- DÉFINITIONS D'ANIMATION ----------------- */
+
+/* Animation de clignotement pour alarme critique (rouge)
+ * Utilisation: Défaillances critiques, arrêts d'urgence
+ */
+ @keyframes isa-critical-blink {
+  0%, 100% { 
+    stroke: #ff0000;
+    stroke-width: 2px;
+  }
+  50% { 
+    stroke: #ff0000; 
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.7));
+  }
+}
+
+/* Animation de clignotement pour alarme (orange)
+ * Utilisation: Conditions anormales nécessitant attention
+ */
+@keyframes isa-alarm-blink {
+  0%, 100% { 
+    stroke: #ff7700;
+    stroke-width: 2px;
+  }
+  50% { 
+    stroke: #ff7700; 
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px rgba(255, 119, 0, 0.7));
+  }
+}
+
+/* Animation pour changement d'état (bleu)
+ * Utilisation: Transition entre états, en cours d'opération
+ */
+@keyframes isa-state-change {
+  0%, 100% { 
+    stroke: #0066cc;
+    stroke-width: 2px;
+  }
+  50% { 
+    stroke: #0066cc; 
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px rgba(0, 102, 204, 0.7));
+  }
+}
+
+/* Animation pour confirmation d'action (vert)
+ * Utilisation: Confirmation de commande, action acceptée
+ */
+@keyframes isa-confirm {
+  0%, 100% { 
+    stroke: #008800;
+    stroke-width: 2px;
+  }
+  50% { 
+    stroke: #008800; 
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px rgba(0, 136, 0, 0.7));
+  }
+}
+
+/* Animation pour conditions de surveillance (jaune)
+ * Utilisation: Avertissements, attention requise mais non critique
+ */
+@keyframes isa-warning-blink {
+  0%, 100% { 
+    stroke: #ddaa00;
+    stroke-width: 2px;
+  }
+  50% { 
+    stroke: #ddaa00; 
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px rgba(221, 170, 0, 0.7));
+  }
+}
+
+/* ----------------- CLASSES D'APPLICATION ----------------- */
+
+/* Application des animations avec durées appropriées selon ISA-101 */
+.isa-critical-blinking {
+  animation: isa-critical-blink 0.5s ease-in-out infinite;
+}
+
+.isa-alarm-blinking {
+  animation: isa-alarm-blink 1s ease-in-out infinite;
+}
+
+.isa-warning-blinking {
+  animation: isa-warning-blink 2s ease-in-out infinite;
+}
+
+/* Ces animations sont non-infinies car elles représentent 
+   des transitions temporaires plutôt que des états persistants */
+.isa-state-changing {
+  animation: isa-state-change 1s ease-in-out;
+}
+
+.isa-confirming {
+  animation: isa-confirm 1s ease-in-out;
+}
+
+/* ----------------- ADAPTATIONS POUR SVG ----------------- */
+
+/* Pour les éléments SVG spécifiques du diagramme unifilaire */
+.sld-breaker.sld-switching-open {
+  animation: isa-state-change 0.6s ease-in-out;
+}
+
+.sld-breaker.sld-switching-close {
+  animation: isa-confirm 0.6s ease-in-out;
+}
+
+.sld-disconnector.sld-switching-open {
+  animation: isa-state-change 0.6s ease-in-out;
+}
+
+.sld-disconnector.sld-switching-close {
+  animation: isa-confirm 0.6s ease-in-out;
+}
+
+/* Animation pour les éléments qui changent de statut de connexion */
+.sld-wire.sld-switching {
+  animation: isa-state-change 0.6s ease-in-out;
+}
+
+/* Animation pour les alarmes sur les éléments du circuit */
+.sld-breaker.sld-alarm, 
+.sld-disconnector.sld-alarm {
+  animation: isa-alarm-blink 1s ease-in-out infinite;
+}
+
+/* Animation pour les défauts critiques */
+.sld-breaker.sld-fault, 
+.sld-disconnector.sld-fault {
+  animation: isa-critical-blink 0.5s ease-in-out infinite;
+}
