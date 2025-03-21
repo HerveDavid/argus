@@ -11,7 +11,7 @@ use tauri::State;
 pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Substation>> {
     // Clone the client and check for server_url
     let (client, server_url) = {
-        let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let app_state = state.read().map_err(|_| NetworkError::LockError)?;
         let server_url = app_state
             .settings
             .server_url
@@ -48,7 +48,7 @@ pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Su
 
     // Convert to HashMap and update the app state
     {
-        let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let mut app_state = state.write().map_err(|_| NetworkError::LockError)?;
         // Clear existing substations and add new ones
         app_state.network.substations.clear();
         for substation in &substations {
@@ -68,7 +68,7 @@ pub async fn get_substations(state: State<'_, AppState>) -> NetworkResult<Vec<Su
 pub async fn load_substations(state: State<'_, AppState>) -> NetworkResult<FetchStatus> {
     // Clone the client and check for server_url
     let (client, server_url) = {
-        let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let app_state = state.read().map_err(|_| NetworkError::LockError)?;
         let server_url = app_state
             .settings
             .server_url
@@ -105,7 +105,7 @@ pub async fn load_substations(state: State<'_, AppState>) -> NetworkResult<Fetch
 
     // Convert to HashMap and update the app state
     {
-        let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let mut app_state = state.write().map_err(|_| NetworkError::LockError)?;
         // Clear existing substations and add new ones
         app_state.network.substations.clear();
         for substation in substations {
@@ -132,7 +132,7 @@ pub fn get_paginated_substations(
     let params = pagination.unwrap_or_default();
 
     // Access state with a lock
-    let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+    let app_state = state.read().map_err(|_| NetworkError::LockError)?;
 
     // Get total count directly from HashMap size
     let total = app_state.network.substations.len();
@@ -164,7 +164,7 @@ pub fn get_substation_by_id(
     state: State<'_, AppState>,
     id: String,
 ) -> NetworkResult<Option<Substation>> {
-    let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+    let app_state = state.read().map_err(|_| NetworkError::LockError)?;
 
     // Directly get the substation from the HashMap by ID and clone it
     let substation = app_state.network.substations.get(&id).cloned();

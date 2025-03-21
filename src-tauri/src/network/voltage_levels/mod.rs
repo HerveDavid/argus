@@ -11,7 +11,7 @@ use tauri::State;
 pub async fn get_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Vec<VoltageLevel>> {
     // Clone the client and check for server_url
     let (client, server_url) = {
-        let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let app_state = state.read().map_err(|_| NetworkError::LockError)?;
         let server_url = app_state
             .settings
             .server_url
@@ -48,7 +48,7 @@ pub async fn get_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Vec
 
     // Convert to HashMap and update the app state
     {
-        let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let mut app_state = state.write().map_err(|_| NetworkError::LockError)?;
         // Clear existing voltage levels and add new ones
         app_state.network.voltage_levels.clear();
         for voltage_level in &voltage_levels {
@@ -68,7 +68,7 @@ pub async fn get_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Vec
 pub async fn load_voltage_levels(state: State<'_, AppState>) -> NetworkResult<FetchStatus> {
     // Clone the client and check for server_url
     let (client, server_url) = {
-        let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let app_state = state.read().map_err(|_| NetworkError::LockError)?;
         let server_url = app_state
             .settings
             .server_url
@@ -105,7 +105,7 @@ pub async fn load_voltage_levels(state: State<'_, AppState>) -> NetworkResult<Fe
 
     // Convert to HashMap and update the app state
     {
-        let mut app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let mut app_state = state.write().map_err(|_| NetworkError::LockError)?;
         // Clear existing voltage levels and add new ones
         app_state.network.voltage_levels.clear();
         for voltage_level in voltage_levels {
@@ -132,7 +132,7 @@ pub fn get_paginated_voltage_levels(
     let params = pagination.unwrap_or_default();
 
     // Access state with a lock
-    let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+    let app_state = state.read().map_err(|_| NetworkError::LockError)?;
 
     // Get total count directly from HashMap size
     let total = app_state.network.voltage_levels.len();
@@ -164,7 +164,7 @@ pub fn get_voltage_levels_by_id(
     state: State<'_, AppState>,
     id: String,
 ) -> NetworkResult<Option<VoltageLevel>> {
-    let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+    let app_state = state.read().map_err(|_| NetworkError::LockError)?;
 
     // Directly get the voltage level from the HashMap by ID and clone it
     let voltage_level = app_state.network.voltage_levels.get(&id).cloned();

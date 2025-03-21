@@ -24,10 +24,10 @@ pub fn load_client(state: State<'_, AppState>, proxy: Proxy) -> SettingResult<Pr
 
     // Lock the state with error handling
     let mut app_state = state
-        .lock()
+        .write()
         .map_err(|e| SettingsError::StateLock(e.to_string()))?;
 
-    app_state.settings.client = client;
+    app_state.settings.client = std::sync::Arc::new(client);
 
     // Return a meaningful response with configuration details from the original input
     Ok(ProxyResponse {

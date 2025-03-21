@@ -7,4 +7,4 @@ pub struct AppStateInner {
     pub network: NetworkState,
 }
 
-pub type AppState = std::sync::Mutex<AppStateInner>;
+pub type AppState = crossbeam::sync::ShardedLock<AppStateInner>;

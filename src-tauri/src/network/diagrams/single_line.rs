@@ -20,7 +20,7 @@ pub async fn get_single_line_diagram_with_metadata(
 ) -> NetworkResult<DiagramResult> {
     // Clone the client to avoid holding MutexGuard across await
     let (client, server_url) = {
-        let app_state = state.lock().map_err(|_| NetworkError::LockError)?;
+        let app_state = state.read().map_err(|_| NetworkError::LockError)?;
         let server_url = app_state
             .settings
             .server_url
