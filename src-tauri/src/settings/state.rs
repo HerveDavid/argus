@@ -1,8 +1,9 @@
 use reqwest;
+use std::sync::Arc;
 
 #[derive(Debug)]
 pub struct SettingsState {
-    pub client: reqwest::Client,
+    pub client: Arc<reqwest::Client>,
     pub server_url: Option<String>,
 }
 
@@ -20,7 +21,7 @@ impl Default for SettingsState {
             .unwrap();
 
         Self {
-            client,
+            client: Arc::new(client),
             server_url: None,
         }
     }

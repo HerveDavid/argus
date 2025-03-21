@@ -16,14 +16,13 @@ pub async fn set_server_url(
 ) -> SettingResult<ServerUrlResponse> {
     // Lock the state with error handling
     let mut app_state = state
-        .lock()
+        .write()
         .map_err(|e| SettingsError::StateLock(e.to_string()))?;
 
     // Update the server URL (allowing empty string to clear the setting)
     app_state.settings.server_url = if server_url.is_empty() {
         None
     } else {
-        println!("received");
         Some(server_url.clone())
     };
 
@@ -42,7 +41,7 @@ pub async fn set_server_url(
 pub async fn get_server_url(state: State<'_, AppState>) -> SettingResult<ServerUrlResponse> {
     // Lock the state with error handling
     let app_state = state
-        .lock()
+        .write()
         .map_err(|e| SettingsError::StateLock(e.to_string()))?;
 
     // Retrieve the server URL

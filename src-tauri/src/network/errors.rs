@@ -14,6 +14,9 @@ pub enum NetworkError {
 
     #[error("Failed to acquire lock on application state")]
     LockError,
+
+    #[error("Server URL not configured")]
+    ServerUrlNotConfigured,
 }
 
 // Implement Serialize for NetworkError for Tauri command compatibility
