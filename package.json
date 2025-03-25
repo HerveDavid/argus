@@ -49,6 +49,8 @@
     "motion": "^12.4.1",
     "react": "^18.3.1",
     "react-calendar-timeline": "0.30.0-beta.3",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^5.0.0",
     "react-helmet-async": "^2.0.5",
@@ -58,6 +60,7 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.173.0",
+    "vis-timeline": "^7.7.3",
     "zod": "^3.24.1",
     "zustand": "^5.0.3"
   },
