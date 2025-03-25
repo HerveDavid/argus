@@ -21,10 +21,16 @@ const ViewDropdown = () => {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             <Link to={paths.views.stateView.path}>State View</Link>
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+            <DropdownMenuShortcut>⌘V</DropdownMenuShortcut>
           </DropdownMenuItem>
-          <DropdownMenuItem>Game Master</DropdownMenuItem>
-          <DropdownMenuItem>KPI</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link to={paths.views.gameMasterView.path}>Game Master</Link>
+            <DropdownMenuShortcut>⌘G</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <Link to={paths.views.kpiView.path}>KPI</Link>
+            <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

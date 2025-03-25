@@ -5,7 +5,7 @@ import { useSubstationDetails } from '@/features/network/hooks/use-substation-de
 import { NetworkExplorer } from '@/features/network/components/network-explorer';
 import { SubstationViewer } from '@/features/network/components/network-explorer/substation-viewer';
 
-const HomeRoute: React.FC = () => {
+const StateView: React.FC = () => {
   const [selectedSubstationId, setSelectedSubstationId] = useState<string>();
 
   const substationsData = useSubstations();
@@ -32,4 +32,4 @@ const HomeRoute: React.FC = () => {
   );
 };
 
-export default HomeRoute;
+export default StateView;

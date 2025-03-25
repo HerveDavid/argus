@@ -31,6 +31,16 @@ export const createAppRouter = (queryClient: QueryClient) =>
         import('./routes/app/views/state-view').then(convert(queryClient)),
     },
     {
+      path: paths.views.gameMasterView.path,
+      lazy: () =>
+        import('./routes/app/views/game-master-view').then(convert(queryClient)),
+    },
+    {
+      path: paths.views.kpiView.path,
+      lazy: () =>
+        import('./routes/app/views/kpi-view').then(convert(queryClient)),
+    },
+    {
       path: paths.gameMaster.root.path,
       element: <AppRoot />,
       children: [

@@ -12,6 +12,14 @@ export const paths = {
       path: '/views/state-view',
       getHref: () => '/views/state-view',
     },
+    gameMasterView: {
+      path: '/views/game-master-view',
+      getHref: () => '/views/game-master-view',
+    },
+    kpiView: {
+      path: '/views/kpi-view',
+      getHref: () => '/views/kpi-view',
+    },
   },
   gameMaster: {
     root: {
