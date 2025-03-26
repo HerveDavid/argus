@@ -7,6 +7,9 @@ import {
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useSubstations } from '@/features/network/hooks/use-substations';
+import { useSubstationDetails } from '@/features/network/hooks/use-substation-details';
+import { NetworkExplorer } from '@/features/network/components/network-explorer';
 
 // Define types for our data
 interface CollectionItem {
@@ -43,6 +46,15 @@ const SectionHeader = ({ title, expanded, onToggle }: SectionHeaderProps) => (
 );
 
 const Browser = () => {
+  const [selectedSubstationId, setSelectedSubstationId] = useState<string>();
+
+  const substationsData = useSubstations();
+  const substationDetails = useSubstationDetails(selectedSubstationId);
+
+  const handleSubstationSelect = (id: string) => {
+    setSelectedSubstationId(id);
+  };
+
   // State to track which sections are expanded
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     collections: false,
@@ -193,19 +205,13 @@ const Browser = () => {
       {/* Right panel - only shows when a category is selected */}
       {selectedCategory && (
         <div className="flex-1 bg-white p-2 overflow-y-auto">
-          <div className="font-semibold text-sm mb-3 border-b pb-2">
-            {selectedCategory}{' '}
-            {categories.find((c) => c.name === selectedCategory)?.icon}
-          </div>
           <div className="grid grid-cols-1 gap-1">
-            {getSelectedCategoryItems().map((item, index) => (
-              <div
-                key={index}
-                className="bg-gray-50 hover:bg-gray-100 p-2 text-xs cursor-pointer"
-              >
-                {item}
-              </div>
-            ))}
+            <NetworkExplorer
+              title={selectedCategory}
+              substationsData={substationsData}
+              selectedSubstationId={selectedSubstationId}
+              onSubstationSelect={handleSubstationSelect}
+            />
           </div>
         </div>
       )}

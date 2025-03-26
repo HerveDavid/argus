@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { useEffect, useRef, useLayoutEffect } from 'react';
 import { Timeline, DataSet, TimelineOptions } from 'vis-timeline/standalone';
 import moment from 'moment';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import { Button } from '@/components/ui/button';
 
 // Define proper interfaces for our data structure
-interface TimelineItem {
+export interface TimelineItem {
   id: number;
   group: number;
   content: string;
@@ -15,132 +15,38 @@ interface TimelineItem {
   title: string;
 }
 
-interface TimelineGroup {
+export interface TimelineGroup {
   id: number;
   content: string;
-  treeLevel: number;
-  nestedGroups?: number[];
 }
 
-const TimelineComponent = () => {
+interface TimelineComponentProps {
+  groups: TimelineGroup[];
+  items: TimelineItem[];
+  zoomLevel: number;
+  onZoomChange: (level: number) => void;
+  onGroupsChange?: (groups: TimelineGroup[]) => void;
+  onItemsChange?: (items: TimelineItem[]) => void;
+}
+
+const TimelineComponent = ({
+  groups,
+  items,
+  zoomLevel,
+  onZoomChange,
+  onGroupsChange,
+  onItemsChange,
+}: TimelineComponentProps) => {
   const timelineRef = useRef<HTMLDivElement>(null);
-  const [zoomLevel, setZoomLevel] = useState(0.5);
   const timelineInstanceRef = useRef<Timeline | null>(null);
 
   // Initialize the timeline
   useEffect(() => {
     if (!timelineRef.current) return;
 
-    // Create the level 3 groups (most nested)
-    const level3Groups: TimelineGroup[] = [
-      { id: 1001, content: 'Project A', treeLevel: 3 },
-      { id: 1002, content: 'Project B', treeLevel: 3 },
-      { id: 1003, content: 'Project C', treeLevel: 3 },
-      { id: 2001, content: 'Project D', treeLevel: 3 },
-      { id: 2002, content: 'Project E', treeLevel: 3 },
-      { id: 3001, content: 'Project F', treeLevel: 3 },
-      { id: 3002, content: 'Project G', treeLevel: 3 },
-      { id: 3003, content: 'Project H', treeLevel: 3 },
-      { id: 3004, content: 'Project I', treeLevel: 3 },
-    ];
-
-    // Create the level 2 groups (departments)
-    const level2Groups: TimelineGroup[] = [
-      {
-        id: 101,
-        content: 'Development',
-        treeLevel: 2,
-        nestedGroups: [1001, 1002, 1003],
-      },
-      {
-        id: 102,
-        content: 'Design',
-        treeLevel: 2,
-        nestedGroups: [2001, 2002],
-      },
-      {
-        id: 103,
-        content: 'Marketing',
-        treeLevel: 2,
-        nestedGroups: [3001, 3002, 3003, 3004],
-      },
-      {
-        id: 201,
-        content: 'Development',
-        treeLevel: 2,
-      },
-      {
-        id: 202,
-        content: 'Design',
-        treeLevel: 2,
-      },
-      {
-        id: 203,
-        content: 'Marketing',
-        treeLevel: 2,
-      },
-    ];
-
-    // Create the level 1 groups (top level)
-    const level1Groups: TimelineGroup[] = [
-      {
-        id: 10,
-        content: 'Division A',
-        treeLevel: 1,
-        nestedGroups: [101, 102, 103],
-      },
-      {
-        id: 20,
-        content: 'Division B',
-        treeLevel: 1,
-        nestedGroups: [201, 202, 203],
-      },
-    ];
-
-    // Combine all groups
-    const allGroups = [...level1Groups, ...level2Groups, ...level3Groups];
-    const groups = new DataSet<TimelineGroup>(allGroups);
-
-    // Create items
-    const now = moment();
-    const items = new DataSet<TimelineItem>();
-
-    // Function to create random items
-    function createRandomItems(): TimelineItem[] {
-      const itemsArray: TimelineItem[] = [];
-      let id = 1;
-
-      // Create items for level 3 groups
-      level3Groups.forEach((group) => {
-        // Create 2-4 items per project
-        const itemCount = Math.floor(Math.random() * 3) + 2;
-
-        for (let i = 0; i < itemCount; i++) {
-          // Random start date within the last 30 days
-          const randomStart = Math.floor(Math.random() * 30);
-          const start = now.clone().subtract(randomStart, 'days');
-
-          // Random duration between 1-7 days
-          const duration = Math.floor(Math.random() * 7) + 1;
-          const end = start.clone().add(duration, 'days');
-
-          itemsArray.push({
-            id: id++,
-            group: group.id,
-            content: `Task ${id}`,
-            start: start.toDate(),
-            end: end.toDate(),
-            className: `project-${group.id % 10}`,
-            title: `Task ${id} (${duration} days)`,
-          });
-        }
-      });
-
-      return itemsArray;
-    }
-
-    // Add items to the dataset
-    items.add(createRandomItems());
+    // Convert arrays to DataSet objects for vis-timeline
+    const groupsDataSet = new DataSet<TimelineGroup>(groups);
+    const itemsDataSet = new DataSet<TimelineItem>(items);
 
     // Timeline options
     const options: TimelineOptions = {
@@ -149,7 +55,7 @@ const TimelineComponent = () => {
         item: 10,
         axis: 5,
       },
-      orientation: 'both',
+      orientation: 'top',
       zoomMax: 31536000000, // 1 year
       zoomMin: 86400000, // 1 day
       horizontalScroll: true,
@@ -160,22 +66,76 @@ const TimelineComponent = () => {
         overflowMethod: 'cap',
       },
       stack: true,
-      stackSubgroups: true,
       showCurrentTime: true,
       showMajorLabels: true,
       showMinorLabels: true,
       autoResize: false, // Disable built-in resize and handle it manually
-      height: '100%', // Use 100% of container height
+      height: '100%', // Use 100% of container height,
+      // Ensure all items are range items (no point items)
+      type: 'range',
+
+      // Ajout du template pour l'alternance de couleurs
+      template: function (item, element, data) {
+        // Utilisez l'id de l'élément pour déterminer s'il est pair ou impair
+        const isEven = item.id % 2 === 0;
+        const backgroundColor = isEven ? '#f0f4f8' : '#e1ebf2';
+
+        // Créez le HTML avec une couleur de fond alternative
+        return `<div class="vis-item-content" style="background-color: ${backgroundColor};">
+                  ${item.content}
+                </div>`;
+      },
     };
 
     // Create the timeline
     // Use type assertion to resolve compatibility issues with the library
     const timeline = new Timeline(
       timelineRef.current,
-      items as any,
-      groups as any,
+      itemsDataSet as any,
+      groupsDataSet as any,
       options,
     );
+
+    // Set up event listeners for changes
+    if (onGroupsChange) {
+      groupsDataSet.on('*', () => {
+        onGroupsChange(groupsDataSet.get() as TimelineGroup[]);
+      });
+    }
+
+    if (onItemsChange) {
+      itemsDataSet.on('*', () => {
+        onItemsChange(itemsDataSet.get() as TimelineItem[]);
+      });
+    }
+
+    // Ensure items are always range items with duration when updated
+    // Import TimelineEventPropertiesResult if needed
+    let isUpdating = false;
+
+    itemsDataSet.on('update', (event: { items: string[] }) => {
+      // Éviter les mises à jour récursives
+      if (isUpdating) return;
+
+      isUpdating = true;
+
+      // Traiter les éléments mis à jour
+      event.items.forEach((itemId) => {
+        const item = itemsDataSet.get(itemId);
+        if (item && !item.end && item.start) {
+          const startDate = new Date(item.start);
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 1);
+          // Mettre à jour l'élément avec une date de fin
+          itemsDataSet.update({
+            id: item.id,
+            end: endDate,
+          });
+        }
+      });
+
+      isUpdating = false;
+    });
 
     // Store timeline instance in ref for later use
     timelineInstanceRef.current = timeline;
@@ -187,14 +147,29 @@ const TimelineComponent = () => {
       }
     }, 200);
 
+    // Ajout de styles CSS pour les éléments de la timeline
+    const style = document.createElement('style');
+    style.textContent = `
+      .vis-item {
+        border-color: #2d5986 !important;
+      }
+      .vis-item.vis-selected {
+        background-color: #c2d8e9 !important;
+        border-color: #1a365d !important;
+      }
+    `;
+    document.head.appendChild(style);
+
     // Clean up
     return () => {
       if (timeline) {
         timeline.destroy();
       }
+      document.head.removeChild(style);
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, [groups, items, onGroupsChange, onItemsChange]); // Re-initialize if groups or items change
 
+  // Le reste du code reste inchangé
   // Custom resize handler
   useEffect(() => {
     const handleResize = () => {
@@ -261,12 +236,12 @@ const TimelineComponent = () => {
     };
   }, []);
 
-  // Fonction pour réinitialiser le zoom et centrer sur aujourd'hui
+  // Function to reset view and center on today
   const resetView = () => {
     if (timelineInstanceRef.current) {
       timelineInstanceRef.current.fit();
       timelineInstanceRef.current.moveTo(moment().toDate());
-      setZoomLevel(0.5);
+      onZoomChange(0.5);
     }
   };
 

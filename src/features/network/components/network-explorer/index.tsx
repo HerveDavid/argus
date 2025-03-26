@@ -6,6 +6,7 @@ import { SubstationList } from './substation-list';
 import { PaginationControls } from './pagination-controls';
 
 interface NetworkExplorerProps {
+  title?: string,
   substationsData: ReturnType<
     typeof import('../../hooks/use-substations').useSubstations
   >;
@@ -14,6 +15,7 @@ interface NetworkExplorerProps {
 }
 
 export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
+  title = "Network Explorer",
   substationsData,
   selectedSubstationId,
   onSubstationSelect,
@@ -82,9 +84,9 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
   };
 
   return (
-    <div className="w-2/12 flex flex-col border-r border-gray-200">
+    <div className="flex flex-col">
       <div className="flex justify-between items-center border-b border-gray-200 p-2">
-        <h2 className="font-semibold">Network Explorer</h2>
+        <h2 className="font-semibold">{title}</h2>
         <Button
           variant="outline"
           size="sm"
