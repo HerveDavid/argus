@@ -45,8 +45,8 @@ const SectionHeader = ({ title, expanded, onToggle }: SectionHeaderProps) => (
 const Browser = () => {
   // State to track which sections are expanded
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    collections: true,
-    categories: true,
+    collections: false,
+    categories: false,
   });
 
   // State to track selected category
@@ -67,7 +67,7 @@ const Browser = () => {
   const categories: CategoryItem[] = [
     {
       name: 'Substations',
-      icon: '🎵',
+      icon: '🕹️',
       items: [
         'Substation A',
         'Substation B',
@@ -78,12 +78,12 @@ const Browser = () => {
     },
     {
       name: 'Voltage Levels',
-      icon: '🥁',
+      icon: '⚡',
       items: ['110 kV', '220 kV', '380 kV', '400 kV', '500 kV'],
     },
     {
       name: 'Lines',
-      icon: '🎹',
+      icon: '│',
       items: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5', 'Line 6'],
     },
   ];
@@ -125,7 +125,7 @@ const Browser = () => {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* Left sidebar */}
       <div className="flex flex-col h-full bg-gray-100 text-xs w-56 overflow-y-auto border-r border-gray-300">
         {/* Search */}
