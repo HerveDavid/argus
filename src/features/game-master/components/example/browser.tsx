@@ -1,14 +1,59 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+
+// Define types for our data
+interface CollectionItem {
+  name: string;
+  color: string;
+}
+
+interface CategoryItem {
+  name: string;
+  icon: string;
+  items: string[];
+}
+
+// Component for section headers
+interface SectionHeaderProps {
+  title: string;
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+const SectionHeader = ({ title, expanded, onToggle }: SectionHeaderProps) => (
+  <CollapsibleTrigger
+    className="p-1 font-semibold bg-gray-200 hover:bg-gray-300 cursor-pointer flex items-center w-full"
+    onClick={onToggle}
+  >
+    <ChevronDown
+      className={cn(
+        'h-3 w-3 mr-1 transition-transform duration-200',
+        !expanded && '-rotate-90',
+      )}
+    />
+    {title}
+  </CollapsibleTrigger>
+);
 
 const Browser = () => {
-  // State to track which categories are expanded
-  const [expanded, setExpanded] = useState({
+  // State to track which sections are expanded
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
     collections: true,
     categories: true,
   });
 
+  // State to track selected category
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
   // Collections section data
-  const collections = [
+  const collections: CollectionItem[] = [
     { name: 'Favorites', color: 'red' },
     { name: 'Orange', color: 'orange' },
     { name: 'Yellow', color: 'yellow' },
@@ -18,129 +63,152 @@ const Browser = () => {
     { name: 'Gray', color: 'gray' },
   ];
 
-  // Sounds section data - expandable items
-  const sounds = [
-    { name: 'Ambient & Evolving', expanded: false },
-    { name: 'Bass', expanded: false },
-    { name: 'Brass', expanded: false },
-    { name: 'Effects', expanded: false },
-    { name: 'Guitar & Plucked', expanded: false },
-    { name: 'Mallets', expanded: false },
-    { name: 'Pad', expanded: false },
-    { name: 'Percussive', expanded: false },
-    { name: 'Piano & Keys', expanded: false },
-    { name: 'Strings', expanded: false },
-    { name: 'Synth Keys', expanded: false },
-    { name: 'Synth Lead', expanded: false },
-    { name: 'Synth Misc', expanded: false },
-    { name: 'Synth Rhythmic', expanded: false },
-    { name: 'Vocals', expanded: false },
-    { name: 'Winds', expanded: false },
-  ];
-
-  // Categories section data
-  const categories = [
-    { name: 'Sounds', icon: '🎵' },
-    { name: 'Drums', icon: '🥁' },
-    { name: 'Instruments', icon: '🎹' },
-    { name: 'Audio Effects', icon: '🎛️' },
-    { name: 'MIDI Effects', icon: '🎚️' },
-    { name: 'Max for Live', icon: '🎯' },
-    { name: 'Plugins', icon: '📂' },
-    { name: 'Clips', icon: '💬' },
-    { name: 'Samples', icon: '🔈' },
-  ];
-
-  // Places section data
-  const places = [
-    { name: 'Packs' },
-    { name: 'User Library' },
-    { name: 'Current Project' },
-    { name: 'Add Folder...' },
+  // Categories section data with items
+  const categories: CategoryItem[] = [
+    {
+      name: 'Substations',
+      icon: '🎵',
+      items: [
+        'Substation A',
+        'Substation B',
+        'Substation C',
+        'Substation D',
+        'Substation E',
+      ],
+    },
+    {
+      name: 'Voltage Levels',
+      icon: '🥁',
+      items: ['110 kV', '220 kV', '380 kV', '400 kV', '500 kV'],
+    },
+    {
+      name: 'Lines',
+      icon: '🎹',
+      items: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5', 'Line 6'],
+    },
   ];
 
   // Toggle section expansion
-  const toggleSection = (section) => {
+  const toggleSection = (section: string) => {
     setExpanded((prev) => ({
       ...prev,
       [section]: !prev[section],
     }));
   };
 
+  // Handle category selection
+  const handleCategorySelect = (categoryName: string) => {
+    setSelectedCategory(
+      categoryName === selectedCategory ? null : categoryName,
+    );
+  };
+
+  // Get selected category data
+  const getSelectedCategoryItems = () => {
+    if (!selectedCategory) return [];
+    const category = categories.find((cat) => cat.name === selectedCategory);
+    return category?.items || [];
+  };
+
+  const getColorClass = (color: string): string => {
+    const colorMap: Record<string, string> = {
+      red: 'bg-red-500',
+      orange: 'bg-orange-500',
+      yellow: 'bg-yellow-500',
+      green: 'bg-green-500',
+      blue: 'bg-blue-500',
+      purple: 'bg-purple-500',
+      gray: 'bg-gray-500',
+    };
+
+    return colorMap[color] || 'bg-gray-500';
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-100 text-xs w-full overflow-y-auto">
-      {/* Search field */}
-      <div className="p-1 flex items-center bg-gray-200 border-b border-gray-300">
-        <span className="mr-1">🔍</span>
-        <span>Search (Ctrl + F)</span>
-      </div>
-
-      {/* Collections section */}
-      <div
-        className="p-1 font-semibold bg-gray-300 hover:bg-gray-400 cursor-pointer flex items-center"
-        onClick={() => toggleSection('collections')}
-      >
-        <span
-          className={`mr-1 transform ${
-            expanded.collections ? '' : '-rotate-90'
-          } inline-block`}
-        >
-          ▼
-        </span>
-        Collections
-      </div>
-
-      {expanded.collections &&
-        collections.map((item, index) => (
-          <div
-            key={index}
-            className="pl-2 hover:bg-gray-200 p-1 flex items-center"
-          >
-            <span
-              className={`w-2 h-2 mr-2 rounded-full bg-${item.color}-500`}
-            ></span>
-            <span>{item.name}</span>
+    <div className="flex h-screen">
+      {/* Left sidebar */}
+      <div className="flex flex-col h-full bg-gray-100 text-xs w-56 overflow-y-auto border-r border-gray-300">
+        {/* Search */}
+        <div className="p-2 border-b border-gray-300">
+          <div className="relative">
+            <Input
+              className="w-full pl-6 py-1 text-xs bg-gray-100 border border-gray-300"
+              placeholder="Search (Ctrl+F)"
+            />
           </div>
-        ))}
-
-      {/* Sounds section */}
-      <div className="p-1 font-semibold bg-gray-300">Sounds</div>
-
-      {sounds.map((item, index) => (
-        <div
-          key={index}
-          className="pl-2 hover:bg-gray-200 p-1 flex items-center"
-        >
-          <span className="mr-1">▶</span>
-          <span>{item.name}</span>
         </div>
-      ))}
 
-      {/* Categories section */}
-      <div
-        className="p-1 font-semibold bg-gray-300 hover:bg-gray-400 cursor-pointer flex items-center"
-        onClick={() => toggleSection('categories')}
-      >
-        <span
-          className={`mr-1 transform ${
-            expanded.categories ? '' : '-rotate-90'
-          } inline-block`}
-        >
-          ▼
-        </span>
-        Categories
+        {/* Collections section */}
+        <Collapsible open={expanded.collections} className="my-2">
+          <SectionHeader
+            title="Collections"
+            expanded={expanded.collections}
+            onToggle={() => toggleSection('collections')}
+          />
+          <CollapsibleContent>
+            {collections.map((item, index) => (
+              <div
+                key={index}
+                className="pl-2 hover:bg-gray-200 p-1 flex items-center"
+              >
+                <span
+                  className={`w-2 h-2 mr-2 rounded-full ${getColorClass(
+                    item.color,
+                  )}`}
+                ></span>
+                <span>{item.name}</span>
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Categories section */}
+        <Collapsible open={expanded.categories} className="my-2">
+          <SectionHeader
+            title="Categories"
+            expanded={expanded.categories}
+            onToggle={() => toggleSection('categories')}
+          />
+          <CollapsibleContent>
+            {categories.map((item, index) => (
+              <div
+                key={index}
+                className={cn(
+                  'pl-2 hover:bg-gray-200 p-1 flex items-center cursor-pointer',
+                  selectedCategory === item.name && 'bg-blue-100',
+                )}
+                onClick={() => handleCategorySelect(item.name)}
+              >
+                <span className="ml-4 mr-2">{item.icon}</span>
+                <span>{item.name}</span>
+                {selectedCategory === item.name && (
+                  <ChevronRight className="h-3 w-3 ml-auto" />
+                )}
+              </div>
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
-      {/* Places */}
-      <div className="mt-auto">
-        <div className="p-1 text-xs font-semibold bg-gray-300">Places</div>
-        <div className="pl-2 text-xs hover:bg-gray-200 p-1">Packs</div>
-        <div className="pl-2 text-xs hover:bg-gray-200 p-1">User Library</div>
-        <div className="pl-2 text-xs hover:bg-gray-200 p-1">
-          Current Project
+      {/* Right panel - only shows when a category is selected */}
+      {selectedCategory && (
+        <div className="flex-1 bg-white p-2 overflow-y-auto">
+          <div className="font-semibold text-sm mb-3 border-b pb-2">
+            {selectedCategory}{' '}
+            {categories.find((c) => c.name === selectedCategory)?.icon}
+          </div>
+          <div className="grid grid-cols-1 gap-1">
+            {getSelectedCategoryItems().map((item, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 hover:bg-gray-100 p-2 text-xs cursor-pointer"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="pl-2 text-xs hover:bg-gray-200 p-1">Add Folder...</div>
-      </div>
+      )}
     </div>
   );
 };
