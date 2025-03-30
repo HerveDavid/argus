@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SubstationList } from './substation-list';
 import { PaginationControls } from './pagination-controls';
+import { ErrorWithRetry } from '../../hooks/use-error-handling';
 
 interface NetworkExplorerProps {
   substationsData: ReturnType<
@@ -27,28 +28,28 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
     itemsPerPage,
     goToNextPage,
     goToPreviousPage,
+    errors,
   } = substationsData;
 
-  const renderError = (error: unknown, retryFunction: () => void) => {
-    if (!error) return null;
-
-    const errorMessage =
-      error instanceof Error ? error.message : 'An error occurred';
-
+  const renderError = ({ error, retry }: ErrorWithRetry) => {
     return (
-      <Alert variant="destructive" className="m-2">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription className="text-xs flex items-center justify-between">
-          <span>{errorMessage}</span>
+      <Alert variant="destructive" className="m-2 p-2">
+        <div className="flex items-center w-full">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertDescription className="text-xs truncate">
+              {error.message}
+            </AlertDescription>
+          </div>
           <Button
             variant="outline"
             size="sm"
-            onClick={retryFunction}
-            className="ml-2 h-6 text-xs"
+            onClick={retry}
+            className="ml-2 h-6 text-xs flex-shrink-0"
           >
             Retry
           </Button>
-        </AlertDescription>
+        </div>
       </Alert>
     );
   };
@@ -101,10 +102,10 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         </Button>
       </div>
 
-      {initialDataCheck.error &&
-        renderError(initialDataCheck.error, initialDataCheck.refetch)}
-      {substationsQuery.error &&
-        renderError(substationsQuery.error, substationsQuery.refetch)}
+      {/* Render all errors */}
+      {Object.entries(errors).map(([key, errorData]) => (
+        <React.Fragment key={key}>{renderError(errorData)}</React.Fragment>
+      ))}
 
       <div className="flex-1 overflow-y-auto p-2">
         {substationsQuery.isLoading ||

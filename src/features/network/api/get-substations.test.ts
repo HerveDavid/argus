@@ -12,11 +12,19 @@ import {
   FetchStatus,
   PaginatedResponse,
   PaginationParams,
+  Substations,
 } from '../types/substation.type';
 
 // Mock for @tauri-apps/api/core
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
+}));
+
+// Mock for ./api-utils
+vi.mock('./api-utils', () => ({
+  handleApiError: vi.fn((err, msg) => {
+    throw new Error(err.message || msg);
+  }),
 }));
 
 // Test data fixtures
@@ -48,7 +56,7 @@ const mockSubstationData = {
       { id: '1', name: 'Substation 1' },
       { id: '2', name: 'Substation 2' },
     ],
-  },
+  } as Substations,
 
   single: { id: '1', name: 'Substation 1' } as Substation,
 
@@ -84,9 +92,9 @@ const statusData = {
 // Error messages
 const errorMessages = {
   backend: 'Backend error',
-  pagination: 'Pagination error',
-  fetch: 'Failed to fetch substation',
-  load: 'Failed to load',
+  pagination: 'Error fetching paginated substations',
+  fetch: 'Error fetching substation with ID 1',
+  load: 'Failed to load substations',
 };
 
 describe('Substation API', () => {
@@ -119,7 +127,7 @@ describe('Substation API', () => {
         expected: mockSubstationData.basic,
       },
       {
-        name: 'should extract substations when response is an object with substations property',
+        name: 'should extract substations when response has substations property',
         mockReturn: mockSubstationData.withWrapper,
         expected: mockSubstationData.withWrapper.substations,
       },
@@ -142,7 +150,7 @@ describe('Substation API', () => {
       });
     });
 
-    it('should propagate error when invoke rejects', async () => {
+    it('should handle error when invoke rejects', async () => {
       mockInvokeFailure(errorMessages.backend);
 
       await expect(fetchSubstations()).rejects.toThrow(errorMessages.backend);
@@ -160,13 +168,18 @@ describe('Substation API', () => {
       expect(result).toEqual(statusData.success);
     });
 
-    it('should handle error when invoke fails', async () => {
-      mockInvokeFailure(errorMessages.load);
+    it('should throw error when result is not successful', async () => {
+      mockInvoke(statusData.error);
 
-      const result = await loadSubstations();
-
+      await expect(loadSubstations()).rejects.toThrow(statusData.error.message);
       expect(invoke).toHaveBeenCalledWith('load_substations');
-      expect(result).toEqual(statusData.error);
+    });
+
+    it('should handle error when invoke fails', async () => {
+      mockInvokeFailure(errorMessages.backend);
+
+      await expect(loadSubstations()).rejects.toThrow(errorMessages.backend);
+      expect(invoke).toHaveBeenCalledWith('load_substations');
     });
   });
 
@@ -182,11 +195,11 @@ describe('Substation API', () => {
       expect(result).toEqual(paginationData.response);
     });
 
-    it('should propagate error when invoke rejects', async () => {
-      mockInvokeFailure(errorMessages.pagination);
+    it('should handle error when invoke rejects', async () => {
+      mockInvokeFailure(errorMessages.backend);
 
       await expect(getPaginatedSubstations()).rejects.toThrow(
-        errorMessages.pagination,
+        errorMessages.backend,
       );
       expect(invoke).toHaveBeenCalledWith('get_paginated_substations', {
         pagination: undefined,
@@ -221,12 +234,12 @@ describe('Substation API', () => {
       });
     });
 
-    it('should propagate error when invoke rejects', async () => {
+    it('should handle error when invoke rejects', async () => {
       const testId = '1';
-      mockInvokeFailure(errorMessages.fetch);
+      mockInvokeFailure(errorMessages.backend);
 
       await expect(getSubstationById(testId)).rejects.toThrow(
-        errorMessages.fetch,
+        errorMessages.backend,
       );
       expect(invoke).toHaveBeenCalledWith('get_substation_by_id', {
         id: testId,
