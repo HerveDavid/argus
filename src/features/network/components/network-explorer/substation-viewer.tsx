@@ -3,7 +3,7 @@ import SingleLineDiagram from '../single-line-diagram';
 
 interface SubstationViewerProps {
   substationId?: string;
-  substationDetails: any; // TODO: Need to create an api
+  substationDetails?: any; // TODO: Need to create an api
 }
 
 export const SubstationViewer: React.FC<SubstationViewerProps> = ({
