@@ -14,170 +14,180 @@ import {
   PaginationParams,
 } from '../types/substation.type';
 
-// Mock de @tauri-apps/api/core
+// Mock for @tauri-apps/api/core
 vi.mock('@tauri-apps/api/core', () => ({
   invoke: vi.fn(),
 }));
 
+// Test data fixtures
+const mockSubstationData = {
+  basic: [
+    { id: '1', name: 'Substation 1' },
+    { id: '2', name: 'Substation 2' },
+  ] as Substation[],
+
+  detailed: [
+    {
+      id: '1',
+      name: 'Substation 1',
+      country: 'FR',
+      tso: 'RTE',
+      geo_tags: '',
+    },
+    {
+      id: '2',
+      name: 'Substation 2',
+      country: 'FR',
+      tso: 'RTE',
+      geo_tags: '',
+    },
+  ] as Substation[],
+
+  withWrapper: {
+    substations: [
+      { id: '1', name: 'Substation 1' },
+      { id: '2', name: 'Substation 2' },
+    ],
+  },
+
+  single: { id: '1', name: 'Substation 1' } as Substation,
+
+  emptyResponse: {},
+};
+
+// Pagination test data
+const paginationData = {
+  params: { page: 1, per_page: 10 } as PaginationParams,
+
+  response: {
+    items: mockSubstationData.detailed,
+    total: 20,
+    page: 1,
+    per_page: 10,
+    total_pages: 2,
+  } as PaginatedResponse<Substation[]>,
+};
+
+// Status response data
+const statusData = {
+  success: {
+    success: true,
+    message: 'Successfully loaded substations',
+  } as FetchStatus,
+
+  error: {
+    success: false,
+    message: 'Failed to load',
+  } as FetchStatus,
+};
+
+// Error messages
+const errorMessages = {
+  backend: 'Backend error',
+  pagination: 'Pagination error',
+  fetch: 'Failed to fetch substation',
+  load: 'Failed to load',
+};
+
 describe('Substation API', () => {
-  // Réinitialiser les mocks avant chaque test
+  // Reset mocks before each test
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  // Nettoyer après tous les tests
+  // Clean up after all tests
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
+  // Helper function to configure invoke mock
+  const mockInvoke = (returnValue: any) => {
+    vi.mocked(invoke).mockResolvedValue(returnValue);
+  };
+
+  // Helper function to configure invoke mock to reject
+  const mockInvokeFailure = (errorMessage: any) => {
+    vi.mocked(invoke).mockRejectedValue(new Error(errorMessage));
+  };
+
   describe('fetchSubstations', () => {
-    it('should return substations array when response is an array', async () => {
-      // Données de test
-      const mockSubstations = [
-        { id: '1', name: 'Substation 1' },
-        { id: '2', name: 'Substation 2' },
-      ] as Substation[];
+    // Test case definitions
+    const testCases = [
+      {
+        name: 'should return substations array when response is an array',
+        mockReturn: mockSubstationData.basic,
+        expected: mockSubstationData.basic,
+      },
+      {
+        name: 'should extract substations when response is an object with substations property',
+        mockReturn: mockSubstationData.withWrapper,
+        expected: mockSubstationData.withWrapper.substations,
+      },
+      {
+        name: 'should return empty array when response is neither an array nor has substations property',
+        mockReturn: mockSubstationData.emptyResponse,
+        expected: [],
+      },
+    ];
 
-      // Configuration du mock pour invoke
-      vi.mocked(invoke).mockResolvedValue(mockSubstations);
+    // Run all defined test cases
+    testCases.forEach(({ name, mockReturn, expected }) => {
+      it(name, async () => {
+        mockInvoke(mockReturn);
 
-      // Appel de la fonction à tester
-      const result = await fetchSubstations();
+        const result = await fetchSubstations();
 
-      // Vérifications
-      expect(invoke).toHaveBeenCalledWith('get_substations');
-      expect(result).toEqual(mockSubstations);
-    });
-
-    it('should extract substations when response is an object with substations property', async () => {
-      // Données de test
-      const mockSubstationsObject = {
-        substations: [
-          { id: '1', name: 'Substation 1' },
-          { id: '2', name: 'Substation 2' },
-        ],
-      };
-
-      // Configuration du mock
-      vi.mocked(invoke).mockResolvedValue(mockSubstationsObject);
-
-      // Appel de la fonction
-      const result = await fetchSubstations();
-
-      // Vérifications
-      expect(invoke).toHaveBeenCalledWith('get_substations');
-      expect(result).toEqual(mockSubstationsObject.substations);
-    });
-
-    it('should return empty array when response is neither an array nor has substations property', async () => {
-      // Configuration du mock avec une réponse invalide
-      vi.mocked(invoke).mockResolvedValue({});
-
-      // Appel de la fonction
-      const result = await fetchSubstations();
-
-      // Vérifications
-      expect(invoke).toHaveBeenCalledWith('get_substations');
-      expect(result).toEqual([]);
+        expect(invoke).toHaveBeenCalledWith('get_substations');
+        expect(result).toEqual(expected);
+      });
     });
 
     it('should propagate error when invoke rejects', async () => {
-      // Configuration du mock pour rejeter
-      const mockError = new Error('Backend error');
-      vi.mocked(invoke).mockRejectedValue(mockError);
+      mockInvokeFailure(errorMessages.backend);
 
-      // Vérification que l'erreur est propagée
-      await expect(fetchSubstations()).rejects.toThrow(mockError);
+      await expect(fetchSubstations()).rejects.toThrow(errorMessages.backend);
       expect(invoke).toHaveBeenCalledWith('get_substations');
     });
   });
 
   describe('loadSubstations', () => {
     it('should return success status when invoke succeeds', async () => {
-      // Données de test
-      const mockStatus: FetchStatus = {
-        success: true,
-        message: 'Successfully loaded substations',
-      };
+      mockInvoke(statusData.success);
 
-      // Configuration du mock
-      vi.mocked(invoke).mockResolvedValue(mockStatus);
-
-      // Appel de la fonction
       const result = await loadSubstations();
 
-      // Vérifications
       expect(invoke).toHaveBeenCalledWith('load_substations');
-      expect(result).toEqual(mockStatus);
+      expect(result).toEqual(statusData.success);
     });
 
     it('should handle error when invoke fails', async () => {
-      // Configuration du mock pour rejeter
-      const mockError = new Error('Failed to load');
-      vi.mocked(invoke).mockRejectedValue(mockError);
+      mockInvokeFailure(errorMessages.load);
 
-      // Appel de la fonction
       const result = await loadSubstations();
 
-      // Vérifications
       expect(invoke).toHaveBeenCalledWith('load_substations');
-      expect(result).toEqual({
-        success: false,
-        message: 'Failed to load',
-      });
+      expect(result).toEqual(statusData.error);
     });
   });
 
   describe('getPaginatedSubstations', () => {
     it('should return paginated response with pagination params', async () => {
-      // Données de test - Correction du format de pagination
-      const mockPagination: PaginationParams = { page: 1, per_page: 10 };
+      mockInvoke(paginationData.response);
 
-      // Assurez-vous que la structure correspond à votre type PaginatedResponse
+      const result = await getPaginatedSubstations(paginationData.params);
 
-      const mockResponse: PaginatedResponse<Substation[]> = {
-        items: [
-          {
-            id: '1',
-            name: 'Substation 1',
-            country: 'FR',
-            tso: 'RTE',
-            geo_tags: '',
-          },
-          {
-            id: '2',
-            name: 'Substation 2',
-            country: 'FR',
-            tso: 'RTE',
-            geo_tags: '',
-          },
-        ],
-        total: 20,
-        page: 1,
-        per_page: 10,
-        total_pages: 2,
-      };
-
-      // Configuration du mock
-      vi.mocked(invoke).mockResolvedValue(mockResponse);
-
-      // Appel de la fonction
-      const result = await getPaginatedSubstations(mockPagination);
-
-      // Vérifications
       expect(invoke).toHaveBeenCalledWith('get_paginated_substations', {
-        pagination: mockPagination,
+        pagination: paginationData.params,
       });
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(paginationData.response);
     });
 
     it('should propagate error when invoke rejects', async () => {
-      // Configuration du mock
-      const mockError = new Error('Pagination error');
-      vi.mocked(invoke).mockRejectedValue(mockError);
+      mockInvokeFailure(errorMessages.pagination);
 
-      // Vérification que l'erreur est propagée
-      await expect(getPaginatedSubstations()).rejects.toThrow(mockError);
+      await expect(getPaginatedSubstations()).rejects.toThrow(
+        errorMessages.pagination,
+      );
       expect(invoke).toHaveBeenCalledWith('get_paginated_substations', {
         pagination: undefined,
       });
@@ -185,46 +195,42 @@ describe('Substation API', () => {
   });
 
   describe('getSubstationById', () => {
-    it('should return substation when found', async () => {
-      // Données de test
-      const substationId = '1';
-      const mockSubstation = { id: '1', name: 'Substation 1' } as Substation;
-
-      // Configuration du mock
-      vi.mocked(invoke).mockResolvedValue(mockSubstation);
-
-      // Appel de la fonction
-      const result = await getSubstationById(substationId);
-
-      // Vérifications
-      expect(invoke).toHaveBeenCalledWith('get_substation_by_id', {
-        id: substationId,
-      });
-      expect(result).toEqual(mockSubstation);
-    });
-
-    it('should return null when substation not found', async () => {
-      // Configuration du mock
-      vi.mocked(invoke).mockResolvedValue(null);
-
-      // Appel de la fonction
-      const result = await getSubstationById('999');
-
-      // Vérifications
-      expect(invoke).toHaveBeenCalledWith('get_substation_by_id', {
+    const testCases = [
+      {
+        name: 'should return substation when found',
+        id: '1',
+        mockReturn: mockSubstationData.single,
+        expected: mockSubstationData.single,
+      },
+      {
+        name: 'should return null when substation not found',
         id: '999',
+        mockReturn: null,
+        expected: null,
+      },
+    ];
+
+    testCases.forEach(({ name, id, mockReturn, expected }) => {
+      it(name, async () => {
+        mockInvoke(mockReturn);
+
+        const result = await getSubstationById(id);
+
+        expect(invoke).toHaveBeenCalledWith('get_substation_by_id', { id });
+        expect(result).toEqual(expected);
       });
-      expect(result).toBeNull();
     });
 
     it('should propagate error when invoke rejects', async () => {
-      // Configuration du mock
-      const mockError = new Error('Failed to fetch substation');
-      vi.mocked(invoke).mockRejectedValue(mockError);
+      const testId = '1';
+      mockInvokeFailure(errorMessages.fetch);
 
-      // Vérification que l'erreur est propagée
-      await expect(getSubstationById('1')).rejects.toThrow(mockError);
-      expect(invoke).toHaveBeenCalledWith('get_substation_by_id', { id: '1' });
+      await expect(getSubstationById(testId)).rejects.toThrow(
+        errorMessages.fetch,
+      );
+      expect(invoke).toHaveBeenCalledWith('get_substation_by_id', {
+        id: testId,
+      });
     });
   });
 });
