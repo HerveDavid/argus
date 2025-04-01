@@ -21,7 +21,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     <React.Suspense>
       <HelmetProvider>
         <QueryClientProvider client={queryClient}>
-          {import.meta.env.DEV && <ReactQueryDevtools />}
+          {/* {import.meta.env.DEV && <ReactQueryDevtools />} */}
           {children}
         </QueryClientProvider>
       </HelmetProvider>

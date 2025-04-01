@@ -83,9 +83,9 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
   };
 
   return (
-    <div className="w-2/12 flex flex-col border-r border-gray-200">
+    <div className="flex flex-col">
       <div className="flex justify-between items-center border-b border-gray-200 p-2">
-        <h2 className="font-semibold">Network Explorer</h2>
+        <h3 className='uppercase text-sm'>Network Explorer</h3>
         <Button
           variant="outline"
           size="sm"
