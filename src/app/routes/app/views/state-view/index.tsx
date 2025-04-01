@@ -28,7 +28,7 @@ const HomeRoute: React.FC = () => {
       id: 'get-started',
       label: 'Substation',
       content: (
-        <div>
+        <div className="h-full w-full">
           <SubstationViewer
             substationId={selectedSubstationId}
             substationDetails={substationDetails}
@@ -37,24 +37,9 @@ const HomeRoute: React.FC = () => {
       ),
     },
     {
-      id: 'build',
-      label: 'Build',
-      content: <div className="p-4">Build content goes here</div>,
-    },
-    {
-      id: 'manage',
-      label: 'Manage',
-      content: <div className="p-4">Manage content goes here</div>,
-    },
-    {
-      id: 'tools',
-      label: 'Tools',
-      content: <div className="p-4">Tools content goes here</div>,
-    },
-    {
-      id: 'all-docs',
-      label: 'All docs',
-      content: <div className="p-4">All documentation goes here</div>,
+      id: 'logbook',
+      label: 'Logbook',
+      content: <div className="p-4">Logbook</div>,
     },
   ];
 
@@ -66,31 +51,43 @@ const HomeRoute: React.FC = () => {
           selectedSubstationId={selectedSubstationId}
           onSubstationSelect={handleSubstationSelect}
         />
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="border-b">
-            <TabsList className="bg-transparent h-auto p-0">
+        <div className="flex-1 flex flex-col">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="flex flex-col h-full"
+          >
+            <div className="border-b">
+              <TabsList className="bg-transparent h-auto p-0">
+                {tabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className={cn(
+                      'px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:shadow-none',
+                      activeTab === tab.id
+                        ? 'font-medium text-blue-600'
+                        : 'text-gray-600',
+                    )}
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+            <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
               {tabs.map((tab) => (
-                <TabsTrigger
+                <TabsContent
                   key={tab.id}
                   value={tab.id}
-                  className={cn(
-                    'px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:shadow-none',
-                    activeTab === tab.id
-                      ? 'font-medium text-blue-600'
-                      : 'text-gray-600',
-                  )}
+                  className="h-full flex-1"
                 >
-                  {tab.label}
-                </TabsTrigger>
+                  {tab.content}
+                </TabsContent>
               ))}
-            </TabsList>
-          </div>
-          {tabs.map((tab) => (
-            <TabsContent key={tab.id} value={tab.id} className="">
-              {tab.content}
-            </TabsContent>
-          ))}
-        </Tabs>
+            </div>
+          </Tabs>
+        </div>
       </div>
     </EditorLayout>
   );
