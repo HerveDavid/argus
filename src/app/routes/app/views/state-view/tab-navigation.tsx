@@ -20,9 +20,9 @@ export const TabNavigation: React.FC<{
           key={tab.id}
           value={tab.id}
           className={cn(
-            'ml-2 px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:bg-secondary',
+            'ml-2 px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:bg-secondary hover:text-foreground',
             activeTab === tab.id
-              ? 'font-medium border-r border-l bg-secondary'
+              ? 'font-medium border-r border-l bg-secondary border-t'
               : 'text-gray-600',
           )}
         >
