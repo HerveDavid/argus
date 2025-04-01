@@ -56,11 +56,16 @@ const HomeRoute: React.FC = () => {
       label: 'Logbook',
       content: <div className="p-4">Logbook</div>,
     },
+    {
+      id: 'history',
+      label: 'History',
+      content: <div className="p-4">History</div>,
+    },
   ];
 
   return (
     <EditorLayout>
-      <div className="flex w-full h-full bg-gray-50">
+      <div className="flex w-full h-full">
         {/* VSCode-style sidebar with icons */}
         <div className="flex h-full">
           {/* Icon bar */}
@@ -132,15 +137,15 @@ const HomeRoute: React.FC = () => {
             className="flex flex-col h-full"
           >
             <div className="border-b">
-              <TabsList className="bg-transparent h-auto p-0">
+              <TabsList className="bg-transparent h-5 p-0">
                 {tabs.map((tab) => (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
                     className={cn(
-                      'px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:shadow-none',
+                      'ml-2 px-6 py-3 rounded-none data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:bg-secondary',
                       activeTab === tab.id
-                        ? 'font-medium text-blue-600'
+                        ? 'font-medium border-r border-l bg-secondary'
                         : 'text-gray-600',
                     )}
                   >
