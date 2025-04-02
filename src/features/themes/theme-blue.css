@@ -1,0 +1,146 @@
+/* theme-blue.css */
+.theme-blue {
+    /* Variables de couleur principales */
+    --background: hsl(210 50% 95%);
+    --foreground: hsl(210 50% 15%);
+  
+    --card: hsl(210 50% 95%);
+    --card-foreground: hsl(210 50% 15%);
+  
+    --popover: hsl(210 50% 95%);
+    --popover-foreground: hsl(210 50% 15%);
+  
+    --primary: hsl(210 100% 50%);
+    --primary-foreground: hsl(0 0% 100%);
+  
+    --secondary: hsl(210 30% 85%);
+    --secondary-foreground: hsl(210 50% 15%);
+  
+    --muted: hsl(210 40% 90%);
+    --muted-foreground: hsl(210 40% 50%);
+  
+    --accent: hsl(210 100% 50%);
+    --accent-foreground: hsl(0 0% 100%);
+  
+    --destructive: hsl(0 100% 50%);
+    --destructive-foreground: hsl(0 0% 100%);
+  
+    --border: hsl(210 30% 70%);
+    --input: hsl(210 30% 70%);
+    --ring: hsl(210 30% 70%);
+  
+    /* Couleurs pour états et statuts */
+    --success: hsl(130 60% 40%);
+    --success-foreground: hsl(0 0% 100%);
+    --success-weak: hsl(130 60% 95%);
+  
+    --warning: hsl(40 100% 50%);
+    --warning-foreground: hsl(40 35% 15%);
+    --warning-weak: hsl(40 100% 95%);
+  
+    --info: hsl(210 90% 60%);
+    --info-foreground: hsl(0 0% 100%);
+    --info-weak: hsl(210 90% 95%);
+  
+    --highlight: hsl(270 60% 60%);
+    --highlight-foreground: hsl(0 0% 100%);
+    --highlight-weak: hsl(270 60% 95%);
+    
+    --progress: hsl(190 100% 40%);
+    --progress-foreground: hsl(0 0% 100%);
+    --progress-weak: hsl(190 100% 95%);
+  
+    /* Surfaces et arrière-plans */
+    --surface-raised: hsl(210 50% 97%);
+    --surface-lowered: hsl(210 50% 92%);
+    --surface-hover: hsl(210 50% 98%);
+  
+    /* Ombres */
+    --shadow-sm: 0 1px 3px hsla(210, 50%, 5%, 0.08);
+    --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(210, 50%, 5%, 0.05);
+    --shadow-lg: 0 5px 17px hsla(210, 50%, 5%, 0.14);
+    --shadow-xl: 0 24px 38px 3px hsla(210, 50%, 5%, 0.16), 0 9px 46px 8px hsla(210, 50%, 5%, 0.1);
+  
+    /* Sidebar */
+    --sidebar-background: hsl(210 50% 98%);
+    --sidebar-foreground: hsl(210 50% 20%);
+    --sidebar-primary: hsl(210 100% 50%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(210 40% 95%);
+    --sidebar-accent-foreground: hsl(210 50% 20%);
+    --sidebar-border: hsl(210 30% 90%);
+    --sidebar-ring: hsl(210 100% 65%);
+  }
+  
+  /* Version sombre du thème bleu */
+  .dark.theme-blue, .theme-blue.dark {
+    --background: hsl(210 50% 10%);
+    --foreground: hsl(210 30% 90%);
+  
+    --card: hsl(210 50% 12%);
+    --card-foreground: hsl(210 30% 90%);
+  
+    --popover: hsl(210 50% 12%);
+    --popover-foreground: hsl(210 30% 90%);
+  
+    --primary: hsl(210 90% 60%);
+    --primary-foreground: hsl(0 0% 100%);
+  
+    --secondary: hsl(210 30% 18%);
+    --secondary-foreground: hsl(210 30% 90%);
+  
+    --muted: hsl(210 30% 18%);
+    --muted-foreground: hsl(210 30% 60%);
+  
+    --accent: hsl(210 90% 50%);
+    --accent-foreground: hsl(210 30% 90%);
+    
+    --destructive: hsl(0 70% 45%);
+    --destructive-foreground: hsl(0 0% 98%);
+    
+    --border: hsl(210 30% 24%);
+    --input: hsl(210 30% 24%);
+    --ring: hsl(210 30% 80%);
+  
+    /* Couleurs pour états et statuts */
+    --success: hsl(130 60% 50%);
+    --success-foreground: hsl(0 0% 98%);
+    --success-weak: hsl(130 20% 18%);
+  
+    --warning: hsl(40 100% 60%);
+    --warning-foreground: hsl(40 15% 12%);
+    --warning-weak: hsl(40 30% 18%);
+  
+    --info: hsl(210 90% 65%);
+    --info-foreground: hsl(0 0% 98%);
+    --info-weak: hsl(210 30% 18%);
+  
+    --highlight: hsl(270 60% 65%);
+    --highlight-foreground: hsl(0 0% 98%);
+    --highlight-weak: hsl(270 30% 18%);
+    
+    --progress: hsl(190 100% 45%);
+    --progress-foreground: hsl(0 0% 98%);
+    --progress-weak: hsl(190 30% 18%);
+  
+    /* Surfaces et arrière-plans */
+    --surface-raised: hsl(210 50% 15%);
+    --surface-lowered: hsl(210 50% 7%);
+    --surface-hover: hsl(210 50% 18%);
+  
+    /* Ombres pour le mode sombre */
+    --shadow-sm: 0 1px 3px hsla(210, 50%, 0%, 0.15);
+    --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(210, 50%, 0%, 0.15);
+    --shadow-lg: 0 5px 17px hsla(210, 50%, 0%, 0.24);
+    --shadow-xl: 0 0 0 1px var(--border), 0 24px 38px 3px hsla(210, 50%, 0%, 0.34);
+  
+    /* Sidebar pour le mode sombre */
+    --sidebar-background: hsl(210 50% 10%);
+    --sidebar-foreground: hsl(210 30% 90%);
+    --sidebar-primary: hsl(210 90% 50%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(210 30% 16%);
+    --sidebar-accent-foreground: hsl(210 30% 90%);
+    --sidebar-border: hsl(210 30% 16%);
+    --sidebar-ring: hsl(210 90% 60%);
+  }

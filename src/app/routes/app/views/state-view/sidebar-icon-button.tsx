@@ -14,7 +14,7 @@ export const SidebarIconButton: React.FC<{
 }> = ({ item, isActive, onClick }) => (
   <button
     className={cn(
-      'flex items-center justify-center h-12 w-full relative hover:text-foreground',
+      'flex items-center justify-center size-8 w-full relative hover:text-foreground p-3 text-muted-foreground',
       isActive && 'text-foreground',
     )}
     onClick={onClick}
@@ -22,7 +22,7 @@ export const SidebarIconButton: React.FC<{
   >
     {item.icon}
     {isActive && (
-      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500"></div>
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
     )}
   </button>
 );

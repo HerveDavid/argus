@@ -36,7 +36,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
       <Alert variant="destructive" className="m-2 p-2">
         <div className="flex items-center w-full">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <AlertCircle className="h-4 w-4 shrink-0" />
             <AlertDescription className="text-xs truncate">
               {error.message}
             </AlertDescription>
@@ -45,7 +45,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
             variant="outline"
             size="sm"
             onClick={retry}
-            className="ml-2 h-6 text-xs flex-shrink-0"
+            className="ml-2 h-6 text-xs shrink-0"
           >
             Retry
           </Button>

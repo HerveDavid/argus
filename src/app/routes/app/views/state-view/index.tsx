@@ -73,7 +73,7 @@ const HomeRoute: React.FC = () => {
         {/* VSCode-style sidebar */}
         <div className="flex h-full">
           {/* Icon bar */}
-          <div className="flex flex-col bg-gray-900 w-12 h-full text-secondary border-r gap-y-4 p-2">
+          <div className="flex flex-col h-full text-secondary border-r gap-2">
             {sidebarItems.map((item) => (
               <SidebarIconButton
                 key={item.id}

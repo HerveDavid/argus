@@ -26,7 +26,7 @@ export const SubstationList: React.FC<SubstationListProps> = ({
   return (
     <div className="space-y-1">
       {substations.map((substation) => (
-        <Card key={substation.id} className="p-0 shadow-sm hover:bg-secondary">
+        <Card key={substation.id} className="p-0 shadow-xs hover:bg-secondary">
           <div
             className={`cursor-pointer p-2 ${
               selectedId === substation.id ? 'bg-blue-100' : 'hover:bg-gray-100'
