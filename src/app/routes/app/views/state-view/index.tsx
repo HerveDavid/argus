@@ -4,7 +4,7 @@ import { useSubstations } from '@/features/network/hooks/use-substations';
 import { useSubstationDetails } from '@/features/network/hooks/use-substation-details';
 import { SubstationViewer } from '@/features/network/components/network-explorer/substation-viewer';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { FileText, Settings, Database, Layers } from 'lucide-react';
+import { Settings, Layers, Waypoints, Folder } from 'lucide-react';
 import { SidebarIconButton, SidebarItem } from './sidebar-icon-button';
 import { SidebarContent } from './sidebar-content';
 import { TabItem, TabNavigation } from './tab-navigation';
@@ -37,10 +37,9 @@ const HomeRoute: React.FC = () => {
 
   // Data
   const sidebarItems: SidebarItem[] = [
-    { id: 'explorer', icon: <FileText size={18} />, label: 'Explorer' },
-    { id: 'network', icon: <Database size={18} />, label: 'Network' },
+    { id: 'explorer', icon: <Waypoints size={18} />, label: 'Explorer' },
+    { id: 'workspace', icon: <Folder size={18} />, label: 'Workspace' },
     { id: 'layers', icon: <Layers size={18} />, label: 'Layers' },
-    { id: 'settings', icon: <Settings size={18} />, label: 'Settings' },
   ];
 
   const tabs: TabItem[] = [

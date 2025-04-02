@@ -21,22 +21,16 @@ export const SidebarContent: React.FC<{
           onSubstationSelect={onSubstationSelect}
         />
       );
-    case 'network':
+    case 'workspace':
       return (
         <div className="p-2">
-          <div className="text-sm">Network Content</div>
+          <div className="text-sm">Workspace</div>
         </div>
       );
     case 'layers':
       return (
         <div className="p-2">
           <div className="text-sm">Layers Content</div>
-        </div>
-      );
-    case 'settings':
-      return (
-        <div className="p-2">
-          <div className="text-sm">Settings Content</div>
         </div>
       );
     default:
