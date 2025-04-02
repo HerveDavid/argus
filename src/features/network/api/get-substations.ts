@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { handleApiError } from './api-utils';
 import {
   FetchStatus,
   PaginatedResponse,
@@ -7,6 +8,9 @@ import {
   Substations,
 } from '../types/substation.type';
 
+/**
+ * Fetch all substations
+ */
 export const fetchSubstations = async (): Promise<Substation[]> => {
   try {
     const response = await invoke<Substation[]>('get_substations');
@@ -21,27 +25,29 @@ export const fetchSubstations = async (): Promise<Substation[]> => {
 
     return [];
   } catch (error) {
-    throw error; // Re-throw to allow component to handle the error
+    throw handleApiError(error, 'Error fetching substations');
   }
 };
+
 /**
  * Load all substations from the backend and store them in application state
- * This function should be called once before accessing substations
  */
 export async function loadSubstations(): Promise<FetchStatus> {
   try {
-    return await invoke<FetchStatus>('load_substations');
+    const result = await invoke<FetchStatus>('load_substations');
+
+    if (result && !result.success) {
+      throw new Error(result.message || 'Operation failed');
+    }
+
+    return result;
   } catch (error) {
-    console.error('Error loading substations:', error);
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : String(error),
-    };
+    throw handleApiError(error, 'Failed to load substations');
   }
 }
 
 /**
- * Get paginated substations from the application state (no API call is made)
+ * Get paginated substations from the application state
  */
 export async function getPaginatedSubstations(
   pagination?: PaginationParams,
@@ -52,8 +58,7 @@ export async function getPaginatedSubstations(
       { pagination },
     );
   } catch (error) {
-    console.error('Error fetching paginated substations:', error);
-    throw error;
+    throw handleApiError(error, 'Error fetching paginated substations');
   }
 }
 
@@ -64,12 +69,8 @@ export async function getSubstationById(
   id: string,
 ): Promise<Substation | null> {
   try {
-    const substation = await invoke<Substation | null>('get_substation_by_id', {
-      id,
-    });
-    return substation;
+    return await invoke<Substation | null>('get_substation_by_id', { id });
   } catch (error) {
-    console.error(`Error fetching substation with ID ${id}:`, error);
-    throw error;
+    throw handleApiError(error, `Error fetching substation with ID ${id}`);
   }
 }

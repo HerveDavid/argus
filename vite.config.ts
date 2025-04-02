@@ -20,8 +20,8 @@ export default defineConfig(async () => ({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: glob.sync('./features/**/tests/setup.ts'),
-    include: ['./features/**/*.{test,spec}.{ts,tsx}'],
+    setupFiles: glob.sync('./src/**/tests/setup.ts'),
+    include: ['./src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/e2e/**'],
     coverage: {
       include: ['src/**'],

@@ -4,7 +4,7 @@ import {
   getProxyUrl,
 } from '@/features/settings/proxy/stores/proxy.store';
 import { FetchOptions } from '../types/fetch-options.type';
-import { VoltageLevel, VoltageLevels } from '../types/voltage-level.type';
+import { VoltageLevels } from '../types/voltage-level.type';
 
 // Constants
 const BASE_URL = 'http://localhost:8000/api/v1/network/voltage-levels';
