@@ -11,7 +11,7 @@ const HomeRoute = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Game Master Card */}
           <Card className="overflow-hidden">
-            <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+            <div className="h-40 bg-linear-to-br from-purple-600 via-pink-500 to-orange-400"></div>
             <CardContent className="p-4 bg-white">
               <h3 className="text-xl font-medium text-center">Game Master</h3>
             </CardContent>
@@ -20,7 +20,7 @@ const HomeRoute = () => {
           {/* State View Card */}
           <Card className="overflow-hidden">
             <Link to={paths.views.stateView.path}>
-              <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+              <div className="h-40 bg-linear-to-br from-purple-600 via-pink-500 to-orange-400"></div>
               <CardContent className="p-4 bg-white hover:bg-accent hover:text-white">
                 <h3 className="text-xl font-medium text-center">State View</h3>
               </CardContent>
@@ -29,7 +29,7 @@ const HomeRoute = () => {
 
           {/* KPI Card */}
           <Card className="overflow-hidden">
-            <div className="h-40 bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400"></div>
+            <div className="h-40 bg-linear-to-br from-purple-600 via-pink-500 to-orange-400"></div>
             <CardContent className="p-4 bg-white">
               <h3 className="text-xl font-medium text-center">KPI</h3>
             </CardContent>

@@ -366,7 +366,7 @@ const NetworkExplorer: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="p-4 bg-white border-b border-gray-200">
             <form onSubmit={handleSubmit} className="flex gap-3">
-              <div className="relative flex-grow">
+              <div className="relative grow">
                 <Input
                   type="text"
                   value={inputValue}
