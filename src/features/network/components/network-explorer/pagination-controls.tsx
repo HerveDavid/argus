@@ -37,11 +37,11 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="h-6 w-6"
+          className="size-6"
           onClick={onPreviousPage}
           disabled={currentPage <= 1 || isLoading}
         >
-          <ChevronLeft className="h-3 w-3" />
+          <ChevronLeft className="size-3" />
         </Button>
         <span className="text-xs px-1">
           {currentPage} / {totalPages}
@@ -49,7 +49,7 @@ export const PaginationControls: React.FC<PaginationControlsProps> = ({
         <Button
           variant="outline"
           size="icon"
-          className="h-6 w-6"
+          className="size-6"
           onClick={onNextPage}
           disabled={currentPage >= totalPages || isLoading}
         >
