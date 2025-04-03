@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import moment from 'moment';
 
-export const Clock = () => {
+const Clock = () => {
   const [time, setTime] = useState(moment());
 
   useEffect(() => {
@@ -21,3 +21,5 @@ export const Clock = () => {
     </div>
   );
 };
+
+export default Clock;

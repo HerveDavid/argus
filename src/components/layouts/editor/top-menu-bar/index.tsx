@@ -1,4 +1,4 @@
-import { Clock } from './clock';
+import Clock from './clock';
 import FileDropdown from './file-dropdown';
 import ViewDropdown from './view-dropdown';
 

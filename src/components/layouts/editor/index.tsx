@@ -6,6 +6,7 @@ import {
 } from './left-sidebar/sidebar-icon-button';
 import { Folder, Layers, Waypoints } from 'lucide-react';
 import { SidebarContent } from './left-sidebar/sidebar-content';
+import BottomMenuBar from './bottom-menu-bar';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -61,7 +62,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
           {children}
         </div>
       </div>
-      <TopMenuBar />
+      <BottomMenuBar />
     </div>
   );
 };
