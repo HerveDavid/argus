@@ -41,7 +41,7 @@ const LeftSideBar: React.FC<{ sidebarItems: SidebarItem[] }> = ({
 
       {/* Sidebar content */}
       {sidebarOpen && (
-        <div className="w-64 bg-gray-800 overflow-y-auto border-r">
+        <div className="w-64 bg-gray-800 overflow-y-auto border-r inset-shadow-sm">
           <SidebarContent activeItem={activeSidebarItem} />
         </div>
       )}

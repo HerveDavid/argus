@@ -8,7 +8,6 @@ interface SubstationViewerProps {
 
 export const SubstationViewer: React.FC<SubstationViewerProps> = ({
   substationId,
-  substationDetails,
 }) => {
   return (
     <div className="w-full h-full flex flex-col">
