@@ -13,7 +13,6 @@ const StateView: React.FC = () => {
 
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
-
   const substationDetails = useSubstationDetails(substationId);
 
   const tabs: TabItem[] = [
@@ -30,14 +29,14 @@ const StateView: React.FC = () => {
       ),
     },
     {
+      id: 'commands',
+      label: 'Commands',
+      content: <div className="p-4">Commands</div>,
+    },
+    {
       id: 'logbook',
       label: 'Logbook',
       content: <div className="p-4">Logbook</div>,
-    },
-    {
-      id: 'history',
-      label: 'History',
-      content: <div className="p-4">History</div>,
     },
   ];
 
