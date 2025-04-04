@@ -1,10 +1,11 @@
-import { StoreServiceTag } from '@/lib/store-service';
+import { StoreServiceTag } from '@/utils/store-service';
 import { Effect, Context, Layer } from 'effect';
-import { ServerUrlError, ServerUrlResponse } from '../types/url.type';
 import {
-  getServerUrlFromTauri,
-  setServerUrlInTauri,
-} from '../api/set-server-url';
+  createServerUrlError,
+  ServerUrlError,
+  ServerUrlResponse,
+} from '../types/url.type';
+import { getServerUrlFromTauri, setServerUrlInTauri } from '../api';
 
 // -------------- SERVER URL SERVICE ---------------
 // Interface for managing the ServerURL
@@ -52,7 +53,7 @@ export const makeServerUrlService = Effect.gen(function* (_) {
         const setEffect = Effect.mapError(
           store.set(SERVER_URL_KEY, response.url),
           (error) =>
-            new ServerUrlError(
+            createServerUrlError(
               `Store operation failed: ${error.message}`,
               error,
             ),
