@@ -3,7 +3,7 @@ import { Effect, pipe } from 'effect';
 import {
   ServerUrlServiceTag,
   ServerUrlServiceLive,
-} from '../utils/server-url.service';
+} from '../services/server-url';
 import { StoreServiceLive } from '@/utils/store-service';
 import { ServerUrlError } from '../types/url.type';
 
