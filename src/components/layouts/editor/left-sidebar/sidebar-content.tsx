@@ -1,26 +1,12 @@
-import React from 'react';
 import { NetworkExplorer } from '@/features/network/components/network-explorer';
+import React from 'react';
 
 export const SidebarContent: React.FC<{
   activeItem: string;
-  substationsData: any; // Replace with proper type
-  selectedSubstationId?: string;
-  onSubstationSelect: (id: string) => void;
-}> = ({
-  activeItem,
-  substationsData,
-  selectedSubstationId,
-  onSubstationSelect,
-}) => {
+}> = ({ activeItem }) => {
   switch (activeItem) {
     case 'explorer':
-      return (
-        <NetworkExplorer
-          substationsData={substationsData}
-          selectedSubstationId={selectedSubstationId}
-          onSubstationSelect={onSubstationSelect}
-        />
-      );
+      return <NetworkExplorer />;
     case 'workspace':
       return (
         <div className="p-2">

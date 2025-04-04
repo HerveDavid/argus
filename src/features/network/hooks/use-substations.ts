@@ -108,7 +108,7 @@ export const useSubstations = (initialItemsPerPage = 20) => {
     itemsPerPage,
     goToNextPage,
     goToPreviousPage,
-    errors, // Return all errors
-    clearAllErrors, // Allow clearing all errors at once
+    errors,
+    clearAllErrors,
   };
 };

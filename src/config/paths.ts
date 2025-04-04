@@ -9,8 +9,10 @@ export const paths = {
   },
   views: {
     stateView: {
-      path: '/views/state-view',
-      getHref: () => '/views/state-view',
+      path: '/views/state-view/:substationId',
+      getHref: (id: string) => {
+        return `/views/state-view/${id}`;
+      },
     },
   },
   gameMaster: {

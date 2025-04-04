@@ -70,7 +70,6 @@ const ServerUrlSettings = () => {
 
   function handleSubmit(data: ServerUrlFormValues) {
     setServerUrl(data.url);
-    console.log('Server URL settings saved:', data);
   }
 
   function handleReset() {

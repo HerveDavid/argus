@@ -5,20 +5,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SubstationList } from './substation-list';
 import { PaginationControls } from './pagination-controls';
 import { ErrorWithRetry } from '../../hooks/use-error-handling';
+import { useSubstations } from '../../hooks/use-substations';
+import { paths } from '@/config/paths';
+import { useNavigate } from 'react-router';
 
-interface NetworkExplorerProps {
-  substationsData: ReturnType<
-    typeof import('../../hooks/use-substations').useSubstations
-  >;
-  selectedSubstationId?: string;
-  onSubstationSelect: (id: string) => void;
-}
-
-export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
-  substationsData,
-  selectedSubstationId,
-  onSubstationSelect,
-}) => {
+export const NetworkExplorer: React.FC = () => {
   const {
     initialDataCheck,
     substationsQuery,
@@ -29,7 +20,8 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
     goToNextPage,
     goToPreviousPage,
     errors,
-  } = substationsData;
+  } = useSubstations();
+  const navigate = useNavigate();
 
   const renderError = ({ error, retry }: ErrorWithRetry) => {
     return (
@@ -85,7 +77,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
   return (
     <div className="flex flex-col">
       <div className="flex justify-between items-center border-b border-gray-200 p-2">
-        <h3 className='uppercase text-sm'>Network Explorer</h3>
+        <h3 className="uppercase text-sm">Network Explorer</h3>
         <Button
           variant="outline"
           size="sm"
@@ -120,8 +112,9 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
           <>
             <SubstationList
               substations={substationsQuery.data.items}
-              selectedId={selectedSubstationId}
-              onSelect={onSubstationSelect}
+              onSelect={(id) => {
+                navigate(paths.views.stateView.getHref(id));
+              }}
               isLoading={substationsQuery.isLoading}
             />
 
