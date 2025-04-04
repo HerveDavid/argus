@@ -1,5 +1,10 @@
 import { invoke } from '@tauri-apps/api/core';
-import { ServerUrlResponse } from '../types/url.type';
+import {
+  createServerUrlError,
+  ServerUrlError,
+  ServerUrlResponse,
+} from '../types/url.type';
+import { invokeTauri } from '@/lib/invoke-tauri';
 
 /**
  * Sets the server URL configuration for the application
@@ -20,16 +25,21 @@ export async function setServerUrl(url: string): Promise<ServerUrlResponse> {
 }
 
 /**
- * Gets the current server URL configuration
- * @returns A promise that resolves to the server URL configuration response
- * @throws Error if retrieving the server URL configuration fails
+ * Gets the server URL from Tauri backend
  */
-export async function getServerUrl(): Promise<ServerUrlResponse> {
-  try {
-    // Call the Rust command
-    const response = await invoke<ServerUrlResponse>('get_server_url');
-    return response;
-  } catch (error) {
-    throw new Error(`Failed to get server URL: ${error}`);
-  }
-}
+export const getServerUrlFromTauri = () =>
+  invokeTauri<ServerUrlResponse, ServerUrlError>(
+    'get_server_url',
+    undefined,
+    createServerUrlError,
+  );
+
+/**
+ * Sets the server URL in Tauri backend
+ */
+export const setServerUrlInTauri = (url: string) =>
+  invokeTauri<ServerUrlResponse, ServerUrlError>(
+    'set_server_url',
+    { server_url: url },
+    createServerUrlError,
+  );

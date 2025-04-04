@@ -17,7 +17,7 @@ export class StoreServiceTag extends Context.Tag('StoreService')<
 >() {}
 
 // Implémentation du StoreService basée sur LazyStore de Tauri
-export const makeTauriStoreService = (filename: string) =>
+export const makeStoreService = (filename: string) =>
   Effect.sync(() => {
     const store = new LazyStore(filename, { autoSave: true });
 
@@ -49,9 +49,9 @@ export const makeTauriStoreService = (filename: string) =>
   });
 
 // Layer pour fournir le StoreService
-export const TauriStoreServiceLive = Layer.effect(
+export const StoreServiceLive = Layer.effect(
   StoreServiceTag,
-  makeTauriStoreService('app-store.json'),
+  makeStoreService('settings.json'),
 );
 
 // -------------- SERVER URL SERVICE ---------------
@@ -155,7 +155,7 @@ export const ThemeServiceLive = Layer.effect(ThemeServiceTag, makeThemeService);
 // -------------- LAYER COMPOSITE ---------------
 // Layer qui fournit tous les services
 export const AllServicesLive = Layer.mergeAll(
-  TauriStoreServiceLive,
-  Layer.provide(TauriStoreServiceLive)(ServerUrlServiceLive),
-  Layer.provide(TauriStoreServiceLive)(ThemeServiceLive),
+  StoreServiceLive,
+  Layer.provide(StoreServiceLive)(ServerUrlServiceLive),
+  Layer.provide(StoreServiceLive)(ThemeServiceLive),
 );

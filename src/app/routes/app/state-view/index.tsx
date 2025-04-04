@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import EditorLayout from '@/components/layouts/editor';
 import { useSubstationDetails } from '@/features/network/hooks/use-substation-details';
 import { SubstationViewer } from '@/features/network/components/network-explorer/substation-viewer';
@@ -7,7 +7,7 @@ import { TabItem, TabNavigation } from './tab-navigation';
 import { useParams } from 'react-router';
 
 // Main component
-const StateView: React.FC = () => {
+const StateView = () => {
   // Params route
   const { substationId } = useParams();
 
