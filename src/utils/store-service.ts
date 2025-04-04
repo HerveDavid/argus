@@ -1,5 +1,6 @@
 import { LazyStore } from '@tauri-apps/plugin-store';
-import { Effect, Context, Layer, pipe } from 'effect';
+import { Effect, Context, Layer } from 'effect';
+import { cons } from 'effect/List';
 
 // -------------- CORE STORE SERVICE ---------------
 // Interface de base pour le service de stockage
@@ -16,31 +17,85 @@ export class StoreServiceTag extends Context.Tag('StoreService')<
   StoreService
 >() {}
 
-// Implémentation du StoreService basée sur LazyStore de Tauri
+// Singleton pour gérer l'état du store
+class StoreManager {
+  private static instance: StoreManager;
+  private store: LazyStore;
+  private initialized: boolean = false;
+  private initPromise: Promise<void>;
+
+  private constructor(filename: string) {
+    this.store = new LazyStore(filename, { autoSave: true });
+    // Initialiser immédiatement et stocker la promesse
+    this.initPromise = this.store.save().then(() => {
+      this.initialized = true;
+    });
+  }
+
+  public static getInstance(filename: string): StoreManager {
+    if (!StoreManager.instance) {
+      StoreManager.instance = new StoreManager(filename);
+    }
+    return StoreManager.instance;
+  }
+
+  public async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initPromise;
+    }
+  }
+
+  public getStore(): LazyStore {
+    return this.store;
+  }
+}
+
+// Implémentation du StoreService qui utilise le singleton
 export const makeStoreService = (filename: string) =>
-  Effect.sync(() => {
-    const store = new LazyStore(filename, { autoSave: true });
+  Effect.gen(function* (_) {
+    const manager = StoreManager.getInstance(filename);
+
+    // Assurer que le store est initialisé avant de continuer
+    yield* _(
+      Effect.tryPromise({
+        try: () => manager.ensureInitialized(),
+        catch: (error) => new Error(`Failed to initialize store: ${error}`),
+      }),
+    );
+
+    const store = manager.getStore();
 
     const serviceImpl: StoreService = {
       _tag: 'StoreService',
       set: <T>(key: string, value: T) =>
         Effect.tryPromise({
-          try: () => store.set(key, value),
+          try: async () => {
+            await store.set(key, value);
+            await store.save();
+            console.log('Set', store);
+            return;
+          },
           catch: (error) => new Error(`Failed to set ${key}: ${error}`),
         }),
       get: <T>(key: string) =>
         Effect.tryPromise({
-          try: async () => (await store.get(key)) as T | null,
+          try: async () => {
+            console.log('Get', store);
+            return (await store.get(key)) as T | null;
+          },
           catch: (error) => new Error(`Failed to get ${key}: ${error}`),
         }),
       delete: (key: string) =>
         Effect.tryPromise({
-          try: () => store.delete(key),
+          try: async () => {
+            await store.delete(key);
+            return await store.save();
+          },
           catch: (error) => new Error(`Failed to delete ${key}: ${error}`),
         }),
       save: () =>
         Effect.tryPromise({
-          try: () => store.save(),
+          try: async () => await store.save(),
           catch: (error) => new Error(`Failed to save store: ${error}`),
         }),
     };
@@ -51,111 +106,5 @@ export const makeStoreService = (filename: string) =>
 // Layer pour fournir le StoreService
 export const StoreServiceLive = Layer.effect(
   StoreServiceTag,
-  makeStoreService('settings.json'),
-);
-
-// -------------- SERVER URL SERVICE ---------------
-// Interface pour la gestion du ServerURL
-export interface ServerUrlService {
-  readonly _tag: 'ServerUrlService';
-  readonly getServerUrl: () => Effect.Effect<string | null, Error, never>;
-  readonly setServerUrl: (url: string) => Effect.Effect<void, Error, never>;
-  readonly resetServerUrl: () => Effect.Effect<void, Error, never>;
-}
-
-// Clé de stockage pour l'URL du serveur
-const SERVER_URL_KEY = 'server_url';
-
-// Création du Tag pour le service ServerURL
-export class ServerUrlServiceTag extends Context.Tag('ServerUrlService')<
-  ServerUrlServiceTag,
-  ServerUrlService
->() {}
-
-// Implémentation qui utilise le StoreService
-export const makeServerUrlService = Effect.gen(function* (_) {
-  // Accès au StoreService sous-jacent
-  const store = yield* _(StoreServiceTag);
-
-  // Création de l'implémentation
-  const serviceImpl: ServerUrlService = {
-    _tag: 'ServerUrlService',
-    getServerUrl: () => store.get<string>(SERVER_URL_KEY),
-    setServerUrl: (url: string) => store.set(SERVER_URL_KEY, url),
-    resetServerUrl: () => store.delete(SERVER_URL_KEY),
-  };
-
-  return serviceImpl;
-});
-
-// Layer qui dépend du StoreService
-export const ServerUrlServiceLive = Layer.effect(
-  ServerUrlServiceTag,
-  makeServerUrlService,
-);
-
-// -------------- THEME SERVICE ---------------
-
-// -------------- TYPES DE BASE ---------------
-export type Theme = 'light' | 'dark';
-
-// Interface pour la gestion du thème
-export interface ThemeService {
-  readonly _tag: 'ThemeService';
-  readonly getTheme: () => Effect.Effect<Theme | null, Error, never>;
-  readonly setTheme: (theme: Theme) => Effect.Effect<void, Error, never>;
-  readonly toggleTheme: () => Effect.Effect<Theme, Error, never>;
-  readonly resetTheme: () => Effect.Effect<void, Error, never>;
-}
-
-// Clé de stockage pour le thème
-const THEME_KEY = 'app_theme';
-// Thème par défaut si aucun n'est défini
-const DEFAULT_THEME: Theme = 'light';
-
-// Création du Tag pour ThemeService
-export class ThemeServiceTag extends Context.Tag('ThemeService')<
-  ThemeServiceTag,
-  ThemeService
->() {}
-
-// Implémentation qui utilise le StoreService
-export const makeThemeService = Effect.gen(function* (_) {
-  // Accès au StoreService sous-jacent
-  const store = yield* _(StoreServiceTag);
-
-  // Création de l'implémentation
-  const serviceImpl: ThemeService = {
-    _tag: 'ThemeService',
-    getTheme: () =>
-      pipe(
-        store.get<Theme>(THEME_KEY),
-        Effect.map((theme) => theme ?? DEFAULT_THEME),
-      ),
-    setTheme: (theme: Theme) => store.set(THEME_KEY, theme),
-    toggleTheme: () =>
-      pipe(
-        store.get<Theme>(THEME_KEY),
-        Effect.map((theme) => {
-          const newTheme =
-            theme === 'dark' || theme === null ? 'light' : 'dark';
-          return newTheme;
-        }),
-        Effect.tap((newTheme) => store.set(THEME_KEY, newTheme)),
-      ),
-    resetTheme: () => store.delete(THEME_KEY),
-  };
-
-  return serviceImpl;
-});
-
-// Layer qui dépend du StoreService
-export const ThemeServiceLive = Layer.effect(ThemeServiceTag, makeThemeService);
-
-// -------------- LAYER COMPOSITE ---------------
-// Layer qui fournit tous les services
-export const AllServicesLive = Layer.mergeAll(
-  StoreServiceLive,
-  Layer.provide(StoreServiceLive)(ServerUrlServiceLive),
-  Layer.provide(StoreServiceLive)(ThemeServiceLive),
+  makeStoreService('/tmp/settings.json'),
 );

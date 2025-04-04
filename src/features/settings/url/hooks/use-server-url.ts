@@ -1,5 +1,4 @@
-// useServerUrl.ts
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Effect, pipe } from 'effect';
 import {
   ServerUrlServiceTag,
@@ -8,6 +7,16 @@ import {
 import { StoreServiceLive } from '@/utils/store-service';
 import { ServerUrlError } from '../types/url.type';
 
+/**
+ * Hook pour gérer les paramètres avec SettingsStore
+ * @param key - Clé unique pour identifier les paramètres
+ * @param defaultValue - Valeur par défaut si aucun paramètre n'est trouvé
+ * @returns [settings, setSettings, isLoading, error]
+ */
+/**
+ * Hook pour gérer les paramètres du serveur URL
+ * @returns {Object} Objet contenant URL, statut, et fonctions pour gérer l'URL
+ */
 export const useServerUrl = () => {
   // Change the type to string with empty string as default
   const [url, setUrl] = useState<string>('');

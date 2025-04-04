@@ -4,9 +4,10 @@ import ProxySettings from './proxy-settings';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
 import ServerUrlSettings from './server-url-settings';
+import ProfileSettings from './profile-settings';
 
 const HomeSettings = () => {
-  const [activeTab, setActiveTab] = useState('billing');
+  const [activeTab, setActiveTab] = useState('profile');
 
   const tabs = [
     { id: 'profile', label: 'Profile' },
@@ -67,6 +68,7 @@ const HomeSettings = () => {
             <div className="max-w-5xl mx-auto">
               {activeTab === 'connections' && <ServerUrlSettings />}
               {activeTab === 'proxy' && <ProxySettings />}
+              {activeTab === 'profile' && <ProfileSettings />}
               {/* Add other tab content here when needed */}
             </div>
           </div>
