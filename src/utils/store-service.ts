@@ -1,15 +1,16 @@
 import { LazyStore } from '@tauri-apps/plugin-store';
 import { Effect, Context, Layer } from 'effect';
-import { cons } from 'effect/List';
+import { appDataDir } from '@tauri-apps/api/path';
 
 // -------------- CORE STORE SERVICE ---------------
-// Interface de base pour le service de stockage
+// Base interface for the storage service
 export interface StoreService {
   readonly _tag: 'StoreService';
   readonly set: <T>(key: string, value: T) => Effect.Effect<void, Error, never>;
   readonly get: <T>(key: string) => Effect.Effect<T | null, Error, never>;
   readonly delete: (key: string) => Effect.Effect<void, Error, never>;
   readonly save: () => Effect.Effect<void, Error, never>;
+  readonly reload: () => Effect.Effect<void, Error, never>;
 }
 
 export class StoreServiceTag extends Context.Tag('StoreService')<
@@ -17,7 +18,7 @@ export class StoreServiceTag extends Context.Tag('StoreService')<
   StoreService
 >() {}
 
-// Singleton pour gérer l'état du store
+// Singleton to manage the store state
 class StoreManager {
   private static instance: StoreManager;
   private store: LazyStore;
@@ -26,7 +27,7 @@ class StoreManager {
 
   private constructor(filename: string) {
     this.store = new LazyStore(filename, { autoSave: true });
-    // Initialiser immédiatement et stocker la promesse
+    // Initialize immediately and store the promise
     this.initPromise = this.store.save().then(() => {
       this.initialized = true;
     });
@@ -50,12 +51,11 @@ class StoreManager {
   }
 }
 
-// Implémentation du StoreService qui utilise le singleton
+// Implementation of StoreService that uses the singleton
 export const makeStoreService = (filename: string) =>
   Effect.gen(function* (_) {
     const manager = StoreManager.getInstance(filename);
-
-    // Assurer que le store est initialisé avant de continuer
+    // Ensure that the store is initialized before continuing
     yield* _(
       Effect.tryPromise({
         try: () => manager.ensureInitialized(),
@@ -64,7 +64,6 @@ export const makeStoreService = (filename: string) =>
     );
 
     const store = manager.getStore();
-
     const serviceImpl: StoreService = {
       _tag: 'StoreService',
       set: <T>(key: string, value: T) =>
@@ -72,7 +71,6 @@ export const makeStoreService = (filename: string) =>
           try: async () => {
             await store.set(key, value);
             await store.save();
-            console.log('Set', store);
             return;
           },
           catch: (error) => new Error(`Failed to set ${key}: ${error}`),
@@ -80,7 +78,6 @@ export const makeStoreService = (filename: string) =>
       get: <T>(key: string) =>
         Effect.tryPromise({
           try: async () => {
-            console.log('Get', store);
             return (await store.get(key)) as T | null;
           },
           catch: (error) => new Error(`Failed to get ${key}: ${error}`),
@@ -98,13 +95,30 @@ export const makeStoreService = (filename: string) =>
           try: async () => await store.save(),
           catch: (error) => new Error(`Failed to save store: ${error}`),
         }),
+      reload: () =>
+        Effect.tryPromise({
+          try: async () => await store.reload(),
+          catch: (error) => new Error(`Failed to reload store: ${error}`),
+        }),
     };
 
     return serviceImpl;
   });
 
-// Layer pour fournir le StoreService
+// Function to get the app data path
+export const getStoreFilePath = () =>
+  Effect.tryPromise({
+    try: async () => {
+      // Get the app data directory path
+      const dir = await appDataDir();
+      // Combine with the filename
+      return `${dir}/settings.json`;
+    },
+    catch: (error) => new Error(`Failed to get app data directory: ${error}`),
+  });
+
+// Layer to provide the StoreService with a Tauri path
 export const StoreServiceLive = Layer.effect(
   StoreServiceTag,
-  makeStoreService('/tmp/settings.json'),
+  Effect.flatMap(getStoreFilePath(), makeStoreService),
 );
