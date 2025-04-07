@@ -8,6 +8,7 @@ export interface DiagramData {
   metadata: MetadataGrid | null;
   isLoading: boolean;
   error: string | null;
+  currentLineId: string | null;
 }
 
 interface DiagramStore extends DiagramData {
@@ -15,21 +16,45 @@ interface DiagramStore extends DiagramData {
   resetDiagram: () => void;
 }
 
-export const useDiagramStore = create<DiagramStore>((set) => ({
+export const useDiagramStore = create<DiagramStore>((set, get) => ({
   svgUrl: null,
   svgBlob: null,
   metadata: null,
   isLoading: false,
   error: null,
+  currentLineId: null,
 
   loadDiagram: async (lineId: string) => {
+    // Vérifier si on a déjà chargé ce diagramme
+    const { currentLineId } = get();
+
+    // Si c'est le même diagramme, ne rien faire
+    if (lineId === currentLineId) {
+      return;
+    }
+
+    // Sinon, charger le nouveau diagramme
     set({ isLoading: true, error: null });
+
     try {
       const { svgBlob, metadata } = await getSingleLineDiagramWithMetadata(
         lineId,
       );
       const svgUrl = URL.createObjectURL(svgBlob);
-      set({ svgBlob, metadata, svgUrl, isLoading: false });
+
+      // Libérer l'URL précédente si elle existe
+      const prevState = get();
+      if (prevState.svgUrl) {
+        URL.revokeObjectURL(prevState.svgUrl);
+      }
+
+      set({
+        svgBlob,
+        metadata,
+        svgUrl,
+        isLoading: false,
+        currentLineId: lineId,
+      });
     } catch (error) {
       set({
         error:
@@ -41,15 +66,17 @@ export const useDiagramStore = create<DiagramStore>((set) => ({
 
   resetDiagram: () => {
     set((state) => {
-      // Revoke object URL to prevent memory leaks
+      // Révoquer l'URL pour éviter les fuites de mémoire
       if (state.svgUrl) {
         URL.revokeObjectURL(state.svgUrl);
       }
+
       return {
         svgUrl: null,
         svgBlob: null,
         metadata: null,
         error: null,
+        currentLineId: null,
       };
     });
   },

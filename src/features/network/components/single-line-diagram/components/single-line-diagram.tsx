@@ -16,8 +16,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = 'auto',
   className = '',
 }) => {
-  const { svgBlob, isLoading, error, loadDiagram, resetDiagram } =
-    useDiagramStore();
+  const { svgBlob, isLoading, error, loadDiagram } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
@@ -64,12 +63,11 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     toggleBreaker,
   );
 
+  // Charger le diagramme lors du montage et quand lineId change
   useEffect(() => {
     loadDiagram(lineId);
-    return () => {
-      resetDiagram();
-    };
-  }, [lineId, loadDiagram, resetDiagram]);
+    // Pas de fonction de nettoyage pour conserver les données dans le store
+  }, [lineId, loadDiagram]);
 
   useEffect(() => {
     if (svgBlob) {
