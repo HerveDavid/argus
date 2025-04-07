@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { SldMetadata } from '../types/sld-metatada';
-import { handleApiError } from './api-utils';
+import { handleApiError } from '@/lib/api-utils';
 
 // Types
 interface SldDiagramResult {
