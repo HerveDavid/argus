@@ -1,5 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { SldMetadata } from '../types/sld-metatada';
+import { handleApiError } from './api-utils';
 
 // Types
 interface SldDiagramResult {
@@ -30,8 +31,10 @@ export const getSingleLineDiagramWithMetadata = async (
       metadata: result.metadata,
     };
   } catch (error) {
-    console.error('Error retrieving diagram with metadata:', error);
-    throw error;
+    throw handleApiError(
+      error,
+      `Error retrieving diagram with metadata: {error}`,
+    );
   }
 };
 
@@ -54,7 +57,6 @@ export const getSingleLineDiagram = async (line_id: string): Promise<Blob> => {
     // Create a Blob from the Uint8Array
     return new Blob([uint8Array], { type: result.mime_type });
   } catch (error) {
-    console.error('Error retrieving network diagram:', error);
-    throw error;
+    throw handleApiError(error, `Error retrieving network diagram: {error}`);
   }
 };
