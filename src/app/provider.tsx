@@ -10,6 +10,7 @@ import {
 import { Effect } from 'effect';
 import { ServerUrlServiceTag } from '@/features/settings/url/services/server-url';
 import { ServerUrlError } from '@/features/settings/url/types/url.type';
+import { ThemeProvider } from '@/features/settings/theme/provider';
 
 type AppProviderProps = {
   children: React.ReactNode;
@@ -49,10 +50,12 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     <React.Suspense>
       <HelmetProvider>
         <ServicesProvider onInitialized={handleServicesInitialized}>
-          <QueryClientProvider client={queryClient}>
-            {import.meta.env.DEV && <ReactQueryDevtools />}
-            {isServicesReady && children}
-          </QueryClientProvider>
+          <ThemeProvider>
+            <QueryClientProvider client={queryClient}>
+              {import.meta.env.DEV && <ReactQueryDevtools />}
+              {isServicesReady && children}
+            </QueryClientProvider>
+          </ThemeProvider>
         </ServicesProvider>
       </HelmetProvider>
     </React.Suspense>
