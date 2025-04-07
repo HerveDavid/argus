@@ -65,8 +65,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   // Charger le diagramme lors du montage et quand lineId change
   useEffect(() => {
-    loadDiagram(lineId);
-    // Pas de fonction de nettoyage pour conserver les données dans le store
+    const { currentLineId } = useDiagramStore.getState();
+    if (currentLineId !== lineId) {
+      loadDiagram(lineId);
+    }
   }, [lineId, loadDiagram]);
 
   useEffect(() => {

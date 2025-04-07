@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { MetadataGrid } from '../types/sld-metatada';
+import { SldMetadata } from '../types/sld-metatada';
 import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram';
 
 export interface DiagramData {
   svgUrl: string | null;
   svgBlob: Blob | null;
-  metadata: MetadataGrid | null;
+  metadata: SldMetadata | null;
   isLoading: boolean;
   error: string | null;
   currentLineId: string | null;
@@ -41,6 +41,8 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         lineId,
       );
       const svgUrl = URL.createObjectURL(svgBlob);
+
+      console.log(metadata);
 
       // Libérer l'URL précédente si elle existe
       const prevState = get();

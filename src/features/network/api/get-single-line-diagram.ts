@@ -25,8 +25,6 @@ export const getSingleLineDiagramWithMetadata = async (
     // Convert the SVG string to a Blob
     const svgBlob = new Blob([result.svg], { type: 'image/svg+xml' });
 
-    console.log(result.metadata);
-
     return {
       svgBlob,
       metadata: result.metadata,
