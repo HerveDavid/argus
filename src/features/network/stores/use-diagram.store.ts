@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MetadataGrid } from '../types/metadata-diagram.type';
+import { MetadataGrid } from '../types/sld-metatada';
 import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram';
 
 export interface DiagramData {

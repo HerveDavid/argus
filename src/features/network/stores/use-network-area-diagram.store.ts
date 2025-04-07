@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MetadataGrid } from '../types/metadata-diagram.type';
+import { MetadataGrid } from '../types/sld-metatada';
 import { getNetworkAreaDiagramWithMetadata } from '../api/get-network-area-diagram';
 
 export interface NetworkAreaDiagramData {

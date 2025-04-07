@@ -1,3 +1,4 @@
+use super::sld_metadata::SldMetadata;
 use crate::network::errors::{NetworkError, NetworkResult};
 use crate::state::AppState;
 use reqwest;
@@ -9,7 +10,7 @@ use tauri::State;
 #[derive(Serialize, Deserialize)]
 pub struct DiagramResult {
     svg: String,
-    metadata: serde_json::Value,
+    metadata: SldMetadata,
 }
 
 /// Gets a single line diagram with metadata for a specific line ID
@@ -85,12 +86,13 @@ async fn fetch_unified_diagram(
         })?
         .to_string();
 
-    let metadata = data
-        .get("metadata")
-        .ok_or_else(|| {
-            NetworkError::JsonParseError(serde_json::Error::custom("Missing 'metadata' field"))
-        })?
-        .clone();
+    // Parse metadata as SldMetadata instead of keeping it as a Value
+    let metadata_value = data.get("metadata").ok_or_else(|| {
+        NetworkError::JsonParseError(serde_json::Error::custom("Missing 'metadata' field"))
+    })?;
+
+    let metadata: SldMetadata = serde_json::from_value(metadata_value.clone())
+        .map_err(|e| NetworkError::JsonParseError(e))?;
 
     Ok(DiagramResult { svg, metadata })
 }
@@ -116,7 +118,7 @@ async fn fetch_diagram_metadata(
     client: &reqwest::Client,
     server_url: &str,
     line_id: &str,
-) -> NetworkResult<serde_json::Value> {
+) -> NetworkResult<SldMetadata> {
     let url = format!(
         "{}/api/v1/network/diagram/line/{}/metadata",
         server_url, line_id
@@ -128,7 +130,15 @@ async fn fetch_diagram_metadata(
         return Err(NetworkError::ApiError(response.status().to_string()));
     }
 
-    Ok(serde_json::Value::String(response.text().await?))
+    // Parse the response text directly into SldMetadata
+    let text = response.text().await?;
+    let metadata = serde_json::from_str(&text).map_err(|e| {
+        println!("Error parsing metadata: {}", e);
+        println!("Response text: {}", text);
+        NetworkError::JsonParseError(e)
+    })?;
+
+    Ok(metadata)
 }
 
 /// Retrieves the diagram and metadata in two separate requests

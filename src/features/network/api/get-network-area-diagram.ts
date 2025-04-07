@@ -1,5 +1,5 @@
 import { fetch } from '@tauri-apps/plugin-http';
-import { MetadataGrid } from '../types/metadata-diagram.type';
+import { MetadataGrid } from '../types/sld-metatada';
 import {
   getNoProxy,
   getProxyUrl,
