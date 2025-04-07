@@ -1,10 +1,10 @@
 import { invoke } from '@tauri-apps/api/core';
-import { MetadataGrid } from '../types/metadata-diagram.type';
+import { SldMetadata } from '../types/metadata-diagram.type';
 
 // Types
-export interface DiagramResult {
+interface SldDiagramResult {
   svgBlob: Blob;
-  metadata: MetadataGrid;
+  metadata: SldMetadata;
 }
 
 /**
@@ -14,16 +14,18 @@ export interface DiagramResult {
  */
 export const getSingleLineDiagramWithMetadata = async (
   line_id: string,
-): Promise<DiagramResult> => {
+): Promise<SldDiagramResult> => {
   try {
     // Invoke the Tauri command
-    const result = await invoke<{ svg: string; metadata: MetadataGrid }>(
+    const result = await invoke<{ svg: string; metadata: SldMetadata }>(
       'get_single_line_diagram_with_metadata',
       { line_id },
     );
 
     // Convert the SVG string to a Blob
     const svgBlob = new Blob([result.svg], { type: 'image/svg+xml' });
+
+    console.log(result.metadata);
 
     return {
       svgBlob,
