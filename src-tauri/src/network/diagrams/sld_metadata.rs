@@ -87,18 +87,17 @@ pub struct Component {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Label {
     pub id: String,
-    #[serde(rename = "positionName")]
     pub position_name: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct FeederInfo {
     pub id: String,
-    #[serde(rename = "componentType")]
     pub component_type: String,
-    #[serde(rename = "equipmentId")]
     pub equipment_id: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -107,15 +106,14 @@ pub struct FeederInfo {
 
 // Node representation
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Node {
     pub id: String,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "componentType")]
     pub component_type: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "equipmentId")]
     pub equipment_id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -129,140 +127,86 @@ pub struct Node {
     pub vlabel: bool,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "nextVId")]
     pub next_v_id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(rename = "rotationAngle")]
     pub rotation_angle: Option<f64>,
 }
 
 // Connection representation
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Wire {
     pub id: String,
-    #[serde(rename = "nodeId1")]
     pub node_id1: String,
-    #[serde(rename = "nodeId2")]
     pub node_id2: String,
-    #[serde(rename = "snakeLine")]
     pub snake_line: bool,
     pub straight: bool,
 }
 
 // Layout parameters
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct LayoutParams {
-    #[serde(rename = "adaptCellHeightToContent")]
     pub adapt_cell_height_to_content: bool,
-    #[serde(rename = "busbarsAlignment")]
     pub busbars_alignment: String,
-    #[serde(rename = "cellWidth")]
     pub cell_width: f64,
-    #[serde(rename = "cgmesDiagramName")]
     pub cgmes_diagram_name: Option<String>,
-    #[serde(rename = "cgmesScaleFactor")]
     pub cgmes_scale_factor: f64,
-    #[serde(rename = "cgmesUseNames")]
     pub cgmes_use_names: bool,
-    #[serde(rename = "componentsOnBusbars")]
     pub components_on_busbars: Vec<String>,
-    #[serde(rename = "diagramPadding")]
     pub diagram_padding: Padding,
-    #[serde(rename = "externCellHeight")]
     pub extern_cell_height: f64,
-    #[serde(rename = "horizontalBusPadding")]
     pub horizontal_bus_padding: f64,
-    #[serde(rename = "horizontalSnakeLinePadding")]
     pub horizontal_snake_line_padding: f64,
-    #[serde(rename = "internCellHeight")]
     pub intern_cell_height: f64,
-    #[serde(rename = "maxComponentHeight")]
     pub max_component_height: f64,
-    #[serde(rename = "minExternCellHeight")]
     pub min_extern_cell_height: f64,
-    #[serde(rename = "minSpaceBetweenComponents")]
     pub min_space_between_components: f64,
-    #[serde(rename = "removeFictitiousSwitchNodes")]
     pub remove_fictitious_switch_nodes: bool,
-    #[serde(rename = "spaceForFeederInfos")]
     pub space_for_feeder_infos: f64,
-    #[serde(rename = "stackHeight")]
     pub stack_height: f64,
-    #[serde(rename = "verticalSnakeLinePadding")]
     pub vertical_snake_line_padding: f64,
-    #[serde(rename = "verticalSpaceBus")]
     pub vertical_space_bus: f64,
-    #[serde(rename = "voltageLevelPadding")]
     pub voltage_level_padding: Padding,
-    #[serde(rename = "zoneLayoutSnakeLinePadding")]
     pub zone_layout_snake_line_padding: f64,
 }
 
 // SVG parameters
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SvgParams {
-    #[serde(rename = "activePowerUnit")]
     pub active_power_unit: String,
-    #[serde(rename = "angleLabelShift")]
     pub angle_label_shift: f64,
-    #[serde(rename = "angleValuePrecision")]
     pub angle_value_precision: i32,
     #[serde(rename = "avoidSVGComponentsDuplication")]
     pub avoid_svg_components_duplication: bool,
-    #[serde(rename = "busInfoMargin")]
     pub bus_info_margin: f64,
-    #[serde(rename = "busesLegendAdded")]
     pub buses_legend_added: bool,
-    #[serde(rename = "cssLocation")]
     pub css_location: String,
-    #[serde(rename = "currentUnit")]
     pub current_unit: String,
-    #[serde(rename = "currentValuePrecision")]
     pub current_value_precision: i32,
-    #[serde(rename = "diagramName")]
     pub diagram_name: Option<String>,
-    #[serde(rename = "displayConnectivityNodesId")]
     pub display_connectivity_nodes_id: bool,
-    #[serde(rename = "displayCurrentFeederInfo")]
     pub display_current_feeder_info: bool,
-    #[serde(rename = "displayEquipmentNodesLabel")]
     pub display_equipment_nodes_label: bool,
-    #[serde(rename = "drawStraightWires")]
     pub draw_straight_wires: bool,
-    #[serde(rename = "feederInfoSymmetry")]
     pub feeder_info_symmetry: bool,
-    #[serde(rename = "feederInfosIntraMargin")]
     pub feeder_infos_intra_margin: f64,
-    #[serde(rename = "feederInfosOuterMargin")]
     pub feeder_infos_outer_margin: f64,
-    #[serde(rename = "labelCentered")]
     pub label_centered: bool,
-    #[serde(rename = "labelDiagonal")]
     pub label_diagonal: bool,
-    #[serde(rename = "languageTag")]
     pub language_tag: String,
-    #[serde(rename = "powerValuePrecision")]
     pub power_value_precision: i32,
-    #[serde(rename = "prefixId")]
     pub prefix_id: String,
-    #[serde(rename = "reactivePowerUnit")]
     pub reactive_power_unit: String,
-    #[serde(rename = "showGrid")]
     pub show_grid: bool,
-    #[serde(rename = "showInternalNodes")]
     pub show_internal_nodes: bool,
-    #[serde(rename = "svgWidthAndHeightAdded")]
     pub svg_width_and_height_added: bool,
-    #[serde(rename = "tooltipEnabled")]
     pub tooltip_enabled: bool,
-    #[serde(rename = "undefinedValueSymbol")]
     pub undefined_value_symbol: String,
-    #[serde(rename = "unifyVoltageLevelColors")]
     pub unify_voltage_level_colors: bool,
-    #[serde(rename = "useName")]
     pub use_name: bool,
-    #[serde(rename = "voltageValuePrecision")]
     pub voltage_value_precision: i32,
 }
 
@@ -309,19 +253,15 @@ pub const MIN_ZOOM_LEVEL_VL: f64 = 0.5;
 
 // Main SLD Metadata struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct SldMetadata {
-    #[serde(rename = "busInfos")]
     pub bus_infos: Vec<serde_json::Value>,
-    #[serde(rename = "busLegendInfos")]
     pub bus_legend_infos: Vec<serde_json::Value>,
     pub components: Vec<Component>,
-    #[serde(rename = "feederInfos")]
     pub feeder_infos: Vec<FeederInfo>,
-    #[serde(rename = "layoutParams")]
     pub layout_params: LayoutParams,
     pub lines: Vec<serde_json::Value>,
     pub nodes: Vec<Node>,
-    #[serde(rename = "svgParams")]
     pub svg_params: SvgParams,
     pub wires: Vec<Wire>,
 }
