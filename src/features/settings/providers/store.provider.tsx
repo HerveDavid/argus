@@ -42,27 +42,30 @@ const StoreInstance = <T,>({
   // Update the parent context when this store changes
   const contextValue = useContext(StoreContext);
 
-  // Set this store in the context
+  // Initial load and setup
   React.useEffect(() => {
-    contextValue[storeKey] = store;
+    const initializeStore = async () => {
+      // Set this store in the context
+      contextValue[storeKey] = store;
 
-    // If we have a value, make sure it's loaded
-    if (store.value === undefined && !store.loading && !store.error) {
-      if (loader) {
-        (async () => {
-          try {
-            const initialValue = await loader();
-            await store.setValue(initialValue);
-          } catch (error) {
-            console.error(`Error loading store ${storeKey}:`, error);
-            // The error will be set inside setValue
-          }
-        })();
-      } else {
-        store.refreshValue();
+      // If we have a loader and no value is set yet (or we want to refresh from source)
+      if (loader && store.value === undefined) {
+        try {
+          // Load the value from the loader
+          const loadedValue = await loader();
+          // Save it to the store
+          await store.setValue(loadedValue);
+        } catch (error) {
+          console.error(`Failed to load store ${storeKey}:`, error);
+        }
+      } else if (defaultValue !== undefined && store.value === undefined) {
+        // If we have a default value but no existing value, save the default
+        await store.setValue(defaultValue);
       }
-    }
-  }, [contextValue, store, storeKey]);
+    };
+
+    initializeStore();
+  }, [contextValue, store, storeKey, loader, defaultValue]);
 
   return null; // This is a logic-only component, no UI
 };
