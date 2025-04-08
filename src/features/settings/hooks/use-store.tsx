@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Effect, pipe } from 'effect';
-import { StoreServiceTag, StoreServiceLive } from '@/utils/store-service';
+import { StoreServiceTag, StoreServiceLive } from '@/features/settings/services/store-service';
 
 /**
  * Hook to easily interact with the StoreService from Effect TS

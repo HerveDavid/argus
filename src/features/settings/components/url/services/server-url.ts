@@ -1,4 +1,4 @@
-import { StoreServiceTag } from '@/utils/store-service';
+import { StoreServiceTag } from '@/features/settings/services/store-service';
 import { Effect, Context, Layer } from 'effect';
 import {
   createServerUrlError,
