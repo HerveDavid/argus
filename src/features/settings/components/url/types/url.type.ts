@@ -1,5 +1,3 @@
-import { createTaggedError, TaggedError } from '@/types/tagged-error.type';
-
 /**
  * Response object for server URL operations
  */
@@ -17,16 +15,3 @@ export interface ServerUrlResponse {
    */
   url: string;
 }
-
-/**
- * Interface for server URL errors
- */
-export type ServerUrlError = TaggedError<'ServerUrlError'>;
-
-/**
- * Factory function to create a ServerUrlError
- */
-export const createServerUrlError = (
-  message: string,
-  cause?: unknown,
-): ServerUrlError => createTaggedError('ServerUrlError', message, cause);

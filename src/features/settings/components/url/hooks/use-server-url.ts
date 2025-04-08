@@ -1,11 +1,5 @@
-import { Effect, pipe } from 'effect';
-import {
-  ServerUrlServiceTag,
-  ServerUrlServiceLive,
-} from '../services/server-url';
-import { StoreServiceLive } from '@/utils/store-service';
-import { ServerUrlError } from '../types/url.type';
 import { useStoreContext } from '@/features/settings/providers/store.provider';
+import { getServerUrl, setServerUrl } from '../api';
 
 // Define the server URL data structure
 export interface ServerUrlData {
@@ -37,15 +31,7 @@ export const useServerUrl = () => {
    */
   const refreshServerUrl = async () => {
     try {
-      const program = pipe(
-        Effect.flatMap(ServerUrlServiceTag, (service) =>
-          service.getServerUrl(),
-        ),
-        Effect.provide(ServerUrlServiceLive),
-        Effect.provide(StoreServiceLive),
-      );
-
-      const result = await Effect.runPromise(program);
+      const result = await getServerUrl();
 
       // Update the store with the result
       await setStoreValue({
@@ -62,20 +48,11 @@ export const useServerUrl = () => {
   /**
    * Updates the server URL in Tauri and in the store
    */
-  const setServerUrl = async (newUrl: string) => {
+  const setServer = async (newUrl: string) => {
     try {
       // Ensure newUrl is always a string
       const urlToSet = newUrl?.trim() || '';
-
-      const program = pipe(
-        Effect.flatMap(ServerUrlServiceTag, (service) =>
-          service.setServerUrl(urlToSet),
-        ),
-        Effect.provide(ServerUrlServiceLive),
-        Effect.provide(StoreServiceLive),
-      );
-
-      const result = await Effect.runPromise(program);
+      const result = await setServerUrl(urlToSet);
 
       // Update the store with the result
       await setStoreValue({
@@ -85,8 +62,7 @@ export const useServerUrl = () => {
 
       return result;
     } catch (err) {
-      const serverError = err as ServerUrlError;
-      throw serverError;
+      throw err;
     }
   };
 
@@ -95,7 +71,7 @@ export const useServerUrl = () => {
     loading,
     error,
     status,
-    setServerUrl,
+    setServerUrl: setServer,
     refreshServerUrl,
   };
 };
