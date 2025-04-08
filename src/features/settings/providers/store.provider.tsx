@@ -17,6 +17,7 @@ const StoreContext = createContext<Record<string, any>>({});
 
 // Define the type for custom loaders
 type StoreLoader<T> = () => Promise<T>;
+type StoreHandler<T> = (value: T) => void | Promise<void>;
 
 interface StoreProviderProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ interface StoreProviderProps {
     key: string;
     defaultValue?: any;
     loader?: StoreLoader<any>;
+    handler?: StoreHandler<any>;
   }>;
 }
 
@@ -32,15 +34,19 @@ const StoreInstance = <T,>({
   storeKey,
   defaultValue,
   loader,
+  handler,
 }: {
   storeKey: string;
   defaultValue?: T;
   loader?: StoreLoader<T>;
+  handler?: StoreHandler<any>;
 }) => {
   const store = useStore<T>(storeKey, defaultValue);
 
   // Update the parent context when this store changes
   const contextValue = useContext(StoreContext);
+
+  const [initialized, setInitialized] = React.useState(false);
 
   // Initial load and setup
   React.useEffect(() => {
@@ -62,10 +68,38 @@ const StoreInstance = <T,>({
         // If we have a default value but no existing value, save the default
         await store.setValue(defaultValue);
       }
+
+      // Important: Set initialized to true after initialization is complete
+      setInitialized(true);
     };
 
     initializeStore();
   }, [contextValue, store, storeKey, loader, defaultValue]);
+
+  // Execute handler when the store value changes
+  React.useEffect(() => {
+    // Skip if not initialized or no value or no handler
+    if (!store.value || !handler) return;
+
+    // Only execute the handler if the store is initialized or the value has changed after initialization
+    if (initialized) {
+      console.log(`Executing handler for ${storeKey}`);
+
+      // Handle both async and sync handlers
+      try {
+        const result = handler(store.value);
+
+        // If the handler returns a promise, catch any errors
+        if (result instanceof Promise) {
+          result.catch((error) => {
+            console.error(`Error in async handler for ${storeKey}:`, error);
+          });
+        }
+      } catch (error) {
+        console.error(`Error in handler for ${storeKey}:`, error);
+      }
+    }
+  }, [store.value, handler, initialized, storeKey]);
 
   return null; // This is a logic-only component, no UI
 };
@@ -90,6 +124,7 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
           storeKey={storeConfig.key}
           defaultValue={storeConfig.defaultValue}
           loader={storeConfig.loader}
+          handler={storeConfig.handler}
         />
       ))}
       {children}
