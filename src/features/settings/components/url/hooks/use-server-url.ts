@@ -26,7 +26,6 @@ export const useServerUrl = () => {
     loading,
     error,
     setValue: setStoreValue,
-    refreshValue,
   } = useStoreContext<ServerUrlData>(SERVER_URL_STORE_KEY);
 
   // Default values for when store data is undefined
@@ -99,31 +98,4 @@ export const useServerUrl = () => {
     setServerUrl,
     refreshServerUrl,
   };
-};
-
-/**
- * Function to load the server URL from Tauri
- * Can be used as a loader in StoreProvider
- */
-export const loadServerUrl = async (): Promise<ServerUrlData> => {
-  try {
-    const program = pipe(
-      Effect.flatMap(ServerUrlServiceTag, (service) => service.getServerUrl()),
-      Effect.provide(ServerUrlServiceLive),
-      Effect.provide(StoreServiceLive),
-    );
-
-    const result = await Effect.runPromise(program);
-
-    return {
-      url: result.url || '',
-      status: result.url ? 'configured' : 'not_configured',
-    };
-  } catch (err) {
-    console.error('Error loading server URL:', err);
-    return {
-      url: '',
-      status: 'not_configured',
-    };
-  }
 };

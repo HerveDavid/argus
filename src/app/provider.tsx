@@ -5,6 +5,8 @@ import { HelmetProvider } from 'react-helmet-async';
 import { queryConfig } from '@/lib/react-query';
 import { ThemeProvider } from '@/features/settings/components/theme/provider';
 import { StoreProvider } from '@/features/settings/providers/store.provider';
+import { ServerUrlError } from '@/features/settings/components/url/types/url.type';
+import { setServerUrl } from '@/features/settings/components/url/api';
 
 type AppProviderProps = {
   children: React.ReactNode;
@@ -23,25 +25,12 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     url: string;
     status: string;
   }) => {
-    console.log('Configuration serveur modifiée:', serverConfig);
-
-    const { url, status } = serverConfig;
-
-    if (status === 'configured' && url) {
-      console.log(`Initialisation de la connexion à ${url}`);
-
-      try {
-        // Simulation d'une opération asynchrone (comme un fetch)
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Simuler une vérification de connexion
-        console.log(`Connexion réussie à ${url}`);
-
-        // Vous pourriez par exemple initialiser d'autres services ici
-        // ou mettre à jour d'autres stores en fonction du résultat
-      } catch (error) {
-        console.error(`Échec de la connexion à ${url}:`, error);
-      }
+    try {
+      const { url } = serverConfig;
+      await setServerUrl(url);
+    } catch (err) {
+      const serverError = err as ServerUrlError;
+      throw serverError;
     }
   };
 

@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import {
   createServerUrlError,
   ServerUrlError,
@@ -24,3 +25,19 @@ export const setServerUrlInTauri = (url: string) =>
     { server_url: url },
     createServerUrlError,
   );
+
+/**
+ * Sets the server URL in Tauri backend
+ */
+export const setServerUrl = async (url: string) => {
+  try {
+    // Call the Rust command
+    const response = await invoke<ServerUrlResponse>('set_server_url', {
+      server_url: url,
+    });
+
+    return response;
+  } catch (error) {
+    throw new Error(`Failed to configure proxy: ${error}`);
+  }
+};
