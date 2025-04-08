@@ -8,9 +8,10 @@ import {
   ServicesProvider,
 } from '@/providers/services.provider';
 import { Effect } from 'effect';
-import { ServerUrlServiceTag } from '@/features/settings/url/services/server-url';
-import { ServerUrlError } from '@/features/settings/url/types/url.type';
-import { ThemeProvider } from '@/features/settings/theme/provider';
+import { ServerUrlServiceTag } from '@/features/settings/components/url/services/server-url';
+import { ServerUrlError } from '@/features/settings/components/url/types/url.type';
+import { ThemeProvider } from '@/features/settings/components/theme/provider';
+import { StoreProvider } from '@/features/settings/providers/store.provider';
 
 type AppProviderProps = {
   children: React.ReactNode;
@@ -50,12 +51,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     <React.Suspense>
       <HelmetProvider>
         <ServicesProvider onInitialized={handleServicesInitialized}>
-          <ThemeProvider>
-            <QueryClientProvider client={queryClient}>
-              {import.meta.env.DEV && <ReactQueryDevtools />}
-              {isServicesReady && children}
-            </QueryClientProvider>
-          </ThemeProvider>
+          <StoreProvider stores={[]}>
+            <ThemeProvider>
+              <QueryClientProvider client={queryClient}>
+                {import.meta.env.DEV && <ReactQueryDevtools />}
+                {isServicesReady && children}
+              </QueryClientProvider>
+            </ThemeProvider>
+          </StoreProvider>
         </ServicesProvider>
       </HelmetProvider>
     </React.Suspense>

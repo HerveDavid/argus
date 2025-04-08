@@ -1,9 +1,9 @@
-import { ServerUrlServiceLive } from '@/features/settings/url/services/server-url';
+import { ServerUrlServiceLive } from '@/features/settings/components/url/services/server-url';
 import { StoreServiceLive } from '@/utils/store-service';
 import { Effect, pipe } from 'effect';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { StoreServiceTag } from '@/utils/store-service';
-import { ServerUrlServiceTag } from '@/features/settings/url/services/server-url';
+import { ServerUrlServiceTag } from '@/features/settings/components/url/services/server-url';
 
 // Define our environment type
 type AppEnv = StoreServiceTag | ServerUrlServiceTag;

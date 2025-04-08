@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@/features/settings/theme/provider';
+import { useTheme } from '@/features/settings/components/theme/provider';
 
 interface ThemeToggleProps {
   className?: string;

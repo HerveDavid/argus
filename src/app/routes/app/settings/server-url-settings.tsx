@@ -20,7 +20,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { useServerUrl } from '@/features/settings/url/hooks/use-server-url';
+import { useServerUrl } from '@/features/settings/components/url/hooks/use-server-url';
 import { useEffect } from 'react';
 
 /**

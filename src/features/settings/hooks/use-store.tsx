@@ -3,7 +3,7 @@ import { Effect, pipe } from 'effect';
 import { StoreServiceTag, StoreServiceLive } from '@/utils/store-service';
 
 /**
- * Hook to easily interact with the StoreService from React components
+ * Hook to easily interact with the StoreService from Effect TS
  *
  * @param key The storage key to access
  * @param defaultValue Optional default value if the key doesn't exist
