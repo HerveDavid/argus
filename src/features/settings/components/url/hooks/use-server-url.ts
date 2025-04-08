@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Effect, pipe } from 'effect';
 import {
   ServerUrlServiceTag,
@@ -6,86 +5,91 @@ import {
 } from '../services/server-url';
 import { StoreServiceLive } from '@/utils/store-service';
 import { ServerUrlError } from '../types/url.type';
+import { useStoreContext } from '@/features/settings/providers/store.provider';
+
+// Define the server URL data structure
+export interface ServerUrlData {
+  url: string;
+  status: 'configured' | 'not_configured';
+}
+
+// Store key for the server URL
+const SERVER_URL_STORE_KEY = 'server_url';
 
 /**
- * Hook pour gérer les paramètres avec SettingsStore
- * @param key - Clé unique pour identifier les paramètres
- * @param defaultValue - Valeur par défaut si aucun paramètre n'est trouvé
- * @returns [settings, setSettings, isLoading, error]
- */
-/**
- * Hook pour gérer les paramètres du serveur URL
- * @returns {Object} Objet contenant URL, statut, et fonctions pour gérer l'URL
+ * Hook to manage server URL settings
+ * @returns Object containing URL, status, and functions to manage the URL
  */
 export const useServerUrl = () => {
-  // Change the type to string with empty string as default
-  const [url, setUrl] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [status, setStatus] = useState<'configured' | 'not_configured'>(
-    'not_configured',
-  );
+  const {
+    value: serverUrlData,
+    loading,
+    error,
+    setValue: setStoreValue,
+    refreshValue,
+  } = useStoreContext<ServerUrlData>(SERVER_URL_STORE_KEY);
 
-  // Function to fetch the server URL
+  // Default values for when store data is undefined
+  const url = serverUrlData?.url || '';
+  const status = serverUrlData?.status || 'not_configured';
+
+  /**
+   * Fetches the server URL from Tauri and updates the store
+   */
   const refreshServerUrl = async () => {
-    setLoading(true);
-    setError(null);
-
-    const program = pipe(
-      Effect.flatMap(ServerUrlServiceTag, (service) => service.getServerUrl()),
-      Effect.provide(ServerUrlServiceLive),
-      Effect.provide(StoreServiceLive),
-    );
-
     try {
+      const program = pipe(
+        Effect.flatMap(ServerUrlServiceTag, (service) =>
+          service.getServerUrl(),
+        ),
+        Effect.provide(ServerUrlServiceLive),
+        Effect.provide(StoreServiceLive),
+      );
+
       const result = await Effect.runPromise(program);
-      // Ensure we always set a string, not null
-      setUrl(result.url || '');
-      setStatus(result.url ? 'configured' : 'not_configured');
+
+      // Update the store with the result
+      await setStoreValue({
+        url: result.url || '',
+        status: result.url ? 'configured' : 'not_configured',
+      });
     } catch (err) {
-      const serverError = err as ServerUrlError;
-      setError(serverError.message || 'Failed to fetch server URL');
-      setStatus('not_configured');
-    } finally {
-      setLoading(false);
+      // The error will be captured by the store context
+      console.error('Error refreshing server URL:', err);
+      throw err;
     }
   };
 
-  // Function to update the server URL
+  /**
+   * Updates the server URL in Tauri and in the store
+   */
   const setServerUrl = async (newUrl: string) => {
-    setLoading(true);
-    setError(null);
-
-    // Ensure newUrl is always a string
-    const urlToSet = newUrl?.trim() || '';
-
-    const program = pipe(
-      Effect.flatMap(ServerUrlServiceTag, (service) =>
-        service.setServerUrl(urlToSet),
-      ),
-      Effect.provide(ServerUrlServiceLive),
-      Effect.provide(StoreServiceLive),
-    );
-
     try {
+      // Ensure newUrl is always a string
+      const urlToSet = newUrl?.trim() || '';
+
+      const program = pipe(
+        Effect.flatMap(ServerUrlServiceTag, (service) =>
+          service.setServerUrl(urlToSet),
+        ),
+        Effect.provide(ServerUrlServiceLive),
+        Effect.provide(StoreServiceLive),
+      );
+
       const result = await Effect.runPromise(program);
-      // Ensure we always set a string, not null
-      setUrl(result.url || '');
-      setStatus(result.url ? 'configured' : 'not_configured');
+
+      // Update the store with the result
+      await setStoreValue({
+        url: result.url || '',
+        status: result.url ? 'configured' : 'not_configured',
+      });
+
       return result;
     } catch (err) {
       const serverError = err as ServerUrlError;
-      setError(serverError.message || 'Failed to update server URL');
-      throw err;
-    } finally {
-      setLoading(false);
+      throw serverError;
     }
   };
-
-  // Load the URL when the component mounts
-  useEffect(() => {
-    refreshServerUrl();
-  }, []);
 
   return {
     url,
@@ -95,4 +99,31 @@ export const useServerUrl = () => {
     setServerUrl,
     refreshServerUrl,
   };
+};
+
+/**
+ * Function to load the server URL from Tauri
+ * Can be used as a loader in StoreProvider
+ */
+export const loadServerUrl = async (): Promise<ServerUrlData> => {
+  try {
+    const program = pipe(
+      Effect.flatMap(ServerUrlServiceTag, (service) => service.getServerUrl()),
+      Effect.provide(ServerUrlServiceLive),
+      Effect.provide(StoreServiceLive),
+    );
+
+    const result = await Effect.runPromise(program);
+
+    return {
+      url: result.url || '',
+      status: result.url ? 'configured' : 'not_configured',
+    };
+  } catch (err) {
+    console.error('Error loading server URL:', err);
+    return {
+      url: '',
+      status: 'not_configured',
+    };
+  }
 };

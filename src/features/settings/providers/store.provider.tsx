@@ -15,11 +15,15 @@ type StoreContextValue<T> = {
 // Create a context with empty object as default
 const StoreContext = createContext<Record<string, any>>({});
 
+// Define the type for custom loaders
+type StoreLoader<T> = () => Promise<T>;
+
 interface StoreProviderProps {
   children: ReactNode;
   stores: Array<{
     key: string;
     defaultValue?: any;
+    loader?: StoreLoader<any>;
   }>;
 }
 
@@ -27,9 +31,11 @@ interface StoreProviderProps {
 const StoreInstance = <T,>({
   storeKey,
   defaultValue,
+  loader,
 }: {
   storeKey: string;
   defaultValue?: T;
+  loader?: StoreLoader<T>;
 }) => {
   const store = useStore<T>(storeKey, defaultValue);
 
@@ -42,7 +48,19 @@ const StoreInstance = <T,>({
 
     // If we have a value, make sure it's loaded
     if (store.value === undefined && !store.loading && !store.error) {
-      store.refreshValue();
+      if (loader) {
+        (async () => {
+          try {
+            const initialValue = await loader();
+            await store.setValue(initialValue);
+          } catch (error) {
+            console.error(`Error loading store ${storeKey}:`, error);
+            // The error will be set inside setValue
+          }
+        })();
+      } else {
+        store.refreshValue();
+      }
     }
   }, [contextValue, store, storeKey]);
 
@@ -68,6 +86,7 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({
           key={storeConfig.key}
           storeKey={storeConfig.key}
           defaultValue={storeConfig.defaultValue}
+          loader={storeConfig.loader}
         />
       ))}
       {children}
