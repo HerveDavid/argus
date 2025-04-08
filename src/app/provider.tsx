@@ -38,7 +38,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
               key: 'server_url',
               defaultValue: {
                 url: 'http://localhost:8000',
-                status: 'configured',
+                status: 'not_configured',
               },
               loader: serverUrlLoader
             },
