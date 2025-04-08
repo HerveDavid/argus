@@ -18,7 +18,7 @@ import {
 import {
   getNoProxy,
   getProxyUrl,
-} from '@/features/settings/proxy/stores/proxy.store';
+} from '@/features/settings/components/proxy/stores/proxy.store';
 
 // Define TypeScript interfaces
 interface Substation {

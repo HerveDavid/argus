@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { handleApiError } from './api-utils';
+import { handleApiError } from '@/lib/api-utils';
 import {
   FetchStatus,
   PaginatedResponse,

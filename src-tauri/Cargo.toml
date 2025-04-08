@@ -31,3 +31,4 @@ thiserror = "2.0.12"
 futures = "0.3.31"
 reqwest = { version = "0.12.15", features = ["json"] }
 crossbeam = "0.8.4"
+once_cell = "1.21.3"

@@ -20,8 +20,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { useProxyStore } from '@/features/settings/proxy/stores/proxy.store';
-import { Proxy } from '@/features/settings/proxy/types/proxy.type';
+import { useProxyStore } from '@/features/settings/components/proxy/stores/proxy.store';
+import { Proxy } from '@/features/settings/components/proxy/types/proxy.type';
 
 /**
  * Validation schema for the proxy configuration form

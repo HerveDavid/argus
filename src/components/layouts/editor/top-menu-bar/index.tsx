@@ -9,7 +9,9 @@ export const TopMenuBar = () => {
         <FileDropdown />
         <ViewDropdown />
       </div>
-      <Clock />
+      <div className="flex space-x-4">
+        <Clock />
+      </div>
     </div>
   );
 };
