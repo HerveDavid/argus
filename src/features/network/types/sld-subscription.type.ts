@@ -1,7 +1,4 @@
-export enum SldSubscriptionStatus {
-  Connected = 'Connected',
-  Unconnected = 'Unconnected',
-}
+export type SldSubscriptionStatus = 'connected' | 'disconnected';
 
 export interface SldSubscriptionResponse {
   status: SldSubscriptionStatus;

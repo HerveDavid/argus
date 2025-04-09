@@ -83,7 +83,6 @@ const ProxySettings = () => {
   function handleSubmit(data: ProxyFormValues) {
     setProxy(data as Proxy);
     applyProxy();
-    console.log('Proxy settings saved to Zustand store and AppState:', data);
   }
 
   return (
