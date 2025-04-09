@@ -83,8 +83,6 @@ const StoreInstance = <T,>({
 
     // Only execute the handler if the store is initialized or the value has changed after initialization
     if (initialized) {
-      console.log(`Executing handler for ${storeKey}`);
-
       // Handle both async and sync handlers
       try {
         const result = handler(store.value);

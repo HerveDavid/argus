@@ -1,5 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
-import { SldMetadata } from '../types/sld-metatada';
+import { SldMetadata } from '../types/sld-metatada.type';
 import { handleApiError } from '@/lib/api-utils';
 
 // Types

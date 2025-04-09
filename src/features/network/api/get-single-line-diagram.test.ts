@@ -5,7 +5,7 @@ import {
   getSingleLineDiagramWithMetadata,
   getSingleLineDiagram,
 } from './get-single-line-diagram'; // adjust path as needed
-import { SldMetadata } from '../types/sld-metatada';
+import { SldMetadata } from '../types/sld-metatada.type';
 
 // Mock for @tauri-apps/api/core
 vi.mock('@tauri-apps/api/core', () => ({

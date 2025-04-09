@@ -3,8 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HelmetProvider } from 'react-helmet-async';
 import { queryConfig } from '@/lib/react-query';
-import { ThemeProvider } from '@/features/settings/components/theme/provider';
-import { StoreProvider } from '@/features/settings/providers/store.provider';
+import { StoreProvider, ThemeProvider } from '@/features/settings/providers';
 import { defaultSettings } from '@/config/default-settings';
 
 type AppProviderProps = {
