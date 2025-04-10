@@ -59,3 +59,14 @@ pub struct FetchStatus {
     pub success: bool,
     pub message: String,
 }
+
+#[derive(Serialize, Deserialize)]
+pub struct SldSubscriptionResponse {
+    pub status: String,
+}
+
+#[derive(Clone, Serialize)]
+#[serde(tag = "ti", content = "data")]
+pub enum TeleInformation {
+    TM { id: String, value: i32 },
+}

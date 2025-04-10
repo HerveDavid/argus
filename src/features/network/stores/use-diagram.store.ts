@@ -6,6 +6,7 @@ import {
   unsubscribeSingleLineDiagram,
 } from '../api/subscribe-single-line-diagram';
 import { SldSubscriptionStatus } from '../types/sld-subscription.type';
+import { TeleInformation } from '../types/tele-information.type';
 
 export interface DiagramData {
   svgUrl: string | null;
@@ -92,18 +93,28 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   subscribeDiagram: async () => {
     const { metadata, currentLineId } = get();
 
-    if (!metadata || !currentLineId) {
+    if (!metadata) {
       set({
         error: 'Cannot subscribe: no diagram metadata available',
       });
       return;
     }
 
+    if (!currentLineId) {
+      return;
+    }
+
     try {
       set({ isLoading: true, error: null });
+
+      const handler = (ti: TeleInformation) => {
+        console.log('TI from store:', ti);
+      };
+
       const response = await subscribeSingleLineDiagram(
         currentLineId,
         metadata,
+        handler,
       );
       set({
         isLoading: false,
@@ -126,7 +137,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   unsubscribeDiagram: async () => {
-    const { metadata, subscriptionStatus, currentLineId } = get();
+    const { metadata, currentLineId } = get();
 
     if (!metadata || !currentLineId) {
       set({
@@ -135,10 +146,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       return;
     }
 
-    if (subscriptionStatus === 'disconnected') {
-      console.log('Not subscribed to any diagram');
-      return;
-    }
+    console.log('UNSCRIBED from store');
 
     try {
       set({ isLoading: true, error: null });
