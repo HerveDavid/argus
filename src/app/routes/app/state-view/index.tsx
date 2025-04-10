@@ -16,16 +16,10 @@ const StateView = () => {
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
   const substationDetails = useSubstationDetails(substationId);
-  const { subscribeDiagram, unsubscribeDiagram } = useDiagramStore();
+  const { unsubscribeDiagram } = useDiagramStore();
 
   // Init
   useEffect(() => {
-    const subscrine = async () => {
-      await subscribeDiagram();
-    };
-
-    subscrine();
-
     return () => {
       const cleanup = async () => {
         try {
@@ -57,7 +51,6 @@ const StateView = () => {
       label: 'Commands',
       content: (
         <div className="p-4">
-          <Button onClick={subscribeDiagram}>subscribe</Button>
           <Button onClick={unsubscribeDiagram}>unsubscribe</Button>
         </div>
       ),

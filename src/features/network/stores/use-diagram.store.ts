@@ -20,7 +20,8 @@ export interface DiagramData {
 interface DiagramStore extends DiagramData {
   loadDiagram: (lineId: string) => Promise<void>;
   resetDiagram: () => void;
-  subscribeDiagram: () => Promise<void>;
+  // TODO use my hook here: handleUpdateMessage
+  subscribeDiagram: (handler: (ti: TeleInformation) => void) => Promise<void>;
   unsubscribeDiagram: () => Promise<void>;
   subscriptionStatus: SldSubscriptionStatus;
 }
@@ -90,7 +91,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     });
   },
 
-  subscribeDiagram: async () => {
+  subscribeDiagram: async (handler) => {
     const { metadata, currentLineId } = get();
 
     if (!metadata) {
@@ -106,10 +107,6 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
     try {
       set({ isLoading: true, error: null });
-
-      const handler = (ti: TeleInformation) => {
-        console.log('TI from store:', ti);
-      };
 
       const response = await subscribeSingleLineDiagram(
         currentLineId,
