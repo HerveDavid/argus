@@ -15,12 +15,14 @@ import {
 } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { SunIcon, MoonIcon, LaptopIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Effect } from 'effect';
+import { getStoreFilePath } from '@/features/settings/services/store-service';
 
 const ProfileSettings = () => {
   // Mock data for application information
   const appVersion = 'v1.2.3';
-  const storagePath = '/Users/current/AppData/Roaming/YourAppName';
-
+  const [storagePath, setStoragePath] = useState('');
   const { theme, setThemeMode } = useTheme();
 
   // Theme options with icons and labels
@@ -29,6 +31,10 @@ const ProfileSettings = () => {
     { value: 'dark', label: 'Dark', icon: <MoonIcon size={16} /> },
     { value: 'system', label: 'System', icon: <LaptopIcon size={16} /> },
   ];
+
+  useEffect(() => {
+    Effect.runPromise(getStoreFilePath()).then(setStoragePath);
+  }, []);
 
   return (
     <div className="space-y-8 w-full max-w-full p-4">
