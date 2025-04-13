@@ -1,7 +1,7 @@
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { EllipsisIcon } from 'lucide-react';
+import { EllipsisIcon, MonitorUpIcon, Pin, PinIcon } from 'lucide-react';
 
 export interface TabItem {
   id: string;
@@ -33,7 +33,8 @@ export const TabNavigation: React.FC<{
           </TabsTrigger>
         ))}
       </TabsList>
-      <div className="mr-2 h-5">
+      <div className="flex space-x-2 mr-2 h-5">
+        <PinIcon className="size-5 p-0.5"></PinIcon>
         <EllipsisIcon className="size-5"></EllipsisIcon>
       </div>
     </div>

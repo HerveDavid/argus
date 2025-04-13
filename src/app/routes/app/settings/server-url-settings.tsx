@@ -80,16 +80,16 @@ const ServerUrlSettings = () => {
   return (
     <div className="space-y-8 w-full max-w-full p-4">
       <div className="max-w-2xl">
-        <h2 className="text-lg font-semibold text-gray-900 tracking-tight mb-2">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight mb-2">
           Server URL Settings
         </h2>
-        <p className="text-base text-gray-600 leading-relaxed">
+        <p className="text-base text-muted-foreground leading-relaxed">
           Configure the API server URL for connecting to backend services.
         </p>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+        <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md">
           {error}
         </div>
       )}
@@ -97,12 +97,12 @@ const ServerUrlSettings = () => {
       {/* Responsive grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="w-full">
-          <Card className="shadow-md border border-gray-200 overflow-hidden bg-white">
-            <CardHeader className="bg-gray-50 border-b border-gray-200 pb-4">
-              <CardTitle className="text-md font-bold text-gray-800">
+          <Card className="shadow-md border border-border overflow-hidden bg-card">
+            <CardHeader className="bg-muted border-b border-border pb-4">
+              <CardTitle className="text-md font-bold text-card-foreground">
                 Current Configuration
               </CardTitle>
-              <CardDescription className="text-sm text-gray-600 mt-1">
+              <CardDescription className="text-sm text-muted-foreground mt-1">
                 Your active server URL settings
               </CardDescription>
             </CardHeader>
@@ -110,29 +110,33 @@ const ServerUrlSettings = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableBody>
-                    <TableRow className="border-b border-gray-100">
-                      <TableCell className="font-semibold text-gray-800 w-1/3 py-4 pl-6">
+                    <TableRow className="border-b border-border">
+                      <TableCell className="font-semibold text-foreground w-1/3 py-4 pl-6">
                         URL
                       </TableCell>
-                      <TableCell className="text-gray-700 font-mono text-sm py-4 pr-6">
+                      <TableCell className="text-foreground font-mono text-sm py-4 pr-6">
                         {url ? (
                           url
                         ) : (
-                          <span className="text-gray-400 italic">Not set</span>
+                          <span className="text-muted-foreground italic">
+                            Not set
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-semibold text-gray-800 py-4 pl-6">
+                      <TableCell className="font-semibold text-foreground py-4 pl-6">
                         Status
                       </TableCell>
                       <TableCell className="py-4 pr-6">
                         {loading ? (
-                          <span className="text-blue-500">Loading...</span>
+                          <span className="text-primary">Loading...</span>
                         ) : status === 'configured' ? (
-                          <span className="text-green-500">Configured</span>
+                          <span className="text-success">Configured</span>
                         ) : (
-                          <span className="text-gray-400">Not configured</span>
+                          <span className="text-muted-foreground">
+                            Not configured
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -144,12 +148,12 @@ const ServerUrlSettings = () => {
         </div>
 
         <div className="w-full">
-          <Card className="shadow-md border border-gray-200 bg-white">
-            <CardHeader className="bg-gray-50 border-b border-gray-200 pb-4">
-              <CardTitle className="text-md font-bold text-gray-800">
+          <Card className="shadow-md border border-border bg-card">
+            <CardHeader className="bg-muted border-b border-border pb-4">
+              <CardTitle className="text-md font-bold text-card-foreground">
                 Update Settings
               </CardTitle>
-              <CardDescription className="text-sm text-gray-600 mt-1">
+              <CardDescription className="text-sm text-muted-foreground mt-1">
                 Modify your server URL configuration
               </CardDescription>
             </CardHeader>
@@ -167,33 +171,33 @@ const ServerUrlSettings = () => {
                       name={field.name}
                       render={({ field: formField }) => (
                         <FormItem className="space-y-2">
-                          <FormLabel className="text-sm font-bold text-gray-700 block">
+                          <FormLabel className="text-sm font-bold text-foreground block">
                             {field.label}
                           </FormLabel>
                           <FormControl>
                             <Input
                               type={field.type}
                               placeholder={field.placeholder}
-                              className="w-full font-mono text-sm p-3 border border-gray-300 rounded-md"
+                              className="w-full font-mono text-sm p-3 border border-input rounded-md"
                               {...formField}
                               disabled={loading}
                             />
                           </FormControl>
-                          <FormDescription className="text-xs text-gray-500">
+                          <FormDescription className="text-xs text-muted-foreground">
                             {field.description}
                           </FormDescription>
-                          <FormMessage className="text-xs font-medium text-red-500" />
+                          <FormMessage className="text-xs font-medium text-destructive" />
                         </FormItem>
                       )}
                     />
                   ))}
 
-                  <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 mt-4 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 mt-4 border-t border-border">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={handleReset}
-                      className="text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4"
+                      className="text-sm font-medium border-input text-foreground hover:bg-accent py-2 px-4"
                       disabled={loading}
                     >
                       Reset
