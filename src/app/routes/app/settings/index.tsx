@@ -78,11 +78,11 @@ const HomeSettings = () => {
         </div>
 
         {/* Content Area - Takes all available space */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1">
           <div className="h-full sm:px-6 lg:px-8">
             <div className="h-full lg:grid lg:grid-cols-[250px_1fr] lg:gap-8">
               {/* Sidebar */}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block pt-4">
                 <div className="space-y-1">
                   {TABS.map((tab) => (
                     <Button
@@ -147,15 +147,11 @@ const HomeSettings = () => {
                   </TabsList>
                 </Tabs>
 
-                {/* Active tab description (mobile only) */}
-                <p className="text-sm text-muted-foreground mt-2">
-                  {TABS.find((tab) => tab.id === activeTab)?.description}
-                </p>
                 <Separator className="mt-4" />
               </div>
 
               {/* Content */}
-              <div className="lg:border-l lg:border-border lg:pl-8 h-full">
+              <div className="lg:border-l lg:border-border lg:pl-8 h-full pt-4">
                 {/* Tab heading (desktop only) */}
                 <div className="mb-6 hidden lg:block">
                   <h2 className="text-xl font-semibold text-foreground">
