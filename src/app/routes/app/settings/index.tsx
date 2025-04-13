@@ -4,7 +4,7 @@ import ProxySettings from './proxy-settings';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
-import ServerUrlSettings from './server-url-settings';
+import ServerUrlSettings from './connection-settings';
 import ProfileSettings from './profile-settings';
 import {
   ArrowLeft,

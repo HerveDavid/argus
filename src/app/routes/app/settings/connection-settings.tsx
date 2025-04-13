@@ -97,7 +97,7 @@ const ServerUrlSettings = () => {
       {/* Responsive grid layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="w-full">
-          <Card className="shadow-md border border-border overflow-hidden bg-card">
+          <Card className="shadow-xs overflow-hidden bg-card">
             <CardHeader className="bg-muted border-b border-border pb-4">
               <CardTitle className="text-md font-bold text-card-foreground">
                 Current Configuration
@@ -148,7 +148,7 @@ const ServerUrlSettings = () => {
         </div>
 
         <div className="w-full">
-          <Card className="shadow-md border border-border bg-card">
+          <Card className="shadow-xs bg-card">
             <CardHeader className="bg-muted border-b border-border pb-4">
               <CardTitle className="text-md font-bold text-card-foreground">
                 Update Settings

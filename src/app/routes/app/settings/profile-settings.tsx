@@ -57,7 +57,7 @@ const ProfileSettings = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Theme Settings Card */}
-        <Card className="shadow-md border bg-card">
+        <Card className="shadow-xs bg-card">
           <CardHeader className="bg-muted border-b pb-4">
             <CardTitle className="text-md font-bold text-card-foreground">
               Appearance
@@ -151,7 +151,7 @@ const ProfileSettings = () => {
         </Card>
 
         {/* System Information Card */}
-        <Card className="shadow-md overflow-hidden bg-card">
+        <Card className="shadow-xs bg-card">
           <CardHeader className="bg-muted border-b pb-4">
             <CardTitle className="text-md font-bold text-card-foreground">
               System Information

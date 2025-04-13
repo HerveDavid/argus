@@ -101,7 +101,7 @@ const ProxySettings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
         {/* Current Configuration Card */}
         <div className="w-full">
-          <Card className="shadow-md border overflow-hidden bg-card">
+          <Card className="shadow-xs bg-card">
             <CardHeader className="bg-muted border-b p-4 sm:pb-4">
               <CardTitle className="text-md font-bold text-card-foreground">
                 Current Configuration
@@ -173,7 +173,7 @@ const ProxySettings = () => {
 
         {/* Update Settings Card */}
         <div className="w-full">
-          <Card className="shadow-md border bg-card">
+          <Card className="shadow-xs bg-card">
             <CardHeader className="bg-muted border-b p-4 sm:pb-4">
               <CardTitle className="text-md font-bold text-card-foreground">
                 Update Settings
