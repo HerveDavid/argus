@@ -23,13 +23,21 @@ const ProfileSettings = () => {
   // Mock data for application information
   const appVersion = 'v1.2.3';
   const [storagePath, setStoragePath] = useState('');
-  const { theme, setThemeMode } = useTheme();
+  const { themeMode, themeColor, setThemeMode, setThemeColor } = useTheme();
 
   // Theme options with icons and labels
   const themeOptions = [
     { value: 'light', label: 'Light', icon: <SunIcon size={16} /> },
     { value: 'dark', label: 'Dark', icon: <MoonIcon size={16} /> },
     { value: 'system', label: 'System', icon: <LaptopIcon size={16} /> },
+  ];
+
+  // Color theme options
+  const colorOptions = [
+    { value: 'default', label: 'Default', color: 'bg-primary' },
+    { value: 'blue', label: 'Blue', color: 'bg-blue-500' },
+    { value: 'purple', label: 'Purple', color: 'bg-purple-500' },
+    { value: 'nord', label: 'Nord', color: 'bg-slate-500' },
   ];
 
   useEffect(() => {
@@ -60,16 +68,17 @@ const ProfileSettings = () => {
           </CardHeader>
           <CardContent className="pt-6">
             <div className="space-y-6">
+              {/* Theme Mode Selection */}
               <div className="space-y-2">
                 <label
                   htmlFor="theme-select"
                   className="text-sm font-medium text-foreground block"
                 >
-                  Theme
+                  Theme Mode
                 </label>
-                <Select value={theme} onValueChange={setThemeMode}>
+                <Select value={themeMode} onValueChange={setThemeMode}>
                   <SelectTrigger id="theme-select" className="w-full">
-                    <SelectValue placeholder="Select theme" />
+                    <SelectValue placeholder="Select theme mode" />
                   </SelectTrigger>
                   <SelectContent>
                     {themeOptions.map((option) => (
@@ -85,6 +94,57 @@ const ProfileSettings = () => {
                 <p className="text-xs text-muted-foreground mt-1">
                   Choose between light, dark, or system theme
                 </p>
+              </div>
+
+              {/* Color Theme Selection */}
+              <div className="space-y-2">
+                <label
+                  htmlFor="color-select"
+                  className="text-sm font-medium text-foreground block"
+                >
+                  Color Theme
+                </label>
+                <Select value={themeColor} onValueChange={setThemeColor}>
+                  <SelectTrigger id="color-select" className="w-full">
+                    <SelectValue placeholder="Select color theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colorOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-4 h-4 rounded-full ${option.color}`}
+                          />
+                          <span>{option.label}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose a color palette for the application
+                </p>
+              </div>
+
+              {/* Preview */}
+              <div className="pt-4">
+                <label className="text-sm font-medium text-foreground block mb-2">
+                  Preview
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-3 bg-primary text-primary-foreground rounded-md">
+                    Primary
+                  </div>
+                  <div className="p-3 bg-secondary text-secondary-foreground rounded-md">
+                    Secondary
+                  </div>
+                  <div className="p-3 bg-accent text-accent-foreground rounded-md">
+                    Accent
+                  </div>
+                  <div className="p-3 bg-muted text-muted-foreground rounded-md">
+                    Muted
+                  </div>
+                </div>
               </div>
             </div>
           </CardContent>
