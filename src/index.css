@@ -1,10 +1,8 @@
 @import 'tailwindcss';
-
 @plugin 'tailwindcss-animate';
-
 @custom-variant dark (&:is(.dark *));
 
-/* Base variables in :root with HSL */
+/* Base variables in :root with HSL - Default Isa 101 Theme */
 :root {
   /* Main colors */
   --background: hsl(0 0% 88%);
@@ -98,79 +96,87 @@
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
 
-/* Dark mode */
+/* Dark mode for default Isa 101 theme */
 .dark {
-  /* Primary color variables */
-  --background: hsl(260, 15%, 10%);
-  --foreground: hsl(260, 20%, 90%);
+  /* Main colors */
+  --background: hsl(0 0% 12%);
+  --foreground: hsl(0 0% 88%);
+  --card: hsl(0 0% 12%);
+  --card-foreground: hsl(0 0% 88%);
+  --popover: hsl(0 0% 12%);
+  --popover-foreground: hsl(0 0% 88%);
+  --primary: hsl(225 41% 57%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(0 0% 22%);
+  --secondary-foreground: hsl(0 0% 88%);
+  --muted: hsl(0 0% 18%);
+  --muted-foreground: hsl(0 0% 65%);
+  --accent: hsl(225 41% 57%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(357 92% 57%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(240 2% 35%);
+  --input: hsl(240 2% 35%);
+  --ring: hsl(240 2% 45%);
+  --radius: 0.5rem;
 
-  --card: hsl(260, 15%, 12%);
-  --card-foreground: hsl(260, 20%, 90%);
+  /* Colors for states and statuses */
+  --success: hsl(134 56% 45%);
+  --success-foreground: hsl(0 0% 100%);
+  --success-weak: hsl(120 54% 15%);
+  --warning: hsl(45 100% 60%);
+  --warning-foreground: hsl(30 35% 15%);
+  --warning-weak: hsl(48 100% 15%);
+  --info: hsl(216 72% 65%);
+  --info-foreground: hsl(0 0% 100%);
+  --info-weak: hsl(216 72% 15%);
+  --highlight: hsl(278 43% 66%);
+  --highlight-foreground: hsl(0 0% 100%);
+  --highlight-weak: hsl(278 43% 15%);
+  --progress: hsl(188 100% 40%);
+  --progress-foreground: hsl(0 0% 100%);
+  --progress-weak: hsl(188 100% 15%);
 
-  --popover: hsl(260, 15%, 12%);
-  --popover-foreground: hsl(260, 20%, 90%);
-
-  --primary: hsl(270, 70%, 60%);
-  --primary-foreground: hsl(0, 0%, 100%);
-
-  --secondary: hsl(260, 25%, 18%);
-  --secondary-foreground: hsl(260, 20%, 90%);
-
-  --muted: hsl(260, 20%, 18%);
-  --muted-foreground: hsl(260, 15%, 60%);
-
-  --accent: hsl(270, 70%, 50%);
-  --accent-foreground: hsl(0, 0%, 100%);
-
-  --destructive: hsl(0, 70%, 45%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-
-  --border: hsl(260, 15%, 24%);
-  --input: hsl(260, 15%, 24%);
-  --ring: hsl(270, 60%, 65%);
-
-  /* Status colors */
-  --success: hsl(140, 60%, 45%);
-  --success-foreground: hsl(0, 0%, 98%);
-  --success-weak: hsl(140, 20%, 18%);
-
-  --warning: hsl(35, 100%, 60%);
-  --warning-foreground: hsl(35, 15%, 12%);
-  --warning-weak: hsl(35, 30%, 18%);
-
-  --info: hsl(220, 80%, 65%);
-  --info-foreground: hsl(0, 0%, 98%);
-  --info-weak: hsl(220, 30%, 18%);
-
-  --highlight: hsl(300, 70%, 65%);
-  --highlight-foreground: hsl(0, 0%, 98%);
-  --highlight-weak: hsl(300, 30%, 18%);
-
-  --progress: hsl(200, 90%, 45%);
-  --progress-foreground: hsl(0, 0%, 98%);
-  --progress-weak: hsl(200, 30%, 18%);
-
-  /* Surfaces and backgrounds */
-  --surface-raised: hsl(260, 15%, 15%);
-  --surface-lowered: hsl(260, 15%, 7%);
-  --surface-hover: hsl(260, 15%, 18%);
+  /* Surface and background colors */
+  --surface-raised: hsl(180 4% 18%);
+  --surface-lowered: hsl(210 5% 15%);
+  --surface-hover: hsl(180 4% 20%);
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px hsla(260, 50%, 0%, 0.18);
-  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(260, 50%, 0%, 0.18);
-  --shadow-lg: 0 5px 17px hsla(260, 50%, 0%, 0.28);
-  --shadow-xl: 0 0 0 1px var(--border), 0 24px 38px 3px hsla(260, 50%, 0%, 0.38);
+  --shadow-sm: 0 1px 3px hsla(0, 0%, 0%, 0.3);
+  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(0, 0%, 0%, 0.2);
+  --shadow-lg: 0 5px 17px hsla(0, 0%, 0%, 0.3);
+  --shadow-xl: 0 24px 38px 3px hsla(0, 0%, 0%, 0.35),
+    0 9px 46px 8px hsla(0, 0%, 0%, 0.25);
+
+  /* Typography */
+  --font-xxxl: 2.25rem;
+  --font-xxl: 1.5rem;
+  --font-xl: 1.25rem;
+  --font-l: 1rem;
+  --font-m: 0.875rem;
+  --font-s: 0.75rem;
+  --font-xs: 0.6875rem;
+
+  /* Spacing */
+  --space-xxl: 72px;
+  --space-xl: 36px;
+  --space-l: 24px;
+  --space-m: 16px;
+  --space-s: 8px;
+  --space-xs: 4px;
 
   /* Sidebar */
-  --sidebar-background: hsl(260, 15%, 10%);
-  --sidebar-foreground: hsl(260, 20%, 90%);
-  --sidebar-primary: hsl(270, 70%, 60%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(260, 20%, 16%);
-  --sidebar-accent-foreground: hsl(260, 20%, 90%);
-  --sidebar-border: hsl(260, 20%, 16%);
-  --sidebar-ring: hsl(270, 70%, 60%);
+  --sidebar-background: hsl(0 0% 10%);
+  --sidebar-foreground: hsl(240 5.3% 85%);
+  --sidebar-primary: hsl(240 5.9% 90%);
+  --sidebar-primary-foreground: hsl(0 0% 10%);
+  --sidebar-accent: hsl(240 4.8% 20%);
+  --sidebar-accent-foreground: hsl(240 5.9% 90%);
+  --sidebar-border: hsl(220 13% 20%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
 }
+
 /* Inline theme for Tailwind v4 */
 @theme inline {
   --color-*: initial;

@@ -29,6 +29,8 @@
   --input: hsl(210 30% 70%);
   --ring: hsl(210 30% 70%);
 
+  --radius: 0.5rem;
+
   /* Couleurs pour états et statuts */
   --success: hsl(130 60% 40%);
   --success-foreground: hsl(0 0% 100%);
@@ -49,6 +51,23 @@
   --progress: hsl(190 100% 40%);
   --progress-foreground: hsl(0 0% 100%);
   --progress-weak: hsl(190 100% 95%);
+
+  /* Typography */
+  --font-xxxl: 2.25rem;
+  --font-xxl: 1.5rem;
+  --font-xl: 1.25rem;
+  --font-l: 1rem;
+  --font-m: 0.875rem;
+  --font-s: 0.75rem;
+  --font-xs: 0.6875rem;
+
+  /* Spacing */
+  --space-xxl: 72px;
+  --space-xl: 36px;
+  --space-l: 24px;
+  --space-m: 16px;
+  --space-s: 8px;
+  --space-xs: 4px;
 
   /* Surfaces et arrière-plans */
   --surface-raised: hsl(210 50% 97%);

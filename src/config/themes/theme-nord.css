@@ -1,5 +1,80 @@
 /* theme-nord.css */
+
+/* Light theme version (though Nord is primarily a dark theme) */
 .theme-nord {
+  --background: hsl(220, 16%, 94%);
+  --foreground: hsl(220, 16%, 22%);
+
+  --card: hsl(220, 16%, 98%);
+  --card-foreground: hsl(220, 16%, 22%);
+
+  --popover: hsl(220, 16%, 98%);
+  --popover-foreground: hsl(220, 16%, 22%);
+
+  --primary: var(--nord10);
+  --primary-foreground: var(--nord6);
+
+  --secondary: hsl(220, 16%, 92%);
+  --secondary-foreground: hsl(220, 16%, 20%);
+
+  --muted: hsl(220, 16%, 92%);
+  --muted-foreground: hsl(220, 16%, 42%);
+
+  --accent: var(--nord9);
+  --accent-foreground: var(--nord0);
+
+  --destructive: var(--nord11);
+  --destructive-foreground: var(--nord6);
+
+  --border: hsl(220, 16%, 86%);
+  --input: hsl(220, 16%, 86%);
+  --ring: var(--nord10);
+
+  /* Status colors for light mode */
+  --success: var(--nord14);
+  --success-foreground: hsl(220, 16%, 22%);
+  --success-weak: hsla(92, 28%, 65%, 0.2);
+
+  --warning: var(--nord12);
+  --warning-foreground: hsl(220, 16%, 22%);
+  --warning-weak: hsla(14, 51%, 63%, 0.2);
+
+  --info: var(--nord8);
+  --info-foreground: hsl(220, 16%, 22%);
+  --info-weak: hsla(193, 43%, 67%, 0.2);
+
+  --highlight: var(--nord15);
+  --highlight-foreground: hsl(220, 16%, 22%);
+  --highlight-weak: hsla(311, 20%, 63%, 0.2);
+
+  --progress: var(--nord7);
+  --progress-foreground: hsl(220, 16%, 22%);
+  --progress-weak: hsla(179, 25%, 65%, 0.2);
+
+  /* Surfaces and backgrounds for light mode */
+  --surface-raised: hsl(220, 16%, 100%);
+  --surface-lowered: hsl(220, 16%, 90%);
+  --surface-hover: hsl(220, 16%, 96%);
+
+  /* Shadows for light mode */
+  --shadow-sm: 0 1px 3px hsla(220, 16%, 5%, 0.1);
+  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(220, 16%, 5%, 0.08);
+  --shadow-lg: 0 5px 17px hsla(220, 16%, 5%, 0.12);
+  --shadow-xl: 0 24px 38px 3px hsla(220, 16%, 5%, 0.1);
+
+  /* Sidebar for light mode */
+  --sidebar-background: hsl(220, 16%, 96%);
+  --sidebar-foreground: hsl(220, 16%, 22%);
+  --sidebar-primary: var(--nord10);
+  --sidebar-primary-foreground: var(--nord6);
+  --sidebar-accent: hsl(220, 16%, 92%);
+  --sidebar-accent-foreground: hsl(220, 16%, 22%);
+  --sidebar-border: hsl(220, 16%, 88%);
+  --sidebar-ring: var(--nord10);
+}
+
+.dark.theme-nord,
+.theme-nord.dark {
   /* Primary Nord palette variables */
   --nord0: hsl(220, 16%, 22%); /* Dark background */
   --nord1: hsl(222, 16%, 28%); /* Darker gray for surfaces */
@@ -92,78 +167,4 @@
   --sidebar-accent-foreground: var(--nord4);
   --sidebar-border: var(--nord2);
   --sidebar-ring: var(--nord8);
-}
-
-/* Light theme version (though Nord is primarily a dark theme) */
-.light.theme-nord,
-.theme-nord.light {
-  --background: hsl(220, 16%, 94%);
-  --foreground: hsl(220, 16%, 22%);
-
-  --card: hsl(220, 16%, 98%);
-  --card-foreground: hsl(220, 16%, 22%);
-
-  --popover: hsl(220, 16%, 98%);
-  --popover-foreground: hsl(220, 16%, 22%);
-
-  --primary: var(--nord10);
-  --primary-foreground: var(--nord6);
-
-  --secondary: hsl(220, 16%, 92%);
-  --secondary-foreground: hsl(220, 16%, 20%);
-
-  --muted: hsl(220, 16%, 92%);
-  --muted-foreground: hsl(220, 16%, 42%);
-
-  --accent: var(--nord9);
-  --accent-foreground: var(--nord0);
-
-  --destructive: var(--nord11);
-  --destructive-foreground: var(--nord6);
-
-  --border: hsl(220, 16%, 86%);
-  --input: hsl(220, 16%, 86%);
-  --ring: var(--nord10);
-
-  /* Status colors for light mode */
-  --success: var(--nord14);
-  --success-foreground: hsl(220, 16%, 22%);
-  --success-weak: hsla(92, 28%, 65%, 0.2);
-
-  --warning: var(--nord12);
-  --warning-foreground: hsl(220, 16%, 22%);
-  --warning-weak: hsla(14, 51%, 63%, 0.2);
-
-  --info: var(--nord8);
-  --info-foreground: hsl(220, 16%, 22%);
-  --info-weak: hsla(193, 43%, 67%, 0.2);
-
-  --highlight: var(--nord15);
-  --highlight-foreground: hsl(220, 16%, 22%);
-  --highlight-weak: hsla(311, 20%, 63%, 0.2);
-
-  --progress: var(--nord7);
-  --progress-foreground: hsl(220, 16%, 22%);
-  --progress-weak: hsla(179, 25%, 65%, 0.2);
-
-  /* Surfaces and backgrounds for light mode */
-  --surface-raised: hsl(220, 16%, 100%);
-  --surface-lowered: hsl(220, 16%, 90%);
-  --surface-hover: hsl(220, 16%, 96%);
-
-  /* Shadows for light mode */
-  --shadow-sm: 0 1px 3px hsla(220, 16%, 5%, 0.1);
-  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(220, 16%, 5%, 0.08);
-  --shadow-lg: 0 5px 17px hsla(220, 16%, 5%, 0.12);
-  --shadow-xl: 0 24px 38px 3px hsla(220, 16%, 5%, 0.1);
-
-  /* Sidebar for light mode */
-  --sidebar-background: hsl(220, 16%, 96%);
-  --sidebar-foreground: hsl(220, 16%, 22%);
-  --sidebar-primary: var(--nord10);
-  --sidebar-primary-foreground: var(--nord6);
-  --sidebar-accent: hsl(220, 16%, 92%);
-  --sidebar-accent-foreground: hsl(220, 16%, 22%);
-  --sidebar-border: hsl(220, 16%, 88%);
-  --sidebar-ring: var(--nord10);
 }
