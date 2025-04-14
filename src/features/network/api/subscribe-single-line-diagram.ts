@@ -39,8 +39,6 @@ export const unsubscribeSingleLineDiagram = async (
   try {
     channels.delete(id);
 
-    console.log('UNSCRIBED: ', id);
-
     const response = await invoke<SldSubscriptionResponse>(
       'unsubscribe_single_line_diagram',
       { sld_metadata },

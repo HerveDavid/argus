@@ -21,15 +21,7 @@ const StateView = () => {
   // Init
   useEffect(() => {
     return () => {
-      const cleanup = async () => {
-        try {
-          await unsubscribeDiagram();
-        } catch (error) {
-          console.error('Failed when unscribedDiagram', error);
-        }
-      };
-
-      cleanup();
+      unsubscribeDiagram();
     };
   }, [substationId]);
 
