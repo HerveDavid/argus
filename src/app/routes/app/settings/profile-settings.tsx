@@ -91,7 +91,9 @@ const ProfileSettings = () => {
                           ? 'bg-muted ring-2 ring-primary'
                           : 'bg-card hover:bg-muted/50'
                       }`}
-                      onClick={() => handleThemeModeSelect(option.value)}
+                      onClick={() =>
+                        handleThemeModeSelect(option.value as ThemeMode)
+                      }
                     >
                       <div className="flex flex-col items-center gap-2">
                         {option.icon}
@@ -124,7 +126,9 @@ const ProfileSettings = () => {
                           ? 'bg-muted ring-2 ring-primary'
                           : 'bg-card hover:bg-muted/50'
                       }`}
-                      onClick={() => handleColorThemeSelect(option.value)}
+                      onClick={() =>
+                        handleColorThemeSelect(option.value as ThemeColor)
+                      }
                     >
                       <div className={`w-6 h-6 rounded-full ${option.color}`} />
                       <span className="text-xs">{option.label}</span>

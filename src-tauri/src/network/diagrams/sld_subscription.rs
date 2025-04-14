@@ -56,7 +56,7 @@ pub async fn subscribe_single_line_diagram(
                         tokio::select! {
                             _ = tokio::time::sleep(tokio::time::Duration::from_millis(500)) => {
                                 // Générer une valeur aléatoire entre 0.0 et 1.0
-                                let random_value = rng.random::<i32>();
+                                let random_value = rng.gen_range(0..=500);
 
                                 // Envoyer la valeur via le canal
                                 if let Err(e) = channel.send(TeleInformation::TM {

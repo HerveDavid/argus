@@ -1,12 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import EditorLayout from '@/components/layouts/editor';
 import { useSubstationDetails } from '@/features/network/hooks/use-substation-details';
 import { SubstationViewer } from '@/features/network/components/network-explorer/substation-viewer';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TabItem, TabNavigation } from './tab-navigation';
 import { useParams } from 'react-router';
-import { useDiagramStore } from '@/features/network/stores/use-diagram.store';
-import { Button } from '@/components/ui/button';
 
 // Main component
 const StateView = () => {
@@ -16,14 +14,6 @@ const StateView = () => {
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
   const substationDetails = useSubstationDetails(substationId);
-  const { unsubscribeDiagram } = useDiagramStore();
-
-  // Init
-  useEffect(() => {
-    return () => {
-      unsubscribeDiagram();
-    };
-  }, [substationId]);
 
   const tabs: TabItem[] = [
     {
@@ -41,11 +31,7 @@ const StateView = () => {
     {
       id: 'commands',
       label: 'Commands',
-      content: (
-        <div className="p-4">
-          <Button onClick={unsubscribeDiagram}>unsubscribe</Button>
-        </div>
-      ),
+      content: <div className="p-4">Commands</div>,
     },
     {
       id: 'logbook',
