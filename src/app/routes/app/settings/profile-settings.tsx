@@ -1,4 +1,8 @@
-import { useTheme } from '@/features/settings/components/theme/provider';
+import {
+  ThemeColor,
+  ThemeMode,
+  useTheme,
+} from '@/features/settings/components/theme/provider';
 import {
   Card,
   CardContent,
@@ -6,18 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { SunIcon, MoonIcon, LaptopIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Effect } from 'effect';
 import { getStoreFilePath } from '@/features/settings/services/store-service';
+import { Badge } from '@/components/ui/badge';
 
 const ProfileSettings = () => {
   // Mock data for application information
@@ -37,12 +35,23 @@ const ProfileSettings = () => {
     { value: 'default', label: 'Default', color: 'bg-primary' },
     { value: 'blue', label: 'Blue', color: 'bg-blue-500' },
     { value: 'purple', label: 'Purple', color: 'bg-purple-500' },
-    { value: 'nord', label: 'Nord', color: 'bg-slate-500' },
+    { value: 'nord', label: 'Nord', color: 'bg-cyan-700' },
+    { value: 'gruvbox', label: 'Gruvbox', color: 'bg-amber-700' },
   ];
 
   useEffect(() => {
     Effect.runPromise(getStoreFilePath()).then(setStoragePath);
   }, []);
+
+  // Handler for theme mode selection
+  const handleThemeModeSelect = (value: ThemeMode) => {
+    setThemeMode(value);
+  };
+
+  // Handler for color theme selection
+  const handleColorThemeSelect = (value: ThemeColor) => {
+    setThemeColor(value);
+  };
 
   return (
     <div className="space-y-8 w-full max-w-full p-4">
@@ -70,27 +79,32 @@ const ProfileSettings = () => {
             <div className="space-y-6">
               {/* Theme Mode Selection */}
               <div className="space-y-2">
-                <label
-                  htmlFor="theme-select"
-                  className="text-sm font-medium text-foreground block"
-                >
+                <label className="text-sm font-medium text-foreground block">
                   Theme Mode
                 </label>
-                <Select value={themeMode} onValueChange={setThemeMode}>
-                  <SelectTrigger id="theme-select" className="w-full">
-                    <SelectValue placeholder="Select theme mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {themeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          {option.icon}
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {themeOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`relative flex items-center justify-center p-3 rounded-md cursor-pointer ${
+                        themeMode === option.value
+                          ? 'bg-muted ring-2 ring-primary'
+                          : 'bg-card hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleThemeModeSelect(option.value)}
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        {option.icon}
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                      {themeMode === option.value && (
+                        <Badge className="absolute -top-2 -right-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground">
+                          Active
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Choose between light, dark, or system theme
                 </p>
@@ -98,29 +112,30 @@ const ProfileSettings = () => {
 
               {/* Color Theme Selection */}
               <div className="space-y-2">
-                <label
-                  htmlFor="color-select"
-                  className="text-sm font-medium text-foreground block"
-                >
+                <label className="text-sm font-medium text-foreground block">
                   Color Theme
                 </label>
-                <Select value={themeColor} onValueChange={setThemeColor}>
-                  <SelectTrigger id="color-select" className="w-full">
-                    <SelectValue placeholder="Select color theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {colorOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`w-4 h-4 rounded-full ${option.color}`}
-                          />
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-5 gap-2 mt-2">
+                  {colorOptions.map((option) => (
+                    <div
+                      key={option.value}
+                      className={`relative flex flex-col items-center gap-2 p-3 rounded-md cursor-pointer ${
+                        themeColor === option.value
+                          ? 'bg-muted ring-2 ring-primary'
+                          : 'bg-card hover:bg-muted/50'
+                      }`}
+                      onClick={() => handleColorThemeSelect(option.value)}
+                    >
+                      <div className={`w-6 h-6 rounded-full ${option.color}`} />
+                      <span className="text-xs">{option.label}</span>
+                      {themeColor === option.value && (
+                        <Badge className="absolute -top-2 -right-2 px-2 py-0.5 text-xs bg-primary text-primary-foreground">
+                          Active
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Choose a color palette for the application
                 </p>

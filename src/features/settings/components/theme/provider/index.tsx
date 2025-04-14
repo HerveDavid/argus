@@ -8,8 +8,8 @@ import React, {
 } from 'react';
 
 // Définir les types
-type ThemeMode = 'light' | 'dark' | 'system';
-type ThemeColor = 'blue' | 'purple' | 'nord' | 'default';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeColor = 'blue' | 'gruvbox' | 'purple' | 'nord' | 'default';
 
 interface ThemeContextType {
   themeMode: ThemeMode;
