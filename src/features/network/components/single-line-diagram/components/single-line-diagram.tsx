@@ -4,12 +4,12 @@ import ContextMenu from './context-menu';
 import LegendOverlay from './legend-overlay';
 import { useContextMenu } from '../hooks/use-context-menu';
 import { useSvgManipulation } from '../hooks/use-svg-manipulation';
-import { useSvgUpdate } from '../hooks/use-svg-update';
 import { useDiagramEffects } from '../hooks/use-diagram-effects';
 import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 
 // Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
+import { useSvgUpdate } from '../hooks/use-svg-update';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -17,8 +17,14 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = 'auto',
   className = '',
 }) => {
-  const { svgBlob, isLoading, error, loadDiagram, subscribeDiagram } =
-    useDiagramStore();
+  const {
+    svgBlob,
+    isLoading,
+    error,
+    loadDiagram,
+    subscribeDiagram,
+    unsubscribeDiagram,
+  } = useDiagramStore();
 
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -69,16 +75,19 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   // Charger le diagramme lors du montage et quand lineId change
   useEffect(() => {
-    const { currentLineId } = useDiagramStore.getState();
-
     const subscribe = async () => {
+      await loadDiagram(lineId);
       await subscribeDiagram(handleUpdateMessage);
     };
 
-    if (currentLineId !== lineId) {
-      loadDiagram(lineId);
-      subscribe();
-    }
+    subscribe();
+
+    return () => {
+      const cleanUp = async () => {
+        await unsubscribeDiagram();
+      };
+      cleanUp();
+    };
   }, [lineId, loadDiagram]);
 
   useEffect(() => {
