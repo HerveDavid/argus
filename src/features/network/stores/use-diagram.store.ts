@@ -21,7 +21,7 @@ export interface DiagramData {
   currentLineId: string | null;
 }
 
-interface DiagramStore extends DiagramData {
+export interface DiagramStore extends DiagramData {
   loadDiagram: (lineId: string) => Promise<void>;
   resetDiagram: () => void;
   subscribeDiagram: (handler: (ti: TeleInformation) => void) => void;
