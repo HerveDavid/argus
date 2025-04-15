@@ -33,9 +33,12 @@ export const SubstationList: React.FC<SubstationListProps> = ({
             }`}
             onClick={() => onSelect(substation.id)}
           >
-            <div className="flex items-center">
+            <div className="flex items-center justify-between">
               <span className="font-medium truncate text-sm">
-                {substation.id} ({substation.country}) ({substation.name})
+                {substation.id}
+              </span>
+              <span className="font-medium truncate text-sm">
+                ({substation.country})
               </span>
             </div>
           </div>
