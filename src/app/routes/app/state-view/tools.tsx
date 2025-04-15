@@ -25,10 +25,14 @@ export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
 
     if (isInWorkspace) {
       removeSubstation(substation.id);
-      toast(`Substation ${substation?.id} was added from workspace`);
+      toast.info(`Substation ${substation?.id} was removed from workspace`, {
+        closeButton: true,
+      });
     } else {
       addSubstation(substation);
-      toast(`Substation ${substation?.id} was removed from workspace`);
+      toast.success(`Substation ${substation?.id} was added to workspace`, {
+        closeButton: true,
+      });
     }
   };
 
