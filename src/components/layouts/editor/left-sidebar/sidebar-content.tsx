@@ -1,4 +1,5 @@
 import { NetworkExplorer } from '@/features/network/components/network-explorer';
+import { WorkspaceExplorer } from '@/features/workspace/components/workspace-explorer';
 import React from 'react';
 
 export const SidebarContent: React.FC<{
@@ -8,11 +9,7 @@ export const SidebarContent: React.FC<{
     case 'explorer':
       return <NetworkExplorer />;
     case 'workspace':
-      return (
-        <div className="p-2">
-          <div className="text-sm">Workspace</div>
-        </div>
-      );
+      return <WorkspaceExplorer />;
     case 'layers':
       return (
         <div className="p-2">

@@ -5,9 +5,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useWorkspaceStore } from '@/features/workspace/stores/use-workspace.store';
+import { Substation } from '@/types/substation.type';
 import { EllipsisIcon } from 'lucide-react';
 
-export const Tools = () => {
+export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
+  const { addSubstation } = useWorkspaceStore();
+
+  const addToWorkspace = () => {
+    addSubstation(substation);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
@@ -15,7 +23,7 @@ export const Tools = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => console.log('add workspace')}>
+        <DropdownMenuItem onClick={addToWorkspace}>
           Add to workspace
         </DropdownMenuItem>
         <DropdownMenuSeparator />

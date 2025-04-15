@@ -3,6 +3,7 @@ import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { PinIcon } from 'lucide-react';
 import { Tools } from './tools';
+import { Substation } from '@/types/substation.type';
 
 export interface TabItem {
   id: string;
@@ -14,7 +15,8 @@ export const TabNavigation: React.FC<{
   tabs: TabItem[];
   activeTab: string;
   onTabChange: (tabId: string) => void;
-}> = ({ tabs, activeTab, onTabChange }) => {
+  substation: Substation;
+}> = ({ tabs, activeTab, onTabChange, substation }) => {
   return (
     <div className="border-b flex justify-between">
       <TabsList className="bg-transparent h-5 p-0">
@@ -36,7 +38,7 @@ export const TabNavigation: React.FC<{
       </TabsList>
       <div className="flex space-x-2 mr-2 h-5">
         <PinIcon className="size-5 p-0.5"></PinIcon>
-        <Tools />
+        <Tools substation={substation} />
       </div>
     </div>
   );
