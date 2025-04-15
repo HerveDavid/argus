@@ -4,6 +4,7 @@ import { SidebarItem } from './left-sidebar/sidebar-icon-button';
 import { Folder, Layers, Waypoints } from 'lucide-react';
 import BottomMenuBar from './bottom-menu-bar';
 import LeftSideBar from './left-sidebar';
+import { Toaster } from '@/components/ui/sonner';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,6 +25,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
         <div className="flex w-full h-full">
           <LeftSideBar sidebarItems={sidebarItems} />
           {children}
+          <Toaster />
         </div>
       </div>
       <BottomMenuBar />

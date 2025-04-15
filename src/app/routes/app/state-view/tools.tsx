@@ -7,32 +7,29 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useWorkspaceStore } from '@/features/workspace/stores/use-workspace.store';
 import { Substation } from '@/types/substation.type';
+import { toast } from 'sonner';
+
 import { EllipsisIcon, PinIcon, TrashIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
 
 export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
   const { addSubstation, removeSubstation, hasId } = useWorkspaceStore();
-  const [isInWorkspace, setIsInWorkspace] = useState(false);
 
-  // Vérifier si la sous-station est dans le workspace
-  useEffect(() => {
-    if (substation && substation.id) {
-      setIsInWorkspace(hasId(substation.id));
-    }
-  }, [substation, hasId]);
+  // Vérifier directement si la sous-station est dans le workspace
+  const isInWorkspace = substation?.id ? hasId(substation.id) : false;
 
   const toggleWorkspace = () => {
-    if (!substation || !substation.id) {
+    if (!substation?.id) {
       console.error('Substation or substation.id is undefined');
       return;
     }
 
     if (isInWorkspace) {
       removeSubstation(substation.id);
+      toast(`Substation ${substation?.id} was added from workspace`);
     } else {
       addSubstation(substation);
+      toast(`Substation ${substation?.id} was removed from workspace`);
     }
-    setIsInWorkspace(!isInWorkspace);
   };
 
   return (
