@@ -35,7 +35,7 @@ export const SubstationList: React.FC<SubstationListProps> = ({
           >
             <div className="flex items-center">
               <span className="font-medium truncate text-sm">
-                {substation.id} ({substation.country})
+                {substation.id} ({substation.country}) ({substation.name})
               </span>
             </div>
           </div>

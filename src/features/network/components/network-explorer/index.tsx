@@ -1,5 +1,5 @@
-import React from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { AlertCircle, RefreshCw, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { SubstationList } from './substation-list';
@@ -8,6 +8,8 @@ import { ErrorWithRetry } from '../../hooks/use-error-handling';
 import { useSubstations } from '../../hooks/use-substations';
 import { paths } from '@/config/paths';
 import { useNavigate } from 'react-router';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 
 export const NetworkExplorer: React.FC = () => {
   const {
@@ -20,8 +22,54 @@ export const NetworkExplorer: React.FC = () => {
     goToNextPage,
     goToPreviousPage,
     errors,
+    // Search functionality
+    searchQuery,
+    isSearching,
+    handleSearch,
+    clearSearch,
+    searchFields,
+    setSearchFields,
   } = useSubstations();
+
   const navigate = useNavigate();
+  const [inputValue, setInputValue] = useState('');
+
+  // Debounce search to avoid too many queries while typing
+  const debouncedSearch = useCallback(
+    (value: string) => {
+      handleSearch(value, searchFields);
+    },
+    [handleSearch, searchFields],
+  );
+
+  // Handle search input changes
+  const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+
+    // Use setTimeout to create a simple debounce
+    const timeoutId = setTimeout(() => {
+      debouncedSearch(value);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  // Toggle a search field
+  const toggleSearchField = (field: string) => {
+    if (!searchFields) {
+      setSearchFields([field]);
+      handleSearch(searchQuery, [field]);
+      return;
+    }
+
+    const newFields = searchFields.includes(field)
+      ? searchFields.filter((f) => f !== field)
+      : [...searchFields, field];
+
+    setSearchFields(newFields.length ? newFields : undefined);
+    handleSearch(searchQuery, newFields.length ? newFields : undefined);
+  };
 
   const renderError = ({ error, retry }: ErrorWithRetry) => {
     return (
@@ -74,8 +122,94 @@ export const NetworkExplorer: React.FC = () => {
     return null;
   };
 
+  const renderSearchBar = () => {
+    return (
+      <div className="border-b border-gray-200 p-2">
+        <div className="relative flex items-center">
+          <Search className="absolute left-2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Search substations..."
+            value={inputValue}
+            onChange={handleSearchInput}
+            className="pl-8 h-8 text-sm"
+          />
+          {isSearching && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                clearSearch();
+                setInputValue('');
+              }}
+              className="absolute right-1 h-6 w-6 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+
+        {/* Search field filters */}
+        {initialDataCheck.data && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            <Badge
+              variant={
+                !searchFields || searchFields.includes('name')
+                  ? 'default'
+                  : 'outline'
+              }
+              className="cursor-pointer text-xs h-5"
+              onClick={() => toggleSearchField('name')}
+            >
+              Name
+            </Badge>
+            <Badge
+              variant={
+                !searchFields || searchFields.includes('country')
+                  ? 'default'
+                  : 'outline'
+              }
+              className="cursor-pointer text-xs h-5"
+              onClick={() => toggleSearchField('country')}
+            >
+              Country
+            </Badge>
+            <Badge
+              variant={
+                !searchFields || searchFields.includes('tso')
+                  ? 'default'
+                  : 'outline'
+              }
+              className="cursor-pointer text-xs h-5"
+              onClick={() => toggleSearchField('tso')}
+            >
+              TSO
+            </Badge>
+            <Badge
+              variant={
+                !searchFields || searchFields.includes('geo_tags')
+                  ? 'default'
+                  : 'outline'
+              }
+              className="cursor-pointer text-xs h-5"
+              onClick={() => toggleSearchField('geo_tags')}
+            >
+              Geo Tags
+            </Badge>
+          </div>
+        )}
+
+        {/* Search results info */}
+        {isSearching && substationsQuery.data && (
+          <div className="text-xs text-gray-500 mt-1">
+            Found {substationsQuery.data.total} results for "{searchQuery}"
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       <div className="flex justify-between items-center border-b border-gray-200 p-2">
         <h3 className="uppercase text-sm">Network Explorer</h3>
         <Button
@@ -94,6 +228,9 @@ export const NetworkExplorer: React.FC = () => {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      {initialDataCheck.data && renderSearchBar()}
+
       {/* Render all errors */}
       {Object.entries(errors).map(([key, errorData]) => (
         <React.Fragment key={key}>{renderError(errorData)}</React.Fragment>
@@ -107,7 +244,26 @@ export const NetworkExplorer: React.FC = () => {
           </div>
         ) : !substationsQuery.data ||
           substationsQuery.data.items.length === 0 ? (
-          renderLoadDataPrompt()
+          isSearching ? (
+            <div className="text-center p-4">
+              <p className="text-gray-500">
+                No substations found matching your search
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  clearSearch();
+                  setInputValue('');
+                }}
+                className="mt-2"
+              >
+                Clear Search
+              </Button>
+            </div>
+          ) : (
+            renderLoadDataPrompt()
+          )
         ) : (
           <>
             <SubstationList

@@ -74,3 +74,29 @@ export async function getSubstationById(
     throw handleApiError(error, `Error fetching substation with ID ${id}`);
   }
 }
+
+/**
+ * Search for substations in the application state
+ * @param query - The search query string
+ * @param pagination - Optional pagination parameters
+ * @param searchFields - Optional array of fields to search (defaults to name, country, tso, geo_tags if not provided)
+ * @returns Paginated response containing matching substations
+ */
+export async function searchSubstations(
+  query: string,
+  pagination?: PaginationParams,
+  search_fields?: string[],
+): Promise<PaginatedResponse<Substation[]>> {
+  try {
+    return await invoke<PaginatedResponse<Substation[]>>('search_substations', {
+      query,
+      pagination,
+      search_fields,
+    });
+  } catch (error) {
+    throw handleApiError(
+      error,
+      `Error searching substations with query: ${query}`,
+    );
+  }
+}

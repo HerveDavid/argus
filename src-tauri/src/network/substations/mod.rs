@@ -171,3 +171,76 @@ pub fn get_substation_by_id(
 
     Ok(substation)
 }
+
+/// Search for substations in the application state and return paginated results
+#[tauri::command(rename_all = "snake_case")]
+pub fn search_substations(
+    state: State<'_, AppState>,
+    query: String,
+    pagination: Option<PaginationParams>,
+    search_fields: Option<Vec<String>>,
+) -> NetworkResult<PaginatedResponse<Vec<Substation>>> {
+    // Use pagination parameters or default values
+    let params = pagination.unwrap_or_default();
+
+    // Default search fields if none provided
+    let fields = search_fields.unwrap_or_else(|| {
+        vec![
+            "name".to_string(),
+            "country".to_string(),
+            "tso".to_string(),
+            "geo_tags".to_string(),
+        ]
+    });
+
+    // Access state with a lock
+    let app_state = state.read().map_err(|_| NetworkError::LockError)?;
+
+    // Convert query to lowercase for case-insensitive search
+    let query = query.to_lowercase();
+
+    // Filter substations based on search query
+    let filtered_substations: Vec<Substation> = app_state
+        .network
+        .substations
+        .values()
+        .filter(|substation| {
+            // If query is empty, return all substations
+            if query.is_empty() {
+                return true;
+            }
+
+            // Check if any of the specified fields contain the query
+            // todo seach wit id also
+            fields.iter().any(|field| match field.as_str() {
+                // "name" => substation.name.to_lowercase().contains(&query),
+                "country" => substation.country.to_lowercase().contains(&query),
+                "tso" => substation.tso.to_lowercase().contains(&query),
+                "geo_tags" => substation.geo_tags.to_lowercase().contains(&query),
+                "name" => substation.id.to_lowercase().contains(&query),
+                _ => false,
+            })
+        })
+        .cloned()
+        .collect();
+
+    // Calculate pagination values
+    let total = filtered_substations.len();
+    let total_pages = (total + params.per_page - 1) / params.per_page;
+
+    // Get items for current page
+    let page_items: Vec<Substation> = filtered_substations
+        .into_iter()
+        .skip((params.page - 1) * params.per_page)
+        .take(params.per_page)
+        .collect();
+
+    // Return the paginated response
+    Ok(PaginatedResponse {
+        items: page_items,
+        total,
+        page: params.page,
+        per_page: params.per_page,
+        total_pages,
+    })
+}

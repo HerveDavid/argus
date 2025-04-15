@@ -29,6 +29,7 @@ pub fn run() {
             get_substations,
             get_substation_by_id,
             get_paginated_substations,
+            search_substations,
             // Voltage levels
             get_voltage_levels,
             get_voltage_levels_by_id,
