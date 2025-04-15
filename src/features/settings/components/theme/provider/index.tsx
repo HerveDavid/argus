@@ -1,4 +1,4 @@
-// ThemeProvider.tsx
+// @/features/settings/components/theme/provider.tsx
 import React, {
   createContext,
   useContext,
@@ -7,12 +7,15 @@ import React, {
   ReactNode,
 } from 'react';
 
-type Theme = 'light' | 'dark';
+// Définir les types
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeColor = 'blue' | 'gruvbox' | 'purple' | 'nord' | 'default';
 
 interface ThemeContextType {
-  theme: Theme;
-  toggleTheme: () => void;
-  setThemeMode: (mode: Theme) => void;
+  themeMode: ThemeMode;
+  themeColor: ThemeColor;
+  setThemeMode: (mode: ThemeMode) => void;
+  setThemeColor: (color: ThemeColor) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -22,42 +25,95 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Vérifier le thème du système ou celui stocké
-  const [theme, setTheme] = useState<Theme>(() => {
+  // État pour le mode (clair/sombre/système)
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-      // Check local storage first
-      const storedTheme = localStorage.getItem('theme') as Theme;
-      if (storedTheme && (storedTheme === 'light' || storedTheme === 'dark')) {
-        return storedTheme;
-      }
-
-      // Check system preference
-      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
+      const storedThemeMode = localStorage.getItem('themeMode') as ThemeMode;
+      if (
+        storedThemeMode &&
+        ['light', 'dark', 'system'].includes(storedThemeMode)
+      ) {
+        return storedThemeMode;
       }
     }
-    return 'light';
+    return 'system';
   });
 
-  // Mettre à jour le DOM quand le thème change
+  // État pour la couleur du thème
+  const [themeColor, setThemeColor] = useState<ThemeColor>(() => {
+    if (typeof window !== 'undefined') {
+      const storedThemeColor = localStorage.getItem('themeColor') as ThemeColor;
+      if (
+        storedThemeColor &&
+        ['blue', 'purple', 'nord', 'default'].includes(storedThemeColor)
+      ) {
+        return storedThemeColor;
+      }
+    }
+    return 'default';
+  });
+
+  // Appliquer le mode sombre/clair en fonction de la préférence système si nécessaire
+  useEffect(() => {
+    const updateTheme = () => {
+      if (typeof window !== 'undefined') {
+        // Si le thème est "system", on utilise la préférence système
+        if (themeMode === 'system') {
+          const isDark = window.matchMedia(
+            '(prefers-color-scheme: dark)',
+          ).matches;
+          document.documentElement.classList.toggle('dark', isDark);
+        } else {
+          // Sinon on utilise la valeur explicite
+          document.documentElement.classList.toggle(
+            'dark',
+            themeMode === 'dark',
+          );
+        }
+
+        // Sauvegarder la préférence
+        localStorage.setItem('themeMode', themeMode);
+      }
+    };
+
+    // Appliquer la préférence initiale
+    updateTheme();
+
+    // Écouter les changements de préférence système
+    if (themeMode === 'system' && typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => updateTheme();
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [themeMode]);
+
+  // Appliquer le thème de couleur
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      document.documentElement.classList.toggle('dark', theme === 'dark');
-      localStorage.setItem('theme', theme);
+      // Nettoyer les classes de thème précédentes
+      document.documentElement.classList.remove(
+        'theme-blue',
+        'theme-purple',
+        'theme-nord',
+      );
+
+      // Ajouter la classe pour le thème de couleur
+      if (themeColor !== 'default') {
+        document.documentElement.classList.add(`theme-${themeColor}`);
+      }
+
+      // Sauvegarder la préférence
+      localStorage.setItem('themeColor', themeColor);
     }
-  }, [theme]);
+  }, [themeColor]);
 
-  // Basculer entre les thèmes
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
+  const value = {
+    themeMode,
+    themeColor,
+    setThemeMode,
+    setThemeColor,
   };
-
-  // Définir un thème spécifique
-  const setThemeMode = (mode: Theme) => {
-    setTheme(mode);
-  };
-
-  const value = { theme, toggleTheme, setThemeMode };
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>

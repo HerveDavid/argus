@@ -266,7 +266,6 @@ pub struct SldMetadata {
     pub wires: Vec<Wire>,
 }
 
-// Example serialization/deserialization functions
 impl SldMetadata {
     pub fn to_json(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string(self)
@@ -278,6 +277,14 @@ impl SldMetadata {
 
     pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json)
+    }
+
+    pub fn get_active_arrow_feeders(&self) -> Vec<FeederInfo> {
+        self.feeder_infos
+            .iter()
+            .filter(|feeder| feeder.component_type == "ARROW_ACTIVE")
+            .cloned()
+            .collect()
     }
 }
 

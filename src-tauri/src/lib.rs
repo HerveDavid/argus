@@ -29,13 +29,16 @@ pub fn run() {
             get_substations,
             get_substation_by_id,
             get_paginated_substations,
+            search_substations,
             // Voltage levels
             get_voltage_levels,
             get_voltage_levels_by_id,
             get_paginated_voltage_levels,
             // Diagrams
             get_single_line_diagram,
-            get_single_line_diagram_with_metadata
+            get_single_line_diagram_with_metadata,
+            subscribe_single_line_diagram,
+            unsubscribe_single_line_diagram,
         ])
         .setup(|app| {
             app.manage(AppState::default());

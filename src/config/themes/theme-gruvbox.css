@@ -1,0 +1,167 @@
+/* theme-gruvbox.css */
+.theme-gruvbox {
+    /* Variables de couleur principales */
+    --background: hsl(50, 11%, 87%);
+    --foreground: hsl(20, 12%, 23%);
+  
+    --card: hsl(50, 11%, 87%);
+    --card-foreground: hsl(20, 12%, 23%);
+  
+    --popover: hsl(50, 11%, 87%);
+    --popover-foreground: hsl(20, 12%, 23%);
+  
+    --primary: hsl(29, 54%, 53%);
+    --primary-foreground: hsl(20, 12%, 6%);
+  
+    --secondary: hsl(43, 50%, 85%);
+    --secondary-foreground: hsl(20, 12%, 23%);
+  
+    --muted: hsl(50, 11%, 80%);
+    --muted-foreground: hsl(20, 12%, 45%);
+  
+    --accent: hsl(15, 56%, 50%);
+    --accent-foreground: hsl(0, 0%, 100%);
+  
+    --destructive: hsl(0, 74%, 50%);
+    --destructive-foreground: hsl(0, 0%, 100%);
+  
+    --border: hsl(39, 19%, 65%);
+    --input: hsl(39, 19%, 65%);
+    --ring: hsl(39, 19%, 65%);
+  
+    --radius: 0.3rem;
+  
+    /* Couleurs pour états et statuts */
+    --success: hsl(98, 35%, 42%);
+    --success-foreground: hsl(0, 0%, 100%);
+    --success-weak: hsl(98, 35%, 90%);
+  
+    --warning: hsl(42, 80%, 52%);
+    --warning-foreground: hsl(40, 35%, 15%);
+    --warning-weak: hsl(42, 80%, 90%);
+  
+    --info: hsl(180, 49%, 38%);
+    --info-foreground: hsl(0, 0%, 100%);
+    --info-weak: hsl(180, 49%, 90%);
+  
+    --highlight: hsl(313, 30%, 45%);
+    --highlight-foreground: hsl(0, 0%, 100%);
+    --highlight-weak: hsl(313, 30%, 90%);
+  
+    --progress: hsl(142, 36%, 45%);
+    --progress-foreground: hsl(0, 0%, 100%);
+    --progress-weak: hsl(142, 36%, 90%);
+  
+    /* Typography */
+    --font-xxxl: 2.25rem;
+    --font-xxl: 1.5rem;
+    --font-xl: 1.25rem;
+    --font-l: 1rem;
+    --font-m: 0.875rem;
+    --font-s: 0.75rem;
+    --font-xs: 0.6875rem;
+  
+    /* Spacing */
+    --space-xxl: 72px;
+    --space-xl: 36px;
+    --space-l: 24px;
+    --space-m: 16px;
+    --space-s: 8px;
+    --space-xs: 4px;
+  
+    /* Surfaces et arrière-plans */
+    --surface-raised: hsl(50, 11%, 91%);
+    --surface-lowered: hsl(50, 11%, 83%);
+    --surface-hover: hsl(50, 11%, 93%);
+  
+    /* Ombres */
+    --shadow-sm: 0 1px 3px hsla(20, 12%, 5%, 0.08);
+    --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(20, 12%, 5%, 0.05);
+    --shadow-lg: 0 5px 17px hsla(20, 12%, 5%, 0.14);
+    --shadow-xl: 0 24px 38px 3px hsla(20, 12%, 5%, 0.16),
+      0 9px 46px 8px hsla(20, 12%, 5%, 0.1);
+  
+    /* Sidebar */
+    --sidebar-background: hsl(50, 11%, 91%);
+    --sidebar-foreground: hsl(20, 12%, 23%);
+    --sidebar-primary: hsl(29, 54%, 53%);
+    --sidebar-primary-foreground: hsl(20, 12%, 6%);
+    --sidebar-accent: hsl(50, 11%, 86%);
+    --sidebar-accent-foreground: hsl(20, 12%, 23%);
+    --sidebar-border: hsl(50, 11%, 78%);
+    --sidebar-ring: hsl(29, 54%, 60%);
+  }
+  
+  /* Version sombre du thème gruvbox */
+  .dark.theme-gruvbox,
+  .theme-gruvbox.dark {
+    --background: hsl(20, 12%, 18%);
+    --foreground: hsl(50, 11%, 87%);
+  
+    --card: hsl(20, 12%, 20%);
+    --card-foreground: hsl(50, 11%, 87%);
+  
+    --popover: hsl(20, 12%, 20%);
+    --popover-foreground: hsl(50, 11%, 87%);
+  
+    --primary: hsl(29, 54%, 53%);
+    --primary-foreground: hsl(20, 12%, 6%);
+  
+    --secondary: hsl(20, 12%, 28%);
+    --secondary-foreground: hsl(50, 11%, 87%);
+  
+    --muted: hsl(20, 12%, 28%);
+    --muted-foreground: hsl(50, 11%, 60%);
+  
+    --accent: hsl(15, 56%, 50%);
+    --accent-foreground: hsl(50, 11%, 87%);
+  
+    --destructive: hsl(0, 74%, 50%);
+    --destructive-foreground: hsl(0, 0%, 98%);
+  
+    --border: hsl(20, 12%, 30%);
+    --input: hsl(20, 12%, 30%);
+    --ring: hsl(50, 11%, 75%);
+  
+    /* Couleurs pour états et statuts */
+    --success: hsl(98, 35%, 45%);
+    --success-foreground: hsl(0, 0%, 98%);
+    --success-weak: hsl(98, 20%, 25%);
+  
+    --warning: hsl(42, 80%, 52%);
+    --warning-foreground: hsl(40, 15%, 12%);
+    --warning-weak: hsl(42, 30%, 25%);
+  
+    --info: hsl(180, 49%, 45%);
+    --info-foreground: hsl(0, 0%, 98%);
+    --info-weak: hsl(180, 30%, 25%);
+  
+    --highlight: hsl(313, 30%, 45%);
+    --highlight-foreground: hsl(0, 0%, 98%);
+    --highlight-weak: hsl(313, 30%, 25%);
+  
+    --progress: hsl(142, 36%, 45%);
+    --progress-foreground: hsl(0, 0%, 98%);
+    --progress-weak: hsl(142, 30%, 25%);
+  
+    /* Surfaces et arrière-plans */
+    --surface-raised: hsl(20, 12%, 22%);
+    --surface-lowered: hsl(20, 12%, 15%);
+    --surface-hover: hsl(20, 12%, 25%);
+  
+    /* Ombres pour le mode sombre */
+    --shadow-sm: 0 1px 3px hsla(20, 12%, 0%, 0.15);
+    --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(20, 12%, 0%, 0.15);
+    --shadow-lg: 0 5px 17px hsla(20, 12%, 0%, 0.24);
+    --shadow-xl: 0 0 0 1px var(--border), 0 24px 38px 3px hsla(20, 12%, 0%, 0.34);
+  
+    /* Sidebar pour le mode sombre */
+    --sidebar-background: hsl(20, 12%, 18%);
+    --sidebar-foreground: hsl(50, 11%, 87%);
+    --sidebar-primary: hsl(29, 54%, 53%);
+    --sidebar-primary-foreground: hsl(20, 12%, 6%);
+    --sidebar-accent: hsl(20, 12%, 23%);
+    --sidebar-accent-foreground: hsl(50, 11%, 87%);
+    --sidebar-border: hsl(20, 12%, 23%);
+    --sidebar-ring: hsl(29, 54%, 60%);
+  }

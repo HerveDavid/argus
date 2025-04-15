@@ -1,0 +1,149 @@
+/* theme-nord.css */
+
+/* Light theme version (though Nord is primarily a dark theme) */
+.theme-nord {
+  --background: hsl(220, 16%, 94%);
+  --foreground: hsl(220, 16%, 22%);
+
+  --card: hsl(220, 16%, 98%);
+  --card-foreground: hsl(220, 16%, 22%);
+
+  --popover: hsl(220, 16%, 98%);
+  --popover-foreground: hsl(220, 16%, 22%);
+
+  --primary: hsl(213, 32%, 52%);
+  --primary-foreground: hsl(218, 27%, 94%);
+
+  --secondary: hsl(220, 16%, 92%);
+  --secondary-foreground: hsl(220, 16%, 20%);
+
+  --muted: hsl(220, 16%, 92%);
+  --muted-foreground: hsl(220, 16%, 42%);
+
+  --accent: hsl(210, 34%, 63%);
+  --accent-foreground: hsl(220, 16%, 22%);
+
+  --destructive: hsl(354, 42%, 56%);
+  --destructive-foreground: hsl(218, 27%, 94%);
+
+  --border: hsl(220, 16%, 86%);
+  --input: hsl(220, 16%, 86%);
+  --ring: hsl(213, 32%, 52%);
+
+  /* Status colors for light mode */
+  --success: hsl(92, 28%, 65%);
+  --success-foreground: hsl(220, 16%, 22%);
+  --success-weak: hsla(92, 28%, 65%, 0.2);
+
+  --warning: hsl(14, 51%, 63%);
+  --warning-foreground: hsl(220, 16%, 22%);
+  --warning-weak: hsla(14, 51%, 63%, 0.2);
+
+  --info: hsl(193, 43%, 67%);
+  --info-foreground: hsl(220, 16%, 22%);
+  --info-weak: hsla(193, 43%, 67%, 0.2);
+
+  --highlight: hsl(311, 20%, 63%);
+  --highlight-foreground: hsl(220, 16%, 22%);
+  --highlight-weak: hsla(311, 20%, 63%, 0.2);
+
+  --progress: hsl(179, 25%, 65%);
+  --progress-foreground: hsl(220, 16%, 22%);
+  --progress-weak: hsla(179, 25%, 65%, 0.2);
+
+  /* Surfaces and backgrounds for light mode */
+  --surface-raised: hsl(220, 16%, 100%);
+  --surface-lowered: hsl(220, 16%, 90%);
+  --surface-hover: hsl(220, 16%, 96%);
+
+  /* Shadows for light mode */
+  --shadow-sm: 0 1px 3px hsla(220, 16%, 5%, 0.1);
+  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(220, 16%, 5%, 0.08);
+  --shadow-lg: 0 5px 17px hsla(220, 16%, 5%, 0.12);
+  --shadow-xl: 0 24px 38px 3px hsla(220, 16%, 5%, 0.1);
+
+  /* Sidebar for light mode */
+  --sidebar-background: hsl(220, 16%, 96%);
+  --sidebar-foreground: hsl(220, 16%, 22%);
+  --sidebar-primary: hsl(213, 32%, 52%);
+  --sidebar-primary-foreground: hsl(218, 27%, 94%);
+  --sidebar-accent: hsl(220, 16%, 92%);
+  --sidebar-accent-foreground: hsl(220, 16%, 22%);
+  --sidebar-border: hsl(220, 16%, 88%);
+  --sidebar-ring: hsl(213, 32%, 52%);
+}
+
+.dark.theme-nord,
+.theme-nord.dark {
+
+  /* Basic UI variables */
+  --background: hsl(220, 16%, 22%);
+  --foreground: hsl(219, 28%, 88%);
+
+  --card: hsl(222, 16%, 28%);
+  --card-foreground: hsl(219, 28%, 88%);
+
+  --popover: hsl(222, 16%, 28%);
+  --popover-foreground: hsl(219, 28%, 88%);
+
+  --primary: hsl(193, 43%, 67%);
+  --primary-foreground: hsl(220, 16%, 22%);
+
+  --secondary: hsl(220, 17%, 32%);
+  --secondary-foreground: hsl(219, 28%, 88%);
+
+  --muted: hsl(220, 17%, 32%);
+  --muted-foreground: hsl(218, 27%, 80%);
+
+  --accent: hsl(210, 34%, 63%);
+  --accent-foreground: hsl(220, 16%, 22%);
+
+  --destructive: hsl(354, 42%, 56%);
+  --destructive-foreground: hsl(218, 27%, 94%);
+
+  --border: hsl(220, 17%, 32%);
+  --input: hsl(220, 17%, 32%);
+  --ring: hsl(193, 43%, 67%);
+
+  /* Status colors */
+  --success: hsl(92, 28%, 65%);
+  --success-foreground: hsl(220, 16%, 22%);
+  --success-weak: hsla(92, 28%, 65%, 0.15);
+
+  --warning: hsl(40, 71%, 73%);
+  --warning-foreground: hsl(220, 16%, 22%);
+  --warning-weak: hsla(40, 71%, 73%, 0.15);
+
+  --info: hsl(193, 43%, 67%);
+  --info-foreground: hsl(220, 16%, 22%);
+  --info-weak: hsla(193, 43%, 67%, 0.15);
+
+  --highlight: hsl(311, 20%, 63%);
+  --highlight-foreground: hsl(220, 16%, 22%);
+  --highlight-weak: hsla(311, 20%, 63%, 0.15);
+
+  --progress: hsl(179, 25%, 65%);
+  --progress-foreground: hsl(220, 16%, 22%);
+  --progress-weak: hsla(179, 25%, 65%, 0.15);
+
+  /* Surfaces and backgrounds */
+  --surface-raised: hsl(222, 16%, 28%);
+  --surface-lowered: hsl(222, 16%, 20%); /* Slightly darker than base background */
+  --surface-hover: hsl(220, 17%, 32%);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px hsla(220, 16%, 0%, 0.2);
+  --shadow-md: 0 0 0 1px var(--border), 0 1px 5px hsla(220, 16%, 0%, 0.2);
+  --shadow-lg: 0 5px 17px hsla(220, 16%, 0%, 0.26);
+  --shadow-xl: 0 0 0 1px var(--border), 0 24px 38px 3px hsla(220, 16%, 0%, 0.36);
+
+  /* Sidebar */
+  --sidebar-background: hsl(220, 16%, 22%);
+  --sidebar-foreground: hsl(219, 28%, 88%);
+  --sidebar-primary: hsl(193, 43%, 67%);
+  --sidebar-primary-foreground: hsl(220, 16%, 22%);
+  --sidebar-accent: hsl(220, 17%, 32%);
+  --sidebar-accent-foreground: hsl(219, 28%, 88%);
+  --sidebar-border: hsl(220, 17%, 32%);
+  --sidebar-ring: hsl(193, 43%, 67%);
+}

@@ -1,1 +1,610 @@
-{"busInfos":[],"busLegendInfos":[],"components":[{"size":{"height":0.0,"width":0.0},"styleClass":"sld-busbar-section","type":"BUSBAR_SECTION"},{"anchorPoints":[{"orientation":"VERTICAL"},{"orientation":"VERTICAL"},{"orientation":"HORIZONTAL"},{"orientation":"HORIZONTAL"}],"size":{"height":12.0,"width":12.0},"styleClass":"sld-generator","type":"GENERATOR"},{"size":{"height":10.0,"width":10.0},"styleClass":"sld-reactive-power","transformations":{"LEFT":"ROTATION","RIGHT":"ROTATION"},"type":"ARROW_REACTIVE"},{"size":{"height":10.0,"width":10.0},"styleClass":"sld-active-power","transformations":{"LEFT":"ROTATION","RIGHT":"ROTATION"},"type":"ARROW_ACTIVE"},{"anchorPoints":[{"orientation":"NONE"}],"size":{"height":8.0,"width":8.0},"styleClass":"sld-node","type":"NODE"},{"anchorPoints":[{"orientation":"NONE"}],"size":{"height":0.0,"width":0.0},"type":"LINE"},{"anchorPoints":[{"orientation":"VERTICAL"}],"size":{"height":8.0,"width":8.0},"styleClass":"sld-bus-connection","type":"BUS_CONNECTION"},{"anchorPoints":[{"orientation":"NONE"}],"size":{"height":0.0,"width":0.0},"type":"TWO_WINDINGS_TRANSFORMER_LEG"},{"anchorPoints":[{"orientation":"VERTICAL"},{"orientation":"VERTICAL"}],"size":{"height":15.0,"width":10.0},"styleClass":"sld-two-wt","transformations":{"DOWN":"ROTATION","LEFT":"ROTATION","RIGHT":"ROTATION"},"type":"TWO_WINDINGS_TRANSFORMER"},{"size":{"height":10.0,"width":10.0},"styleClass":"sld-current","transformations":{"LEFT":"ROTATION","RIGHT":"ROTATION"},"type":"ARROW_CURRENT"}],"feederInfos":[{"componentType":"ARROW_CURRENT","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_TWO_ARROW_CURRENT","side":"TWO"},{"componentType":"ARROW_REACTIVE","equipmentId":"GEN","id":"idGEN_ARROW_REACTIVE"},{"componentType":"ARROW_ACTIVE","equipmentId":"NHV1_NHV2_2","id":"idNHV1_95_NHV2_95_2_95_ONE_ARROW_ACTIVE","side":"ONE"},{"componentType":"ARROW_CURRENT","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_ONE_ARROW_CURRENT","side":"ONE"},{"componentType":"ARROW_ACTIVE","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_TWO_ARROW_ACTIVE","side":"TWO"},{"componentType":"ARROW_REACTIVE","equipmentId":"NHV1_NHV2_1","id":"idNHV1_95_NHV2_95_1_95_ONE_ARROW_REACTIVE","side":"ONE"},{"componentType":"ARROW_REACTIVE","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_TWO_ARROW_REACTIVE","side":"TWO"},{"componentType":"ARROW_REACTIVE","equipmentId":"NHV1_NHV2_2","id":"idNHV1_95_NHV2_95_2_95_ONE_ARROW_REACTIVE","side":"ONE"},{"componentType":"ARROW_CURRENT","equipmentId":"GEN","id":"idGEN_ARROW_CURRENT"},{"componentType":"ARROW_CURRENT","equipmentId":"NHV1_NHV2_1","id":"idNHV1_95_NHV2_95_1_95_ONE_ARROW_CURRENT","side":"ONE"},{"componentType":"ARROW_ACTIVE","equipmentId":"GEN","id":"idGEN_ARROW_ACTIVE"},{"componentType":"ARROW_REACTIVE","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_ONE_ARROW_REACTIVE","side":"ONE"},{"componentType":"ARROW_ACTIVE","equipmentId":"NHV1_NHV2_1","id":"idNHV1_95_NHV2_95_1_95_ONE_ARROW_ACTIVE","side":"ONE"},{"componentType":"ARROW_CURRENT","equipmentId":"NHV1_NHV2_2","id":"idNHV1_95_NHV2_95_2_95_ONE_ARROW_CURRENT","side":"ONE"},{"componentType":"ARROW_ACTIVE","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_ONE_ARROW_ACTIVE","side":"ONE"}],"layoutParams":{"adaptCellHeightToContent":true,"busbarsAlignment":"FIRST","cellWidth":50.0,"cgmesDiagramName":null,"cgmesScaleFactor":1.0,"cgmesUseNames":true,"componentsOnBusbars":["DISCONNECTOR"],"diagramPadding":{"bottom":20.0,"left":20.0,"right":20.0,"top":20.0},"externCellHeight":250.0,"horizontalBusPadding":20.0,"horizontalSnakeLinePadding":20.0,"internCellHeight":40.0,"maxComponentHeight":12.0,"minExternCellHeight":80.0,"minSpaceBetweenComponents":15.0,"removeFictitiousSwitchNodes":false,"spaceForFeederInfos":50.0,"stackHeight":30.0,"verticalSnakeLinePadding":25.0,"verticalSpaceBus":25.0,"voltageLevelPadding":{"bottom":60.0,"left":20.0,"right":20.0,"top":60.0},"zoneLayoutSnakeLinePadding":90},"lines":[],"nodes":[{"componentType":"GENERATOR","direction":"TOP","equipmentId":"GEN","id":"idGEN","labels":[{"id":"GEN_N_LABEL","positionName":"N_LABEL"}],"open":false,"vid":"VLGEN","vlabel":false},{"id":"LABEL_VL_VLGEN","labels":[],"open":false,"vid":"VLGEN","vlabel":true},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"LINE","direction":"BOTTOM","equipmentId":"NHV1_NHV2_1","id":"idNHV1_95_NHV2_95_1_95_ONE","labels":[{"id":"NHV1_NHV2_1_ONE_S_LABEL","positionName":"S_LABEL"}],"nextVId":"VLHV2","open":false,"vid":"VLHV1","vlabel":false},{"componentType":"LINE","direction":"TOP","equipmentId":"NHV1_NHV2_2","id":"idNHV1_95_NHV2_95_2_95_ONE","labels":[{"id":"NHV1_NHV2_2_ONE_N_LABEL","positionName":"N_LABEL"}],"nextVId":"VLHV2","open":false,"vid":"VLHV1","vlabel":false},{"componentType":"TWO_WINDINGS_TRANSFORMER_LEG","direction":"BOTTOM","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_ONE","labels":[{"id":"NGEN_NHV1_ONE_S_LABEL","positionName":"S_LABEL"}],"nextVId":"VLGEN","open":false,"vid":"VLGEN","vlabel":false},{"componentType":"BUS_CONNECTION","id":"idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE","labels":[],"open":false,"vid":"VLGEN","vlabel":false},{"id":"LABEL_VL_VLHV1","labels":[],"open":false,"vid":"VLHV1","vlabel":true},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"BUSBAR_SECTION","equipmentId":"NHV1","id":"idNHV1","labels":[{"id":"NHV1_NW_LABEL","positionName":"NW_LABEL"}],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"BUS_CONNECTION","id":"idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN","labels":[],"open":false,"vid":"VLGEN","vlabel":false},{"componentType":"TWO_WINDINGS_TRANSFORMER","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1","labels":[],"open":false,"vid":"","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE","labels":[],"open":false,"vid":"VLGEN","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE","labels":[],"open":false,"vid":"VLGEN","vlabel":false},{"componentType":"BUSBAR_SECTION","equipmentId":"NGEN","id":"idNGEN","labels":[{"id":"NGEN_NW_LABEL","positionName":"NW_LABEL"}],"open":false,"vid":"VLGEN","vlabel":false},{"componentType":"TWO_WINDINGS_TRANSFORMER_LEG","direction":"TOP","equipmentId":"NGEN_NHV1","id":"idNGEN_95_NHV1_95_TWO","labels":[{"id":"NGEN_NHV1_TWO_N_LABEL","positionName":"N_LABEL"}],"nextVId":"VLHV1","open":false,"vid":"VLHV1","vlabel":false},{"componentType":"BUS_CONNECTION","id":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"BUS_CONNECTION","id":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE","labels":[],"open":false,"vid":"VLHV1","vlabel":false},{"componentType":"NODE","id":"idINTERNAL_95_VLGEN_95_GEN","labels":[],"open":false,"vid":"VLGEN","vlabel":false},{"componentType":"BUS_CONNECTION","id":"idBUSCO_95_NGEN_95_GEN","labels":[],"open":false,"vid":"VLGEN","vlabel":false}],"svgParams":{"activePowerUnit":"MW","angleLabelShift":15.0,"angleValuePrecision":1,"avoidSVGComponentsDuplication":false,"busInfoMargin":0.0,"busesLegendAdded":true,"cssLocation":"INSERTED_IN_SVG","currentUnit":"","currentValuePrecision":0,"diagramName":null,"displayConnectivityNodesId":false,"displayCurrentFeederInfo":true,"displayEquipmentNodesLabel":false,"drawStraightWires":false,"feederInfoSymmetry":false,"feederInfosIntraMargin":10.0,"feederInfosOuterMargin":20.0,"labelCentered":true,"labelDiagonal":true,"languageTag":"en","powerValuePrecision":0,"prefixId":"","reactivePowerUnit":"","showGrid":false,"showInternalNodes":false,"svgWidthAndHeightAdded":true,"tooltipEnabled":true,"undefinedValueSymbol":"\u2014","unifyVoltageLevelColors":false,"useName":true,"voltageValuePrecision":1},"wires":[{"id":"_95_VLGEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN_95_INTERNAL_95_VLGEN_95_GEN","nodeId1":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN","nodeId2":"idINTERNAL_95_VLGEN_95_GEN","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_INTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE_95_NGEN_95_NHV1_95_ONE","nodeId1":"idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE","nodeId2":"idNGEN_95_NHV1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO","nodeId1":"idNHV1","nodeId2":"idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO_95_NGEN_95_NHV1_95_TWO","nodeId1":"idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO","nodeId2":"idNGEN_95_NHV1_95_TWO","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_NGEN_95_BUSCO_95_NGEN_95_GEN","nodeId1":"idNGEN","nodeId2":"idBUSCO_95_NGEN_95_GEN","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE_95_NHV1_95_NHV2_95_2_95_ONE","nodeId1":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE","nodeId2":"idNHV1_95_NHV2_95_2_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO","nodeId1":"idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO","nodeId2":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE_95_NHV1_95_NHV2_95_1_95_ONE","nodeId1":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE","nodeId2":"idNHV1_95_NHV2_95_1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE","nodeId1":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE","nodeId2":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_NGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE","nodeId1":"idNGEN","nodeId2":"idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE","snakeLine":false,"straight":false},{"id":"idEDGE_95_NGEN_95_NHV1_95_ONE","nodeId1":"idNGEN_95_NHV1_95_ONE","nodeId2":"idNGEN_95_NHV1","snakeLine":true,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO_95_INTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO","nodeId1":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO","nodeId2":"idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE_95_INTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE","nodeId1":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE","nodeId2":"idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE","nodeId1":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE","nodeId2":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_INTERNAL_95_VLGEN_95_GEN_95_GEN","nodeId1":"idINTERNAL_95_VLGEN_95_GEN","nodeId2":"idGEN","snakeLine":false,"straight":false},{"id":"idEDGE_95_NGEN_95_NHV1_95_TWO","nodeId1":"idNGEN_95_NHV1_95_TWO","nodeId2":"idNGEN_95_NHV1","snakeLine":true,"straight":false},{"id":"_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN","nodeId1":"idBUSCO_95_NGEN_95_GEN","nodeId2":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE","nodeId1":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE","nodeId2":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE","nodeId1":"idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE","nodeId2":"idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE","nodeId1":"idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE","nodeId2":"idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE","nodeId1":"idNHV1","nodeId2":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE","snakeLine":false,"straight":false},{"id":"_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE","nodeId1":"idNHV1","nodeId2":"idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE","snakeLine":false,"straight":false}]}
+{
+  "busInfos": [],
+  "busLegendInfos": [],
+  "components": [
+    {
+      "size": { "height": 0.0, "width": 0.0 },
+      "styleClass": "sld-busbar-section",
+      "type": "BUSBAR_SECTION"
+    },
+    {
+      "anchorPoints": [
+        { "orientation": "VERTICAL" },
+        { "orientation": "VERTICAL" },
+        { "orientation": "HORIZONTAL" },
+        { "orientation": "HORIZONTAL" }
+      ],
+      "size": { "height": 12.0, "width": 12.0 },
+      "styleClass": "sld-generator",
+      "type": "GENERATOR"
+    },
+    {
+      "size": { "height": 10.0, "width": 10.0 },
+      "styleClass": "sld-reactive-power",
+      "transformations": { "LEFT": "ROTATION", "RIGHT": "ROTATION" },
+      "type": "ARROW_REACTIVE"
+    },
+    {
+      "size": { "height": 10.0, "width": 10.0 },
+      "styleClass": "sld-active-power",
+      "transformations": { "LEFT": "ROTATION", "RIGHT": "ROTATION" },
+      "type": "ARROW_ACTIVE"
+    },
+    {
+      "anchorPoints": [{ "orientation": "NONE" }],
+      "size": { "height": 8.0, "width": 8.0 },
+      "styleClass": "sld-node",
+      "type": "NODE"
+    },
+    {
+      "anchorPoints": [{ "orientation": "NONE" }],
+      "size": { "height": 0.0, "width": 0.0 },
+      "type": "LINE"
+    },
+    {
+      "anchorPoints": [{ "orientation": "VERTICAL" }],
+      "size": { "height": 8.0, "width": 8.0 },
+      "styleClass": "sld-bus-connection",
+      "type": "BUS_CONNECTION"
+    },
+    {
+      "anchorPoints": [{ "orientation": "NONE" }],
+      "size": { "height": 0.0, "width": 0.0 },
+      "type": "TWO_WINDINGS_TRANSFORMER_LEG"
+    },
+    {
+      "anchorPoints": [
+        { "orientation": "VERTICAL" },
+        { "orientation": "VERTICAL" }
+      ],
+      "size": { "height": 15.0, "width": 10.0 },
+      "styleClass": "sld-two-wt",
+      "transformations": {
+        "DOWN": "ROTATION",
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "type": "TWO_WINDINGS_TRANSFORMER"
+    },
+    {
+      "size": { "height": 10.0, "width": 10.0 },
+      "styleClass": "sld-current",
+      "transformations": { "LEFT": "ROTATION", "RIGHT": "ROTATION" },
+      "type": "ARROW_CURRENT"
+    }
+  ],
+  "feederInfos": [
+    {
+      "componentType": "ARROW_CURRENT",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_TWO_ARROW_CURRENT",
+      "side": "TWO"
+    },
+    {
+      "componentType": "ARROW_REACTIVE",
+      "equipmentId": "GEN",
+      "id": "idGEN_ARROW_REACTIVE"
+    },
+    {
+      "componentType": "ARROW_ACTIVE",
+      "equipmentId": "NHV1_NHV2_2",
+      "id": "idNHV1_95_NHV2_95_2_95_ONE_ARROW_ACTIVE",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_CURRENT",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_ONE_ARROW_CURRENT",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_ACTIVE",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_TWO_ARROW_ACTIVE",
+      "side": "TWO"
+    },
+    {
+      "componentType": "ARROW_REACTIVE",
+      "equipmentId": "NHV1_NHV2_1",
+      "id": "idNHV1_95_NHV2_95_1_95_ONE_ARROW_REACTIVE",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_REACTIVE",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_TWO_ARROW_REACTIVE",
+      "side": "TWO"
+    },
+    {
+      "componentType": "ARROW_REACTIVE",
+      "equipmentId": "NHV1_NHV2_2",
+      "id": "idNHV1_95_NHV2_95_2_95_ONE_ARROW_REACTIVE",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_CURRENT",
+      "equipmentId": "GEN",
+      "id": "idGEN_ARROW_CURRENT"
+    },
+    {
+      "componentType": "ARROW_CURRENT",
+      "equipmentId": "NHV1_NHV2_1",
+      "id": "idNHV1_95_NHV2_95_1_95_ONE_ARROW_CURRENT",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_ACTIVE",
+      "equipmentId": "GEN",
+      "id": "idGEN_ARROW_ACTIVE"
+    },
+    {
+      "componentType": "ARROW_REACTIVE",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_ONE_ARROW_REACTIVE",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_ACTIVE",
+      "equipmentId": "NHV1_NHV2_1",
+      "id": "idNHV1_95_NHV2_95_1_95_ONE_ARROW_ACTIVE",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_CURRENT",
+      "equipmentId": "NHV1_NHV2_2",
+      "id": "idNHV1_95_NHV2_95_2_95_ONE_ARROW_CURRENT",
+      "side": "ONE"
+    },
+    {
+      "componentType": "ARROW_ACTIVE",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_ONE_ARROW_ACTIVE",
+      "side": "ONE"
+    }
+  ],
+  "layoutParams": {
+    "adaptCellHeightToContent": true,
+    "busbarsAlignment": "FIRST",
+    "cellWidth": 50.0,
+    "cgmesDiagramName": null,
+    "cgmesScaleFactor": 1.0,
+    "cgmesUseNames": true,
+    "componentsOnBusbars": ["DISCONNECTOR"],
+    "diagramPadding": {
+      "bottom": 20.0,
+      "left": 20.0,
+      "right": 20.0,
+      "top": 20.0
+    },
+    "externCellHeight": 250.0,
+    "horizontalBusPadding": 20.0,
+    "horizontalSnakeLinePadding": 20.0,
+    "internCellHeight": 40.0,
+    "maxComponentHeight": 12.0,
+    "minExternCellHeight": 80.0,
+    "minSpaceBetweenComponents": 15.0,
+    "removeFictitiousSwitchNodes": false,
+    "spaceForFeederInfos": 50.0,
+    "stackHeight": 30.0,
+    "verticalSnakeLinePadding": 25.0,
+    "verticalSpaceBus": 25.0,
+    "voltageLevelPadding": {
+      "bottom": 60.0,
+      "left": 20.0,
+      "right": 20.0,
+      "top": 60.0
+    },
+    "zoneLayoutSnakeLinePadding": 90
+  },
+  "lines": [],
+  "nodes": [
+    {
+      "componentType": "GENERATOR",
+      "direction": "TOP",
+      "equipmentId": "GEN",
+      "id": "idGEN",
+      "labels": [{ "id": "GEN_N_LABEL", "positionName": "N_LABEL" }],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "id": "LABEL_VL_VLGEN",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": true
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "LINE",
+      "direction": "BOTTOM",
+      "equipmentId": "NHV1_NHV2_1",
+      "id": "idNHV1_95_NHV2_95_1_95_ONE",
+      "labels": [
+        { "id": "NHV1_NHV2_1_ONE_S_LABEL", "positionName": "S_LABEL" }
+      ],
+      "nextVId": "VLHV2",
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "LINE",
+      "direction": "TOP",
+      "equipmentId": "NHV1_NHV2_2",
+      "id": "idNHV1_95_NHV2_95_2_95_ONE",
+      "labels": [
+        { "id": "NHV1_NHV2_2_ONE_N_LABEL", "positionName": "N_LABEL" }
+      ],
+      "nextVId": "VLHV2",
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "TWO_WINDINGS_TRANSFORMER_LEG",
+      "direction": "BOTTOM",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_ONE",
+      "labels": [{ "id": "NGEN_NHV1_ONE_S_LABEL", "positionName": "S_LABEL" }],
+      "nextVId": "VLGEN",
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUS_CONNECTION",
+      "id": "idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "id": "LABEL_VL_VLHV1",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": true
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUSBAR_SECTION",
+      "equipmentId": "NHV1",
+      "id": "idNHV1",
+      "labels": [{ "id": "NHV1_NW_LABEL", "positionName": "NW_LABEL" }],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUS_CONNECTION",
+      "id": "idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "TWO_WINDINGS_TRANSFORMER",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1",
+      "labels": [],
+      "open": false,
+      "vid": "",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUSBAR_SECTION",
+      "equipmentId": "NGEN",
+      "id": "idNGEN",
+      "labels": [{ "id": "NGEN_NW_LABEL", "positionName": "NW_LABEL" }],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "TWO_WINDINGS_TRANSFORMER_LEG",
+      "direction": "TOP",
+      "equipmentId": "NGEN_NHV1",
+      "id": "idNGEN_95_NHV1_95_TWO",
+      "labels": [{ "id": "NGEN_NHV1_TWO_N_LABEL", "positionName": "N_LABEL" }],
+      "nextVId": "VLHV1",
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUS_CONNECTION",
+      "id": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUS_CONNECTION",
+      "id": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE",
+      "labels": [],
+      "open": false,
+      "vid": "VLHV1",
+      "vlabel": false
+    },
+    {
+      "componentType": "NODE",
+      "id": "idINTERNAL_95_VLGEN_95_GEN",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    },
+    {
+      "componentType": "BUS_CONNECTION",
+      "id": "idBUSCO_95_NGEN_95_GEN",
+      "labels": [],
+      "open": false,
+      "vid": "VLGEN",
+      "vlabel": false
+    }
+  ],
+  "svgParams": {
+    "activePowerUnit": "MW",
+    "angleLabelShift": 15.0,
+    "angleValuePrecision": 1,
+    "avoidSVGComponentsDuplication": false,
+    "busInfoMargin": 0.0,
+    "busesLegendAdded": true,
+    "cssLocation": "INSERTED_IN_SVG",
+    "currentUnit": "",
+    "currentValuePrecision": 0,
+    "diagramName": null,
+    "displayConnectivityNodesId": false,
+    "displayCurrentFeederInfo": true,
+    "displayEquipmentNodesLabel": false,
+    "drawStraightWires": false,
+    "feederInfoSymmetry": false,
+    "feederInfosIntraMargin": 10.0,
+    "feederInfosOuterMargin": 20.0,
+    "labelCentered": true,
+    "labelDiagonal": true,
+    "languageTag": "en",
+    "powerValuePrecision": 0,
+    "prefixId": "",
+    "reactivePowerUnit": "",
+    "showGrid": false,
+    "showInternalNodes": false,
+    "svgWidthAndHeightAdded": true,
+    "tooltipEnabled": true,
+    "undefinedValueSymbol": "\u2014",
+    "unifyVoltageLevelColors": false,
+    "useName": true,
+    "voltageValuePrecision": 1
+  },
+  "wires": [
+    {
+      "id": "_95_VLGEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN_95_INTERNAL_95_VLGEN_95_GEN",
+      "nodeId1": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN",
+      "nodeId2": "idINTERNAL_95_VLGEN_95_GEN",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_INTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE_95_NGEN_95_NHV1_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE",
+      "nodeId2": "idNGEN_95_NHV1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO",
+      "nodeId1": "idNHV1",
+      "nodeId2": "idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO_95_NGEN_95_NHV1_95_TWO",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO",
+      "nodeId2": "idNGEN_95_NHV1_95_TWO",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_NGEN_95_BUSCO_95_NGEN_95_GEN",
+      "nodeId1": "idNGEN",
+      "nodeId2": "idBUSCO_95_NGEN_95_GEN",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE_95_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId2": "idNHV1_95_NHV2_95_2_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO",
+      "nodeId1": "idBUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE_95_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId2": "idNHV1_95_NHV2_95_1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId1": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_NGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE",
+      "nodeId1": "idNGEN",
+      "nodeId2": "idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "idEDGE_95_NGEN_95_NHV1_95_ONE",
+      "nodeId1": "idNGEN_95_NHV1_95_ONE",
+      "nodeId2": "idNGEN_95_NHV1",
+      "snakeLine": true,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO_95_INTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NGEN_95_NHV1_95_TWO_45_NGEN_95_NHV1_95_TWO",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_NGEN_95_NHV1_95_TWO",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE_95_INTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLGEN_95_NGEN_95_NHV1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId1": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_INTERNAL_95_VLGEN_95_GEN_95_GEN",
+      "nodeId1": "idINTERNAL_95_VLGEN_95_GEN",
+      "nodeId2": "idGEN",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "idEDGE_95_NGEN_95_NHV1_95_TWO",
+      "nodeId1": "idNGEN_95_NHV1_95_TWO",
+      "nodeId2": "idNGEN_95_NHV1",
+      "snakeLine": true,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN",
+      "nodeId1": "idBUSCO_95_NGEN_95_GEN",
+      "nodeId2": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_GEN_45_GEN",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE_45_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_INTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE_95_INTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId1": "idINTERNAL_95_VLHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE_45_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_95_INTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE",
+      "nodeId1": "idBUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE",
+      "nodeId2": "idINTERNAL_95_VLGEN_95_BUSCO_95_NGEN_95_NGEN_95_NHV1_95_ONE_45_NGEN_95_NHV1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "nodeId1": "idNHV1",
+      "nodeId2": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_1_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    },
+    {
+      "id": "_95_VLHV1_95_NHV1_95_BUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "nodeId1": "idNHV1",
+      "nodeId2": "idBUSCO_95_NHV1_95_NHV1_95_NHV2_95_2_95_ONE",
+      "snakeLine": false,
+      "straight": false
+    }
+  ]
+}

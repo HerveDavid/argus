@@ -150,7 +150,6 @@ async fn fetch_separate_diagram_and_metadata(
     // Execute both requests in parallel
     let svg_future = fetch_diagram_svg(client, server_url, line_id);
     let metadata_future = fetch_diagram_metadata(client, server_url, line_id);
-
     let (svg, metadata) = futures::join!(svg_future, metadata_future);
 
     Ok(DiagramResult {

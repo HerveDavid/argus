@@ -1,22 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useErrorHandling } from './use-error-handling';
 import {
   getPaginatedSubstations,
   loadSubstations,
+  searchSubstations,
 } from '../api/get-substations';
 
 // Query keys as constants for consistency
 const QUERY_KEYS = {
   SUBSTATIONS_CHECK: 'substationsCheck',
   SUBSTATIONS: 'substations',
+  SUBSTATIONS_SEARCH: 'substationsSearch',
 };
 
 export const useSubstations = (initialItemsPerPage = 20) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(initialItemsPerPage);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchFields, setSearchFields] = useState<string[] | undefined>(
+    undefined,
+  );
+  const [isSearching, setIsSearching] = useState(false);
+
   const queryClient = useQueryClient();
   const { errors, setError, clearError, clearAllErrors } = useErrorHandling();
+
+  // Reset to page 1 when search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, searchFields]);
 
   // Check if initial data exists
   const initialDataCheck = useQuery({
@@ -36,15 +49,29 @@ export const useSubstations = (initialItemsPerPage = 20) => {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
-  // Fetch paginated substations
+  // Fetch paginated substations or search results based on isSearching flag
   const substationsQuery = useQuery({
-    queryKey: [QUERY_KEYS.SUBSTATIONS, currentPage, itemsPerPage],
+    queryKey: [
+      isSearching ? QUERY_KEYS.SUBSTATIONS_SEARCH : QUERY_KEYS.SUBSTATIONS,
+      currentPage,
+      itemsPerPage,
+      searchQuery,
+      searchFields,
+    ],
     queryFn: async () => {
       try {
-        return await getPaginatedSubstations({
-          page: currentPage,
-          per_page: itemsPerPage,
-        });
+        if (isSearching && searchQuery.trim()) {
+          return await searchSubstations(
+            searchQuery,
+            { page: currentPage, per_page: itemsPerPage },
+            searchFields,
+          );
+        } else {
+          return await getPaginatedSubstations({
+            page: currentPage,
+            per_page: itemsPerPage,
+          });
+        }
       } catch (error) {
         setError('substationsQuery', error, () => substationsQuery.refetch());
         throw error;
@@ -61,6 +88,9 @@ export const useSubstations = (initialItemsPerPage = 20) => {
       clearError('loadAllSubstations');
       invalidateQueries();
       setCurrentPage(1);
+      // Reset search state on reload
+      setSearchQuery('');
+      setIsSearching(false);
     },
     onError: (error) => {
       setError('loadAllSubstations', error, handleLoadAllSubstations);
@@ -75,12 +105,30 @@ export const useSubstations = (initialItemsPerPage = 20) => {
     queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.SUBSTATIONS],
     });
+    queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.SUBSTATIONS_SEARCH],
+    });
   };
 
   // Handle loading all substations
   const handleLoadAllSubstations = () => {
     clearError('loadAllSubstations');
     loadAllSubstationsMutation.mutate();
+  };
+
+  // Search functions
+  const handleSearch = (query: string, fields?: string[]) => {
+    setSearchQuery(query);
+    setSearchFields(fields);
+    setIsSearching(!!query.trim());
+    setCurrentPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchFields(undefined);
+    setIsSearching(false);
+    setCurrentPage(1);
   };
 
   // Pagination controls
@@ -110,5 +158,13 @@ export const useSubstations = (initialItemsPerPage = 20) => {
     goToPreviousPage,
     errors,
     clearAllErrors,
+
+    // Search related
+    searchQuery,
+    isSearching,
+    handleSearch,
+    clearSearch,
+    searchFields,
+    setSearchFields,
   };
 };

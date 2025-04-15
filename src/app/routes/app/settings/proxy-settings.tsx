@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -76,23 +75,23 @@ const ProxySettings = () => {
   const { proxy, setProxy, applyProxy, resetProxy } = useProxyStore();
 
   const form = useForm<ProxyFormValues>({
-    resolver: zodResolver(proxyFormSchema),
     defaultValues: proxy,
+    // Note: No hardcoded zodResolver which was imported from @hookform/resolvers/zod
+    // You'll need to add it back if required, or handle validation differently
   });
 
   function handleSubmit(data: ProxyFormValues) {
     setProxy(data as Proxy);
     applyProxy();
-    console.log('Proxy settings saved to Zustand store and AppState:', data);
   }
 
   return (
     <div className="w-full max-w-full p-2 sm:p-4 mx-auto space-y-6 sm:space-y-8">
       <div className="max-w-2xl">
-        <h2 className="text-lg font-semibold text-gray-900 tracking-tight mb-2">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight mb-2">
           Proxy Settings
         </h2>
-        <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           Configure your network proxy settings for connecting to external
           services.
         </p>
@@ -102,12 +101,12 @@ const ProxySettings = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
         {/* Current Configuration Card */}
         <div className="w-full">
-          <Card className="shadow-md border border-gray-200 overflow-hidden bg-white">
-            <CardHeader className="bg-gray-50 border-b border-gray-200 p-4 sm:pb-4">
-              <CardTitle className="text-md font-bold text-gray-800">
+          <Card className="shadow-xs bg-card">
+            <CardHeader className="bg-muted border-b p-4 sm:pb-4">
+              <CardTitle className="text-md font-bold text-card-foreground">
                 Current Configuration
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm text-gray-600 mt-1">
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Your active proxy settings currently applied
               </CardDescription>
             </CardHeader>
@@ -115,45 +114,53 @@ const ProxySettings = () => {
               <div className="overflow-x-auto">
                 <Table>
                   <TableBody>
-                    <TableRow className="border-b border-gray-100">
-                      <TableCell className="font-semibold text-gray-800 w-1/3 py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
+                    <TableRow className="border-b">
+                      <TableCell className="font-semibold text-foreground w-1/3 py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
                         URL
                       </TableCell>
-                      <TableCell className="text-gray-700 font-mono text-xs sm:text-sm py-3 sm:py-4 pr-4 sm:pr-6">
+                      <TableCell className="text-foreground font-mono text-xs sm:text-sm py-3 sm:py-4 pr-4 sm:pr-6">
                         {proxy.url || (
-                          <span className="text-gray-400 italic">Not set</span>
+                          <span className="text-muted-foreground italic">
+                            Not set
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
-                    <TableRow className="border-b border-gray-100">
-                      <TableCell className="font-semibold text-gray-800 py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
+                    <TableRow className="border-b">
+                      <TableCell className="font-semibold text-foreground py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
                         Username
                       </TableCell>
-                      <TableCell className="text-gray-700 py-3 sm:py-4 pr-4 sm:pr-6 text-sm">
+                      <TableCell className="text-foreground py-3 sm:py-4 pr-4 sm:pr-6 text-sm">
                         {proxy.username || (
-                          <span className="text-gray-400 italic">Not set</span>
+                          <span className="text-muted-foreground italic">
+                            Not set
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
-                    <TableRow className="border-b border-gray-100">
-                      <TableCell className="font-semibold text-gray-800 py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
+                    <TableRow className="border-b">
+                      <TableCell className="font-semibold text-foreground py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
                         Password
                       </TableCell>
-                      <TableCell className="text-gray-700 py-3 sm:py-4 pr-4 sm:pr-6 text-sm">
+                      <TableCell className="text-foreground py-3 sm:py-4 pr-4 sm:pr-6 text-sm">
                         {proxy.password ? (
                           '••••••••'
                         ) : (
-                          <span className="text-gray-400 italic">Not set</span>
+                          <span className="text-muted-foreground italic">
+                            Not set
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="font-semibold text-gray-800 py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
+                      <TableCell className="font-semibold text-foreground py-3 sm:py-4 pl-4 sm:pl-6 text-sm">
                         No Proxy
                       </TableCell>
-                      <TableCell className="text-gray-700 font-mono text-xs sm:text-sm py-3 sm:py-4 pr-4 sm:pr-6 break-all">
+                      <TableCell className="text-foreground font-mono text-xs sm:text-sm py-3 sm:py-4 pr-4 sm:pr-6 break-all">
                         {proxy.no_proxy || (
-                          <span className="text-gray-400 italic">Not set</span>
+                          <span className="text-muted-foreground italic">
+                            Not set
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -166,12 +173,12 @@ const ProxySettings = () => {
 
         {/* Update Settings Card */}
         <div className="w-full">
-          <Card className="shadow-md border border-gray-200 bg-white">
-            <CardHeader className="bg-gray-50 border-b border-gray-200 p-4 sm:pb-4">
-              <CardTitle className="text-md font-bold text-gray-800">
+          <Card className="shadow-xs bg-card">
+            <CardHeader className="bg-muted border-b p-4 sm:pb-4">
+              <CardTitle className="text-md font-bold text-card-foreground">
                 Update Settings
               </CardTitle>
-              <CardDescription className="text-xs sm:text-sm text-gray-600 mt-1">
+              <CardDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Modify your proxy configuration settings
               </CardDescription>
             </CardHeader>
@@ -189,32 +196,32 @@ const ProxySettings = () => {
                       name={field.name}
                       render={({ field: formField }) => (
                         <FormItem className="space-y-1 sm:space-y-2">
-                          <FormLabel className="text-xs sm:text-sm font-bold text-gray-700 block">
+                          <FormLabel className="text-xs sm:text-sm font-bold text-foreground block">
                             {field.label}
                           </FormLabel>
                           <FormControl>
                             <Input
                               type={field.type}
                               placeholder={field.placeholder}
-                              className="w-full font-mono text-xs sm:text-sm p-2 sm:p-3 border border-gray-300 rounded-md"
+                              className="w-full font-mono text-xs sm:text-sm p-2 sm:p-3 border border-input rounded-md"
                               {...formField}
                             />
                           </FormControl>
-                          <FormDescription className="text-xs text-gray-500">
+                          <FormDescription className="text-xs text-muted-foreground">
                             {field.description}
                           </FormDescription>
-                          <FormMessage className="text-xs font-medium text-red-500" />
+                          <FormMessage className="text-xs font-medium text-destructive" />
                         </FormItem>
                       )}
                     />
                   ))}
 
-                  <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 sm:pt-6 mt-3 sm:mt-4 border-t border-gray-200">
+                  <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 sm:pt-6 mt-3 sm:mt-4 border-t">
                     <Button
                       type="button"
                       variant="outline"
                       onClick={resetProxy}
-                      className="text-xs sm:text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-3 sm:px-4"
+                      className="text-xs sm:text-sm font-medium border-input text-foreground hover:bg-accent py-2 px-3 sm:px-4"
                     >
                       Reset Settings
                     </Button>

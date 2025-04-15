@@ -1,7 +1,17 @@
 import { create } from 'zustand';
-import { SldMetadata } from '../types/sld-metatada';
+import { Effect } from 'effect';
+import { SldMetadata } from '../types/sld-metatada.type';
 import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram';
+import { SldSubscriptionStatus } from '../types/sld-subscription.type';
+import { TeleInformation } from '../types/tele-information.type';
+import {
+  subscribeSLD,
+  unsubscribeSLD,
+} from '../services/subscription-ti.service';
 
+// ------------------------------
+// Types
+// ------------------------------
 export interface DiagramData {
   svgUrl: string | null;
   svgBlob: Blob | null;
@@ -11,45 +21,50 @@ export interface DiagramData {
   currentLineId: string | null;
 }
 
-interface DiagramStore extends DiagramData {
+export interface DiagramStore extends DiagramData {
   loadDiagram: (lineId: string) => Promise<void>;
   resetDiagram: () => void;
+  subscribeDiagram: (handler: (ti: TeleInformation) => void) => void;
+  unsubscribeDiagram: () => void;
+  subscriptionStatus: SldSubscriptionStatus;
 }
 
+// ------------------------------
+// Store
+// ------------------------------
 export const useDiagramStore = create<DiagramStore>((set, get) => ({
+  // État initial
   svgUrl: null,
   svgBlob: null,
   metadata: null,
   isLoading: false,
   error: null,
   currentLineId: null,
+  subscriptionStatus: 'disconnected',
 
+  /**
+   * Charge un diagramme à partir de son ID
+   */
   loadDiagram: async (lineId: string) => {
-    // Vérifier si on a déjà chargé ce diagramme
     const { currentLineId } = get();
 
-    // Si c'est le même diagramme, ne rien faire
-    if (lineId === currentLineId) {
-      return;
-    }
+    // Ne rien faire si c'est le même diagramme
+    if (lineId === currentLineId) return;
 
-    // Sinon, charger le nouveau diagramme
     set({ isLoading: true, error: null });
 
     try {
+      // Récupération du diagramme
       const { svgBlob, metadata } = await getSingleLineDiagramWithMetadata(
         lineId,
       );
       const svgUrl = URL.createObjectURL(svgBlob);
 
-      console.log(metadata);
-
       // Libérer l'URL précédente si elle existe
-      const prevState = get();
-      if (prevState.svgUrl) {
-        URL.revokeObjectURL(prevState.svgUrl);
-      }
+      const prevUrl = get().svgUrl;
+      if (prevUrl) URL.revokeObjectURL(prevUrl);
 
+      // Mise à jour du state
       set({
         svgBlob,
         metadata,
@@ -66,20 +81,96 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     }
   },
 
+  /**
+   * Réinitialise l'état du diagramme
+   */
   resetDiagram: () => {
-    set((state) => {
-      // Révoquer l'URL pour éviter les fuites de mémoire
-      if (state.svgUrl) {
-        URL.revokeObjectURL(state.svgUrl);
-      }
+    const { subscriptionStatus, unsubscribeDiagram, svgUrl } = get();
 
-      return {
-        svgUrl: null,
-        svgBlob: null,
-        metadata: null,
-        error: null,
-        currentLineId: null,
-      };
+    // Se désabonner si connecté
+    if (subscriptionStatus === 'connected') {
+      unsubscribeDiagram();
+    }
+
+    // Libérer l'URL pour éviter les fuites de mémoire
+    if (svgUrl) URL.revokeObjectURL(svgUrl);
+
+    // Réinitialisation du state
+    set({
+      svgUrl: null,
+      svgBlob: null,
+      metadata: null,
+      error: null,
+      currentLineId: null,
     });
+  },
+
+  /**
+   * S'abonne aux mises à jour du diagramme
+   */
+  subscribeDiagram: (handler) => {
+    const { metadata, currentLineId } = get();
+
+    if (!metadata || !currentLineId) {
+      set({ error: 'Cannot subscribe: no diagram metadata available' });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+
+    // Utilisation de runPromise comme recommandé dans les best practices
+    Effect.runPromise(subscribeSLD(currentLineId, metadata, handler))
+      .then((response) => {
+        set({
+          isLoading: false,
+          subscriptionStatus: response.status,
+          error:
+            response.status === 'connected'
+              ? null
+              : 'Failed to connect to ZMQ server',
+        });
+      })
+      .catch((error) => {
+        set({
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Error subscribing to diagram',
+          isLoading: false,
+          subscriptionStatus: 'disconnected',
+        });
+      });
+  },
+
+  /**
+   * Se désabonne des mises à jour du diagramme
+   */
+  unsubscribeDiagram: () => {
+    const { metadata, currentLineId } = get();
+
+    if (!metadata || !currentLineId) {
+      set({ error: 'Cannot unsubscribe: no diagram metadata available' });
+      return;
+    }
+
+    set({ isLoading: true, error: null });
+
+    // Utilisation de runPromise comme recommandé dans les best practices
+    Effect.runPromise(unsubscribeSLD(currentLineId, metadata))
+      .then((response) => {
+        set({
+          isLoading: false,
+          subscriptionStatus: response.status,
+        });
+      })
+      .catch((error) => {
+        set({
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Error unsubscribing from diagram',
+          isLoading: false,
+        });
+      });
   },
 }));
