@@ -1,12 +1,11 @@
 import { invoke } from '@tauri-apps/api/core';
 import { handleApiError } from '@/lib/api-utils';
+import { Substation, Substations } from '@/types/substation.type';
 import {
   FetchStatus,
   PaginatedResponse,
   PaginationParams,
-  Substation,
-  Substations,
-} from '../types/substation.type';
+} from '@/types/pagination.type';
 
 /**
  * Fetch all substations

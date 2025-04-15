@@ -1,5 +1,5 @@
 import React from 'react';
-import { Substation } from '../../types/substation.type';
+import { Substation } from '@/types/substation.type';
 import { Card } from '@/components/ui/card';
 
 interface SubstationListProps {
