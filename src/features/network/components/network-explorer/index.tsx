@@ -29,7 +29,7 @@ export const NetworkExplorer: React.FC = () => {
     clearSearch,
     searchFields,
     setSearchFields,
-  } = useSubstations();
+  } = useSubstations(18);
 
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState('');
@@ -160,7 +160,7 @@ export const NetworkExplorer: React.FC = () => {
               className="cursor-pointer text-xs h-5"
               onClick={() => toggleSearchField('name')}
             >
-              Name
+              Id
             </Badge>
             <Badge
               variant={
@@ -236,36 +236,38 @@ export const NetworkExplorer: React.FC = () => {
         <React.Fragment key={key}>{renderError(errorData)}</React.Fragment>
       ))}
 
-      <div className="flex-1 overflow-y-auto p-2">
-        {substationsQuery.isLoading ||
-        (initialDataCheck.isLoading && !initialDataCheck.data) ? (
-          <div className="flex items-center justify-center h-full">
-            <p>Loading substations...</p>
-          </div>
-        ) : !substationsQuery.data ||
-          substationsQuery.data.items.length === 0 ? (
-          isSearching ? (
-            <div className="text-center p-4">
-              <p className="text-gray-500">
-                No substations found matching your search
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  clearSearch();
-                  setInputValue('');
-                }}
-                className="mt-2"
-              >
-                Clear Search
-              </Button>
+      {/* Modified structure to create separate scrollable section */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex-1 overflow-y-auto p-2">
+          {substationsQuery.isLoading ||
+          (initialDataCheck.isLoading && !initialDataCheck.data) ? (
+            <div className="flex items-center justify-center h-full">
+              <p>Loading substations...</p>
             </div>
+          ) : !substationsQuery.data ||
+            substationsQuery.data.items.length === 0 ? (
+            isSearching ? (
+              <div className="text-center p-4">
+                <p className="text-gray-500">
+                  No substations found matching your search
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    clearSearch();
+                    setInputValue('');
+                  }}
+                  className="mt-2"
+                >
+                  Clear Search
+                </Button>
+              </div>
+            ) : (
+              renderLoadDataPrompt()
+            )
           ) : (
-            renderLoadDataPrompt()
-          )
-        ) : (
-          <>
+            /* Scrollable substation list */
             <SubstationList
               substations={substationsQuery.data.items}
               onSelect={(id) => {
@@ -273,7 +275,12 @@ export const NetworkExplorer: React.FC = () => {
               }}
               isLoading={substationsQuery.isLoading}
             />
+          )}
+        </div>
 
+        {/* Non-scrollable pagination section */}
+        {substationsQuery.data && substationsQuery.data.items.length > 0 && (
+          <div className="border-t border-gray-200 p-2">
             <PaginationControls
               currentPage={currentPage}
               totalPages={substationsQuery.data.total_pages}
@@ -283,7 +290,7 @@ export const NetworkExplorer: React.FC = () => {
               onNextPage={goToNextPage}
               onPreviousPage={goToPreviousPage}
             />
-          </>
+          </div>
         )}
       </div>
     </div>
