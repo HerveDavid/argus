@@ -25,9 +25,9 @@ export const EditorLayout = ({ children }: LayoutProps) => {
         <div className="flex w-full h-full">
           <LeftSideBar sidebarItems={sidebarItems} />
           {children}
-          <Toaster />
         </div>
       </div>
+      <Toaster />
       <BottomMenuBar />
     </div>
   );
