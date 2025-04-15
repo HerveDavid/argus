@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @plugin 'tailwindcss-animate';
+
 @custom-variant dark (&:is(.dark *));
 
 /* Base variables in :root with HSL - Default Isa 101 Theme */
@@ -466,4 +467,63 @@
     font-feature-settings: 'kern' 1, 'tnum' 1, 'calt' 1, 'case' 1, 'cv05' 1,
       'zero' 1;
   }
+
 }
+
+@layer base {
+
+  /* Highlight Line States */
+  .sld-wire.sld-feeder-disconnected {stroke: var(--color-foreground) !important;}
+  .sld-wire.sld-feeder-connected-disconnected {stroke-dasharray: 3,3 !important;}
+  .sld-wire.sld-feeder-disconnected-connected {stroke: var(--color-foreground) !important; stroke-dasharray: 3,3 !important;}
+  .sld-busbar-section.sld-bus-disconnected {stroke-dasharray: 3,3 !important;}
+
+  /* Components */
+  .sld-disconnector {stroke-width: 3 !important; stroke: var(--color-foreground) !important; fill: none !important;}
+  /* .sld-breaker {stroke-width: 2 !important; stroke: blue !important; fill: white !important;} */
+  /* .sld-load-break-switch {stroke: blue !important; fill: white !important;} */
+  .sld-bus-connection {fill: var(--sld-vl-color, var(--color-foreground)) !important;}
+  .sld-cell-shape-flat .sld-bus-connection {visibility: hidden !important;}
+  .sld-busbar-section {stroke: var(--sld-vl-color, var(--color-foreground)) !important; stroke-width: 3 !important; fill: none !important;}
+  .sld-wire {stroke: var(--sld-vl-color, #c80000) !important; fill: none !important;}
+  .sld-wire.sld-dangling-line {stroke-width: 2px !important;}
+  .sld-wire.sld-tie-line {stroke-width: 2px !important;}
+  .sld-load {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-battery {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-generator {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-two-wt {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-three-wt {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-winding {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-capacitor {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-inductor {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-pst {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-pst-arrow {stroke: var(--color-foreground) !important; fill: none !important;}
+  .sld-svc {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-vsc {stroke: var(--sld-vl-color, blue) !important; font-size: 7.43px !important; fill: none !important;}
+  .sld-lcc {stroke: var(--sld-vl-color, blue) !important; font-size: 7.43px !important; fill: none !important;}
+  .sld-ground {stroke: var(--sld-vl-color, blue) !important; fill: none !important;}
+  .sld-node-infos {stroke: none !important; fill: var(--color-foreground) !important;}
+  .sld-node {stroke: none !important; fill: var(--color-foreground) !important;}
+  .sld-flash {stroke: none !important; fill: var(--color-foreground) !important;}
+  .sld-lock {stroke: none !important; fill: var(--color-foreground) !important;}
+  .sld-unknown {stroke: none !important; fill: var(--color-foreground) !important;}
+  .sld-label {stroke: none !important; fill: var(--color-foreground) !important; font: 8px serif !important;}
+  .sld-bus-legend-info {fill: var(--color-foreground) !important;}
+  .sld-graph-label {fill: var(--color-foreground) !important;}
+  .sld-grid {stroke: #003700 !important; stroke-dasharray: 1,10 !important;}
+  .sld-feeder-info.sld-active-power {fill: var(--color-foreground) !important;}
+  .sld-feeder-info.sld-reactive-power {fill: blue !important;}
+  .sld-feeder-info.sld-current {fill: purple !important;}
+  .sld-frame {fill: var(--sld-background-color, transparent) !important;}
+  .sld-breaker.sld-fictitious {stroke: maroon !important;}
+  .sld-disconnector.sld-fictitious {stroke: maroon !important;}
+  .sld-load-break-switch.sld-fictitious {stroke: maroon !important;}
+  .sld-busbar-section.sld-fictitious {stroke: var(--sld-vl-color, #c80000) !important; stroke-width: 1 !important;}
+  .sld-ground-disconnection-attach {stroke: var(--sld-vl-color, #c80000) !important; fill: none !important;}
+  .sld-open .sld-ground-disconnection-ground {stroke: var(--color-foreground) !important; fill: none !important;}
+  .sld-closed .sld-ground-disconnection-ground {stroke: var(--sld-vl-color, #c80000) !important; fill: none !important;}
+  .sld-ground-disconnection .sld-sw-open {stroke: var(--color-foreground) !important; fill: none !important;}
+  .sld-ground-disconnection .sld-sw-closed {stroke: var(--color-foreground) !important; fill: none !important;}
+}
+
+

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import './index.css';
-import './config/themes/sld-styles.css';
+// import './config/themes/sld-styles.css';
 import './config/themes/theme-blue.css';
 import './config/themes/theme-gruvbox.css';
 import './config/themes/theme-nord.css';
