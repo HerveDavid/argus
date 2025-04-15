@@ -9,11 +9,12 @@ interface WorkspaceData {
 export interface WorkspaceStore extends WorkspaceData {
   addSubstation: (substation: Substation) => void;
   removeSubstation: (id: string) => void;
+  hasId: (id: string) => boolean;
 }
 // ------------------------------
 // Store
 // ------------------------------
-export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
+export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   substations: new Map(),
   addSubstation: (substation) => {
     set((state) => {
@@ -28,5 +29,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set) => ({
       newSubstations.delete(id);
       return { substations: newSubstations };
     });
+  },
+  hasId: (id) => {
+    return get().substations.has(id);
   },
 }));

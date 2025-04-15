@@ -1,7 +1,6 @@
 import React from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { PinIcon } from 'lucide-react';
 import { Tools } from './tools';
 import { Substation } from '@/types/substation.type';
 
@@ -36,10 +35,7 @@ export const TabNavigation: React.FC<{
           </TabsTrigger>
         ))}
       </TabsList>
-      <div className="flex space-x-2 mr-2 h-5">
-        <PinIcon className="size-5 p-0.5"></PinIcon>
-        <Tools substation={substation} />
-      </div>
+      <Tools substation={substation} />
     </div>
   );
 };
