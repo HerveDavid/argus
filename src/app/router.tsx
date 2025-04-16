@@ -3,8 +3,6 @@ import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 
-import { default as AppRoot } from './routes/app/root';
-
 const convert = (queryClient: QueryClient) => (m: any) => {
   const { clientLoader, clientAction, default: Component, ...rest } = m;
   return {
@@ -27,28 +25,7 @@ export const createAppRouter = (queryClient: QueryClient) =>
     },
     {
       path: paths.views.stateView.path,
-      lazy: () =>
-        import('./routes/app/state-view').then(convert(queryClient)),
-    },
-    {
-      path: paths.gameMaster.root.path,
-      element: <AppRoot />,
-      children: [
-        {
-          path: paths.gameMaster.home.path,
-          lazy: () =>
-            import('./routes/app/game-master/home-page').then(
-              convert(queryClient),
-            ),
-        },
-        {
-          path: paths.gameMaster.mapping.path,
-          lazy: () =>
-            import('./routes/app/game-master/mapping-page').then(
-              convert(queryClient),
-            ),
-        },
-      ],
+      lazy: () => import('./routes/app/state-view').then(convert(queryClient)),
     },
     {
       path: '*',
