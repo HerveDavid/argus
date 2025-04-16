@@ -16,27 +16,6 @@
   },
   "permissions": [
     "core:default",
-    {
-      "identifier": "shell:allow-execute",
-      "allow": [
-        {
-          "args": [
-            {
-              "validator": "*"
-            }
-          ],
-          "name": "binaries/powsybl",
-          "sidecar": true
-        }
-      ]
-    },
-    {
-      "identifier": "http:default",
-      "allow": [
-        { "url": "http://localhost:8000/api/v1/**" }
-      ],
-      "deny": []
-    },
     "shell:allow-open",
     "fs:read-all",
     "core:path:default",
