@@ -1,16 +1,19 @@
 import { Substation } from '@/types/substation.type';
 import { create } from 'zustand';
+
 // ------------------------------
 // Types
 // ------------------------------
 interface WorkspaceData {
   substations: Map<string, Substation>;
 }
+
 export interface WorkspaceStore extends WorkspaceData {
   addSubstation: (substation: Substation) => void;
   removeSubstation: (id: string) => void;
   hasId: (id: string) => boolean;
 }
+
 // ------------------------------
 // Store
 // ------------------------------
