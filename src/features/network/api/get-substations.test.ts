@@ -1,4 +1,3 @@
-// substation.test.ts
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { invoke } from '@tauri-apps/api/core';
 import {
@@ -9,11 +8,13 @@ import {
 } from './get-substations';
 import {
   Substation,
+  Substations,
+} from '@/types/substation.type';
+import {
   FetchStatus,
   PaginatedResponse,
   PaginationParams,
-  Substations,
-} from '../types/substation.type';
+} from '@/types/pagination.type'
 
 // Mock for @tauri-apps/api/core
 vi.mock('@tauri-apps/api/core', () => ({

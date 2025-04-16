@@ -63,8 +63,8 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   const { contextMenu, handleContextMenu, closeContextMenu, setContextMenu } =
     useContextMenu(svgContainerRef);
 
-  useSvgManipulation(svgContent, svgContainerRef);
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
+  useSvgManipulation(svgContent, svgContainerRef);
 
   const { applyBlinkEffect } = useDiagramEffects(
     svgContent,

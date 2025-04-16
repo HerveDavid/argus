@@ -4,6 +4,7 @@ import { SidebarItem } from './left-sidebar/sidebar-icon-button';
 import { Folder, Layers, Waypoints } from 'lucide-react';
 import BottomMenuBar from './bottom-menu-bar';
 import LeftSideBar from './left-sidebar';
+import { Toaster } from '@/components/ui/sonner';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
           {children}
         </div>
       </div>
+      <Toaster />
       <BottomMenuBar />
     </div>
   );

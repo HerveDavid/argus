@@ -53,6 +53,7 @@ const StateView = () => {
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            substation={substationDetails.data}
           />
           <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
             {tabs.map((tab) => (

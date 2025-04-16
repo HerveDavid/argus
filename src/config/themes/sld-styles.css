@@ -1,6 +1,3 @@
-/* sld-styles.css */
-
-/* Appliquer les variables CSS pour les classes SLD */
 .sld-disconnected { --sld-vl-color: var(--sld-disconnected) !important; }
 
 .sld-vl300to500-0 { --sld-vl-color: var(--sld-vl300to500-0) !important; }
@@ -129,8 +126,8 @@
 .sld-lock {stroke: none !important; fill: var(--color-foreground) !important;}
 .sld-unknown {stroke: none !important; fill: var(--color-foreground) !important;}
 .sld-label {stroke: none !important; fill: var(--color-foreground) !important; font: 8px serif !important;}
-.sld-bus-legend-info {font: 10px serif !important;}
-.sld-graph-label {font: 12px serif !important;}
+.sld-bus-legend-info {fill: var(--color-foreground) !important;}
+.sld-graph-label {fill: var(--color-foreground) !important;}
 .sld-grid {stroke: #003700 !important; stroke-dasharray: 1,10 !important;}
 .sld-feeder-info.sld-active-power {fill: var(--color-foreground) !important;}
 .sld-feeder-info.sld-reactive-power {fill: blue !important;}
