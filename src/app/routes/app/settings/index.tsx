@@ -18,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ZmqUrlSettings from './zmq-connection-settings';
 
 const TABS = [
   {
@@ -36,6 +37,12 @@ const TABS = [
   {
     id: 'connections',
     label: 'Connections',
+    icon: <Link2 size={18} />,
+    description: 'Manage server and API connections',
+  },
+  {
+    id: 'zmq',
+    label: 'Zmq',
     icon: <Link2 size={18} />,
     description: 'Manage server and API connections',
   },
@@ -166,6 +173,7 @@ const HomeSettings = () => {
                 <div className="mt-4 w-full h-full">
                   {activeTab === 'connections' && <ServerUrlSettings />}
                   {activeTab === 'proxy' && <ProxySettings />}
+                  {activeTab == 'zmq' && <ZmqUrlSettings />}
                   {activeTab === 'profile' && <ProfileSettings />}
                   {activeTab === 'notifications' && (
                     <div className="p-4 rounded-lg border border-border bg-card shadow-sm">

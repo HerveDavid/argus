@@ -66,7 +66,6 @@ pub async fn get_zmq_url(state: State<'_, AppState>) -> SettingResult<ZmqUrlResp
             .read()
             .map_err(|e| SettingsError::StateLock(e.to_string()))?;
         app_state.settings.zmq_url.clone()
-
     };
 
     Ok(ZmqUrlResponse {
