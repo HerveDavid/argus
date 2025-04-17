@@ -1,7 +1,7 @@
 use crate::network::state::NetworkState;
 use crate::settings::state::SettingsState;
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub struct AppStateInner {
     pub settings: SettingsState,
     pub network: NetworkState,

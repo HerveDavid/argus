@@ -21,6 +21,9 @@ pub fn run() {
             // Settings
             set_server_url,
             get_server_url,
+            set_zmq_url,
+            set_zmq_subscription,
+            get_zmq_url,
             // Loaders
             load_client,
             load_substations,
