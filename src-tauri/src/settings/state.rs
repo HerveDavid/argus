@@ -29,7 +29,7 @@ impl Default for SettingsState {
             client: Arc::new(client),
             server_url: None,
             zmq_client: Arc::new(zmq_client),
-            zmq_url: None,
+            zmq_url: Some("".to_string()),
         }
     }
 }

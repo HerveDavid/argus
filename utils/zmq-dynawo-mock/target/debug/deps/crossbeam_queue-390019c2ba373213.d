@@ -1,0 +1,9 @@
+/home/david/Projects/Argus/argus/utils/zmq-dynawo-mock/target/debug/deps/libcrossbeam_queue-390019c2ba373213.rmeta: /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/lib.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/array_queue.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/home/david/Projects/Argus/argus/utils/zmq-dynawo-mock/target/debug/deps/libcrossbeam_queue-390019c2ba373213.rlib: /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/lib.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/array_queue.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/home/david/Projects/Argus/argus/utils/zmq-dynawo-mock/target/debug/deps/crossbeam_queue-390019c2ba373213.d: /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/lib.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/array_queue.rs /home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/seg_queue.rs
+
+/home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/lib.rs:
+/home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/array_queue.rs:
+/home/david/.local/share/mise/installs/rust/1.84.1/registry/src/index.crates.io-6f17d22bba15001f/crossbeam-queue-0.3.12/src/seg_queue.rs:
