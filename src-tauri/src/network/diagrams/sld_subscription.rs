@@ -91,28 +91,31 @@ pub async fn subscribe_single_line_diagram(
                                         println!("Message ZMQ #{} reçu pour feeder {}: {} parties", 
                                             message_count, feeder_id, multipart.len());
                                         
-                                        // Traiter les données reçues
-                                        // Convertir le message ZMQ en vecteur de données
-                                        let parts: Vec<Vec<u8>> = multipart.iter().map(|frame| frame.to_vec()).collect();
+                                        // Convertir les parties du message ZMQ en chaînes de caractères
+                                        // au lieu de vecteurs d'octets
+                                        let parts: Vec<String> = multipart.iter()
+                                            .map(|frame| String::from_utf8(frame.to_vec())
+                                                .unwrap_or_else(|_| String::from("[données non UTF-8]")))
+                                            .collect();
                                         
-                                        if parts.len() >= 2 {
-                                            // Le premier élément est généralement le topic
-                                            let topic = String::from_utf8_lossy(&parts[0]);
+                                      
+                                            // Le premier élément est le topic (maintenant déjà en String)
+                                            let topic = &parts[0];
                                             println!("  Topic reçu: '{}'", topic);
                                             
-                                            // Le second élément contient les données JSON
-                                            let data = &parts[1];
-                                            println!("  Taille des données JSON: {} octets", data.len());
+                                            // Le second élément contient les données JSON (maintenant déjà en String)
+                                            let data = &parts[0];
+                                            println!("  Taille des données JSON: {} caractères", data.len());
                                             
-                                            // Afficher un aperçu du JSON (les 100 premiers caractères)
-                                            if data.len() > 0 {
-                                                let preview = String::from_utf8_lossy(&data[..std::cmp::min(data.len(), 100)]);
+                                            // Afficher un aperçu du JSON
+                                            if !data.is_empty() {
+                                                let preview_len = std::cmp::min(data.len(), 100);
                                                 println!("  Aperçu des données JSON: {}{}", 
-                                                    preview, if data.len() > 100 { "..." } else { "" });
+                                                    &data[..preview_len], if data.len() > 100 { "..." } else { "" });
                                             }
                                             
-                                            // Tenter de désérialiser les données en TelemetryCurves
-                                            match serde_json::from_slice::<TelemetryCurves>(data) {
+                                            // Désérialiser les données JSON directement depuis la chaîne
+                                            match serde_json::from_str::<TelemetryCurves>(data) {
                                                 Ok(telemetry) => {
                                                     println!("  Désérialisation réussie en TelemetryCurves");
                                                     println!("  Nb de courbes: {}", telemetry.curves.values.len());
@@ -127,31 +130,12 @@ pub async fn subscribe_single_line_diagram(
                                                     }
                                                 },
                                                 Err(e) => {
-                                                    println!("  Erreur de désérialisation des données ZMQ: {:?}", e);
-                                                    
-                                                    // Tenter d'afficher le JSON brut pour déboguer
-                                                    if let Ok(json_str) = String::from_utf8(data.to_vec()) {
-                                                        println!("  JSON reçu (début): {}", 
-                                                            if json_str.len() > 200 { &json_str[0..200] } else { &json_str });
-                                                    } else {
-                                                        println!("  Impossible d'afficher le JSON (données binaires non UTF-8)");
-                                                    }
+                                                    println!("  Erreur de désérialisation des données JSON: {:?}", e);
+                                                    println!("  JSON reçu (début): {}", 
+                                                        if data.len() > 200 { &data[0..200] } else { data });
                                                 }
                                             }
-                                        } else {
-                                            println!("  Format de message inattendu: attendu au moins 2 parties, reçu {}", parts.len());
-                                            
-                                            // Afficher les parties disponibles pour déboguer
-                                            for (i, part) in parts.iter().enumerate() {
-                                                if let Ok(text) = String::from_utf8(part.clone()) {
-                                                    println!("  Partie {}: '{}'{}", i, 
-                                                        if text.len() > 50 { &text[0..50] } else { &text },
-                                                        if text.len() > 50 { "..." } else { "" });
-                                                } else {
-                                                    println!("  Partie {}: [données binaires de {} octets]", i, part.len());
-                                                }
-                                            }
-                                        }
+                                       
                                     },
                                     Err(e) => {
                                         println!("Erreur de réception ZMQ: {:?}", e);
@@ -183,7 +167,7 @@ pub async fn subscribe_single_line_diagram(
     })
 }
 
-// La fonction unsubscribe_single_line_diagram avec ajout de logs
+// La fonction unsubscribe_single_line_diagram reste inchangée
 #[tauri::command(rename_all = "snake_case")]
 pub async fn unsubscribe_single_line_diagram(
     state: State<'_, AppState>,
