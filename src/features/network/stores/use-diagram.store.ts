@@ -3,7 +3,7 @@ import { Effect } from 'effect';
 import { SldMetadata } from '../types/sld-metatada.type';
 import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram';
 import { SldSubscriptionStatus } from '../types/sld-subscription.type';
-import { TeleInformation } from '../types/tele-information.type';
+import { TelemetryCurves } from '../types/telemetry-curves.type';
 import {
   subscribeSLD,
   unsubscribeSLD,
@@ -24,7 +24,7 @@ export interface DiagramData {
 export interface DiagramStore extends DiagramData {
   loadDiagram: (lineId: string) => Promise<void>;
   resetDiagram: () => void;
-  subscribeDiagram: (handler: (ti: TeleInformation) => void) => void;
+  subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
   subscriptionStatus: SldSubscriptionStatus;
 }

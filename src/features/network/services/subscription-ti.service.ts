@@ -1,6 +1,6 @@
 import { Channel, invoke } from '@tauri-apps/api/core';
 import { Effect } from 'effect';
-import { TeleInformation } from '../types/tele-information.type';
+import { TelemetryCurves } from '../types/telemetry-curves.type';
 import { SldMetadata } from '../types/sld-metatada.type';
 
 // ------------------------------
@@ -24,12 +24,12 @@ class SubscriptionSLDError extends Error {
 // External API
 // ------------------------------
 
-const channels = new Map<string, Channel<TeleInformation>>();
+const channels = new Map<string, Channel<TelemetryCurves>>();
 
 export const subscribeSLD = (
   id: string,
   sld_metadata: SldMetadata,
-  handler: (ti: TeleInformation) => void,
+  handler: (ti: TelemetryCurves) => void,
 ) =>
   Effect.gen(function* () {
     // Réutilisation d'un canal existant
@@ -38,7 +38,7 @@ export const subscribeSLD = (
     }
 
     // Création d'un nouveau canal
-    const on_event = new Channel<TeleInformation>();
+    const on_event = new Channel<TelemetryCurves>();
     on_event.onmessage = handler;
     channels.set(id, on_event);
 

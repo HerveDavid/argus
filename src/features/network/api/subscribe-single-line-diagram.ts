@@ -2,21 +2,21 @@ import { SldMetadata } from '../types/sld-metatada.type';
 import { SldSubscriptionResponse } from '../types/sld-subscription.type';
 import { invoke, Channel } from '@tauri-apps/api/core';
 import { handleApiError } from '@/lib/api-utils';
-import { TeleInformation } from '../types/tele-information.type';
+import { TelemetryCurves } from '../types/telemetry-curves.type';
 
-const channels = new Map<string, Channel<TeleInformation>>();
+const channels = new Map<string, Channel<TelemetryCurves>>();
 
 export const subscribeSingleLineDiagram = async (
   id: string,
   sld_metadata: SldMetadata,
-  handler: (ti: TeleInformation) => void,
+  handler: (tc: TelemetryCurves) => void,
 ): Promise<SldSubscriptionResponse> => {
   try {
     if (channels.has(id)) {
       return { status: 'connected' };
     }
 
-    const on_event = new Channel<TeleInformation>();
+    const on_event = new Channel<TelemetryCurves>();
     on_event.onmessage = handler;
 
     channels.set(id, on_event);

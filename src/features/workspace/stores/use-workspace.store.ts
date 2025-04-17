@@ -17,8 +17,18 @@ export interface WorkspaceStore extends WorkspaceData {
 // ------------------------------
 // Store
 // ------------------------------
+
+const defaultSubstations = new Map<string, Substation>();
+defaultSubstations.set('MQIS', {
+  country: 'FR',
+  geo_tags: '',
+  id: 'MQIS',
+  name: '',
+  tso: 'FR',
+});
+
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
-  substations: new Map(),
+  substations: defaultSubstations,
   addSubstation: (substation) => {
     set((state) => {
       const newSubstations = new Map(state.substations);

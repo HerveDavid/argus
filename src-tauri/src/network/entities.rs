@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
@@ -69,4 +71,15 @@ pub struct SldSubscriptionResponse {
 #[serde(tag = "ti", content = "data")]
 pub enum TeleInformation {
     TM { id: String, value: i32 },
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TelemetryCurves {
+    curves: TelemetryData,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct TelemetryData {
+    values: HashMap<String, f64>,
+    time: u64,
 }

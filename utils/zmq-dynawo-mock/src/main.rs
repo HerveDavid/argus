@@ -120,13 +120,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let json_data = serde_json::to_string(&telemetry_data)?;
 
         // Créer un message ZMQ avec le sujet "telemetry"
-        let mut message = ZmqMessage::from("telemetry");
+        let mut message = ZmqMessage::from("");
         message.push_back(json_data.into_bytes().into());
 
         println!("Sending telemetry data with time: {}", time_counter);
         socket.send(message).await?;
 
         // Attendre 1 seconde avant d'envoyer le prochain message
-        tokio::time::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }

@@ -54,7 +54,7 @@ export const defaultSettings = [
   {
     key: 'zmq_url',
     defaultValue: {
-      url: 'tcp://127.0.0.1:5558',
+      url: 'tcp://127.0.0.1:5556',
       subscription: '',
       status: 'configured',
     },

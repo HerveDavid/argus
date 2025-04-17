@@ -10,6 +10,9 @@ import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 // Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
+import { TelemetryCurves } from '@/features/network/types/telemetry-curves.type';
+import { feeders_with_dynawo_id } from '../utils/mapping';
+import { TeleInformation } from '@/features/network/types/tele-information.type';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -75,18 +78,31 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   // Charger le diagramme lors du montage et quand lineId change
   useEffect(() => {
+    const mapper = (tc: TelemetryCurves) => {
+      for (const dynawoId in tc.curves.values) {
+        const id = feeders_with_dynawo_id.find((value) =>
+          dynawoId.includes(value.dynawo_id),
+        );
+
+        if (id?.id) {
+          const tm: TeleInformation = {
+            ti: 'TM',
+            data: { id: id.id, value: tc.curves.values[dynawoId] },
+          };
+          handleUpdateMessage(tm);
+        }
+      }
+    };
+
     const subscribe = async () => {
       await loadDiagram(lineId);
-      await subscribeDiagram(handleUpdateMessage);
+      subscribeDiagram(mapper);
     };
 
     subscribe();
 
     return () => {
-      const cleanUp = async () => {
-        await unsubscribeDiagram();
-      };
-      cleanUp();
+      unsubscribeDiagram();
     };
   }, [lineId, loadDiagram]);
 
