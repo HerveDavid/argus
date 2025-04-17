@@ -75,11 +75,11 @@ pub enum TeleInformation {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct TelemetryCurves {
-    curves: TelemetryData,
+    pub curves: TelemetryData,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct TelemetryData {
-    values: HashMap<String, f64>,
-    time: u64,
+    pub values: HashMap<String, f64>,
+    pub time: u64,
 }

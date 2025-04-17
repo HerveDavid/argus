@@ -84,12 +84,16 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           dynawoId.includes(value.dynawo_id),
         );
 
+
         if (id?.id) {
           const tm: TeleInformation = {
             ti: 'TM',
             data: { id: id.id, value: tc.curves.values[dynawoId] },
           };
+          console.log('TM: ', tm);
           handleUpdateMessage(tm);
+        } else {
+          console.log('NO TM');
         }
       }
     };
