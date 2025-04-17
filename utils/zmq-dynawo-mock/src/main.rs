@@ -17,7 +17,7 @@ pub struct TelemetryData {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut rng = rand::rng();
+    let mut rng = rand::thread_rng(); // Correction de rand::rng() à rand::thread_rng()
 
     // Liste des identifiants de télémétrie
     let telemetry_ids = vec![
@@ -96,13 +96,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for id in &telemetry_ids {
             let value = if id.contains("_U_value") {
                 // Valeurs de tension autour de 230-240V
-                rng.random_range(230.0..240.0)
+                rng.gen_range(230.0..240.0) // Correction de random_range à gen_range
             } else if *id == "Simulation_stepDurationMs" {
                 // Temps de simulation entre 200-300ms
-                rng.random_range(200.0..300.0)
+                rng.gen_range(200.0..300.0) // Correction de random_range à gen_range
             } else {
                 // Pour les autres, générer des valeurs entre -5.0 et 5.0
-                rng.random_range(-5.0..5.0)
+                rng.gen_range(-5.0..5.0) // Correction de random_range à gen_range
             };
 
             values.insert(id.to_string(), value);
@@ -119,9 +119,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Sérialiser en JSON
         let json_data = serde_json::to_string(&telemetry_data)?;
 
-        // Créer un message ZMQ avec le sujet "telemetry"
-        let mut message = ZmqMessage::from("");
-        message.push_back(json_data.into_bytes().into());
+        // Créer un message ZMQ avec le sujet "telemetry" comme première partie
+        // et la chaîne JSON comme deuxième partie (sans conversion en bytes)
+        let mut message = ZmqMessage::new();
+        message.push_back("telemetry".into()); // Premier frame: sujet (topic)
+        message.push_back(json_data.into()); // Deuxième frame: données JSON en string
 
         println!("Sending telemetry data with time: {}", time_counter);
         socket.send(message).await?;
