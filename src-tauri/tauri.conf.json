@@ -31,11 +31,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": [
-      "binaries/powsybl"
-    ],
-    "resources": [
-      "resources/**/*.jar" 
-    ]
+    "externalBin": ["binaries/powsybl"]
   }
 }
