@@ -25,11 +25,11 @@ async def main():
     # Check if port is already in use
     if await check_port_in_use(address):
         logger.warning(f"Port is already in use: {address}")
-    if force_close_port(5555):
-        logger.info("Successfully closed existing process on port 5555")
-    else:
-        logger.error("Failed to close existing process")
-        return
+        if force_close_port(5555):
+            logger.info("Successfully closed existing process on port 5555")
+        else:
+            logger.error("Failed to close existing process")
+            return
 
     # Create network service
     network_service = NetworkService()
