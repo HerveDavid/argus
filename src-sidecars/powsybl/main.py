@@ -2,7 +2,15 @@ import sys
 import asyncio
 import logging
 from domain.network import NetworkService
-from interfaces import zmq_server, start_stdin_thread
+from interfaces import (
+    zmq_server,
+    start_stdin_thread,
+    force_close_port,
+    check_port_in_use,
+)
+
+
+address = "tcp://localhost:5555"
 
 
 async def main():
@@ -15,7 +23,13 @@ async def main():
     logger = logging.getLogger("main")
 
     # Check if port is already in use
-    address = "tcp://localhost:5555"
+    if await check_port_in_use(address):
+        logger.warning(f"Port is already in use: {address}")
+    if force_close_port(5555):
+        logger.info("Successfully closed existing process on port 5555")
+    else:
+        logger.error("Failed to close existing process")
+        return
 
     # Create network service
     network_service = NetworkService()
