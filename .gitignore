@@ -31,4 +31,5 @@ dist-ssr
 
 **/target/*
 build/
+uploads/
 

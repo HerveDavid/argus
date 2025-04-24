@@ -1,5 +1,3 @@
-quart
-hypercorn
 pypowsybl
 pyinstaller
 zmq
