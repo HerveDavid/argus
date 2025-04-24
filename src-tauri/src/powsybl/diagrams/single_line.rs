@@ -103,35 +103,3 @@ pub async fn get_single_line_diagram_metadata_n(
 
     Ok(metadata)
 }
-
-/// ZMQ subscription for single line diagram updates
-/// This function sets up a subscription for diagram updates
-#[tauri::command(rename_all = "snake_case")]
-pub async fn subscribe_single_line_diagram_n(
-    _state: State<'_, AppState>,
-    line_id: String,
-) -> PowsyblResult<()> {
-    let params = json!({
-        "id": line_id,
-        "subscribe": true
-    });
-
-    // Assuming there's a subscription endpoint
-    let _result = send_zmq_request("subscribe_diagram_updates", Some(params)).await?;
-    Ok(())
-}
-
-/// Unsubscribe from single line diagram updates
-#[tauri::command(rename_all = "snake_case")]
-pub async fn unsubscribe_single_line_diagram_n(
-    _state: State<'_, AppState>,
-    line_id: String,
-) -> PowsyblResult<()> {
-    let params = json!({
-        "id": line_id,
-        "subscribe": false
-    });
-
-    let _result = send_zmq_request("subscribe_diagram_updates", Some(params)).await?;
-    Ok(())
-}

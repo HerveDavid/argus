@@ -1,12 +1,4 @@
-use super::errors::{PowsyblError, PowsyblResult};
-use super::send_zmq_request;
-use crate::state::AppState;
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use serde_json::json;
-use std::collections::HashSet;
-use tauri::State;
-
 
 // Base structs
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -216,48 +208,6 @@ pub struct SvgParams {
     pub voltage_value_precision: i32,
 }
 
-// Constants
-pub static SWITCH_COMPONENT_TYPES: Lazy<HashSet<&'static str>> = Lazy::new(|| {
-    let mut set = HashSet::new();
-    set.insert("BREAKER");
-    set.insert("DISCONNECTOR");
-    set.insert("LOAD_BREAK_SWITCH");
-    set
-});
-
-pub static FEEDER_COMPONENT_TYPES: Lazy<HashSet<&'static str>> = Lazy::new(|| {
-    let mut set = HashSet::new();
-    set.insert("LINE");
-    set.insert("LOAD");
-    set.insert("BATTERY");
-    set.insert("DANGLING_LINE");
-    set.insert("TIE_LINE");
-    set.insert("GENERATOR");
-    set.insert("VSC_CONVERTER_STATION");
-    set.insert("LCC_CONVERTER_STATION");
-    set.insert("HVDC_LINE");
-    set.insert("CAPACITOR");
-    set.insert("INDUCTOR");
-    set.insert("STATIC_VAR_COMPENSATOR");
-    set.insert("TWO_WINDINGS_TRANSFORMER");
-    set.insert("TWO_WINDINGS_TRANSFORMER_LEG");
-    set.insert("THREE_WINDINGS_TRANSFORMER");
-    set.insert("THREE_WINDINGS_TRANSFORMER_LEG");
-    set.insert("PHASE_SHIFT_TRANSFORMER");
-    set
-});
-
-pub static BUSBAR_SECTION_TYPES: Lazy<HashSet<&'static str>> = Lazy::new(|| {
-    let mut set = HashSet::new();
-    set.insert("BUSBAR_SECTION");
-    set
-});
-
-pub const MAX_ZOOM_LEVEL: f64 = 10.0;
-pub const MIN_ZOOM_LEVEL_SUB: f64 = 0.1;
-pub const MIN_ZOOM_LEVEL_VL: f64 = 0.5;
-
-// Main SLD Metadata struct
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SldMetadata {
@@ -273,18 +223,6 @@ pub struct SldMetadata {
 }
 
 impl SldMetadata {
-    pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(self)
-    }
-
-    pub fn to_json_pretty(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string_pretty(self)
-    }
-
-    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
-    }
-
     pub fn get_active_arrow_feeders(&self) -> Vec<FeederInfo> {
         self.feeder_infos
             .iter()

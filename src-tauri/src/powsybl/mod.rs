@@ -9,6 +9,7 @@ mod substations;
 pub mod commands;
 pub mod entities;
 pub mod errors;
+pub mod state;
 
 // Helper function to send ZMQ request
 async fn send_zmq_request(method: &str, params: Option<Value>) -> PowsyblResult<Value> {

@@ -5,6 +5,7 @@ use tauri_plugin_shell::process::CommandChild;
 mod network;
 mod powsybl;
 mod settings;
+mod shared;
 mod sidecars;
 mod state;
 

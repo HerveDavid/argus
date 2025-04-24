@@ -1,7 +1,8 @@
+use super::entities::{FetchStatus, PaginatedResponse, PaginationParams};
 use super::errors::{PowsyblError, PowsyblResult};
 use super::send_zmq_request;
 
-use crate::network::entities::{FetchStatus, PaginatedResponse, PaginationParams, Substation};
+use crate::shared::entities::iidm::Substation;
 use crate::state::AppState;
 
 use tauri::State;
@@ -26,10 +27,10 @@ pub async fn get_substations_n(state: State<'_, AppState>) -> PowsyblResult<Vec<
     // Update the state
     {
         let mut app_state = state.write().map_err(|_| PowsyblError::LockError)?;
-        app_state.network.substations.clear();
+        app_state.powsybl.substations.clear();
         for substation in &substations {
             app_state
-                .network
+                .powsybl
                 .substations
                 .insert(substation.id.clone(), substation.clone());
         }
@@ -62,7 +63,7 @@ pub fn get_paginated_substations_n(
     let total_pages = (total + params.per_page - 1) / params.per_page;
 
     let page_items: Vec<Substation> = app_state
-        .network
+        .powsybl
         .substations
         .values()
         .skip((params.page - 1) * params.per_page)
@@ -87,7 +88,7 @@ pub fn get_substation_by_id_n(
 ) -> PowsyblResult<Option<Substation>> {
     // This function remains the same as it reads from local state
     let app_state = state.read().map_err(|_| PowsyblError::LockError)?;
-    let substation = app_state.network.substations.get(&id).cloned();
+    let substation = app_state.powsybl.substations.get(&id).cloned();
     Ok(substation)
 }
 
@@ -115,7 +116,7 @@ pub fn search_substations_n(
     let query = query.to_lowercase();
 
     let filtered_substations: Vec<Substation> = app_state
-        .network
+        .powsybl
         .substations
         .values()
         .filter(|substation| {
