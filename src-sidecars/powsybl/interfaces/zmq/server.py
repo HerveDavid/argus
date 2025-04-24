@@ -4,6 +4,8 @@ import zmq
 import zmq.asyncio
 import asyncio
 import signal
+import sys
+import threading
 from ..zmq.handler import ZmqHandler
 
 
@@ -131,6 +133,58 @@ async def zmq_server(network_service, bind_address="tcp://*:5555"):
         socket.close()
         context.term()
         logger.info("ZMQ server shut down successfully")
+
+
+# Handle the stdin event loop. This can be used like a CLI.
+def stdin_loop(network_service):
+    """Handle commands from stdin for graceful shutdown."""
+    print("[sidecar] Waiting for commands...", flush=True)
+    
+    loop = asyncio.new_event_loop()
+    
+    while True:
+        # Read input from stdin.
+        user_input = sys.stdin.readline().strip()
+        
+        # Check if the input matches one of the available functions
+        match user_input:
+            case "sidecar shutdown":
+                print("[sidecar] Received 'sidecar shutdown' command.", flush=True)
+                # Gracefully shutdown the ZMQ server
+                shutdown_server(loop)
+                break
+            case _:
+                print(
+                    f"[sidecar] Invalid command [{user_input}]. Try again.", flush=True
+                )
+    
+    loop.close()
+
+
+def shutdown_server(loop):
+    """Shutdown the server gracefully."""
+    # Send shutdown signal to all asyncio tasks
+    for task in asyncio.all_tasks(loop):
+        task.cancel()
+    
+    # Stop the event loop
+    loop.stop()
+    
+    # Set a flag that the server should shut down
+    global running
+    running = False
+    
+    print("[sidecar] Shutdown command executed. Server is shutting down...", flush=True)
+    sys.exit(0)
+
+
+def start_stdin_thread(network_service):
+    """Start a thread to handle stdin commands."""
+    try: 
+        thread = threading.Thread(target=stdin_loop, args=(network_service,), daemon=True)
+        thread.start()
+    except:
+        print("[sidecar] Failed to start input handler.", flush=True)
 
 
 # Alternative function to check if port is in use before starting
