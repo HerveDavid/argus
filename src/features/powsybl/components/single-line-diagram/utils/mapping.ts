@@ -1,4 +1,4 @@
-import { TeleInformation } from '@/features/network/types/tele-information.type';
+import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
 export const feeders_with_dynawo_id = [
   {

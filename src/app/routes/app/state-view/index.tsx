@@ -5,6 +5,7 @@ import { SubstationViewer } from '@/features/powsybl/components/network-explorer
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TabItem, TabNavigation } from './tab-navigation';
 import { useParams } from 'react-router';
+import { Substation } from '@/types/substation.type';
 
 // Main component
 const StateView = () => {
@@ -53,7 +54,7 @@ const StateView = () => {
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            substation={substationDetails.data}
+            substation={substationDetails.data as Substation}
           />
           <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
             {tabs.map((tab) => (
