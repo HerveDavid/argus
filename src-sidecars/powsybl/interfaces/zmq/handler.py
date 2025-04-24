@@ -3,6 +3,7 @@ import json
 import logging
 import traceback
 import uuid
+import base64
 import os
 import zmq
 import zmq.asyncio
@@ -121,8 +122,11 @@ class ZmqHandler:
             if "file_data" not in params or "filename" not in params:
                 return 400, {"error": "File data and filename are required"}
             
-            file_data = params["file_data"]
+            file_data_encoded = params["file_data"]
             filename = params["filename"]
+            
+            # Décoder les données Base64 en bytes
+            file_data = base64.b64decode(file_data_encoded)
             
             # Generate a unique filename
             unique_filename = f"{uuid.uuid4().hex}.xiidm"
