@@ -6,7 +6,7 @@ import uuid
 import os
 import zmq
 import zmq.asyncio
-from domain.network.services.network_service import NetworkService
+from domain.network import NetworkService
 
 class ZmqHandler:
     """Handler for ZMQ messages that maps request types to handler functions."""
