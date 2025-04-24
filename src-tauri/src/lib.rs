@@ -52,27 +52,25 @@ fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), String>
                 }
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
-                    eprintln!("Sidecar stderr: {}", line);
+                    println!("Sidecar stderr: {}", line);
                     // Emit the error line to the frontend
                     app_handle
                         .emit("sidecar-stderr", line.to_string())
                         .expect("Failed to emit sidecar stderr event");
                 }
                 CommandEvent::Error(error) => {
-                    eprintln!("[SIDECAR ERROR]: {}", error);
+                    println!("Sidecar error: {}", error);
                     app_handle
                         .emit("sidecar-error", error.to_string())
                         .expect("Failed to emit sidecar error event");
                 }
                 CommandEvent::Terminated(payload) => {
-                    println!("[SIDECAR TERMINATED]: {:?}", payload);
+                    println!("Sidecar terminated: {:?}", payload);
                     app_handle
                         .emit("sidecar-terminated", format!("{:?}", payload))
                         .expect("Failed to emit sidecar terminated event");
                 }
-                _ => {
-                    eprintln!("error")
-                }
+                _ => {}
             }
         }
     });

@@ -17,7 +17,7 @@ async def main():
     
     # Start ZMQ server
     logger.info("Starting ZMQ server...")
-    await zmq_server(network_service, bind_address="tcp://*:5555")
+    await zmq_server(network_service, bind_address="tcp://localhost:5555")
 
 if __name__ == "__main__":
     try:
