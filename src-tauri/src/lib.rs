@@ -57,6 +57,12 @@ pub fn run() {
             get_single_line_diagram_with_metadata,
             subscribe_single_line_diagram,
             unsubscribe_single_line_diagram,
+            // refactor
+            get_single_line_diagram_n,
+            get_single_line_diagram_metadata_n,
+            get_single_line_diagram_with_metadata_n,
+            subscribe_single_line_diagram_n,
+            unsubscribe_single_line_diagram_n,
         ])
         .setup(|app| {
             app.manage(AppState::default());

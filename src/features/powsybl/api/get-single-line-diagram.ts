@@ -19,7 +19,7 @@ export const getSingleLineDiagramWithMetadata = async (
   try {
     // Invoke the Tauri command
     const result = await invoke<{ svg: string; metadata: SldMetadata }>(
-      'get_single_line_diagram_with_metadata',
+      'get_single_line_diagram_with_metadata_n',
       { line_id },
     );
 
@@ -47,7 +47,7 @@ export const getSingleLineDiagram = async (line_id: string): Promise<Blob> => {
   try {
     // Invoke the Tauri command
     const result = await invoke<{ data: number[]; mime_type: string }>(
-      'get_single_line_diagram',
+      'get_single_line_diagram_n',
       { line_id },
     );
 

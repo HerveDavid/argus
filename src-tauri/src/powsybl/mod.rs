@@ -3,6 +3,9 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 use zeromq::{Socket, SocketRecv, SocketSend};
 
+mod diagrams;
+mod substations;
+
 pub mod commands;
 pub mod entities;
 pub mod errors;
