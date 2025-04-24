@@ -66,6 +66,7 @@ checksum = "34ac096ce696dc2fcabef30516bb13c0a68a11d30131d3df6f04711467681b04"
 name = "argus"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "crossbeam",
  "futures",
  "once_cell",
@@ -83,6 +84,7 @@ dependencies = [
  "tauri-plugin-store",
  "thiserror 2.0.12",
  "tokio",
+ "uuid",
  "zeromq",
 ]
 
@@ -5017,11 +5019,11 @@ checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
 
 [[package]]
 name = "uuid"
-version = "1.12.1"
+version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3758f5e68192bb96cc8f9b7e2c2cfdabb435499a28499a42f8f984092adad4b"
+checksum = "458f7a779bf54acc9f347480ac654f68407d3aab21269a6e3c9f922acd9e2da9"
 dependencies = [
- "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "serde",
 ]
 

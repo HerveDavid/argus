@@ -1,6 +1,3 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
@@ -12,6 +9,7 @@ mod sidecars;
 mod state;
 
 use network::commands::*;
+use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
 use state::AppState;
@@ -44,6 +42,12 @@ pub fn run() {
             get_substation_by_id,
             get_paginated_substations,
             search_substations,
+            // refactor
+            get_substations_n,
+            get_substation_by_id_n,
+            get_paginated_substations_n,
+            search_substations_n,
+            load_substations_n,
             // Voltage levels
             get_voltage_levels,
             get_voltage_levels_by_id,

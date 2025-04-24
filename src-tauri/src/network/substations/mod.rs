@@ -1,5 +1,4 @@
 use super::errors::NetworkError;
-
 use crate::network::entities::*;
 use crate::network::errors::NetworkResult;
 use crate::state::AppState;
