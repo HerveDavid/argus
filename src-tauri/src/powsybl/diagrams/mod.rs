@@ -5,7 +5,7 @@ pub mod sld_metadata;
 pub mod sld_subscriptions;
 
 pub use single_line::{
-    get_single_line_diagram_metadata_n, get_single_line_diagram_n,
-    get_single_line_diagram_with_metadata_n,
+    get_single_line_diagram, get_single_line_diagram_metadata,
+    get_single_line_diagram_with_metadata,
 };
-pub use sld_subscriptions::{subscribe_single_line_diagram_n, unsubscribe_single_line_diagram_n};
+pub use sld_subscriptions::{subscribe_single_line_diagram, unsubscribe_single_line_diagram};

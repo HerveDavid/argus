@@ -2,14 +2,12 @@ use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
-mod network;
 mod powsybl;
 mod settings;
 mod shared;
 mod sidecars;
 mod state;
 
-use network::commands::*;
 use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
@@ -36,34 +34,25 @@ pub fn run() {
             get_zmq_url,
             // Loaders
             load_client,
-            load_substations,
-            load_voltage_levels,
             // Substations
             get_substations,
             get_substation_by_id,
             get_paginated_substations,
             search_substations,
-            // refactor
-            get_substations_n,
-            get_substation_by_id_n,
-            get_paginated_substations_n,
-            search_substations_n,
-            load_substations_n,
+            load_substations,
             // Voltage levels
             get_voltage_levels,
             get_voltage_levels_by_id,
             get_paginated_voltage_levels,
+            get_voltage_levels_for_substation,
+            search_voltage_levels,
+            load_voltage_levels,
             // Diagrams
             get_single_line_diagram,
+            get_single_line_diagram_metadata,
             get_single_line_diagram_with_metadata,
             subscribe_single_line_diagram,
             unsubscribe_single_line_diagram,
-            // refactor
-            get_single_line_diagram_n,
-            get_single_line_diagram_metadata_n,
-            get_single_line_diagram_with_metadata_n,
-            subscribe_single_line_diagram_n,
-            unsubscribe_single_line_diagram_n,
         ])
         .setup(|app| {
             app.manage(AppState::default());

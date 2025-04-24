@@ -1,6 +1,7 @@
 use super::sld_metadata::SldMetadata;
-use crate::network::entities::{SldSubscriptionResponse, TelemetryCurves};
-use crate::network::errors::NetworkResult;
+use super::super::errors::PowsyblResult;
+use super::super::entities::{SldSubscriptionResponse, TelemetryCurves};
+
 use crate::state::AppState;
 
 use serde_json;
@@ -40,11 +41,11 @@ use zeromq::{Socket, SocketRecv};
 // }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn subscribe_single_line_diagram_n(
+pub async fn subscribe_single_line_diagram(
     state: State<'_, AppState>,
     sld_metadata: SldMetadata,
     on_event: Channel<TelemetryCurves>,
-) -> NetworkResult<SldSubscriptionResponse> {
+) -> PowsyblResult<SldSubscriptionResponse> {
     println!("subscribe_single_line_diagram called with SLD metadata: {:?}", sld_metadata);
     let active_feeders = sld_metadata.get_active_arrow_feeders();
     println!("Active feeders found: {}", active_feeders.len());
@@ -201,10 +202,10 @@ pub async fn subscribe_single_line_diagram_n(
 
 // La fonction unsubscribe_single_line_diagram reste inchangée
 #[tauri::command(rename_all = "snake_case")]
-pub async fn unsubscribe_single_line_diagram_n(
+pub async fn unsubscribe_single_line_diagram(
     state: State<'_, AppState>,
     sld_metadata: SldMetadata,
-) -> NetworkResult<SldSubscriptionResponse> {
+) -> PowsyblResult<SldSubscriptionResponse> {
     println!("unsubscribe_single_line_diagram called");
     let active_feeders = sld_metadata.get_active_arrow_feeders();
     println!("Stopping tasks for {} active feeders", active_feeders.len());

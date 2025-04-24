@@ -16,7 +16,7 @@ pub struct DiagramResult {
 
 /// Gets a single line diagram with metadata for a specific line ID using ZMQ
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_single_line_diagram_with_metadata_n(
+pub async fn get_single_line_diagram_with_metadata(
     _state: State<'_, AppState>,
     line_id: String,
 ) -> PowsyblResult<DiagramResult> {
@@ -48,7 +48,7 @@ pub async fn get_single_line_diagram_with_metadata_n(
 
 /// Gets only the SVG diagram for a specific line ID using ZMQ
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_single_line_diagram_n(
+pub async fn get_single_line_diagram(
     _state: State<'_, AppState>,
     line_id: String,
 ) -> PowsyblResult<Vec<u8>> {
@@ -85,7 +85,7 @@ pub async fn get_single_line_diagram_n(
 
 /// Gets only the diagram metadata for a specific line ID using ZMQ
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_single_line_diagram_metadata_n(
+pub async fn get_single_line_diagram_metadata(
     _state: State<'_, AppState>,
     line_id: String,
 ) -> PowsyblResult<SldMetadata> {

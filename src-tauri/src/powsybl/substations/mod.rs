@@ -9,7 +9,7 @@ use tauri::State;
 
 /// Get all substations from the API
 #[tauri::command(rename_all = "snake_case")]
-pub async fn get_substations_n(state: State<'_, AppState>) -> PowsyblResult<Vec<Substation>> {
+pub async fn get_substations(state: State<'_, AppState>) -> PowsyblResult<Vec<Substation>> {
     // Send request to get network substations
     let result = send_zmq_request("get_network_substations", None).await?;
     let substations =
@@ -41,8 +41,8 @@ pub async fn get_substations_n(state: State<'_, AppState>) -> PowsyblResult<Vec<
 
 /// Load all substations from the ZMQ server and store them in the application state
 #[tauri::command(rename_all = "snake_case")]
-pub async fn load_substations_n(state: State<'_, AppState>) -> PowsyblResult<FetchStatus> {
-    let substations = get_substations_n(state).await?;
+pub async fn load_substations(state: State<'_, AppState>) -> PowsyblResult<FetchStatus> {
+    let substations = get_substations(state).await?;
     Ok(FetchStatus {
         success: true,
         message: format!("Loaded {} substations sucessfully", substations.len()),
@@ -51,7 +51,7 @@ pub async fn load_substations_n(state: State<'_, AppState>) -> PowsyblResult<Fet
 
 /// Get paginated substations from application state (no ZMQ call)
 #[tauri::command(rename_all = "snake_case")]
-pub fn get_paginated_substations_n(
+pub fn get_paginated_substations(
     state: State<'_, AppState>,
     pagination: Option<PaginationParams>,
 ) -> PowsyblResult<PaginatedResponse<Vec<Substation>>> {
@@ -59,7 +59,7 @@ pub fn get_paginated_substations_n(
     let params = pagination.unwrap_or_default();
     let app_state = state.read().map_err(|_| PowsyblError::LockError)?;
 
-    let total = app_state.network.substations.len();
+    let total = app_state.powsybl.substations.len();
     let total_pages = (total + params.per_page - 1) / params.per_page;
 
     let page_items: Vec<Substation> = app_state
@@ -82,7 +82,7 @@ pub fn get_paginated_substations_n(
 
 /// Get a specific substation by ID
 #[tauri::command(rename_all = "snake_case")]
-pub fn get_substation_by_id_n(
+pub fn get_substation_by_id(
     state: State<'_, AppState>,
     id: String,
 ) -> PowsyblResult<Option<Substation>> {
@@ -94,7 +94,7 @@ pub fn get_substation_by_id_n(
 
 /// Search for substations in the application state and return paginated results
 #[tauri::command(rename_all = "snake_case")]
-pub fn search_substations_n(
+pub fn search_substations(
     state: State<'_, AppState>,
     query: String,
     pagination: Option<PaginationParams>,
