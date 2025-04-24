@@ -30,13 +30,6 @@
         }
       ]
     },
-    {
-      "identifier": "http:default",
-      "allow": [
-        { "url": "http://localhost:8000/api/v1/**" }
-      ],
-      "deny": []
-    },
     "shell:allow-open",
     "fs:read-all",
     "core:path:default",
