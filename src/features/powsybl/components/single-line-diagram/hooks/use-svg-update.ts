@@ -1,7 +1,7 @@
 import React, { useEffect, RefObject, useCallback } from 'react';
 import * as d3 from 'd3';
 import { useDiagramStore } from '../../../stores/use-diagram.store';
-import { TeleInformation } from '@/features/network/types/tele-information.type';
+import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
 /**
  * Hook pour synchroniser les métadonnées du diagramme électrique avec le SVG

@@ -10,9 +10,9 @@ import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 // Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
-import { TelemetryCurves } from '@/features/network/types/telemetry-curves.type';
+import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
 import { feeders_with_dynawo_id } from '../utils/mapping';
-import { TeleInformation } from '@/features/network/types/tele-information.type';
+import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
