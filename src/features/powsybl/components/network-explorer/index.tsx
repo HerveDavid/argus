@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SubstationsExplorer } from './substations';
 import { VoltageLevelsExplorer } from './voltage-levels';
+import { cn } from '@/lib/utils';
 
 type TabType = 'substations' | 'voltageLevels';
 
@@ -75,15 +76,29 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         onValueChange={handleTabChange}
         className="flex-1 flex flex-col"
       >
-        <TabsList className="mx-2 mt-2">
-          <TabsTrigger value="substations">Substations</TabsTrigger>
-          <TabsTrigger value="voltageLevels">Voltage Levels</TabsTrigger>
+        <TabsList className="rounded-none border-b shadow-none">
+          <TabsTrigger
+            value="substations"
+            className={cn(
+              'px-2 py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
+            )}
+          >
+            Substations
+          </TabsTrigger>
+          <TabsTrigger
+            value="voltageLevels"
+            className={cn(
+              'px-2 py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
+            )}
+          >
+            Voltage Levels
+          </TabsTrigger>
         </TabsList>
 
         {/* Substations Tab Content */}
         <TabsContent
           value="substations"
-          className="flex-1 flex flex-col overflow-hidden m-0"
+          className="flex-1 flex flex-col overflow-hidden"
         >
           <SubstationsExplorer ref={substationsRef} />
         </TabsContent>
@@ -91,7 +106,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         {/* Voltage Levels Tab Content */}
         <TabsContent
           value="voltageLevels"
-          className="flex-1 flex flex-col overflow-hidden m-0"
+          className="flex-1 flex flex-col overflow-hidden"
         >
           <VoltageLevelsExplorer ref={voltageLevelsRef} />
         </TabsContent>

@@ -167,47 +167,36 @@ export const VoltageLevelsExplorer = forwardRef<ExplorerRef>((_props, ref) => {
           <div className="flex flex-wrap gap-1 mt-2">
             <Badge
               variant={
-                !searchFields || searchFields.includes('name')
+                !searchFields || searchFields.includes('id')
                   ? 'default'
                   : 'outline'
               }
               className="cursor-pointer text-xs h-5"
-              onClick={() => toggleSearchField('name')}
+              onClick={() => toggleSearchField('id')}
             >
               Id
             </Badge>
             <Badge
               variant={
-                !searchFields || searchFields.includes('country')
+                !searchFields || searchFields.includes('high_voltage_limit')
                   ? 'default'
                   : 'outline'
               }
               className="cursor-pointer text-xs h-5"
-              onClick={() => toggleSearchField('country')}
+              onClick={() => toggleSearchField('high_voltage_limit')}
             >
-              Country
+              High Voltage
             </Badge>
             <Badge
               variant={
-                !searchFields || searchFields.includes('tso')
+                !searchFields || searchFields.includes('low_voltage_limit')
                   ? 'default'
                   : 'outline'
               }
               className="cursor-pointer text-xs h-5"
-              onClick={() => toggleSearchField('tso')}
+              onClick={() => toggleSearchField('low_voltage_limit')}
             >
-              TSO
-            </Badge>
-            <Badge
-              variant={
-                !searchFields || searchFields.includes('geo_tags')
-                  ? 'default'
-                  : 'outline'
-              }
-              className="cursor-pointer text-xs h-5"
-              onClick={() => toggleSearchField('geo_tags')}
-            >
-              Geo Tags
+              Low Voltage
             </Badge>
           </div>
         )}
