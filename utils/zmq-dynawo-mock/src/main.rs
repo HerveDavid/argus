@@ -121,9 +121,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Créer un message ZMQ avec le sujet "telemetry" comme première partie
         // et la chaîne JSON comme deuxième partie (sans conversion en bytes)
-        let mut message = ZmqMessage::new();
-        message.push_back("telemetry".into()); // Premier frame: sujet (topic)
-        message.push_back(json_data.into()); // Deuxième frame: données JSON en string
+        let mut message = ZmqMessage::from("MQIS");
+        message.push_back(json_data.into());
 
         println!("Sending telemetry data with time: {}", time_counter);
         socket.send(message).await?;
