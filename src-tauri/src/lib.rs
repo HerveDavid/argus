@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
+mod broker;
 mod powsybl;
 mod settings;
 mod shared;
@@ -67,7 +68,7 @@ pub fn run() {
 
             // Store the initial sidecar process in the app state
             app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
-            
+
             let app_handle = app.handle().clone();
             // Spawn the Python sidecar on startup
             spawn_and_monitor_sidecar(app_handle).ok();
