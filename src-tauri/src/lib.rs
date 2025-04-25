@@ -67,11 +67,10 @@ pub fn run() {
 
             // Store the initial sidecar process in the app state
             app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+            
             let app_handle = app.handle().clone();
             // Spawn the Python sidecar on startup
-            println!("[tauri] Creating sidecar...");
             spawn_and_monitor_sidecar(app_handle).ok();
-            println!("[tauri] Sidecar spawned and monitoring started.");
 
             Ok(())
         })
