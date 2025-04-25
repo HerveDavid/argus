@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import EditorLayout from '@/components/layouts/editor';
-import { useSubstationDetails } from '@/features/network/hooks/use-substation-details';
-import { SubstationViewer } from '@/features/network/components/network-explorer/substation-viewer';
+import { useSubstationDetails } from '@/features/powsybl/hooks/use-substation-details';
+import { SubstationViewer } from '@/features/powsybl/components/network-explorer/substation-viewer';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TabItem, TabNavigation } from './tab-navigation';
 import { useParams } from 'react-router';
+import { Substation } from '@/types/substation.type';
 
 // Main component
 const StateView = () => {
@@ -53,7 +54,7 @@ const StateView = () => {
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            substation={substationDetails.data}
+            substation={substationDetails.data as Substation}
           />
           <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
             {tabs.map((tab) => (

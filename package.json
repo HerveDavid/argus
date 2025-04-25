@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:sidecars": "cross-env-shell \"bash ./scripts/build-sidecars.sh\"",
     "preview": "vite preview",
     "tauri": "tauri",
     "test": "vitest run",
@@ -45,6 +46,7 @@
     "@types/three": "^0.173.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cross-env": "^7.0.3",
     "d3": "^7.9.0",
     "effect": "^3.14.5",
     "framer-motion": "^12.4.1",

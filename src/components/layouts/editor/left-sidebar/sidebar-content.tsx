@@ -1,4 +1,4 @@
-import { NetworkExplorer } from '@/features/network/components/network-explorer';
+import { NetworkExplorer } from '@/features/powsybl/components/network-explorer';
 import { WorkspaceExplorer } from '@/features/workspace/components/workspace-explorer';
 import React from 'react';
 

@@ -18,7 +18,8 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; connect-src 'self' http://localhost:* ws://localhost:* tcp://localhost:*;",
+      "dangerousDisableAssetCspModification": false
     }
   },
   "bundle": {
@@ -31,11 +32,6 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": [
-      "binaries/powsybl"
-    ],
-    "resources": [
-      "resources/**/*.jar" 
-    ]
+    "externalBin": ["binaries/powsybl"]
   }
 }

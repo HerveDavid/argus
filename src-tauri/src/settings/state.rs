@@ -1,10 +1,12 @@
 use reqwest;
 use std::sync::Arc;
+use zeromq::Socket;
 
-#[derive(Debug)]
 pub struct SettingsState {
     pub client: Arc<reqwest::Client>,
     pub server_url: Option<String>,
+    pub zmq_client: Arc<zeromq::SubSocket>,
+    pub zmq_url: Option<String>,
 }
 
 impl Default for SettingsState {
@@ -20,9 +22,14 @@ impl Default for SettingsState {
             .build()
             .unwrap();
 
+        // Build the zeromq client
+        let zmq_client = zeromq::SubSocket::new();
+
         Self {
             client: Arc::new(client),
             server_url: None,
+            zmq_client: Arc::new(zmq_client),
+            zmq_url: Some("".to_string()),
         }
     }
 }

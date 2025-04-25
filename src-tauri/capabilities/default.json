@@ -16,26 +16,28 @@
   },
   "permissions": [
     "core:default",
+    "http:default",
+    "http:allow-fetch",
     {
-      "identifier": "shell:allow-execute",
+      "identifier": "http:default",
       "allow": [
         {
-          "args": [
-            {
-              "validator": "*"
-            }
-          ],
-          "name": "binaries/powsybl",
-          "sidecar": true
+          "url": "http://**/"
+        },
+        {
+          "url": "https://**/"
         }
       ]
     },
     {
-      "identifier": "http:default",
+      "identifier": "shell:allow-execute",
       "allow": [
-        { "url": "http://localhost:8000/api/v1/**" }
-      ],
-      "deny": []
+        {
+          "args": false,
+          "name": "binaries/powsybl",
+          "sidecar": true
+        }
+      ]
     },
     "shell:allow-open",
     "fs:read-all",
