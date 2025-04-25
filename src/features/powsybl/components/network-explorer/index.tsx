@@ -76,7 +76,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         onValueChange={handleTabChange}
         className="flex-1 flex flex-col"
       >
-        <TabsList className="rounded-none border-b shadow-none">
+        <TabsList className="rounded-none border-b">
           <TabsTrigger
             value="substations"
             className={cn(
