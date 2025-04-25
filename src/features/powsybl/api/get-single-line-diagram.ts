@@ -1,12 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { SldMetadata } from '../types/sld-metatada.type';
 import { handleApiError } from '@/lib/api-utils';
-
-// Types
-interface SldDiagramResult {
-  svgBlob: Blob;
-  metadata: SldMetadata;
-}
+import { SldDiagramResult } from '../types/sld-diagram-result';
 
 /**
  * Retrieves a network diagram SVG with its metadata for a specific line
