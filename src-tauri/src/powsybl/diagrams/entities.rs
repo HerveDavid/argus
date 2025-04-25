@@ -1,10 +1,9 @@
+use super::errors::SubscriptionResult;
+use crate::{errors::SubscriptionError, powsybl::entities::TelemetryCurves};
+use log::{debug, error, info, trace};
 use tauri::ipc::Channel;
 use tokio::sync::broadcast;
 use zeromq::{Socket, SocketRecv};
-
-use crate::{errors::SubscriptionError, powsybl::entities::TelemetryCurves};
-
-use super::errors::SubscriptionResult;
 
 #[derive(Debug, Clone)]
 pub struct ZmqConfig {
@@ -35,7 +34,7 @@ impl ZmqSubscription {
     }
 
     pub async fn start(&self, mut shutdown_rx: broadcast::Receiver<()>) -> SubscriptionResult<()> {
-        println!(
+        info!(
             "Starting ZMQ monitoring for feeder {} on {}",
             self.feeder_id, self.config.url
         );
@@ -45,7 +44,7 @@ impl ZmqSubscription {
         loop {
             tokio::select! {
                 _ = shutdown_rx.recv() => {
-                    println!("Shutdown signal received for feeder {}", self.feeder_id);
+                    info!("Shutdown signal received for feeder {}", self.feeder_id);
                     break;
                 }
                 result = socket.recv() => {
@@ -54,7 +53,7 @@ impl ZmqSubscription {
                             self.process_message(message).await?;
                         }
                         Err(e) => {
-                            println!("ZMQ receive error: {:?}", e);
+                            error!("ZMQ receive error: {:?}", e);
                             tokio::time::sleep(tokio::time::Duration::from_millis(500)).await;
                         }
                     }
@@ -62,7 +61,7 @@ impl ZmqSubscription {
             }
         }
 
-        println!("ZMQ monitoring finished for feeder {}", self.feeder_id);
+        info!("ZMQ monitoring finished for feeder {}", self.feeder_id);
         Ok(())
     }
 
@@ -74,23 +73,23 @@ impl ZmqSubscription {
     }
 
     async fn process_message(&self, message: zeromq::ZmqMessage) -> SubscriptionResult<()> {
-        println!("ZMQ message received for feeder {}", self.feeder_id);
+        debug!("ZMQ message received for feeder {}", self.feeder_id);
 
         if let Some(frame) = message.get(0) {
             let data = String::from_utf8(frame.to_vec())
                 .unwrap_or_else(|_| String::from("[non-UTF8 data]"));
 
-            println!("  JSON data size: {} characters", data.len());
+            trace!("  JSON data size: {} characters", data.len());
 
             let telemetry: TelemetryCurves = serde_json::from_str(&data)?;
-            println!("  Successfully deserialized to TelemetryCurves");
-            println!("  Number of curves: {}", telemetry.curves.values.len());
+            debug!("  Successfully deserialized to TelemetryCurves");
+            debug!("  Number of curves: {}", telemetry.curves.values.len());
 
             self.channel
                 .send(telemetry.clone())
                 .map_err(|e| SubscriptionError::ChannelSendError(e.to_string()))?;
 
-            println!("  Data successfully sent via channel");
+            debug!("  Data successfully sent via channel");
         }
 
         Ok(())

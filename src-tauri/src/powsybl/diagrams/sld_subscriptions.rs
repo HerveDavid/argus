@@ -6,6 +6,7 @@ use crate::powsybl::diagrams::entities::{ZmqConfig, ZmqSubscription};
 use crate::powsybl::errors::PowsyblError;
 use crate::state::AppState;
 
+use log::{debug, error, info};
 use tauri::{ipc::Channel, State};
 
 async fn create_subscription_task(
@@ -23,7 +24,7 @@ async fn create_subscription_task(
             .unwrap_or_else(|| ZmqConfig::default().url),
     };
 
-    println!("Using ZMQ URL: {}", zmq_config.url);
+    info!("Using ZMQ URL: {}", zmq_config.url);
 
     state_guard
         .powsybl
@@ -33,7 +34,7 @@ async fn create_subscription_task(
 
             tokio::spawn(async move {
                 if let Err(e) = subscription.start(shutdown_rx).await {
-                    println!(
+                    error!(
                         "Subscription error for feeder {}: {:?}",
                         feeder_id.clone(),
                         e
@@ -51,13 +52,13 @@ pub async fn subscribe_single_line_diagram(
     sld_metadata: SldMetadata,
     on_event: Channel<TelemetryCurves>,
 ) -> PowsyblResult<SldSubscriptionResponse> {
-    println!(
+    debug!(
         "subscribe_single_line_diagram called with SLD metadata: {:?}",
         sld_metadata
     );
 
     let active_feeders = sld_metadata.get_active_arrow_feeders();
-    println!("Active feeders found: {}", active_feeders.len());
+    info!("Active feeders found: {}", active_feeders.len());
 
     for feeder in active_feeders {
         let feeder_id = feeder.id.clone();
@@ -69,7 +70,7 @@ pub async fn subscribe_single_line_diagram(
             .powsybl
             .has_task(&feeder_id)
         {
-            println!("Task already exists for feeder {}, skipping", feeder_id);
+            debug!("Task already exists for feeder {}, skipping", feeder_id);
             continue;
         }
 
@@ -77,7 +78,7 @@ pub async fn subscribe_single_line_diagram(
         create_subscription_task(&state, feeder_id, on_event.clone()).await?;
     }
 
-    println!("subscribe_single_line_diagram completed successfully");
+    info!("subscribe_single_line_diagram completed successfully");
     Ok(SldSubscriptionResponse {
         status: "connected".to_string(),
     })
@@ -88,25 +89,25 @@ pub async fn unsubscribe_single_line_diagram(
     state: State<'_, AppState>,
     sld_metadata: SldMetadata,
 ) -> PowsyblResult<SldSubscriptionResponse> {
-    println!("unsubscribe_single_line_diagram called");
+    info!("unsubscribe_single_line_diagram called");
     let active_feeders = sld_metadata.get_active_arrow_feeders();
-    println!("Stopping tasks for {} active feeders", active_feeders.len());
+    info!("Stopping tasks for {} active feeders", active_feeders.len());
 
     for feeder in active_feeders {
         let feeder_id = feeder.id.clone();
         let task_id = feeder_id.clone();
-        println!("Attempting to stop task for feeder: {}", feeder_id);
+        debug!("Attempting to stop task for feeder: {}", feeder_id);
 
         if let Ok(mut state_guard) = state.write() {
             if state_guard.powsybl.stop_task(&task_id) {
-                println!("Task successfully stopped for feeder {}", feeder_id);
+                info!("Task successfully stopped for feeder {}", feeder_id);
             } else {
-                println!("No task found for feeder {}", feeder_id);
+                debug!("No task found for feeder {}", feeder_id);
             }
         }
     }
 
-    println!("unsubscribe_single_line_diagram completed");
+    info!("unsubscribe_single_line_diagram completed");
     Ok(SldSubscriptionResponse {
         status: "disconnected".to_string(),
     })

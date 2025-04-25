@@ -23,6 +23,4 @@ impl Serialize for SettingsError {
     }
 }
 
-
-
 pub type SettingResult<T> = Result<T, SettingsError>;
