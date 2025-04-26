@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
+use log::{info, error, debug, warn};
 
 // Helper function to spawn the sidecar and monitor its stdout/stderr
 pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
@@ -12,7 +13,7 @@ pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), Str
         let child_process = state.lock().unwrap();
         if child_process.is_some() {
             // A sidecar is already running, do not spawn a new one
-            println!("[tauri] Sidecar is already running. Skipping spawn.");
+            info!("[tauri] Sidecar is already running. Skipping spawn.");
             return Ok(()); // Exit early since sidecar is already running
         }
     }
@@ -35,7 +36,7 @@ pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), Str
             match event {
                 CommandEvent::Stdout(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
-                    println!("Sidecar stdout: {}", line);
+                    debug!("Sidecar stdout: {}", line);
                     // Emit the line to the frontend
                     app_handle
                         .emit("sidecar-stdout", line.to_string())
@@ -43,20 +44,20 @@ pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), Str
                 }
                 CommandEvent::Stderr(line_bytes) => {
                     let line = String::from_utf8_lossy(&line_bytes);
-                    println!("Sidecar stderr: {}", line);
+                    warn!("Sidecar stderr: {}", line);
                     // Emit the error line to the frontend
                     app_handle
                         .emit("sidecar-stderr", line.to_string())
                         .expect("Failed to emit sidecar stderr event");
                 }
                 CommandEvent::Error(error) => {
-                    println!("Sidecar error: {}", error);
+                    error!("Sidecar error: {}", error);
                     app_handle
                         .emit("sidecar-error", error.to_string())
                         .expect("Failed to emit sidecar error event");
                 }
                 CommandEvent::Terminated(payload) => {
-                    println!("Sidecar terminated: {:?}", payload);
+                    info!("Sidecar terminated: {:?}", payload);
                     app_handle
                         .emit("sidecar-terminated", format!("{:?}", payload))
                         .expect("Failed to emit sidecar terminated event");
@@ -83,7 +84,7 @@ pub fn despawn_sidecar(app_handle: &tauri::AppHandle) {
                 // This only applies if you compile a "one-file" exe using PyInstaller. Otherwise, just use the line below to kill the process normally.
                 // let _ = process.kill();
 
-                println!("[tauri] Sidecar closed.");
+                info!("[tauri] Sidecar closed.");
             }
         }
     }

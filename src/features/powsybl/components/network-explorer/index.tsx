@@ -80,7 +80,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
           <TabsTrigger
             value="substations"
             className={cn(
-              'px-2 py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
+              'py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
             )}
           >
             Substations
@@ -88,7 +88,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
           <TabsTrigger
             value="voltageLevels"
             className={cn(
-              'px-2 py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
+              'py-2 rounded-none hover:text-foreground shadow-none data-[state=active]:border-x',
             )}
           >
             Voltage Levels
@@ -98,7 +98,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         {/* Substations Tab Content */}
         <TabsContent
           value="substations"
-          className="flex-1 flex flex-col overflow-hidden"
+          className="flex-1 flex flex-col overflow-hidden mt-2"
         >
           <SubstationsExplorer ref={substationsRef} />
         </TabsContent>
@@ -106,7 +106,7 @@ export const NetworkExplorer: React.FC<NetworkExplorerProps> = ({
         {/* Voltage Levels Tab Content */}
         <TabsContent
           value="voltageLevels"
-          className="flex-1 flex flex-col overflow-hidden"
+          className="flex-1 flex flex-col overflow-hidden mt-2"
         >
           <VoltageLevelsExplorer ref={voltageLevelsRef} />
         </TabsContent>

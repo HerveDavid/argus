@@ -42,8 +42,8 @@ export const VoltageLevelsList: React.FC<VoltageLevelsListProps> = ({
               <span className="font-medium truncate text-sm">
                 {voltageLevel.id}
               </span>
-              <span className="font-medium truncate text-sm">
-                ({voltageLevel.nominal_v} V)
+              <span className="font-medium truncate text-sm text-muted-foreground">
+                {voltageLevel.nominal_v} kV
               </span>
             </div>
           </div>

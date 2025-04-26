@@ -1,6 +1,9 @@
 use super::send_zmq_request;
 
+mod entities;
 mod single_line;
+
+pub mod errors;
 pub mod sld_metadata;
 pub mod sld_subscriptions;
 

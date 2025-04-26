@@ -119,13 +119,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Sérialiser en JSON
         let json_data = serde_json::to_string(&telemetry_data)?;
 
-        // Créer un message ZMQ avec le sujet "telemetry" comme première partie
-        // et la chaîne JSON comme deuxième partie (sans conversion en bytes)
-        let mut message = ZmqMessage::from("MQIS");
-        message.push_back(json_data.into());
-
         println!("Sending telemetry data with time: {}", time_counter);
-        socket.send(message).await?;
+        socket.send(json_data.into()).await?;
 
         // Attendre 1 seconde avant d'envoyer le prochain message
         tokio::time::sleep(Duration::from_secs(1)).await;

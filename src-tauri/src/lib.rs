@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
+mod broker;
 mod powsybl;
 mod settings;
 mod shared;
@@ -16,12 +17,20 @@ use state::AppState;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .target(tauri_plugin_log::Target::new(
+                    tauri_plugin_log::TargetKind::Stdout,
+                ))
+                .build(),
+        )
         .invoke_handler(tauri::generate_handler![
             // Sidecars
             start_sidecar,
@@ -59,11 +68,10 @@ pub fn run() {
 
             // Store the initial sidecar process in the app state
             app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+
             let app_handle = app.handle().clone();
             // Spawn the Python sidecar on startup
-            println!("[tauri] Creating sidecar...");
             spawn_and_monitor_sidecar(app_handle).ok();
-            println!("[tauri] Sidecar spawned and monitoring started.");
 
             Ok(())
         })

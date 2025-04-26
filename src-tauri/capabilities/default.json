@@ -2,14 +2,20 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "app": {
     "security": {
       "capabilities": [
         {
           "identifier": "draggable-window",
-          "windows": ["*"],
-          "permissions": ["core:window:allow-start-dragging"]
+          "windows": [
+            "*"
+          ],
+          "permissions": [
+            "core:window:allow-start-dragging"
+          ]
         }
       ]
     }
@@ -63,6 +69,7 @@
     "store:allow-length",
     "store:allow-reload",
     "store:allow-save",
-    "dialog:default"
+    "dialog:default",
+    "log:default"
   ]
 }

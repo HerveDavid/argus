@@ -37,8 +37,8 @@ export const SubstationList: React.FC<SubstationListProps> = ({
               <span className="font-medium truncate text-sm">
                 {substation.id}
               </span>
-              <span className="font-medium truncate text-sm">
-                ({substation.country})
+              <span className="font-medium truncate text-sm text-muted-foreground">
+                {substation.country}
               </span>
             </div>
           </div>
