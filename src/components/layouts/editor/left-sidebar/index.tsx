@@ -23,7 +23,7 @@ const LeftSideBar: React.FC<{ sidebarItems: SidebarItem[] }> = ({
   return (
     <div className="flex h-full">
       {/* Icon bar */}
-      <div className="flex flex-col justify-between h-full text-secondary border-r gap-2">
+      <div className="flex flex-col justify-between h-full text-secondary border-r gap-2 shadow-lg">
         <div>
           {sidebarItems.map((item) => (
             <SidebarIconButton
@@ -41,7 +41,7 @@ const LeftSideBar: React.FC<{ sidebarItems: SidebarItem[] }> = ({
 
       {/* Sidebar content */}
       {sidebarOpen && (
-        <div className="w-64 bg-gray-800 overflow-y-auto border-r inset-shadow-sm">
+        <div className="w-64 overflow-y-auto border-r inset-shadow-sm">
           <SidebarContent activeItem={activeSidebarItem} />
         </div>
       )}
