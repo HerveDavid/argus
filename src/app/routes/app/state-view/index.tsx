@@ -19,7 +19,7 @@ const StateView = () => {
   const tabs: TabItem[] = [
     {
       id: 'get-started',
-      label: 'Substation',
+      label: 'Diagram',
       content: (
         <div className="h-full w-full">
           <SubstationViewer
