@@ -25,7 +25,6 @@ export const Tools: React.FC<{ element: Substation | VoltageLevel }> = ({
     hasId,
   } = useWorkspaceStore();
 
-  console.log(element);
   const isInWorkspace = element?.id ? hasId(element.id) : false;
 
   const toggleWorkspace = () => {

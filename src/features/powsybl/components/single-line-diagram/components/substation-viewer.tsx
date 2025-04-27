@@ -1,5 +1,5 @@
 import React from 'react';
-import SingleLineDiagram from '../single-line-diagram';
+import SingleLineDiagram from '..';
 
 interface SubstationViewerProps {
   substationId?: string;
