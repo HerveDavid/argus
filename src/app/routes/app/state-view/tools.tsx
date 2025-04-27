@@ -2,37 +2,62 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useWorkspaceStore } from '@/features/workspace/stores/use-workspace.store';
 import { Substation } from '@/types/substation.type';
 import { toast } from 'sonner';
-
 import { EllipsisIcon, PinIcon, TrashIcon } from 'lucide-react';
+import { VoltageLevel } from '@/types/voltage-level.type';
 
-export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
-  const { addSubstation, removeSubstation, hasId } = useWorkspaceStore();
+function isSubstation(obj: Substation | VoltageLevel): obj is Substation {
+  return 'tso' in obj;
+}
 
-  // Vérifier directement si la sous-station est dans le workspace
-  const isInWorkspace = substation?.id ? hasId(substation.id) : false;
+export const Tools: React.FC<{ element: Substation | VoltageLevel }> = ({
+  element,
+}) => {
+  const {
+    addSubstation,
+    removeSubstation,
+    addVoltageLevel,
+    removeVoltageLevel,
+    hasId,
+  } = useWorkspaceStore();
+
+  console.log(element);
+  const isInWorkspace = element?.id ? hasId(element.id) : false;
 
   const toggleWorkspace = () => {
-    if (!substation?.id) {
-      console.error('Substation or substation.id is undefined');
+    if (!element?.id) {
+      console.error('Element or element.id is undefined');
       return;
     }
 
     if (isInWorkspace) {
-      removeSubstation(substation.id);
-      toast.info(`Substation ${substation?.id} was removed from workspace`, {
-        closeButton: true,
-      });
+      if (isSubstation(element)) {
+        removeSubstation(element.id);
+        toast.info(`Substation ${element.id} was removed from workspace`, {
+          closeButton: true,
+        });
+      } else {
+        removeVoltageLevel(element.id);
+        toast.info(`Voltage level ${element.id} was removed from workspace`, {
+          closeButton: true,
+        });
+      }
     } else {
-      addSubstation(substation);
-      toast.success(`Substation ${substation?.id} was added to workspace`, {
-        closeButton: true,
-      });
+      if (isSubstation(element)) {
+        addSubstation(element);
+        toast.success(`Substation ${element.id} was added to workspace`, {
+          closeButton: true,
+        });
+      } else {
+        addVoltageLevel(element);
+        toast.success(`Voltage level ${element.id} was added to workspace`, {
+          closeButton: true,
+        });
+      }
     }
   };
 
@@ -49,7 +74,6 @@ export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
           <EllipsisIcon className="size-5" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuSeparator />
           {isInWorkspace ? (
             <DropdownMenuItem
               onClick={toggleWorkspace}
@@ -64,7 +88,6 @@ export const Tools: React.FC<{ substation: Substation }> = ({ substation }) => {
               Add to workspace
             </DropdownMenuItem>
           )}
-          <DropdownMenuSeparator />
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

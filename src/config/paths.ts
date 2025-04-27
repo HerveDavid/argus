@@ -1,3 +1,5 @@
+export type TypeView = 'substation' | 'voltage-level';
+
 export const paths = {
   home: {
     path: '/',
@@ -9,9 +11,9 @@ export const paths = {
   },
   views: {
     stateView: {
-      path: '/views/state-view/:substationId',
-      getHref: (id: string) => {
-        return `/views/state-view/${id}`;
+      path: '/views/state-view/:type/:substationId/',
+      getHref: (id: string, type: TypeView) => {
+        return `/views/state-view/${type}/${id}`;
       },
     },
   },

@@ -68,9 +68,9 @@ export async function getVoltageLevelById(
   id: string,
 ): Promise<VoltageLevel | null> {
   try {
-    return await invoke<VoltageLevel | null>('get_substation_by_id', { id });
+    return await invoke<VoltageLevel | null>('get_voltage_levels_by_id', { id });
   } catch (error) {
-    throw handleApiError(error, `Error fetching substation with ID ${id}`);
+    throw handleApiError(error, `Error fetching voltage_levels with ID ${id}`);
   }
 }
 

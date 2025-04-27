@@ -6,15 +6,19 @@ import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { TabItem, TabNavigation } from './tab-navigation';
 import { useParams } from 'react-router';
 import { Substation } from '@/types/substation.type';
-
+import { useVoltageLevelDetails } from '@/features/powsybl/hooks/use-voltage-level-details';
+import { VoltageLevel } from '@/types/voltage-level.type';
 // Main component
 const StateView = () => {
   // Params route
-  const { substationId } = useParams();
+  const { substationId, type } = useParams();
 
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
-  const substationDetails = useSubstationDetails(substationId);
+  const elementDetails =
+    type === 'substation'
+      ? useSubstationDetails(substationId)
+      : useVoltageLevelDetails(substationId);
 
   const tabs: TabItem[] = [
     {
@@ -22,10 +26,7 @@ const StateView = () => {
       label: 'Diagram',
       content: (
         <div className="h-full w-full">
-          <SubstationViewer
-            substationId={substationId}
-            substationDetails={substationDetails}
-          />
+          <SubstationViewer substationId={substationId} />
         </div>
       ),
     },
@@ -54,7 +55,7 @@ const StateView = () => {
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            substation={substationDetails.data as Substation}
+            element={elementDetails.data as VoltageLevel | Substation}
           />
           <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
             {tabs.map((tab) => (
@@ -72,5 +73,4 @@ const StateView = () => {
     </EditorLayout>
   );
 };
-
 export default StateView;
