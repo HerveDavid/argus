@@ -17,7 +17,7 @@ import { TeleInformation } from '@/features/powsybl/types/tele-information.type'
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
   width = '100%',
-  height = 'auto',
+  height = '100%',
   className = '',
 }) => {
   const {
