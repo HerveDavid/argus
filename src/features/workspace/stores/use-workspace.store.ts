@@ -1,4 +1,5 @@
 import { Substation } from '@/types/substation.type';
+import { VoltageLevel } from '@/types/voltage-level.type';
 import { create } from 'zustand';
 
 // ------------------------------
@@ -6,11 +7,14 @@ import { create } from 'zustand';
 // ------------------------------
 interface WorkspaceData {
   substations: Map<string, Substation>;
+  voltageLevels: Map<string, VoltageLevel>;
 }
 
 export interface WorkspaceStore extends WorkspaceData {
   addSubstation: (substation: Substation) => void;
   removeSubstation: (id: string) => void;
+  addVoltageLevel: (voltageLevel: VoltageLevel) => void;
+  removeVoltageLevel: (id: string) => void;
   hasId: (id: string) => boolean;
 }
 
@@ -27,8 +31,20 @@ defaultSubstations.set('MQIS', {
   tso: 'FR',
 });
 
+const defaultVoltageLevels = new Map<string, VoltageLevel>();
+defaultVoltageLevels.set('MQIS P6', {
+  high_voltage_limit: 245,
+  id: 'MQIS P6',
+  low_voltage_limit: 220,
+  name: '',
+  nominal_v: 225,
+  substation_id: 'MQIS',
+  topology_kind: '',
+});
+
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   substations: defaultSubstations,
+  voltageLevels: defaultVoltageLevels,
   addSubstation: (substation) => {
     set((state) => {
       const newSubstations = new Map(state.substations);
@@ -43,7 +59,21 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
       return { substations: newSubstations };
     });
   },
+  addVoltageLevel: (voltageLevel) => {
+    set((state) => {
+      const newVoltageLevels = new Map(state.voltageLevels);
+      newVoltageLevels.set(voltageLevel.id, voltageLevel);
+      return { voltageLevels: newVoltageLevels };
+    });
+  },
+  removeVoltageLevel: (id) => {
+    set((state) => {
+      const newVoltageLevels = new Map(state.voltageLevels);
+      newVoltageLevels.delete(id);
+      return { voltageLevels: newVoltageLevels };
+    });
+  },
   hasId: (id) => {
-    return get().substations.has(id);
+    return get().substations.has(id) || get().voltageLevels.has(id);
   },
 }));

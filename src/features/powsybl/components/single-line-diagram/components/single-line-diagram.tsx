@@ -4,6 +4,7 @@ import ContextMenu from './context-menu';
 import LegendOverlay from './legend-overlay';
 import { useContextMenu } from '../hooks/use-context-menu';
 import { useSvgManipulation } from '../hooks/use-svg-manipulation';
+import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
 import { useDiagramEffects } from '../hooks/use-diagram-effects';
 import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 
@@ -17,7 +18,7 @@ import { TeleInformation } from '@/features/powsybl/types/tele-information.type'
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
   width = '100%',
-  height = 'auto',
+  height = '100%',
   className = '',
 }) => {
   const {
@@ -30,6 +31,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   } = useDiagramStore();
 
   const [svgContent, setSvgContent] = useState<string | null>(null);
+  const [isSvgReady, setIsSvgReady] = useState(false);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
   // Fonction pour basculer l'état d'un disjoncteur avec effet de clignotement
@@ -69,6 +71,9 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
   useSvgManipulation(svgContent, svgContainerRef);
 
+  // N'utiliser le hook de zoom que lorsque le SVG est prêt
+  useSvgZoomPan(isSvgReady ? svgContent : null, svgContainerRef);
+
   const { applyBlinkEffect } = useDiagramEffects(
     svgContent,
     svgContainerRef,
@@ -83,7 +88,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
         const id = feeders_with_dynawo_id.find((value) =>
           dynawoId.includes(value.dynawo_id),
         );
-
 
         if (id?.id) {
           const tm: TeleInformation = {
@@ -119,6 +123,21 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       setSvgContent(null);
     }
   }, [svgBlob]);
+
+  // Vérifier que le SVG est bien chargé dans le DOM
+  useEffect(() => {
+    if (svgContent && svgContainerRef.current) {
+      // Utiliser requestAnimationFrame pour s'assurer que le DOM est mis à jour
+      requestAnimationFrame(() => {
+        const svg = svgContainerRef.current?.querySelector('svg');
+        if (svg) {
+          setIsSvgReady(true);
+        }
+      });
+    } else {
+      setIsSvgReady(false);
+    }
+  }, [svgContent]);
 
   if (isLoading) {
     return (

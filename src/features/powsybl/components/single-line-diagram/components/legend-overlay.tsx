@@ -4,7 +4,7 @@ import { LegendOverlayProps } from '../types/single-line-diagram.type';
 const LegendOverlay: React.FC<LegendOverlayProps> = ({ className = '' }) => {
   return (
     <div
-      className={`absolute bottom-2 right-2 bg-white p-2 rounded shadow-md text-xs font-sans ${className}`}
+      className={`absolute bottom-2 right-2 p-2 bg-secondary rounded shadow-md text-xs font-sans ${className}`}
     >
       <div className="font-semibold mb-1">Interactions:</div>
       <div className="flex items-center mb-1">

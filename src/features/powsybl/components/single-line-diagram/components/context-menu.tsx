@@ -119,7 +119,7 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
   return (
     <div
       ref={menuRef}
-      className="absolute bg-white shadow-lg rounded-md border border-gray-200 py-2 z-50"
+      className="absolute bg-secondary shadow-lg rounded-md border border-gray-200 py-2 z-50"
       style={{
         left: x,
         top: y,

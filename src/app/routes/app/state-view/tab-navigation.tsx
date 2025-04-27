@@ -3,19 +3,18 @@ import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Tools } from './tools';
 import { Substation } from '@/types/substation.type';
-
+import { VoltageLevel } from '@/types/voltage-level.type';
 export interface TabItem {
   id: string;
   label: string;
   content: React.ReactNode;
 }
-
 export const TabNavigation: React.FC<{
   tabs: TabItem[];
   activeTab: string;
   onTabChange: (tabId: string) => void;
-  substation: Substation;
-}> = ({ tabs, activeTab, onTabChange, substation }) => {
+  element: Substation | VoltageLevel;
+}> = ({ tabs, activeTab, onTabChange, element }) => {
   return (
     <div className="border-b flex justify-between">
       <TabsList className="bg-transparent h-5 p-0">
@@ -35,7 +34,7 @@ export const TabNavigation: React.FC<{
           </TabsTrigger>
         ))}
       </TabsList>
-      <Tools substation={substation} />
+      <Tools element={element} />
     </div>
   );
 };
