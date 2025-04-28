@@ -53,7 +53,7 @@ pub fn run() {
             // subscribe_single_line_diagram,
             // unsubscribe_single_line_diagram,
         ])
-        .setup(|app| {
+        .setup(move |app| {
             app.manage(AppState::default());
 
             // Store the initial sidecar process in the app state

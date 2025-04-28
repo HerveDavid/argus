@@ -1,13 +1,13 @@
 pub mod commands;
 
 use std::sync::{Arc, Mutex};
-use tauri::{Emitter, Manager};
+use tauri::{Emitter, Manager, Runtime};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
 use log::{info, error, debug, warn};
 
 // Helper function to spawn the sidecar and monitor its stdout/stderr
-pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {
+pub fn spawn_and_monitor_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<(), String> {
     // Check if a sidecar process already exists
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         let child_process = state.lock().unwrap();
@@ -71,7 +71,7 @@ pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), Str
 }
 
 // Helper function ensure the sidecar is killed when the app is close
-pub fn despawn_sidecar(app_handle: &tauri::AppHandle) {
+pub fn despawn_sidecar<R: Runtime>(app_handle: &tauri::AppHandle<R>) {
     if let Some(child_process) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         if let Ok(mut child) = child_process.lock() {
             if let Some(process) = child.as_mut() {
