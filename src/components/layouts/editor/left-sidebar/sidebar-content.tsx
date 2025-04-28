@@ -6,10 +6,10 @@ export const SidebarContent: React.FC<{
   activeItem: string;
 }> = ({ activeItem }) => {
   switch (activeItem) {
-    case 'explorer':
-      return <NetworkExplorer />;
     case 'workspace':
       return <WorkspaceExplorer />;
+    case 'explorer':
+      return <NetworkExplorer />;
     case 'layers':
       return (
         <div className="p-2">

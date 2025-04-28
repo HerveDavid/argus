@@ -8,7 +8,7 @@ const LeftSideBar: React.FC<{ sidebarItems: SidebarItem[] }> = ({
 }) => {
   // States
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeSidebarItem, setActiveSidebarItem] = useState('explorer');
+  const [activeSidebarItem, setActiveSidebarItem] = useState('workspace');
 
   // Handlers
   const handleSidebarItemClick = (itemId: string) => {

@@ -12,8 +12,8 @@ type LayoutProps = {
 
 // Configuration
 const sidebarItems: SidebarItem[] = [
-  { id: 'explorer', icon: <Waypoints size={18} />, label: 'Explorer' },
   { id: 'workspace', icon: <Folder size={18} />, label: 'Workspace' },
+  { id: 'explorer', icon: <Waypoints size={18} />, label: 'Explorer' },
   { id: 'layers', icon: <Layers size={18} />, label: 'Layers' },
 ];
 

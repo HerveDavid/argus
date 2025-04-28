@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional
 class ZmqTestClient:
     """Client de test pour le serveur ZMQ."""
     
-    def __init__(self, server_address: str = "tcp://localhost:5555"):
+    def __init__(self, server_address: str = "tcp://localhost:4267"):
         """Initialise le client ZMQ."""
         self.server_address = server_address
         self.context = zmq.Context()

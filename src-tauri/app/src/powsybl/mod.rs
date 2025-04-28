@@ -15,7 +15,7 @@ pub mod state;
 // Helper function to send ZMQ request
 async fn send_zmq_request(method: &str, params: Option<Value>) -> PowsyblResult<Value> {
     let mut socket = zeromq::ReqSocket::new();
-    socket.connect("tcp://localhost:5555").await?;
+    socket.connect("tcp://localhost:4267").await?;
 
     // Generate a unique request ID
     let request_id = Uuid::new_v4().to_string();
