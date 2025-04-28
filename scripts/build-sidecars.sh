@@ -18,8 +18,8 @@ echo "Executing script on $OS platform"
 TEMP_SPEC_DIR=$(mktemp -d)
 echo "Using temporary directory for spec files: $TEMP_SPEC_DIR"
 
-# Ensure the src-tauri/binaries/ directory exists
-mkdir -p src-tauri/binaries/
+# Ensure the src-tauri/app/binaries/ directory exists
+mkdir -p src-tauri/app/binaries/
 
 # Function to setup and activate virtual environment
 setup_venv() {

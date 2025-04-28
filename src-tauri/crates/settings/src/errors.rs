@@ -3,9 +3,6 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SettingsError {
-    #[error("HTTP client error: {0}")]
-    HttpClient(#[from] tauri_plugin_http::reqwest::Error),
-
     #[error("Error accessing application state: {0}")]
     StateLock(String),
 

@@ -22,19 +22,6 @@
   },
   "permissions": [
     "core:default",
-    "http:default",
-    "http:allow-fetch",
-    {
-      "identifier": "http:default",
-      "allow": [
-        {
-          "url": "http://**/"
-        },
-        {
-          "url": "https://**/"
-        }
-      ]
-    },
     {
       "identifier": "shell:allow-execute",
       "allow": [
