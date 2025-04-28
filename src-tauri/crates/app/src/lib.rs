@@ -50,8 +50,8 @@ pub fn run() {
             get_single_line_diagram,
             get_single_line_diagram_metadata,
             get_single_line_diagram_with_metadata,
-            // subscribe_single_line_diagram,
-            // unsubscribe_single_line_diagram,
+            subscribe_single_line_diagram,
+            unsubscribe_single_line_diagram,
         ])
         .setup(move |app| {
             app.manage(AppState::default());

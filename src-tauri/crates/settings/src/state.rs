@@ -13,7 +13,7 @@ impl Default for SettingsState {
 
         Self {
             zmq_client: Arc::new(RwLock::new(zmq_client)),
-            zmq_url: Arc::new(RwLock::new(Some("".to_string()))),
+            zmq_url: Arc::new(RwLock::new(Some("tcp://localhost:5555".to_string()))),
         }
     }
 }
