@@ -295,34 +295,58 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the get_zmq_url command without any pre-configured scope.",
+          "description": "Enables the allow-get-zmq-url command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-allow-get-zmq-url",
+          "markdownDescription": "Enables the allow-get-zmq-url command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the allow-get-zmq-url command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-allow-get-zmq-url",
+          "markdownDescription": "Denies the allow-get-zmq-url command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the allow-set-zmq-url command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-allow-set-zmq-url",
+          "markdownDescription": "Enables the allow-set-zmq-url command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the allow-set-zmq-url command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-allow-set-zmq-url",
+          "markdownDescription": "Denies the allow-set-zmq-url command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-zmq-url command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-zmq-url",
-          "markdownDescription": "Enables the get_zmq_url command without any pre-configured scope."
+          "markdownDescription": "Enables the get-zmq-url command without any pre-configured scope."
         },
         {
-          "description": "Denies the get_zmq_url command without any pre-configured scope.",
+          "description": "Denies the get-zmq-url command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-zmq-url",
-          "markdownDescription": "Denies the get_zmq_url command without any pre-configured scope."
+          "markdownDescription": "Denies the get-zmq-url command without any pre-configured scope."
         },
         {
-          "description": "Enables the set_zmq_url command without any pre-configured scope.",
+          "description": "Enables the set-zmq-url command without any pre-configured scope.",
           "type": "string",
           "const": "allow-set-zmq-url",
-          "markdownDescription": "Enables the set_zmq_url command without any pre-configured scope."
+          "markdownDescription": "Enables the set-zmq-url command without any pre-configured scope."
         },
         {
-          "description": "Denies the set_zmq_url command without any pre-configured scope.",
+          "description": "Denies the set-zmq-url command without any pre-configured scope.",
           "type": "string",
           "const": "deny-set-zmq-url",
-          "markdownDescription": "Denies the set_zmq_url command without any pre-configured scope."
+          "markdownDescription": "Denies the set-zmq-url command without any pre-configured scope."
         },
         {
-          "description": "Permet l'accès aux fonctionnalités de configuration ZMQ\n#### This default permission set includes:\n\n- `allow-set-zmq-url`\n- `allow-get-zmq-url`",
+          "description": "Settings\n#### This default permission set includes:\n\n- `allow-set-zmq-url`\n- `allow-get-zmq-url`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Permet l'accès aux fonctionnalités de configuration ZMQ\n#### This default permission set includes:\n\n- `allow-set-zmq-url`\n- `allow-get-zmq-url`"
+          "markdownDescription": "Settings\n#### This default permission set includes:\n\n- `allow-set-zmq-url`\n- `allow-get-zmq-url`"
         }
       ]
     }

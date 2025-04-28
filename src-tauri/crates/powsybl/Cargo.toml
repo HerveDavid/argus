@@ -1,0 +1,16 @@
+[package]
+name = "powsybl"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tauri = { workspace = true, default-features = false }
+tauri-plugin-shell = "2"
+serde = { workspace = true }
+serde_json = {workspace = true }
+thiserror = { workspace = true }
+log = {workspace = true}
+
+[build-dependencies]
+tauri-plugin = { workspace = true, features = ["build"] }
+schemars = { workspace = true }
