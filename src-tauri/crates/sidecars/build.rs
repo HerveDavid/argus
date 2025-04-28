@@ -1,4 +1,4 @@
-const COMMANDS: &[&str] = &["shutdown_sidecar", "start_sidecar"];
+const COMMANDS: &[&str] = &["shutdown-sidecar", "start-sidecar"];
 
 fn main() {
     tauri_plugin::Builder::new(COMMANDS).build();

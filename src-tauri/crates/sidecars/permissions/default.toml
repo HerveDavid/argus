@@ -2,4 +2,4 @@
 
 [default]
 description = "Sidecars permissions"
-permissions = ["shutdown_sidecar", "start_sidecar"]
+permissions = ["allow-shutdown-sidecar", "allow-start-sidecar"]

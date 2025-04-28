@@ -32,6 +32,7 @@
         }
       ]
     },
+    "sidecars:default",
     "settings:default",
     "shell:allow-open",
     "fs:read-all",
