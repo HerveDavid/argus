@@ -1,12 +1,12 @@
 use std::sync::{Arc, Mutex};
-use tauri::Manager;
+use tauri::{Manager, Runtime};
 use tauri_plugin_shell::process::CommandChild;
 use super::spawn_and_monitor_sidecar;
 use log::{info, error, warn};
 
 // Define a command to shutdown sidecar process
 #[tauri::command]
-pub fn shutdown_sidecar(app_handle: tauri::AppHandle) -> Result<String, String> {
+pub fn shutdown_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<String, String> {
     info!("[tauri] Received command to shutdown sidecar.");
     
     // Access the sidecar process state
@@ -39,7 +39,7 @@ pub fn shutdown_sidecar(app_handle: tauri::AppHandle) -> Result<String, String> 
 
 // Define a command to start sidecar process.
 #[tauri::command]
-pub fn start_sidecar(app_handle: tauri::AppHandle) -> Result<String, String> {
+pub fn start_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<String, String> {
     info!("[tauri] Received command to start sidecar.");
     
     spawn_and_monitor_sidecar(app_handle)?;

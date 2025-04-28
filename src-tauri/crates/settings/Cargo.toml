@@ -2,12 +2,16 @@
 name = "settings"
 version = "0.0.0"
 edition = "2024"
+links = "settings"
+
 
 [dependencies]
-tauri = { version = "2" , features = [] }
-tauri-plugin-store = "2"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+tauri = { workspace = true }
+serde = { workspace = true }
+serde_json = {workspace = true }
+thiserror = { workspace = true }
+log = {workspace = true}
 zeromq = "0.4.1"
-thiserror = "2.0.12"
-log = "0.4.27"
+
+[build-dependencies]
+tauri-plugin = { workspace = true, features = ["build"] }

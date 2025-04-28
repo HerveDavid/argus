@@ -32,6 +32,7 @@
         }
       ]
     },
+    "settings:default",
     "shell:allow-open",
     "fs:read-all",
     "core:path:default",
