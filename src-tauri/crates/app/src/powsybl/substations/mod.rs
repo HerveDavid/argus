@@ -2,9 +2,9 @@ use super::entities::{FetchStatus, PaginatedResponse, PaginationParams};
 use super::errors::{PowsyblError, PowsyblResult};
 use super::send_zmq_request;
 
-use crate::shared::entities::iidm::Substation;
 use crate::state::AppState;
 
+use entities::iidm::Substation;
 use tauri::State;
 
 /// Get all substations from the API

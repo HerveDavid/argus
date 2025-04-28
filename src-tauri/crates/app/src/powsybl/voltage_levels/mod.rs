@@ -2,9 +2,9 @@ use super::entities::{FetchStatus, PaginatedResponse, PaginationParams};
 use super::errors::{PowsyblError, PowsyblResult};
 use super::send_zmq_request;
 
-use crate::shared::entities::iidm::VoltageLevel;
 use crate::state::AppState;
 
+use entities::iidm::VoltageLevel;
 use tauri::State;
 
 /// Get all voltage levels from the ZMQ broker

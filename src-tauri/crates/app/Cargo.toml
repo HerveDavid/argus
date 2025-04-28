@@ -38,4 +38,7 @@ base64 = "0.22.1"
 uuid = "1.16.0"
 log = { workspace = true }
 
+entities = { path = "../entities" }
 settings = { path = "../settings" }
+
+

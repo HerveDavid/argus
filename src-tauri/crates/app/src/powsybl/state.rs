@@ -1,5 +1,4 @@
-use crate::shared::entities::iidm::{Substation, VoltageLevel};
-
+use entities::iidm::{Substation, VoltageLevel};
 use std::collections::HashMap;
 use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
