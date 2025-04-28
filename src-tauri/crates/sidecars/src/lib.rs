@@ -1,13 +1,33 @@
-pub mod commands;
+mod commands;
 
+use log::{debug, error, info, warn};
 use std::sync::{Arc, Mutex};
-use tauri::{Emitter, Manager, Runtime};
-use tauri_plugin_shell::process::{CommandChild, CommandEvent};
+use tauri::{
+    Emitter, Manager, Runtime,
+    plugin::{Builder, TauriPlugin},
+};
 use tauri_plugin_shell::ShellExt;
-use log::{info, error, debug, warn};
+use tauri_plugin_shell::process::{CommandChild, CommandEvent};
+
+use commands::{shutdown_sidecar, start_sidecar};
+
+pub fn init<R: Runtime>() -> TauriPlugin<R> {
+    Builder::<R>::new("sidecars")
+        .invoke_handler(tauri::generate_handler![shutdown_sidecar, start_sidecar])
+        .setup(|app, _api| {
+            app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+            spawn_and_monitor_sidecar(app.clone()).ok();
+            Ok(())
+        })
+        .on_event(|app, event| match event {
+            tauri::RunEvent::ExitRequested { .. } => despawn_sidecar(app),
+            _ => {}
+        })
+        .build()
+}
 
 // Helper function to spawn the sidecar and monitor its stdout/stderr
-pub fn spawn_and_monitor_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<(), String> {
+fn spawn_and_monitor_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<(), String> {
     // Check if a sidecar process already exists
     if let Some(state) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         let child_process = state.lock().unwrap();
@@ -71,7 +91,7 @@ pub fn spawn_and_monitor_sidecar<R: Runtime>(app_handle: tauri::AppHandle<R>) ->
 }
 
 // Helper function ensure the sidecar is killed when the app is close
-pub fn despawn_sidecar<R: Runtime>(app_handle: &tauri::AppHandle<R>) {
+fn despawn_sidecar<R: Runtime>(app_handle: &tauri::AppHandle<R>) {
     if let Some(child_process) = app_handle.try_state::<Arc<Mutex<Option<CommandChild>>>>() {
         if let Ok(mut child) = child_process.lock() {
             if let Some(process) = child.as_mut() {
