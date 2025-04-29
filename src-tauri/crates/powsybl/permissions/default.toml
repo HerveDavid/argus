@@ -2,4 +2,21 @@
 
 [default]
 description = "Powsybl"
-permissions = []
+permissions = [
+  "allow-get-substations",
+  "allow-get-substation-by-id",
+  "allow-get-paginated-substations",
+  "allow-search-substations",
+  "allow-load-substations",
+  "allow-get-voltage-levels",
+  "allow-get-voltage-levels-by-id",
+  "allow-get-paginated-voltage-levels",
+  "allow-get-voltage-levels-for-substation",
+  "allow-search-voltage-levels",
+  "allow-load-voltage-levels",
+  "allow-get-single-line-diagram",
+  "allow-get-single-line-diagram-metadata",
+  "allow-get-single-line-diagram-with-metadata",
+  "allow-subscribe-single-line-diagram",
+  "allow-unsubscribe-single-line-diagram",
+]

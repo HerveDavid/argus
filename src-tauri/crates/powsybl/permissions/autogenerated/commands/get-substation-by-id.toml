@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-get-substation-by-id"
+description = "Enables the get-substation-by-id command without any pre-configured scope."
+commands.allow = ["get-substation-by-id"]
+
+[[permission]]
+identifier = "deny-get-substation-by-id"
+description = "Denies the get-substation-by-id command without any pre-configured scope."
+commands.deny = ["get-substation-by-id"]

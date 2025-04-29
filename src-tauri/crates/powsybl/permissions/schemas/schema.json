@@ -1,0 +1,498 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PermissionFile",
+  "description": "Permission file that can define a default permission, a set of permissions or a list of inlined permissions.",
+  "type": "object",
+  "properties": {
+    "default": {
+      "description": "The default permission set for the plugin",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DefaultPermission"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "set": {
+      "description": "A list of permissions sets defined",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PermissionSet"
+      }
+    },
+    "permission": {
+      "description": "A list of inlined permissions",
+      "default": [],
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Permission"
+      }
+    }
+  },
+  "definitions": {
+    "DefaultPermission": {
+      "description": "The default permission set of the plugin.\n\nWorks similarly to a permission with the \"default\" identifier.",
+      "type": "object",
+      "required": [
+        "permissions"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "PermissionSet": {
+      "description": "A set of direct permissions grouped together under a new name.",
+      "type": "object",
+      "required": [
+        "description",
+        "identifier",
+        "permissions"
+      ],
+      "properties": {
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does.",
+          "type": "string"
+        },
+        "permissions": {
+          "description": "All permissions this set contains.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PermissionKind"
+          }
+        }
+      }
+    },
+    "Permission": {
+      "description": "Descriptions of explicit privileges of commands.\n\nIt can enable commands to be accessible in the frontend of the application.\n\nIf the scope is defined it can be used to fine grain control the access of individual or multiple commands.",
+      "type": "object",
+      "required": [
+        "identifier"
+      ],
+      "properties": {
+        "version": {
+          "description": "The version of the permission.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 1.0
+        },
+        "identifier": {
+          "description": "A unique identifier for the permission.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Human-readable description of what the permission does. Tauri internal convention is to use `<h4>` headings in markdown content for Tauri documentation generation purposes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "commands": {
+          "description": "Allowed or denied commands when using this permission.",
+          "default": {
+            "allow": [],
+            "deny": []
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/Commands"
+            }
+          ]
+        },
+        "scope": {
+          "description": "Allowed or denied scoped when using this permission.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Scopes"
+            }
+          ]
+        },
+        "platforms": {
+          "description": "Target platforms this permission applies. By default all platforms are affected by this permission.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Target"
+          }
+        }
+      }
+    },
+    "Commands": {
+      "description": "Allowed and denied commands inside a permission.\n\nIf two commands clash inside of `allow` and `deny`, it should be denied by default.",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Allowed command.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "description": "Denied command, which takes priority.",
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Scopes": {
+      "description": "An argument for fine grained behavior control of Tauri commands.\n\nIt can be of any serde serializable type and is used to allow or prevent certain actions inside a Tauri command. The configured scope is passed to the command and will be enforced by the command implementation.\n\n## Example\n\n```json { \"allow\": [{ \"path\": \"$HOME/**\" }], \"deny\": [{ \"path\": \"$HOME/secret.txt\" }] } ```",
+      "type": "object",
+      "properties": {
+        "allow": {
+          "description": "Data that defines what is allowed by the scope.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        "deny": {
+          "description": "Data that defines what is denied by the scope. This should be prioritized by validation logic.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      }
+    },
+    "Value": {
+      "description": "All supported ACL values.",
+      "anyOf": [
+        {
+          "description": "Represents a null JSON value.",
+          "type": "null"
+        },
+        {
+          "description": "Represents a [`bool`].",
+          "type": "boolean"
+        },
+        {
+          "description": "Represents a valid ACL [`Number`].",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Number"
+            }
+          ]
+        },
+        {
+          "description": "Represents a [`String`].",
+          "type": "string"
+        },
+        {
+          "description": "Represents a list of other [`Value`]s.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Value"
+          }
+        },
+        {
+          "description": "Represents a map of [`String`] keys to [`Value`]s.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Value"
+          }
+        }
+      ]
+    },
+    "Number": {
+      "description": "A valid ACL number.",
+      "anyOf": [
+        {
+          "description": "Represents an [`i64`].",
+          "type": "integer",
+          "format": "int64"
+        },
+        {
+          "description": "Represents a [`f64`].",
+          "type": "number",
+          "format": "double"
+        }
+      ]
+    },
+    "Target": {
+      "description": "Platform target.",
+      "oneOf": [
+        {
+          "description": "MacOS.",
+          "type": "string",
+          "enum": [
+            "macOS"
+          ]
+        },
+        {
+          "description": "Windows.",
+          "type": "string",
+          "enum": [
+            "windows"
+          ]
+        },
+        {
+          "description": "Linux.",
+          "type": "string",
+          "enum": [
+            "linux"
+          ]
+        },
+        {
+          "description": "Android.",
+          "type": "string",
+          "enum": [
+            "android"
+          ]
+        },
+        {
+          "description": "iOS.",
+          "type": "string",
+          "enum": [
+            "iOS"
+          ]
+        }
+      ]
+    },
+    "PermissionKind": {
+      "type": "string",
+      "oneOf": [
+        {
+          "description": "Enables the get-paginated-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-paginated-substations",
+          "markdownDescription": "Enables the get-paginated-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-paginated-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-paginated-substations",
+          "markdownDescription": "Denies the get-paginated-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-paginated-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-paginated-voltage-levels",
+          "markdownDescription": "Enables the get-paginated-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-paginated-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-paginated-voltage-levels",
+          "markdownDescription": "Denies the get-paginated-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-single-line-diagram-metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-single-line-diagram-metadata",
+          "markdownDescription": "Enables the get-single-line-diagram-metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-single-line-diagram-metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-single-line-diagram-metadata",
+          "markdownDescription": "Denies the get-single-line-diagram-metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-single-line-diagram-with-metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-single-line-diagram-with-metadata",
+          "markdownDescription": "Enables the get-single-line-diagram-with-metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-single-line-diagram-with-metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-single-line-diagram-with-metadata",
+          "markdownDescription": "Denies the get-single-line-diagram-with-metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-single-line-diagram",
+          "markdownDescription": "Enables the get-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-single-line-diagram",
+          "markdownDescription": "Denies the get-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-substation-by-id command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-substation-by-id",
+          "markdownDescription": "Enables the get-substation-by-id command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-substation-by-id command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-substation-by-id",
+          "markdownDescription": "Denies the get-substation-by-id command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-substations",
+          "markdownDescription": "Enables the get-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-substations",
+          "markdownDescription": "Denies the get-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-voltage-levels-by-id command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-voltage-levels-by-id",
+          "markdownDescription": "Enables the get-voltage-levels-by-id command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-voltage-levels-by-id command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-voltage-levels-by-id",
+          "markdownDescription": "Denies the get-voltage-levels-by-id command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-voltage-levels-for-substation command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-voltage-levels-for-substation",
+          "markdownDescription": "Enables the get-voltage-levels-for-substation command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-voltage-levels-for-substation command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-voltage-levels-for-substation",
+          "markdownDescription": "Denies the get-voltage-levels-for-substation command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-voltage-levels",
+          "markdownDescription": "Enables the get-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-voltage-levels",
+          "markdownDescription": "Denies the get-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the load-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-load-substations",
+          "markdownDescription": "Enables the load-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the load-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-load-substations",
+          "markdownDescription": "Denies the load-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the load-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-load-voltage-levels",
+          "markdownDescription": "Enables the load-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the load-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-load-voltage-levels",
+          "markdownDescription": "Denies the load-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the search-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-search-substations",
+          "markdownDescription": "Enables the search-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the search-substations command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-search-substations",
+          "markdownDescription": "Denies the search-substations command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the search-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-search-voltage-levels",
+          "markdownDescription": "Enables the search-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the search-voltage-levels command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-search-voltage-levels",
+          "markdownDescription": "Denies the search-voltage-levels command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the subscribe-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-subscribe-single-line-diagram",
+          "markdownDescription": "Enables the subscribe-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the subscribe-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-subscribe-single-line-diagram",
+          "markdownDescription": "Denies the subscribe-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the unsubscribe-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-unsubscribe-single-line-diagram",
+          "markdownDescription": "Enables the unsubscribe-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the unsubscribe-single-line-diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-unsubscribe-single-line-diagram",
+          "markdownDescription": "Denies the unsubscribe-single-line-diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`",
+          "type": "string",
+          "const": "default",
+          "markdownDescription": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`"
+        }
+      ]
+    }
+  }
+}

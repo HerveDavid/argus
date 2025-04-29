@@ -100,6 +100,7 @@ dependencies = [
  "futures",
  "log",
  "once_cell",
+ "powsybl",
  "rand 0.9.1",
  "serde",
  "serde_json",
@@ -3001,14 +3002,22 @@ checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
 name = "powsybl"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
+ "crossbeam",
+ "entities",
+ "futures",
  "log",
+ "once_cell",
  "schemars",
  "serde",
  "serde_json",
+ "settings",
  "tauri",
  "tauri-plugin",
- "tauri-plugin-shell",
  "thiserror 2.0.12",
+ "tokio",
+ "uuid",
+ "zeromq",
 ]
 
 [[package]]

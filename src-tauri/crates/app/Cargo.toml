@@ -39,6 +39,7 @@ uuid = "1.16.0"
 log = { workspace = true }
 
 entities = { path = "../entities" }
+powsybl = { path = "../powsybl" }
 sidecars = { path = "../sidecars" }
 settings = { path = "../settings" }
 

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-get-voltage-levels-for-substation"
+description = "Enables the get-voltage-levels-for-substation command without any pre-configured scope."
+commands.allow = ["get-voltage-levels-for-substation"]
+
+[[permission]]
+identifier = "deny-get-voltage-levels-for-substation"
+description = "Denies the get-voltage-levels-for-substation command without any pre-configured scope."
+commands.deny = ["get-voltage-levels-for-substation"]

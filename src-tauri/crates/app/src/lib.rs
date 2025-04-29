@@ -1,11 +1,5 @@
 use tauri::Manager;
 
-mod powsybl;
-mod state;
-
-use powsybl::commands::*;
-use state::AppState;
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -24,31 +18,7 @@ pub fn run() {
         )
         .plugin(settings::init())
         .plugin(sidecars::init())
-        .invoke_handler(tauri::generate_handler![
-            // Substations
-            get_substations,
-            get_substation_by_id,
-            get_paginated_substations,
-            search_substations,
-            load_substations,
-            // Voltage levels
-            get_voltage_levels,
-            get_voltage_levels_by_id,
-            get_paginated_voltage_levels,
-            get_voltage_levels_for_substation,
-            search_voltage_levels,
-            load_voltage_levels,
-            // Diagrams
-            get_single_line_diagram,
-            get_single_line_diagram_metadata,
-            get_single_line_diagram_with_metadata,
-            subscribe_single_line_diagram,
-            unsubscribe_single_line_diagram,
-        ])
-        .setup(|app| {
-            app.manage(AppState::default());
-            Ok(())
-        })
+        .plugin(powsybl::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application")
 }

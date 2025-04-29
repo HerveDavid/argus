@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-get-paginated-voltage-levels"
+description = "Enables the get-paginated-voltage-levels command without any pre-configured scope."
+commands.allow = ["get-paginated-voltage-levels"]
+
+[[permission]]
+identifier = "deny-get-paginated-voltage-levels"
+description = "Denies the get-paginated-voltage-levels command without any pre-configured scope."
+commands.deny = ["get-paginated-voltage-levels"]
