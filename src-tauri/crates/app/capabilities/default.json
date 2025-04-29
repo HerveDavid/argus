@@ -32,8 +32,8 @@
         }
       ]
     },
-    "core:path:default",
     "core:event:default",
+    "core:path:default",
     "core:window:default",
     "core:app:default",
     "core:image:default",

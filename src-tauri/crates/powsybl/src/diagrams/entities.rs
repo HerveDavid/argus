@@ -88,10 +88,17 @@ impl ZmqSubscription {
 
             println!("{:?}", telemetry.clone());
 
-            self.channel
-                .send(telemetry.clone())
-                .map_err(|e| SubscriptionError::ChannelSendError(e.to_string()))?;
-
+             // Try to send via channel with better error handling
+            match self.channel.send(telemetry.clone()) {
+                Ok(_) => {
+                    debug!("Successfully sent data through channel");
+                }
+                Err(err) => {
+                    error!("Failed to send data through channel: {}", err);
+                    return Err(SubscriptionError::ChannelSendError(err.to_string()));
+                }
+            }
+            
             debug!("  Data successfully sent via channel");
         }
 

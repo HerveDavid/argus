@@ -487,10 +487,16 @@
           "markdownDescription": "Denies the unsubscribe_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`",
+          "description": "Allows sending and receiving events through channels.\n#### This permission set includes:\n\n- `core:event:allow-emit`\n- `core:event:allow-listen`\n- `core:event:allow-emit-to`\n- `core:event:allow-unlisten`",
+          "type": "string",
+          "const": "allow-channel-events",
+          "markdownDescription": "Allows sending and receiving events through channels.\n#### This permission set includes:\n\n- `core:event:allow-emit`\n- `core:event:allow-listen`\n- `core:event:allow-emit-to`\n- `core:event:allow-unlisten`"
+        },
+        {
+          "description": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`\n- `allow-channel-events`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`"
+          "markdownDescription": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`\n- `allow-channel-events`"
         }
       ]
     }
