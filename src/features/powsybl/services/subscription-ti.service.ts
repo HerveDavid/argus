@@ -45,7 +45,7 @@ export const subscribeSLD = (
     // Invocation de l'API Tauri
     return yield* Effect.tryPromise({
       try: () =>
-        invoke<SldSubscriptionResponse>('subscribe_single_line_diagram', {
+        invoke<SldSubscriptionResponse>('plugin:powsybl|subscribe_single_line_diagram', {
           sld_metadata,
           on_event,
         }),
@@ -58,7 +58,7 @@ export const unsubscribeSLD = (id: string, sld_metadata: SldMetadata) =>
     if (channels.delete(id)) {
       return yield* Effect.tryPromise({
         try: () =>
-          invoke<SldSubscriptionResponse>('unsubscribe_single_line_diagram', {
+          invoke<SldSubscriptionResponse>('plugin:powsybl|unsubscribe_single_line_diagram', {
             sld_metadata,
           }),
         catch: (error) => new SubscriptionSLDError(id, error),
