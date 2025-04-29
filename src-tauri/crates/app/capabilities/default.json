@@ -32,13 +32,12 @@
         }
       ]
     },
-    "sidecars:default",
-    "settings:default",
-    "powsybl:default",
-    "shell:allow-open",
-    "fs:read-all",
     "core:path:default",
     "core:event:default",
+    "core:event:allow-emit",
+    "core:event:allow-listen",
+    "core:event:allow-emit-to",
+    "core:event:allow-unlisten",
     "core:window:default",
     "core:app:default",
     "core:image:default",
@@ -59,7 +58,12 @@
     "store:allow-length",
     "store:allow-reload",
     "store:allow-save",
+    "shell:allow-open",
+    "fs:read-all",
     "dialog:default",
-    "log:default"
+    "log:default",
+    "settings:default",
+    "sidecars:default",
+    "powsybl:default"
   ]
 }

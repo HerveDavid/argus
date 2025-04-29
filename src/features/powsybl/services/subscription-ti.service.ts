@@ -39,16 +39,27 @@ export const subscribeSLD = (
 
     // Création d'un nouveau canal
     const on_event = new Channel<TelemetryCurves>();
-    on_event.onmessage = handler;
+
+    on_event.onmessage = (event: TelemetryCurves) => {
+      console.log('Channel message received:', event);
+      try {
+        handler(event);
+      } catch (err) {
+        console.error('Error in handler:', err);
+      }
+    };
     channels.set(id, on_event);
 
     // Invocation de l'API Tauri
     return yield* Effect.tryPromise({
       try: () =>
-        invoke<SldSubscriptionResponse>('plugin:powsybl|subscribe_single_line_diagram', {
-          sld_metadata,
-          on_event,
-        }),
+        invoke<SldSubscriptionResponse>(
+          'plugin:powsybl|subscribe_single_line_diagram',
+          {
+            sld_metadata,
+            on_event,
+          },
+        ),
       catch: (error) => new SubscriptionSLDError(id, error),
     });
   });
@@ -58,9 +69,12 @@ export const unsubscribeSLD = (id: string, sld_metadata: SldMetadata) =>
     if (channels.delete(id)) {
       return yield* Effect.tryPromise({
         try: () =>
-          invoke<SldSubscriptionResponse>('plugin:powsybl|unsubscribe_single_line_diagram', {
-            sld_metadata,
-          }),
+          invoke<SldSubscriptionResponse>(
+            'plugin:powsybl|unsubscribe_single_line_diagram',
+            {
+              sld_metadata,
+            },
+          ),
         catch: (error) => new SubscriptionSLDError(id, error),
       });
     }

@@ -20,6 +20,7 @@ Powsybl
 - `allow-get-single-line-diagram-with-metadata`
 - `allow-subscribe-single-line-diagram`
 - `allow-unsubscribe-single-line-diagram`
+- `allow-channel-events`
 
 ## Permission Table
 
@@ -442,6 +443,19 @@ Enables the unsubscribe_single_line_diagram command without any pre-configured s
 <td>
 
 Denies the unsubscribe_single_line_diagram command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:allow-channel-events`
+
+</td>
+<td>
+
+Allows sending and receiving events through channels.
 
 </td>
 </tr>

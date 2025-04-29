@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SubstationList } from './substation-list';
 import { useWorkspaceStore } from '../../stores/use-workspace.store';
 import { Substation } from '@/types/substation.type';

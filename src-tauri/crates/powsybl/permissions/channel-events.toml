@@ -1,0 +1,11 @@
+"$schema" = "schemas/schema.json"
+
+[[set]]
+identifier = "allow-channel-events"
+description = "Allows sending and receiving events through channels."
+permissions = [
+  "core:event:allow-emit",
+  "core:event:allow-listen",
+  "core:event:allow-emit-to",
+  "core:event:allow-unlisten"
+]

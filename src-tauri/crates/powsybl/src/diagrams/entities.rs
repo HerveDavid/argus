@@ -40,7 +40,7 @@ impl ZmqSubscription {
             "Starting ZMQ monitoring for feeder {} on {}",
             self.feeder_id, self.config.url
         );
-
+        
         let mut socket = self.create_and_connect_socket().await?;
 
         loop {
@@ -62,7 +62,6 @@ impl ZmqSubscription {
                 }
             }
         }
-
         info!("ZMQ monitoring finished for feeder {}", self.feeder_id);
         Ok(())
     }

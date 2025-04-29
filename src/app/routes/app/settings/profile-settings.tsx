@@ -192,7 +192,7 @@ const ProfileSettings = () => {
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-semibold text-foreground py-4 pl-6">
-                    Storage Path
+                    Settings Path
                   </TableCell>
                   <TableCell className="text-foreground font-mono text-sm py-4 pr-6 break-all">
                     {storagePath}
