@@ -5,7 +5,7 @@ edition = "2024"
 links = "sidecars"
 
 [dependencies]
-tauri = { workspace = true, default-features = false }
+tauri = { workspace = true, features = [] }
 tauri-plugin-shell = "2"
 serde = { workspace = true }
 serde_json = {workspace = true }

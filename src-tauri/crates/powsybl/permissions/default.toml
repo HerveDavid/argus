@@ -19,5 +19,4 @@ permissions = [
   "allow-get-single-line-diagram-with-metadata",
   "allow-subscribe-single-line-diagram",
   "allow-unsubscribe-single-line-diagram",
-  "allow-channel-events"
 ]

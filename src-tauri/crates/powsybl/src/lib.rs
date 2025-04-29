@@ -13,8 +13,9 @@ pub mod entities;
 pub mod errors;
 pub mod state;
 
-use commands::*;
+pub use commands::*;
 
+// TODO! permission not working with Channel Event from tauri v2
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::<R>::new("powsybl")
         .invoke_handler(tauri::generate_handler![

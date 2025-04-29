@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/*"]
 
 [workspace.dependencies]
-tauri = { version = "2", default-features = false }
+tauri = "2"
 tauri-build = "2"
 tauri-plugin = "2"
 tauri-utils = "2"

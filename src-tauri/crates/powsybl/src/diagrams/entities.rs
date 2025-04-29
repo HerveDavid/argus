@@ -40,7 +40,7 @@ impl ZmqSubscription {
             "Starting ZMQ monitoring for feeder {} on {}",
             self.feeder_id, self.config.url
         );
-        
+
         let mut socket = self.create_and_connect_socket().await?;
 
         loop {
@@ -85,6 +85,8 @@ impl ZmqSubscription {
             let telemetry: TelemetryCurves = serde_json::from_str(&data)?;
             debug!("  Successfully deserialized to TelemetryCurves");
             debug!("  Number of curves: {}", telemetry.curves.values.len());
+
+            println!("{:?}", telemetry.clone());
 
             self.channel
                 .send(telemetry.clone())
