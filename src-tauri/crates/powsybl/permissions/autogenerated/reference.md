@@ -38,7 +38,7 @@ Powsybl
 </td>
 <td>
 
-Enables the get-paginated-substations command without any pre-configured scope.
+Enables the get_paginated_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -51,7 +51,7 @@ Enables the get-paginated-substations command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-paginated-substations command without any pre-configured scope.
+Denies the get_paginated_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -64,7 +64,7 @@ Denies the get-paginated-substations command without any pre-configured scope.
 </td>
 <td>
 
-Enables the get-paginated-voltage-levels command without any pre-configured scope.
+Enables the get_paginated_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -77,59 +77,7 @@ Enables the get-paginated-voltage-levels command without any pre-configured scop
 </td>
 <td>
 
-Denies the get-paginated-voltage-levels command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:allow-get-single-line-diagram-metadata`
-
-</td>
-<td>
-
-Enables the get-single-line-diagram-metadata command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:deny-get-single-line-diagram-metadata`
-
-</td>
-<td>
-
-Denies the get-single-line-diagram-metadata command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:allow-get-single-line-diagram-with-metadata`
-
-</td>
-<td>
-
-Enables the get-single-line-diagram-with-metadata command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:deny-get-single-line-diagram-with-metadata`
-
-</td>
-<td>
-
-Denies the get-single-line-diagram-with-metadata command without any pre-configured scope.
+Denies the get_paginated_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -142,7 +90,7 @@ Denies the get-single-line-diagram-with-metadata command without any pre-configu
 </td>
 <td>
 
-Enables the get-single-line-diagram command without any pre-configured scope.
+Enables the get_single_line_diagram command without any pre-configured scope.
 
 </td>
 </tr>
@@ -155,7 +103,59 @@ Enables the get-single-line-diagram command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-single-line-diagram command without any pre-configured scope.
+Denies the get_single_line_diagram command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:allow-get-single-line-diagram-metadata`
+
+</td>
+<td>
+
+Enables the get_single_line_diagram_metadata command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:deny-get-single-line-diagram-metadata`
+
+</td>
+<td>
+
+Denies the get_single_line_diagram_metadata command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:allow-get-single-line-diagram-with-metadata`
+
+</td>
+<td>
+
+Enables the get_single_line_diagram_with_metadata command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:deny-get-single-line-diagram-with-metadata`
+
+</td>
+<td>
+
+Denies the get_single_line_diagram_with_metadata command without any pre-configured scope.
 
 </td>
 </tr>
@@ -168,7 +168,7 @@ Denies the get-single-line-diagram command without any pre-configured scope.
 </td>
 <td>
 
-Enables the get-substation-by-id command without any pre-configured scope.
+Enables the get_substation_by_id command without any pre-configured scope.
 
 </td>
 </tr>
@@ -181,7 +181,7 @@ Enables the get-substation-by-id command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-substation-by-id command without any pre-configured scope.
+Denies the get_substation_by_id command without any pre-configured scope.
 
 </td>
 </tr>
@@ -194,7 +194,7 @@ Denies the get-substation-by-id command without any pre-configured scope.
 </td>
 <td>
 
-Enables the get-substations command without any pre-configured scope.
+Enables the get_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -207,59 +207,7 @@ Enables the get-substations command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-substations command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:allow-get-voltage-levels-by-id`
-
-</td>
-<td>
-
-Enables the get-voltage-levels-by-id command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:deny-get-voltage-levels-by-id`
-
-</td>
-<td>
-
-Denies the get-voltage-levels-by-id command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:allow-get-voltage-levels-for-substation`
-
-</td>
-<td>
-
-Enables the get-voltage-levels-for-substation command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`powsybl:deny-get-voltage-levels-for-substation`
-
-</td>
-<td>
-
-Denies the get-voltage-levels-for-substation command without any pre-configured scope.
+Denies the get_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -272,7 +220,7 @@ Denies the get-voltage-levels-for-substation command without any pre-configured 
 </td>
 <td>
 
-Enables the get-voltage-levels command without any pre-configured scope.
+Enables the get_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -285,7 +233,59 @@ Enables the get-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-voltage-levels command without any pre-configured scope.
+Denies the get_voltage_levels command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:allow-get-voltage-levels-by-id`
+
+</td>
+<td>
+
+Enables the get_voltage_levels_by_id command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:deny-get-voltage-levels-by-id`
+
+</td>
+<td>
+
+Denies the get_voltage_levels_by_id command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:allow-get-voltage-levels-for-substation`
+
+</td>
+<td>
+
+Enables the get_voltage_levels_for_substation command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`powsybl:deny-get-voltage-levels-for-substation`
+
+</td>
+<td>
+
+Denies the get_voltage_levels_for_substation command without any pre-configured scope.
 
 </td>
 </tr>
@@ -298,7 +298,7 @@ Denies the get-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Enables the load-substations command without any pre-configured scope.
+Enables the load_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -311,7 +311,7 @@ Enables the load-substations command without any pre-configured scope.
 </td>
 <td>
 
-Denies the load-substations command without any pre-configured scope.
+Denies the load_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -324,7 +324,7 @@ Denies the load-substations command without any pre-configured scope.
 </td>
 <td>
 
-Enables the load-voltage-levels command without any pre-configured scope.
+Enables the load_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -337,7 +337,7 @@ Enables the load-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Denies the load-voltage-levels command without any pre-configured scope.
+Denies the load_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -350,7 +350,7 @@ Denies the load-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Enables the search-substations command without any pre-configured scope.
+Enables the search_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -363,7 +363,7 @@ Enables the search-substations command without any pre-configured scope.
 </td>
 <td>
 
-Denies the search-substations command without any pre-configured scope.
+Denies the search_substations command without any pre-configured scope.
 
 </td>
 </tr>
@@ -376,7 +376,7 @@ Denies the search-substations command without any pre-configured scope.
 </td>
 <td>
 
-Enables the search-voltage-levels command without any pre-configured scope.
+Enables the search_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -389,7 +389,7 @@ Enables the search-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Denies the search-voltage-levels command without any pre-configured scope.
+Denies the search_voltage_levels command without any pre-configured scope.
 
 </td>
 </tr>
@@ -402,7 +402,7 @@ Denies the search-voltage-levels command without any pre-configured scope.
 </td>
 <td>
 
-Enables the subscribe-single-line-diagram command without any pre-configured scope.
+Enables the subscribe_single_line_diagram command without any pre-configured scope.
 
 </td>
 </tr>
@@ -415,7 +415,7 @@ Enables the subscribe-single-line-diagram command without any pre-configured sco
 </td>
 <td>
 
-Denies the subscribe-single-line-diagram command without any pre-configured scope.
+Denies the subscribe_single_line_diagram command without any pre-configured scope.
 
 </td>
 </tr>
@@ -428,7 +428,7 @@ Denies the subscribe-single-line-diagram command without any pre-configured scop
 </td>
 <td>
 
-Enables the unsubscribe-single-line-diagram command without any pre-configured scope.
+Enables the unsubscribe_single_line_diagram command without any pre-configured scope.
 
 </td>
 </tr>
@@ -441,7 +441,7 @@ Enables the unsubscribe-single-line-diagram command without any pre-configured s
 </td>
 <td>
 
-Denies the unsubscribe-single-line-diagram command without any pre-configured scope.
+Denies the unsubscribe_single_line_diagram command without any pre-configured scope.
 
 </td>
 </tr>

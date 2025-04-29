@@ -10,7 +10,7 @@ import { Proxy, ProxyResponse } from '../types/proxy.type';
 export async function setProxy(proxy: Proxy): Promise<ProxyResponse> {
   try {
     // Call the Rust command
-    const response = await invoke<ProxyResponse>('load_client', { proxy });
+    const response = await invoke<ProxyResponse>('plugin:settings|load_client', { proxy });
 
     return response;
   } catch (error) {

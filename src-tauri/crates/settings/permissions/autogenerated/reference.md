@@ -19,64 +19,12 @@ Settings
 <tr>
 <td>
 
-`settings:allow-allow-get-zmq-url`
-
-</td>
-<td>
-
-Enables the allow-get-zmq-url command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`settings:deny-allow-get-zmq-url`
-
-</td>
-<td>
-
-Denies the allow-get-zmq-url command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`settings:allow-allow-set-zmq-url`
-
-</td>
-<td>
-
-Enables the allow-set-zmq-url command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
-`settings:deny-allow-set-zmq-url`
-
-</td>
-<td>
-
-Denies the allow-set-zmq-url command without any pre-configured scope.
-
-</td>
-</tr>
-
-<tr>
-<td>
-
 `settings:allow-get-zmq-url`
 
 </td>
 <td>
 
-Enables the get-zmq-url command without any pre-configured scope.
+Enables the get_zmq_url command without any pre-configured scope.
 
 </td>
 </tr>
@@ -89,7 +37,7 @@ Enables the get-zmq-url command without any pre-configured scope.
 </td>
 <td>
 
-Denies the get-zmq-url command without any pre-configured scope.
+Denies the get_zmq_url command without any pre-configured scope.
 
 </td>
 </tr>
@@ -102,7 +50,7 @@ Denies the get-zmq-url command without any pre-configured scope.
 </td>
 <td>
 
-Enables the set-zmq-url command without any pre-configured scope.
+Enables the set_zmq_url command without any pre-configured scope.
 
 </td>
 </tr>
@@ -115,7 +63,7 @@ Enables the set-zmq-url command without any pre-configured scope.
 </td>
 <td>
 
-Denies the set-zmq-url command without any pre-configured scope.
+Denies the set_zmq_url command without any pre-configured scope.
 
 </td>
 </tr>

@@ -22,7 +22,7 @@ export const subscribeSingleLineDiagram = async (
     channels.set(id, on_event);
 
     const response = await invoke<SldSubscriptionResponse>(
-      'subscribe_single_line_diagram',
+      'plugin:powsybl|subscribe_single_line_diagram',
       { sld_metadata, on_event },
     );
 
@@ -40,7 +40,7 @@ export const unsubscribeSingleLineDiagram = async (
     channels.delete(id);
 
     const response = await invoke<SldSubscriptionResponse>(
-      'unsubscribe_single_line_diagram',
+      'plugin:powsybl|unsubscribe_single_line_diagram',
       { sld_metadata },
     );
     return response;

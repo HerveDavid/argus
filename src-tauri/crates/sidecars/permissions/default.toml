@@ -1,5 +1,5 @@
 "$schema" = "schemas/schema.json"
 
 [default]
-description = "Sidecars permissions"
+description = "Sidecars"
 permissions = ["allow-shutdown-sidecar", "allow-start-sidecar"]

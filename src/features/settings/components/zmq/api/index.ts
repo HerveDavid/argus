@@ -6,7 +6,7 @@ import { ZmqUrlResponse } from '../types/zmq.type';
  */
 export const getZmqUrl = async (): Promise<ZmqUrlResponse> => {
   try {
-    return await invoke<ZmqUrlResponse>('get_zmq_url');
+    return await invoke<ZmqUrlResponse>('plugin:settings|get_zmq_url');
   } catch (error) {
     throw new Error(`Failed to get ZMQ URL: ${error}`);
   }
@@ -17,7 +17,7 @@ export const getZmqUrl = async (): Promise<ZmqUrlResponse> => {
  */
 export const setZmqUrl = async (url: string): Promise<ZmqUrlResponse> => {
   try {
-    return await invoke<ZmqUrlResponse>('set_zmq_url', {
+    return await invoke<ZmqUrlResponse>('plugin:settings|set_zmq_url', {
       zmq_url: url,
     });
   } catch (error) {
@@ -32,7 +32,7 @@ export const setZmqSubscription = async (
   subscription: string,
 ): Promise<void> => {
   try {
-    await invoke<void>('set_zmq_subscription', {
+    await invoke<void>('plugin:settings|set_zmq_subscription', {
       subscription,
     });
   } catch (error) {

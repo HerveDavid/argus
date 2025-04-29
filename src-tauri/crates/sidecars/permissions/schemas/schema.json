@@ -295,18 +295,6 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the shutdown-sidecar command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-shutdown-sidecar",
-          "markdownDescription": "Enables the shutdown-sidecar command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the shutdown-sidecar command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-shutdown-sidecar",
-          "markdownDescription": "Denies the shutdown-sidecar command without any pre-configured scope."
-        },
-        {
           "description": "Enables the shutdown_sidecar command without any pre-configured scope.",
           "type": "string",
           "const": "allow-shutdown-sidecar",
@@ -317,18 +305,6 @@
           "type": "string",
           "const": "deny-shutdown-sidecar",
           "markdownDescription": "Denies the shutdown_sidecar command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the start-sidecar command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-start-sidecar",
-          "markdownDescription": "Enables the start-sidecar command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the start-sidecar command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-start-sidecar",
-          "markdownDescription": "Denies the start-sidecar command without any pre-configured scope."
         },
         {
           "description": "Enables the start_sidecar command without any pre-configured scope.",
@@ -343,10 +319,10 @@
           "markdownDescription": "Denies the start_sidecar command without any pre-configured scope."
         },
         {
-          "description": "Sidecars permissions\n#### This default permission set includes:\n\n- `allow-shutdown-sidecar`\n- `allow-start-sidecar`",
+          "description": "Sidecars\n#### This default permission set includes:\n\n- `allow-shutdown-sidecar`\n- `allow-start-sidecar`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Sidecars permissions\n#### This default permission set includes:\n\n- `allow-shutdown-sidecar`\n- `allow-start-sidecar`"
+          "markdownDescription": "Sidecars\n#### This default permission set includes:\n\n- `allow-shutdown-sidecar`\n- `allow-start-sidecar`"
         }
       ]
     }

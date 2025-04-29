@@ -94,16 +94,8 @@ checksum = "e16d2d3311acee920a9eb8d33b8cbc1787ce4a264e85f964c2404b969bdcd487"
 name = "argus"
 version = "0.1.0"
 dependencies = [
- "base64 0.22.1",
- "crossbeam",
  "entities",
- "futures",
- "log",
- "once_cell",
  "powsybl",
- "rand 0.9.1",
- "serde",
- "serde_json",
  "settings",
  "sidecars",
  "tauri",
@@ -114,10 +106,6 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-plugin-shell",
  "tauri-plugin-store",
- "thiserror 2.0.12",
- "tokio",
- "uuid",
- "zeromq",
 ]
 
 [[package]]
@@ -3000,7 +2988,7 @@ checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
 
 [[package]]
 name = "powsybl"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "base64 0.22.1",
  "crossbeam",

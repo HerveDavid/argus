@@ -12,7 +12,7 @@ import {
  */
 export const fetchVoltageLevels = async (): Promise<VoltageLevel[]> => {
   try {
-    const response = await invoke<VoltageLevel[]>('get_voltage_levels');
+    const response = await invoke<VoltageLevel[]>('plugin:powsybl|get_voltage_levels');
 
     if (response && typeof response === 'object' && 'voltage_levels' in response) {
       return (response as VoltageLevels).voltage_levels;
@@ -33,7 +33,7 @@ export const fetchVoltageLevels = async (): Promise<VoltageLevel[]> => {
  */
 export async function loadVoltageLevels(): Promise<FetchStatus> {
   try {
-    const result = await invoke<FetchStatus>('load_voltage_levels');
+    const result = await invoke<FetchStatus>('plugin:powsybl|load_voltage_levels');
 
     if (result && !result.success) {
       throw new Error(result.message || 'Operation failed');
@@ -53,7 +53,7 @@ export async function getPaginatedVoltageLevels(
 ): Promise<PaginatedResponse<VoltageLevel[]>> {
   try {
     return await invoke<PaginatedResponse<VoltageLevel[]>>(
-      'get_paginated_voltage_levels',
+      'plugin:powsybl|get_paginated_voltage_levels',
       { pagination },
     );
   } catch (error) {
@@ -68,7 +68,7 @@ export async function getVoltageLevelById(
   id: string,
 ): Promise<VoltageLevel | null> {
   try {
-    return await invoke<VoltageLevel | null>('get_voltage_levels_by_id', { id });
+    return await invoke<VoltageLevel | null>('plugin:powsybl|get_voltage_levels_by_id', { id });
   } catch (error) {
     throw handleApiError(error, `Error fetching voltage_levels with ID ${id}`);
   }
@@ -87,7 +87,7 @@ export async function searchVoltageLevels(
   search_fields?: string[],
 ): Promise<PaginatedResponse<VoltageLevel[]>> {
   try {
-    return await invoke<PaginatedResponse<VoltageLevel[]>>('search_voltage_levels', {
+    return await invoke<PaginatedResponse<VoltageLevel[]>>('plugin:powsybl|search_voltage_levels', {
       query,
       pagination,
       search_fields,

@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-subscribe-single-line-diagram"
+description = "Enables the subscribe_single_line_diagram command without any pre-configured scope."
+commands.allow = ["subscribe_single_line_diagram"]
+
+[[permission]]
+identifier = "deny-subscribe-single-line-diagram"
+description = "Denies the subscribe_single_line_diagram command without any pre-configured scope."
+commands.deny = ["subscribe_single_line_diagram"]

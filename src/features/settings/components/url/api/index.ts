@@ -6,7 +6,7 @@ import { ServerUrlResponse } from '../types/url.type';
  */
 export const getServerUrl = async () => {
   try {
-    return await invoke<ServerUrlResponse>('get_server_url');
+    return await invoke<ServerUrlResponse>('plugin:settings|get_server_url');
   } catch (error) {
     throw new Error(`Failed to get server_url: ${error}`);
   }
@@ -17,7 +17,7 @@ export const getServerUrl = async () => {
  */
 export const setServerUrl = async (url: string) => {
   try {
-    return await invoke<ServerUrlResponse>('set_server_url', {
+    return await invoke<ServerUrlResponse>('plugin:settings|set_server_url', {
       server_url: url,
     });
   } catch (error) {

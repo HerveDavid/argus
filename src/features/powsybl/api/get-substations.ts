@@ -12,7 +12,7 @@ import {
  */
 export const fetchSubstations = async (): Promise<Substation[]> => {
   try {
-    const response = await invoke<Substation[]>('get_substations');
+    const response = await invoke<Substation[]>('plugin:powsybl|get_substations');
 
     if (response && typeof response === 'object' && 'substations' in response) {
       return (response as Substations).substations;
@@ -33,7 +33,7 @@ export const fetchSubstations = async (): Promise<Substation[]> => {
  */
 export async function loadSubstations(): Promise<FetchStatus> {
   try {
-    const result = await invoke<FetchStatus>('load_substations');
+    const result = await invoke<FetchStatus>('plugin:powsybl|load_substations');
 
     if (result && !result.success) {
       throw new Error(result.message || 'Operation failed');
@@ -53,7 +53,7 @@ export async function getPaginatedSubstations(
 ): Promise<PaginatedResponse<Substation[]>> {
   try {
     return await invoke<PaginatedResponse<Substation[]>>(
-      'get_paginated_substations',
+      'plugin:powsybl|get_paginated_substations',
       { pagination },
     );
   } catch (error) {
@@ -68,7 +68,7 @@ export async function getSubstationById(
   id: string,
 ): Promise<Substation | null> {
   try {
-    return await invoke<Substation | null>('get_substation_by_id', { id });
+    return await invoke<Substation | null>('plugin:powsybl|get_substation_by_id', { id });
   } catch (error) {
     throw handleApiError(error, `Error fetching substation with ID ${id}`);
   }
@@ -87,7 +87,7 @@ export async function searchSubstations(
   search_fields?: string[],
 ): Promise<PaginatedResponse<Substation[]>> {
   try {
-    return await invoke<PaginatedResponse<Substation[]>>('search_substations', {
+    return await invoke<PaginatedResponse<Substation[]>>('plugin:powsybl|search_substations', {
       query,
       pagination,
       search_fields,

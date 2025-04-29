@@ -34,6 +34,7 @@
     },
     "sidecars:default",
     "settings:default",
+    "powsybl:default",
     "shell:allow-open",
     "fs:read-all",
     "core:path:default",

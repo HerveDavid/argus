@@ -1,23 +1,23 @@
 const COMMANDS: &[&str] = &[
     // Substations
-    "get-substations",
-    "get-substation-by-id",
-    "get-paginated-substations",
-    "search-substations",
-    "load-substations",
+    "get_substations",
+    "get_substation_by_id",
+    "get_paginated_substations",
+    "search_substations",
+    "load_substations",
     // Voltage levels
-    "get-voltage-levels",
-    "get-voltage-levels-by-id",
-    "get-paginated-voltage-levels",
-    "get-voltage-levels-for-substation",
-    "search-voltage-levels",
-    "load-voltage-levels",
+    "get_voltage_levels",
+    "get_voltage_levels_by_id",
+    "get_paginated_voltage_levels",
+    "get_voltage_levels_for_substation",
+    "search_voltage_levels",
+    "load_voltage_levels",
     // Diagrams
-    "get-single-line-diagram",
-    "get-single-line-diagram-metadata",
-    "get-single-line-diagram-with-metadata",
-    "subscribe-single-line-diagram",
-    "unsubscribe-single-line-diagram",
+    "get_single_line_diagram",
+    "get_single_line_diagram_metadata",
+    "get_single_line_diagram_with_metadata",
+    "subscribe_single_line_diagram",
+    "unsubscribe_single_line_diagram",
 ];
 
 fn main() {

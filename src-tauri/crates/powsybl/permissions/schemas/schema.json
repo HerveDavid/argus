@@ -295,196 +295,196 @@
       "type": "string",
       "oneOf": [
         {
-          "description": "Enables the get-paginated-substations command without any pre-configured scope.",
+          "description": "Enables the get_paginated_substations command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-paginated-substations",
-          "markdownDescription": "Enables the get-paginated-substations command without any pre-configured scope."
+          "markdownDescription": "Enables the get_paginated_substations command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-paginated-substations command without any pre-configured scope.",
+          "description": "Denies the get_paginated_substations command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-paginated-substations",
-          "markdownDescription": "Denies the get-paginated-substations command without any pre-configured scope."
+          "markdownDescription": "Denies the get_paginated_substations command without any pre-configured scope."
         },
         {
-          "description": "Enables the get-paginated-voltage-levels command without any pre-configured scope.",
+          "description": "Enables the get_paginated_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-paginated-voltage-levels",
-          "markdownDescription": "Enables the get-paginated-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Enables the get_paginated_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-paginated-voltage-levels command without any pre-configured scope.",
+          "description": "Denies the get_paginated_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-paginated-voltage-levels",
-          "markdownDescription": "Denies the get-paginated-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Denies the get_paginated_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Enables the get-single-line-diagram-metadata command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-get-single-line-diagram-metadata",
-          "markdownDescription": "Enables the get-single-line-diagram-metadata command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get-single-line-diagram-metadata command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-get-single-line-diagram-metadata",
-          "markdownDescription": "Denies the get-single-line-diagram-metadata command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get-single-line-diagram-with-metadata command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-get-single-line-diagram-with-metadata",
-          "markdownDescription": "Enables the get-single-line-diagram-with-metadata command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get-single-line-diagram-with-metadata command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-get-single-line-diagram-with-metadata",
-          "markdownDescription": "Denies the get-single-line-diagram-with-metadata command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get-single-line-diagram command without any pre-configured scope.",
+          "description": "Enables the get_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-single-line-diagram",
-          "markdownDescription": "Enables the get-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Enables the get_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-single-line-diagram command without any pre-configured scope.",
+          "description": "Denies the get_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-single-line-diagram",
-          "markdownDescription": "Denies the get-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Denies the get_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Enables the get-substation-by-id command without any pre-configured scope.",
+          "description": "Enables the get_single_line_diagram_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-single-line-diagram-metadata",
+          "markdownDescription": "Enables the get_single_line_diagram_metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_single_line_diagram_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-single-line-diagram-metadata",
+          "markdownDescription": "Denies the get_single_line_diagram_metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_single_line_diagram_with_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-single-line-diagram-with-metadata",
+          "markdownDescription": "Enables the get_single_line_diagram_with_metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_single_line_diagram_with_metadata command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-single-line-diagram-with-metadata",
+          "markdownDescription": "Denies the get_single_line_diagram_with_metadata command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_substation_by_id command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-substation-by-id",
-          "markdownDescription": "Enables the get-substation-by-id command without any pre-configured scope."
+          "markdownDescription": "Enables the get_substation_by_id command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-substation-by-id command without any pre-configured scope.",
+          "description": "Denies the get_substation_by_id command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-substation-by-id",
-          "markdownDescription": "Denies the get-substation-by-id command without any pre-configured scope."
+          "markdownDescription": "Denies the get_substation_by_id command without any pre-configured scope."
         },
         {
-          "description": "Enables the get-substations command without any pre-configured scope.",
+          "description": "Enables the get_substations command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-substations",
-          "markdownDescription": "Enables the get-substations command without any pre-configured scope."
+          "markdownDescription": "Enables the get_substations command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-substations command without any pre-configured scope.",
+          "description": "Denies the get_substations command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-substations",
-          "markdownDescription": "Denies the get-substations command without any pre-configured scope."
+          "markdownDescription": "Denies the get_substations command without any pre-configured scope."
         },
         {
-          "description": "Enables the get-voltage-levels-by-id command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-get-voltage-levels-by-id",
-          "markdownDescription": "Enables the get-voltage-levels-by-id command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get-voltage-levels-by-id command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-get-voltage-levels-by-id",
-          "markdownDescription": "Denies the get-voltage-levels-by-id command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get-voltage-levels-for-substation command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-get-voltage-levels-for-substation",
-          "markdownDescription": "Enables the get-voltage-levels-for-substation command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the get-voltage-levels-for-substation command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-get-voltage-levels-for-substation",
-          "markdownDescription": "Denies the get-voltage-levels-for-substation command without any pre-configured scope."
-        },
-        {
-          "description": "Enables the get-voltage-levels command without any pre-configured scope.",
+          "description": "Enables the get_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "allow-get-voltage-levels",
-          "markdownDescription": "Enables the get-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Enables the get_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Denies the get-voltage-levels command without any pre-configured scope.",
+          "description": "Denies the get_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "deny-get-voltage-levels",
-          "markdownDescription": "Denies the get-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Denies the get_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Enables the load-substations command without any pre-configured scope.",
+          "description": "Enables the get_voltage_levels_by_id command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-voltage-levels-by-id",
+          "markdownDescription": "Enables the get_voltage_levels_by_id command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_voltage_levels_by_id command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-voltage-levels-by-id",
+          "markdownDescription": "Denies the get_voltage_levels_by_id command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the get_voltage_levels_for_substation command without any pre-configured scope.",
+          "type": "string",
+          "const": "allow-get-voltage-levels-for-substation",
+          "markdownDescription": "Enables the get_voltage_levels_for_substation command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the get_voltage_levels_for_substation command without any pre-configured scope.",
+          "type": "string",
+          "const": "deny-get-voltage-levels-for-substation",
+          "markdownDescription": "Denies the get_voltage_levels_for_substation command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the load_substations command without any pre-configured scope.",
           "type": "string",
           "const": "allow-load-substations",
-          "markdownDescription": "Enables the load-substations command without any pre-configured scope."
+          "markdownDescription": "Enables the load_substations command without any pre-configured scope."
         },
         {
-          "description": "Denies the load-substations command without any pre-configured scope.",
+          "description": "Denies the load_substations command without any pre-configured scope.",
           "type": "string",
           "const": "deny-load-substations",
-          "markdownDescription": "Denies the load-substations command without any pre-configured scope."
+          "markdownDescription": "Denies the load_substations command without any pre-configured scope."
         },
         {
-          "description": "Enables the load-voltage-levels command without any pre-configured scope.",
+          "description": "Enables the load_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "allow-load-voltage-levels",
-          "markdownDescription": "Enables the load-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Enables the load_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Denies the load-voltage-levels command without any pre-configured scope.",
+          "description": "Denies the load_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "deny-load-voltage-levels",
-          "markdownDescription": "Denies the load-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Denies the load_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Enables the search-substations command without any pre-configured scope.",
+          "description": "Enables the search_substations command without any pre-configured scope.",
           "type": "string",
           "const": "allow-search-substations",
-          "markdownDescription": "Enables the search-substations command without any pre-configured scope."
+          "markdownDescription": "Enables the search_substations command without any pre-configured scope."
         },
         {
-          "description": "Denies the search-substations command without any pre-configured scope.",
+          "description": "Denies the search_substations command without any pre-configured scope.",
           "type": "string",
           "const": "deny-search-substations",
-          "markdownDescription": "Denies the search-substations command without any pre-configured scope."
+          "markdownDescription": "Denies the search_substations command without any pre-configured scope."
         },
         {
-          "description": "Enables the search-voltage-levels command without any pre-configured scope.",
+          "description": "Enables the search_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "allow-search-voltage-levels",
-          "markdownDescription": "Enables the search-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Enables the search_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Denies the search-voltage-levels command without any pre-configured scope.",
+          "description": "Denies the search_voltage_levels command without any pre-configured scope.",
           "type": "string",
           "const": "deny-search-voltage-levels",
-          "markdownDescription": "Denies the search-voltage-levels command without any pre-configured scope."
+          "markdownDescription": "Denies the search_voltage_levels command without any pre-configured scope."
         },
         {
-          "description": "Enables the subscribe-single-line-diagram command without any pre-configured scope.",
+          "description": "Enables the subscribe_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "allow-subscribe-single-line-diagram",
-          "markdownDescription": "Enables the subscribe-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Enables the subscribe_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Denies the subscribe-single-line-diagram command without any pre-configured scope.",
+          "description": "Denies the subscribe_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "deny-subscribe-single-line-diagram",
-          "markdownDescription": "Denies the subscribe-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Denies the subscribe_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Enables the unsubscribe-single-line-diagram command without any pre-configured scope.",
+          "description": "Enables the unsubscribe_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "allow-unsubscribe-single-line-diagram",
-          "markdownDescription": "Enables the unsubscribe-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Enables the unsubscribe_single_line_diagram command without any pre-configured scope."
         },
         {
-          "description": "Denies the unsubscribe-single-line-diagram command without any pre-configured scope.",
+          "description": "Denies the unsubscribe_single_line_diagram command without any pre-configured scope.",
           "type": "string",
           "const": "deny-unsubscribe-single-line-diagram",
-          "markdownDescription": "Denies the unsubscribe-single-line-diagram command without any pre-configured scope."
+          "markdownDescription": "Denies the unsubscribe_single_line_diagram command without any pre-configured scope."
         },
         {
           "description": "Powsybl\n#### This default permission set includes:\n\n- `allow-get-substations`\n- `allow-get-substation-by-id`\n- `allow-get-paginated-substations`\n- `allow-search-substations`\n- `allow-load-substations`\n- `allow-get-voltage-levels`\n- `allow-get-voltage-levels-by-id`\n- `allow-get-paginated-voltage-levels`\n- `allow-get-voltage-levels-for-substation`\n- `allow-search-voltage-levels`\n- `allow-load-voltage-levels`\n- `allow-get-single-line-diagram`\n- `allow-get-single-line-diagram-metadata`\n- `allow-get-single-line-diagram-with-metadata`\n- `allow-subscribe-single-line-diagram`\n- `allow-unsubscribe-single-line-diagram`",
