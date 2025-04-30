@@ -9,6 +9,7 @@ interface ZoomPanOptions {
   zoomEnabled?: boolean;
   wheelZoomEnabled?: boolean;
   initialZoom?: number;
+  animationDuration?: number;
   onZoom?: (zoomLevel: number) => void;
   onPan?: (x: number, y: number) => void;
 }
@@ -25,6 +26,7 @@ export const useSvgZoomPan = (
     zoomEnabled = true,
     wheelZoomEnabled = true,
     initialZoom = 1,
+    animationDuration = 300,
     onZoom,
     onPan,
   } = options;
@@ -36,29 +38,27 @@ export const useSvgZoomPan = (
     let isPanning = false;
     let startPoint = { x: 0, y: 0 };
     let viewBox = { x: 0, y: 0, width: 0, height: 0 };
+    let originalViewBox = { x: 0, y: 0, width: 0, height: 0 };
     let currentZoom = initialZoom;
 
-    // Fonction pour initialiser le SVG
     const initSvg = (svgElement: SVGSVGElement) => {
       if (!svgElement) return null;
 
-      // Créer une instance SVG.js à partir de l'élément SVG existant
       svgInstance = SVG(svgElement);
 
-      // Obtenir le viewBox initial
       const vb = svgElement.viewBox.baseVal;
       if (vb.width && vb.height) {
         viewBox = { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
+        originalViewBox = { ...viewBox };
       } else {
-        // Fallback si viewBox n'est pas défini
         const width = svgElement.width.baseVal.value || svgElement.clientWidth;
         const height =
           svgElement.height.baseVal.value || svgElement.clientHeight;
         viewBox = { x: 0, y: 0, width, height };
+        originalViewBox = { ...viewBox };
         svgInstance.viewbox(0, 0, width, height);
       }
 
-      // Appliquer le zoom initial
       if (initialZoom !== 1) {
         applyZoom(initialZoom);
       }
@@ -66,64 +66,103 @@ export const useSvgZoomPan = (
       return svgInstance;
     };
 
-    // Fonction pour appliquer le zoom
     const applyZoom = (zoom: number, centerX?: number, centerY?: number) => {
       if (!svgInstance) return;
 
       const newZoom = Math.min(Math.max(zoom, minZoom), maxZoom);
 
-      // Si le niveau de zoom n'a pas changé, ne rien faire
       if (newZoom === currentZoom) return;
 
       const svgElement = svgInstance.node;
       const svgRect = svgElement.getBoundingClientRect();
 
-      // Déterminer le centre du zoom
       const cx = centerX !== undefined ? centerX : svgRect.width / 2;
       const cy = centerY !== undefined ? centerY : svgRect.height / 2;
 
-      // Calculer le point dans les coordonnées du viewBox
       const pt = svgElement.createSVGPoint();
       pt.x = cx;
       pt.y = cy;
       const svgP = pt.matrixTransform(svgElement.getScreenCTM()?.inverse());
 
-      // Calculer le nouveau viewBox
       const zoomRatio = currentZoom / newZoom;
       const newWidth = viewBox.width * zoomRatio;
       const newHeight = viewBox.height * zoomRatio;
 
-      // Ajuster la position pour que le zoom soit centré sur le point
       const newX = svgP.x - (svgP.x - viewBox.x) * zoomRatio;
       const newY = svgP.y - (svgP.y - viewBox.y) * zoomRatio;
 
-      // Appliquer le nouveau viewBox
       svgInstance.viewbox(newX, newY, newWidth, newHeight);
 
-      // Mettre à jour les variables
       viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
       currentZoom = newZoom;
 
-      // Appeler le callback si défini
       if (onZoom) onZoom(currentZoom);
     };
 
-    // Gestionnaire d'événement de la molette
+    const animateViewbox = (
+      startViewbox: { x: number; y: number; width: number; height: number },
+      targetViewbox: { x: number; y: number; width: number; height: number },
+      duration: number,
+    ) => {
+      if (!svgInstance) return;
+
+      const startTime = performance.now();
+      const endTime = startTime + duration;
+
+      const animate = (currentTime: number) => {
+        if (currentTime >= endTime) {
+          svgInstance?.viewbox(
+            targetViewbox.x,
+            targetViewbox.y,
+            targetViewbox.width,
+            targetViewbox.height,
+          );
+          currentZoom = originalViewBox.width / targetViewbox.width;
+          viewBox = { ...targetViewbox };
+          if (onZoom) onZoom(currentZoom);
+          return;
+        }
+
+        const progress = (currentTime - startTime) / duration;
+        const easedProgress = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+        const currentX =
+          startViewbox.x + (targetViewbox.x - startViewbox.x) * easedProgress;
+        const currentY =
+          startViewbox.y + (targetViewbox.y - startViewbox.y) * easedProgress;
+        const currentWidth =
+          startViewbox.width +
+          (targetViewbox.width - startViewbox.width) * easedProgress;
+        const currentHeight =
+          startViewbox.height +
+          (targetViewbox.height - startViewbox.height) * easedProgress;
+
+        svgInstance?.viewbox(currentX, currentY, currentWidth, currentHeight);
+
+        requestAnimationFrame(animate);
+      };
+
+      requestAnimationFrame(animate);
+    };
+
+    const animatedResetZoom = () => {
+      if (!svgInstance) return;
+
+      animateViewbox(viewBox, originalViewBox, animationDuration);
+    };
+
     const handleWheel = (e: WheelEvent) => {
       if (!wheelZoomEnabled || !zoomEnabled || !svgInstance) return;
 
       e.preventDefault();
 
-      // Déterminer la direction du zoom
       const delta = e.deltaY < 0 ? 1 : -1;
       const zoomDelta = delta * zoomFactor;
       const newZoom = currentZoom * (1 + zoomDelta);
 
-      // Appliquer le zoom centré sur la position de la souris
       applyZoom(newZoom, e.clientX, e.clientY);
     };
 
-    // Gestionnaire d'événement pour commencer le panoramique
     const handleMouseDown = (e: MouseEvent) => {
       if (!panEnabled || !svgInstance || e.button !== 0) return;
 
@@ -132,13 +171,11 @@ export const useSvgZoomPan = (
       isPanning = true;
       startPoint = { x: e.clientX, y: e.clientY };
 
-      // Ajouter la classe pour le curseur grab
       if (containerRef.current) {
         containerRef.current.style.cursor = 'grabbing';
       }
     };
 
-    // Gestionnaire d'événement pour le panoramique en cours
     const handleMouseMove = (e: MouseEvent) => {
       if (!isPanning || !svgInstance) return;
 
@@ -147,51 +184,36 @@ export const useSvgZoomPan = (
       const dx = e.clientX - startPoint.x;
       const dy = e.clientY - startPoint.y;
 
-      // Convertir le déplacement en coordonnées du viewBox
       const svgElement = svgInstance.node;
       const scale = viewBox.width / svgElement.clientWidth;
 
       const newX = viewBox.x - dx * scale;
       const newY = viewBox.y - dy * scale;
 
-      // Appliquer le nouveau viewBox
       svgInstance.viewbox(newX, newY, viewBox.width, viewBox.height);
 
-      // Mettre à jour les variables
       viewBox.x = newX;
       viewBox.y = newY;
       startPoint = { x: e.clientX, y: e.clientY };
 
-      // Appeler le callback si défini
       if (onPan) onPan(newX, newY);
     };
 
-    // Gestionnaire d'événement pour terminer le panoramique
     const handleMouseUp = () => {
       isPanning = false;
 
-      // Restaurer le curseur
       if (containerRef.current) {
         containerRef.current.style.cursor = 'grab';
       }
     };
 
-    // Fonction pour réinitialiser le zoom
-    const resetZoom = () => {
-      if (!svgInstance) return;
+    const handleDoubleClick = (e: MouseEvent) => {
+      if (!zoomEnabled || !svgInstance) return;
 
-      const svgElement = svgInstance.node;
-      const vb = svgElement.viewBox.baseVal;
-
-      viewBox = { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
-      currentZoom = 1;
-
-      svgInstance.viewbox(viewBox.x, viewBox.y, viewBox.width, viewBox.height);
-
-      if (onZoom) onZoom(1);
+      e.preventDefault();
+      animatedResetZoom();
     };
 
-    // Observer pour surveiller quand le SVG est ajouté au DOM
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList') {
@@ -199,7 +221,6 @@ export const useSvgZoomPan = (
           if (svgElement && !svgInstance) {
             svgInstance = initSvg(svgElement);
 
-            // Ajouter les gestionnaires d'événements
             if (wheelZoomEnabled) {
               containerRef.current?.addEventListener('wheel', handleWheel, {
                 passive: false,
@@ -214,29 +235,32 @@ export const useSvgZoomPan = (
               document.addEventListener('mousemove', handleMouseMove);
               document.addEventListener('mouseup', handleMouseUp);
 
-              // Ajouter la classe pour le curseur grab
               if (containerRef.current) {
                 containerRef.current.style.cursor = 'grab';
               }
+            }
+
+            if (zoomEnabled) {
+              containerRef.current?.addEventListener(
+                'dblclick',
+                handleDoubleClick,
+              );
             }
           }
         }
       });
     });
 
-    // Commencer à observer
     if (containerRef.current) {
       observer.observe(containerRef.current, {
         childList: true,
         subtree: true,
       });
 
-      // Vérifier si le SVG existe déjà
       const svgElement = containerRef.current.querySelector('svg');
       if (svgElement) {
         svgInstance = initSvg(svgElement);
 
-        // Ajouter les gestionnaires d'événements
         if (wheelZoomEnabled) {
           containerRef.current.addEventListener('wheel', handleWheel, {
             passive: false,
@@ -248,19 +272,22 @@ export const useSvgZoomPan = (
           document.addEventListener('mousemove', handleMouseMove);
           document.addEventListener('mouseup', handleMouseUp);
 
-          // Ajouter la classe pour le curseur grab
           containerRef.current.style.cursor = 'grab';
+        }
+
+        if (zoomEnabled) {
+          containerRef.current.addEventListener('dblclick', handleDoubleClick);
         }
       }
     }
 
-    // Nettoyer les gestionnaires d'événements lors du démontage
     return () => {
       observer.disconnect();
 
       if (containerRef.current) {
         containerRef.current.removeEventListener('wheel', handleWheel);
         containerRef.current.removeEventListener('mousedown', handleMouseDown);
+        containerRef.current.removeEventListener('dblclick', handleDoubleClick);
       }
 
       document.removeEventListener('mousemove', handleMouseMove);
@@ -268,7 +295,6 @@ export const useSvgZoomPan = (
     };
   }, [containerRef, options]);
 
-  // Retourner les méthodes pour contrôler le zoom et le panoramique à partir du composant
   return {
     zoomIn: () => {
       const svgElement = containerRef.current?.querySelector('svg');
@@ -276,22 +302,17 @@ export const useSvgZoomPan = (
         const svg = SVG(svgElement);
         const vb = svg.viewbox();
 
-        // Calculer le nouveau zoom
         const zoomFactor = options.zoomFactor || 0.1;
         const newZoomFactor = 1 + zoomFactor;
 
-        // Calculer le nouveau viewBox
         const newWidth = vb.width / newZoomFactor;
         const newHeight = vb.height / newZoomFactor;
 
-        // Centrer le zoom
         const newX = vb.x + (vb.width - newWidth) / 2;
         const newY = vb.y + (vb.height - newHeight) / 2;
 
-        // Appliquer le nouveau viewBox
         svg.viewbox(newX, newY, newWidth, newHeight);
 
-        // Calculer le niveau de zoom approximatif
         const svgNative = svgElement as SVGSVGElement;
         const origWidth = svgNative.viewBox.baseVal.width;
         const currentZoom = origWidth / newWidth;
@@ -305,22 +326,17 @@ export const useSvgZoomPan = (
         const svg = SVG(svgElement);
         const vb = svg.viewbox();
 
-        // Calculer le nouveau zoom
         const zoomFactor = options.zoomFactor || 0.1;
         const newZoomFactor = 1 - zoomFactor;
 
-        // Calculer le nouveau viewBox
         const newWidth = vb.width / newZoomFactor;
         const newHeight = vb.height / newZoomFactor;
 
-        // Centrer le zoom
         const newX = vb.x + (vb.width - newWidth) / 2;
         const newY = vb.y + (vb.height - newHeight) / 2;
 
-        // Appliquer le nouveau viewBox
         svg.viewbox(newX, newY, newWidth, newHeight);
 
-        // Calculer le niveau de zoom approximatif
         const svgNative = svgElement as SVGSVGElement;
         const origWidth = svgNative.viewBox.baseVal.width;
         const currentZoom = origWidth / newWidth;
@@ -333,48 +349,112 @@ export const useSvgZoomPan = (
       if (svgElement) {
         const svg = SVG(svgElement);
         const svgNative = svgElement as SVGSVGElement;
+        const currentVb = svg.viewbox();
 
-        // Restaurer le viewBox d'origine si disponible
-        if (svgNative.viewBox.baseVal) {
-          const originalVB = svgNative.viewBox.baseVal;
-          svg.viewbox(
-            originalVB.x,
-            originalVB.y,
-            originalVB.width,
-            originalVB.height,
-          );
-        } else {
-          // Sinon, utiliser les dimensions actuelles du SVG
-          svg.viewbox(
-            0,
-            0,
-            svgNative.width.baseVal.value,
-            svgNative.height.baseVal.value,
-          );
-        }
+        const targetVb = svgNative.viewBox.baseVal
+          ? {
+              x: svgNative.viewBox.baseVal.x,
+              y: svgNative.viewBox.baseVal.y,
+              width: svgNative.viewBox.baseVal.width,
+              height: svgNative.viewBox.baseVal.height,
+            }
+          : {
+              x: 0,
+              y: 0,
+              width: svgNative.width.baseVal.value,
+              height: svgNative.height.baseVal.value,
+            };
 
-        if (options.onZoom) options.onZoom(1);
+        const animationDuration = options.animationDuration || 300;
+
+        const startTime = performance.now();
+        const endTime = startTime + animationDuration;
+
+        const animate = (currentTime: number) => {
+          if (currentTime >= endTime) {
+            svg.viewbox(
+              targetVb.x,
+              targetVb.y,
+              targetVb.width,
+              targetVb.height,
+            );
+            if (options.onZoom) options.onZoom(1);
+            return;
+          }
+
+          const progress = (currentTime - startTime) / animationDuration;
+          const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+          const currentX =
+            currentVb.x + (targetVb.x - currentVb.x) * easedProgress;
+          const currentY =
+            currentVb.y + (targetVb.y - currentVb.y) * easedProgress;
+          const currentWidth =
+            currentVb.width +
+            (targetVb.width - currentVb.width) * easedProgress;
+          const currentHeight =
+            currentVb.height +
+            (targetVb.height - currentVb.height) * easedProgress;
+
+          svg.viewbox(currentX, currentY, currentWidth, currentHeight);
+
+          requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
       }
     },
     fitContent: () => {
       const svgElement = containerRef.current?.querySelector('svg');
       if (svgElement) {
         const svg = SVG(svgElement);
-
-        // Trouver les limites de tous les éléments dans le SVG
+        const currentVb = svg.viewbox();
         const bbox = svg.bbox();
 
-        // Ajouter une marge
         const margin = 20;
-        const viewbox = {
+        const targetVb = {
           x: bbox.x - margin,
           y: bbox.y - margin,
           width: bbox.width + 2 * margin,
           height: bbox.height + 2 * margin,
         };
 
-        // Appliquer le viewBox
-        svg.viewbox(viewbox.x, viewbox.y, viewbox.width, viewbox.height);
+        const animationDuration = options.animationDuration || 300;
+
+        const startTime = performance.now();
+        const endTime = startTime + animationDuration;
+
+        const animate = (currentTime: number) => {
+          if (currentTime >= endTime) {
+            svg.viewbox(
+              targetVb.x,
+              targetVb.y,
+              targetVb.width,
+              targetVb.height,
+            );
+            return;
+          }
+
+          const progress = (currentTime - startTime) / animationDuration;
+          const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+          const currentX =
+            currentVb.x + (targetVb.x - currentVb.x) * easedProgress;
+          const currentY =
+            currentVb.y + (targetVb.y - currentVb.y) * easedProgress;
+          const currentWidth =
+            currentVb.width +
+            (targetVb.width - currentVb.width) * easedProgress;
+          const currentHeight =
+            currentVb.height +
+            (targetVb.height - currentVb.height) * easedProgress;
+
+          svg.viewbox(currentX, currentY, currentWidth, currentHeight);
+
+          requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
       }
     },
   };
