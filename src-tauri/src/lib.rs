@@ -2,7 +2,6 @@ use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
-mod broker;
 mod powsybl;
 mod settings;
 mod shared;

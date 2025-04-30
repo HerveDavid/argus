@@ -1,19 +1,8 @@
-import { setServerUrl } from '@/features/settings/components/url/api';
 import {
   setZmqSubscription,
   setZmqUrl,
 } from '@/features/settings/components/zmq/api';
 
-// Handler for server URL configuration
-const handleServerConfig = async (serverConfig: { url: string }) => {
-  try {
-    const { url } = serverConfig;
-    await setServerUrl(url);
-  } catch (err) {
-    console.error('Error in server config handler:', err);
-    throw err;
-  }
-};
 
 /**
  * Handler for ZMQ URL and subscription configuration
@@ -43,14 +32,6 @@ const handleZmqConfig = async (zmqConfig: {
 };
 
 export const defaultSettings = [
-  {
-    key: 'server_url',
-    defaultValue: {
-      url: '',
-      status: 'not_configured',
-    },
-    handler: handleServerConfig,
-  },
   {
     key: 'zmq_url',
     defaultValue: {

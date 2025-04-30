@@ -1,17 +1,14 @@
 import EditorLayout from '@/components/layouts/editor';
 import { useState } from 'react';
-import ProxySettings from './proxy-settings';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
-import ServerUrlSettings from './connection-settings';
 import ProfileSettings from './profile-settings';
 import {
   ArrowLeft,
   User,
   Bell,
   Link2,
-  Globe,
   ChevronRight,
   Settings as SettingsIcon,
 } from 'lucide-react';
@@ -35,23 +32,11 @@ const TABS = [
     description: 'Configure how and when you receive notifications',
   },
   {
-    id: 'connections',
-    label: 'Connections',
-    icon: <Link2 size={18} />,
-    description: 'Manage server and API connections',
-  },
-  {
     id: 'zmq',
     label: 'Zmq',
     icon: <Link2 size={18} />,
     description: 'Manage server and API connections',
-  },
-  {
-    id: 'proxy',
-    label: 'Proxy',
-    icon: <Globe size={18} />,
-    description: 'Configure proxy settings for network connections',
-  },
+  }
 ];
 
 const HomeSettings = () => {
@@ -171,8 +156,6 @@ const HomeSettings = () => {
                 </div>
 
                 <div className="mt-4 w-full h-full">
-                  {activeTab === 'connections' && <ServerUrlSettings />}
-                  {activeTab === 'proxy' && <ProxySettings />}
                   {activeTab == 'zmq' && <ZmqUrlSettings />}
                   {activeTab === 'profile' && <ProfileSettings />}
                   {activeTab === 'notifications' && (
