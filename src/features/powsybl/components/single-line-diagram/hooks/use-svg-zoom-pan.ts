@@ -1,145 +1,230 @@
-import { useEffect, RefObject, useCallback } from 'react';
+import { useEffect, RefObject } from 'react';
 import * as d3 from 'd3';
 
+interface ZoomPanOptions {
+  minZoom?: number;
+  maxZoom?: number;
+  initialZoom?: number;
+  zoomDuration?: number;
+  centerOnLoad?: boolean;
+}
+
+/**
+ * Custom hook to add zoom and pan functionality to an SVG element
+ *
+ * @param svgContent The SVG content as a string
+ * @param containerRef Reference to the container div
+ * @param options Configuration options for zoom and pan behavior
+ */
 export const useSvgZoomPan = (
   svgContent: string | null,
-  svgContainerRef: RefObject<HTMLDivElement>,
+  containerRef: RefObject<HTMLDivElement>,
+  options: ZoomPanOptions = {},
 ) => {
-  // Définir le comportement de zoom
-  const zoom = d3
-    .zoom<SVGSVGElement, unknown>()
-    .scaleExtent([0.1, 10]) // Limiter le zoom entre 10% et 1000%
-    .on('zoom', (event) => {
-      const { transform } = event;
-      // Trouver le SVG parent
-      let target = event.sourceEvent?.target;
-      while (target && target.tagName !== 'svg') {
-        target = target.parentElement;
-      }
+  const {
+    minZoom = 0.5,
+    maxZoom = 4,
+    initialZoom = 1,
+    zoomDuration = 250,
+    centerOnLoad = true,
+  } = options;
 
-      if (!target) return;
-
-      const svg = d3.select(target as SVGSVGElement);
-      // Appliquer la transformation au groupe principal du SVG
-      svg.select('g').attr('transform', transform.toString());
-    });
-
-  // Fonction pour réinitialiser le zoom et centrer le SVG
-  const resetZoom = useCallback(
-    (svg: d3.Selection<SVGSVGElement, unknown, null, undefined>) => {
-      const svgElement = svg.node();
-      if (!svgElement) return;
-
-      // Obtenir les dimensions du conteneur et du SVG
-      const containerElement = svgContainerRef.current;
-      if (!containerElement) return;
-
-      const containerRect = containerElement.getBoundingClientRect();
-      const svgRect = svgElement.getBoundingClientRect();
-
-      // Calculer les facteurs d'échelle pour adapter le SVG au conteneur
-      const scaleX = containerRect.width / svgRect.width;
-      const scaleY = containerRect.height / svgRect.height;
-      const scale = Math.min(scaleX, scaleY) * 0.9; // 0.9 pour une marge
-
-      // Calculer la translation pour centrer le SVG
-      const translateX = (containerRect.width - svgRect.width * scale) / 2;
-      const translateY = (containerRect.height - svgRect.height * scale) / 2;
-
-      // Appliquer la transformation
-      svg
-        .transition()
-        .duration(750)
-        .call(
-          zoom.transform as any,
-          d3.zoomIdentity.translate(translateX, translateY).scale(scale),
-        );
-    },
-    [svgContainerRef, zoom],
-  );
-
+  // Initialize the SVG and zoom behavior when content is available
   useEffect(() => {
-    if (!svgContent || !svgContainerRef.current) return;
+    // Don't proceed if svgContent or the container reference is missing
+    if (!svgContent || !containerRef.current) return;
 
-    // Fonction pour initialiser le zoom et le pan
-    const initializeZoomPan = (
-      svgElement: d3.Selection<SVGSVGElement, unknown, null, undefined>,
-    ) => {
-      // Configurer les dimensions pour être responsive
-      svgElement
-        .attr('width', '100%')
-        .attr('height', '100%')
-        .style('display', 'block')
-        .style('overflow', 'visible');
+    // Get the container element
+    const container = containerRef.current;
 
-      // S'assurer qu'il y a un groupe principal qui contient tout le contenu
-      let mainGroup = svgElement.select<SVGGElement>('g');
-      if (mainGroup.empty()) {
-        // Si pas de groupe principal, en créer un et y déplacer tout le contenu
-        mainGroup = svgElement.append('g');
-        const children = Array.from(svgElement.node()?.children || []).filter(
-          (child) => child.tagName !== 'g',
-        );
-        children.forEach((child) => mainGroup.append(() => child));
+    // Clear the container
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    try {
+      // Parse SVG content
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+
+      // Check for parsing errors
+      const parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        console.error('SVG parsing error:', parserError.textContent);
+        return;
       }
 
-      // Appliquer le comportement de zoom
-      svgElement.call(zoom);
+      // Get the svg element - check it's actually an SVG
+      const svgElement = doc.documentElement;
+      if (svgElement.tagName.toLowerCase() !== 'svg') {
+        console.error('Root element is not an SVG');
+        return;
+      }
 
-      // Double-clic pour réinitialiser le zoom
-      svgElement.on('dblclick.zoom', () => {
-        resetZoom(svgElement);
-      });
+      // Now we can safely assert this is an SVGSVGElement
+      const svgNode = svgElement as unknown as SVGSVGElement;
 
-      // Centrer et adapter le SVG au chargement initial
-      resetZoom(svgElement);
+      // Get original viewBox
+      let viewBox = svgNode.getAttribute('viewBox');
+      let originalViewBox: [number, number, number, number] | null = null;
 
-      // Gérer le redimensionnement de la fenêtre
+      if (viewBox) {
+        const viewBoxValues = viewBox.split(/\s+/).map(Number);
+        if (viewBoxValues.length === 4) {
+          originalViewBox = viewBoxValues as [number, number, number, number];
+        }
+      }
+
+      if (!originalViewBox) {
+        // If no viewBox or invalid format, create one based on width and height
+        const width = parseFloat(svgNode.getAttribute('width') || '100');
+        const height = parseFloat(svgNode.getAttribute('height') || '100');
+        originalViewBox = [0, 0, width, height];
+        svgNode.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      }
+
+      // Ensure SVG is responsive
+      svgNode.setAttribute('width', '100%');
+      svgNode.setAttribute('height', '100%');
+      svgNode.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+      // Add the SVG to the container
+      container.appendChild(svgNode);
+
+      // At this point, the SVG is in the DOM, so we can select it with D3
+      // Make sure to get the actual DOM element using querySelector
+      const svgInDOM = container.querySelector('svg');
+      if (!svgInDOM) {
+        console.error('SVG not found in DOM after appending');
+        return;
+      }
+
+      // Create D3 selection with proper type assertion
+      const svg = d3.select(svgInDOM as SVGSVGElement);
+
+      // Check if we need to create a container group
+      let g = svg.select<SVGGElement>('g.zoom-layer');
+
+      // If the zoom layer doesn't exist, create it
+      if (g.empty()) {
+        // Add a new group element for zooming
+        g = svg.append<SVGGElement>('g').attr('class', 'zoom-layer');
+
+        // Move children into the group
+        // Get direct children of SVG (not including g.zoom-layer we just created)
+        const gNode = g.node();
+        if (gNode) {
+          // Get all child nodes that should be moved to the zoom layer
+          const childNodes = Array.from(svgInDOM.childNodes);
+          for (const child of childNodes) {
+            // Skip defs, text nodes, and our zoom layer
+            if (
+              child.nodeName !== 'defs' &&
+              child.nodeName !== '#text' &&
+              child !== gNode
+            ) {
+              // Create a clone of the node (deep clone with all descendants)
+              const clone = child.cloneNode(true);
+
+              // Append the clone to the zoom layer group
+              gNode.appendChild(clone);
+
+              // Remove the original node
+              if (child.parentNode) {
+                child.parentNode.removeChild(child);
+              }
+            }
+          }
+        }
+      }
+
+      // Create zoom behavior
+      const zoom = d3
+        .zoom<SVGSVGElement, unknown>()
+        .scaleExtent([minZoom, maxZoom])
+        .on('zoom', (event) => {
+          g.attr('transform', event.transform.toString());
+        });
+
+      // Apply zoom behavior to the SVG
+      svg.call(zoom as any);
+
+      // Initialize with center view if requested
+      if (centerOnLoad && originalViewBox) {
+        const [, , vbWidth, vbHeight] = originalViewBox;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calculate scale to fit the SVG in the container
+        const scaleX = containerWidth / vbWidth;
+        const scaleY = containerHeight / vbHeight;
+        const scale = Math.min(scaleX, scaleY, initialZoom);
+
+        // Calculate center position
+        const centerX = vbWidth / 2;
+        const centerY = vbHeight / 2;
+
+        // Set initial transform
+        const transform = d3.zoomIdentity
+          .translate(containerWidth / 2, containerHeight / 2)
+          .scale(scale)
+          .translate(-centerX, -centerY);
+
+        svg.call((zoom as any).transform, transform);
+      } else {
+        // Just apply initial zoom
+        svg.call((zoom as any).transform, d3.zoomIdentity.scale(initialZoom));
+      }
+
+      // Add handler for window resize
       const handleResize = () => {
-        resetZoom(svgElement);
+        if (!originalViewBox) return;
+
+        const [, , vbWidth, vbHeight] = originalViewBox;
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calculate scale to fit
+        const scaleX = containerWidth / vbWidth;
+        const scaleY = containerHeight / vbHeight;
+        const scale = Math.min(scaleX, scaleY, maxZoom);
+
+        // Calculate center position
+        const centerX = vbWidth / 2;
+        const centerY = vbHeight / 2;
+
+        // Create the transition
+        svg
+          .transition()
+          .duration(zoomDuration)
+          .call(
+            (zoom as any).transform,
+            d3.zoomIdentity
+              .translate(containerWidth / 2, containerHeight / 2)
+              .scale(scale)
+              .translate(-centerX, -centerY),
+          );
       };
 
       window.addEventListener('resize', handleResize);
 
-      // Cleanup
+      // Return a cleanup function
       return () => {
-        svgElement.on('.zoom', null);
         window.removeEventListener('resize', handleResize);
+        if (svg.node()) {
+          svg.on('.zoom', null);
+        }
       };
-    };
-
-    // Utiliser un MutationObserver pour détecter quand le SVG est ajouté au DOM
-    const observer = new MutationObserver((mutations) => {
-      const container = d3.select(svgContainerRef.current);
-      const svgElement = container.select<SVGSVGElement>('svg');
-
-      if (!svgElement.empty()) {
-        observer.disconnect();
-        initializeZoomPan(svgElement);
-      }
-    });
-
-    // Observer les changements dans le conteneur
-    if (svgContainerRef.current) {
-      observer.observe(svgContainerRef.current, {
-        childList: true,
-        subtree: true,
-      });
+    } catch (error) {
+      console.error('Error setting up SVG zoom/pan:', error);
     }
-
-    // Vérifier si le SVG est déjà dans le DOM
-    const container = d3.select(svgContainerRef.current);
-    const initialSvg = container.select<SVGSVGElement>('svg');
-
-    if (!initialSvg.empty()) {
-      initializeZoomPan(initialSvg);
-    }
-
-    // Cleanup
-    return () => {
-      observer.disconnect();
-    };
-  }, [svgContent, svgContainerRef, resetZoom, zoom]);
-
-  return { resetZoom };
+  }, [
+    svgContent,
+    containerRef,
+    minZoom,
+    maxZoom,
+    initialZoom,
+    centerOnLoad,
+    zoomDuration,
+  ]);
 };
