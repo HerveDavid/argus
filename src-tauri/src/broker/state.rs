@@ -9,7 +9,7 @@ pub struct BrokerState {
 // impl Default for BrokerState {
 //     fn default() -> Self {
 //         let mut socket = zeromq::RepSocket::new();
-//         socket.bind("tcp://localhost:5555").await.unwrap();
+//         socket.bind("tcp://localhost:4267").await.unwrap();
 //         Self {
 //             context: Arc::new(socket),
 //         }

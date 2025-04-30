@@ -45,7 +45,7 @@ const FORM_FIELDS = [
   {
     name: 'url' as const,
     label: 'ZMQ URL',
-    placeholder: 'tcp://127.0.0.1:5555',
+    placeholder: 'tcp://127.0.0.1:5556',
     description: 'Enter the URL of the ZMQ server including protocol and port.',
     type: 'text',
   },
