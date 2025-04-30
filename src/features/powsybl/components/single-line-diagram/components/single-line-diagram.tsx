@@ -4,6 +4,10 @@ import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
 import { SVG, Svg } from '@svgdotjs/svg.js';
 import '../styles/diagram-animations.css';
+import { useSvgUpdate } from '../hooks/use-svg-update';
+import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
+import { feeders_with_dynawo_id } from '../utils/mapping';
+import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -11,28 +15,33 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = '100%',
   className = '',
 }) => {
-  const { svgBlob, isLoading, error, loadDiagram } = useDiagramStore();
+  const {
+    svgBlob,
+    isLoading,
+    error,
+    loadDiagram,
+    subscribeDiagram,
+    unsubscribeDiagram,
+  } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [svgInstance, setSvgInstance] = useState<Svg | null>(null);
+  const [, setSvgInstance] = useState<Svg | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
-  const {} = useSvgZoomPan(
-    svgContainerRef,
-    {
-      minZoom: 0.5,
-      maxZoom: 5,
-      zoomFactor: 0.2,
-      wheelZoomEnabled: true,
-      panEnabled: true,
-      initialZoom: 1,
-      onZoom: (zoomLevel) => {
-        console.log(`Zoom level: ${zoomLevel}`);
-      },
-      onPan: (x, y) => {
-        console.log(`Pan position: ${x}, ${y}`);
-      },
+  const {} = useSvgZoomPan(svgContainerRef, {
+    minZoom: 0.5,
+    maxZoom: 5,
+    zoomFactor: 0.2,
+    wheelZoomEnabled: true,
+    panEnabled: true,
+    initialZoom: 1,
+    onZoom: (zoomLevel) => {
+      console.log(`Zoom level: ${zoomLevel}`);
     },
-  );
+    onPan: (x, y) => {
+      console.log(`Pan position: ${x}, ${y}`);
+    },
+  });
+  const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
 
   useEffect(() => {
     if (lineId) {
@@ -50,6 +59,38 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       reader.readAsText(svgBlob);
     }
   }, [svgBlob]);
+
+  useEffect(() => {
+    const mapper = (tc: TelemetryCurves) => {
+      for (const dynawoId in tc.curves.values) {
+        const id = feeders_with_dynawo_id.find((value) =>
+          dynawoId.includes(value.dynawo_id),
+        );
+
+        if (id?.id) {
+          const tm: TeleInformation = {
+            ti: 'TM',
+            data: { id: id.id, value: tc.curves.values[dynawoId] },
+          };
+          console.log('TM: ', tm);
+          handleUpdateMessage(tm);
+        } else {
+          console.log('NO TM');
+        }
+      }
+    };
+
+    const subscribe = async () => {
+      await loadDiagram(lineId);
+      subscribeDiagram(mapper);
+    };
+
+    subscribe();
+
+    return () => {
+      unsubscribeDiagram();
+    };
+  }, [lineId, loadDiagram]);
 
   useEffect(() => {
     if (svgContent && svgContainerRef.current) {
