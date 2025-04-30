@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useDiagramStore } from '../../../stores/use-diagram.store';
 import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
+import { SVG, Svg } from '@svgdotjs/svg.js';
+// import '@svgdotjs/svg.js/dist/svg.min.css'; // Assurez-vous d'importer les styles si nécessaire
 import '../styles/diagram-animations.css';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
@@ -10,107 +12,110 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = '100%',
   className = '',
 }) => {
-  const {
-    svgBlob,
-    isLoading,
-    error,
-    loadDiagram,
-    subscribeDiagram,
-    unsubscribeDiagram,
-  } = useDiagramStore();
-  
+  const { svgBlob, isLoading, error, loadDiagram } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
+  const [svgInstance, setSvgInstance] = useState<Svg | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Load SVG content from blob when available
-  useEffect(() => {
-    const loadSvgContent = async () => {
-      if (svgBlob) {
-        try {
-          const text = await svgBlob.text();
-          setSvgContent(text);
-        } catch (error) {
-          console.error('Error reading SVG blob:', error);
-        }
-      } else {
-        setSvgContent(null);
-      }
-    };
-    
-    loadSvgContent();
-  }, [svgBlob]);
 
-  // Load diagram when lineId changes
+  // Utiliser notre hook personnalisé pour le zoom et le panoramique
+  const { zoomIn, zoomOut, resetZoom, fitContent } = useSvgZoomPan(
+    svgContainerRef,
+    {
+      minZoom: 0.5,
+      maxZoom: 5,
+      zoomFactor: 0.2,
+      wheelZoomEnabled: true,
+      panEnabled: true,
+      initialZoom: 1,
+      onZoom: (zoomLevel) => {
+        console.log(`Zoom level: ${zoomLevel}`);
+      },
+      onPan: (x, y) => {
+        console.log(`Pan position: ${x}, ${y}`);
+      },
+    },
+  );
+
+  // Charger le diagramme au montage du composant
   useEffect(() => {
     if (lineId) {
       loadDiagram(lineId);
     }
-    
-    // Cleanup on unmount
-    return () => {
-      // No explicit cleanup needed here as it's handled by the store
-    };
   }, [lineId, loadDiagram]);
 
-  // Initialize zoom and pan functionality
-  useSvgZoomPan(svgContent, svgContainerRef, {
-    minZoom: 0.5,
-    maxZoom: 5,
-    initialZoom: 1,
-    centerOnLoad: true,
-  });
+  // Convertir le blob SVG en chaîne et initialiser SVG.js
+  useEffect(() => {
+    if (svgBlob) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setSvgContent(content);
+      };
+      reader.readAsText(svgBlob);
+    }
+  }, [svgBlob]);
 
-  // Handle loading and error states
-  if (isLoading) {
-    return (
-      <div 
-        className={`flex items-center justify-center ${className}`}
-        style={{ width, height }}
-      >
-        <div className="text-gray-600">Loading diagram...</div>
-      </div>
-    );
-  }
-  
-  if (error) {
-    return (
-      <div 
-        className={`flex items-center justify-center ${className}`}
-        style={{ width, height }}
-      >
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
-  }
-  
-  if (!svgContent) {
-    return (
-      <div 
-        className={`flex items-center justify-center ${className}`}
-        style={{ width, height }}
-      >
-        <div className="text-gray-600">No diagram available</div>
-      </div>
-    );
-  }
+  // Initialiser SVG.js une fois que le contenu SVG est injecté dans le DOM
+  useEffect(() => {
+    if (svgContent && svgContainerRef.current) {
+      // Attendre que le DOM soit mis à jour avec le SVG injecté
+      setTimeout(() => {
+        const svgElement = svgContainerRef.current?.querySelector('svg');
+        if (svgElement) {
+          // Initialiser SVG.js avec l'élément SVG existant
+          const instance = SVG(svgElement);
+
+          // Rendre le SVG réactif
+          instance.size('100%', '100%');
+
+          // Stocker l'instance pour une utilisation ultérieure
+          setSvgInstance(instance);
+
+          // Ajouter des classes personnalisées pour les animations
+          instance.find('.node').forEach((node) => {
+            node.addClass('diagram-node');
+          });
+
+          instance.find('.connection').forEach((connection) => {
+            connection.addClass('diagram-connection');
+          });
+        }
+      }, 100);
+    }
+  }, [svgContent]);
+
+  // Fonction pour créer le contenu SVG de manière sécurisée
+  const createSvgContent = () => {
+    if (svgContent) {
+      return { __html: svgContent };
+    }
+    return { __html: '' };
+  };
 
   return (
-    <div
-      className={`relative font-sans ${className}`}
-      style={{
-        width,
-        height,
-        overflow: 'hidden',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        ref={svgContainerRef}
-        className="w-full h-full"
-        style={{ touchAction: 'none' }} // Prevents browser handling of gestures that conflicts with d3 zoom
-      />
+    <div className={`diagram-container ${className}`} style={{ width, height }}>
+      {isLoading && (
+        <div className="diagram-loading">
+          <span>Chargement du diagramme...</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="diagram-error">
+          <span>Erreur lors du chargement du diagramme: {error}</span>
+        </div>
+      )}
+
+      {!isLoading && !error && (
+        <>
+          <div
+            ref={svgContainerRef}
+            className="diagram-svg-container"
+            style={{ width: '100%', height: '100%', overflow: 'hidden' }}
+            dangerouslySetInnerHTML={createSvgContent()}
+          />
+        </>
+      )}
     </div>
   );
 };

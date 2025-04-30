@@ -1,230 +1,381 @@
 import { useEffect, RefObject } from 'react';
-import * as d3 from 'd3';
+import { SVG, Svg } from '@svgdotjs/svg.js';
 
 interface ZoomPanOptions {
   minZoom?: number;
   maxZoom?: number;
+  zoomFactor?: number;
+  panEnabled?: boolean;
+  zoomEnabled?: boolean;
+  wheelZoomEnabled?: boolean;
   initialZoom?: number;
-  zoomDuration?: number;
-  centerOnLoad?: boolean;
+  onZoom?: (zoomLevel: number) => void;
+  onPan?: (x: number, y: number) => void;
 }
 
-/**
- * Custom hook to add zoom and pan functionality to an SVG element
- *
- * @param svgContent The SVG content as a string
- * @param containerRef Reference to the container div
- * @param options Configuration options for zoom and pan behavior
- */
 export const useSvgZoomPan = (
-  svgContent: string | null,
   containerRef: RefObject<HTMLDivElement>,
   options: ZoomPanOptions = {},
 ) => {
   const {
     minZoom = 0.5,
-    maxZoom = 4,
+    maxZoom = 3,
+    zoomFactor = 0.1,
+    panEnabled = true,
+    zoomEnabled = true,
+    wheelZoomEnabled = true,
     initialZoom = 1,
-    zoomDuration = 250,
-    centerOnLoad = true,
+    onZoom,
+    onPan,
   } = options;
 
-  // Initialize the SVG and zoom behavior when content is available
   useEffect(() => {
-    // Don't proceed if svgContent or the container reference is missing
-    if (!svgContent || !containerRef.current) return;
+    if (!containerRef.current) return;
 
-    // Get the container element
-    const container = containerRef.current;
+    let svgInstance: Svg | null = null;
+    let isPanning = false;
+    let startPoint = { x: 0, y: 0 };
+    let viewBox = { x: 0, y: 0, width: 0, height: 0 };
+    let currentZoom = initialZoom;
 
-    // Clear the container
-    while (container.firstChild) {
-      container.removeChild(container.firstChild);
-    }
+    // Fonction pour initialiser le SVG
+    const initSvg = (svgElement: SVGSVGElement) => {
+      if (!svgElement) return null;
 
-    try {
-      // Parse SVG content
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(svgContent, 'image/svg+xml');
+      // Créer une instance SVG.js à partir de l'élément SVG existant
+      svgInstance = SVG(svgElement);
 
-      // Check for parsing errors
-      const parserError = doc.querySelector('parsererror');
-      if (parserError) {
-        console.error('SVG parsing error:', parserError.textContent);
-        return;
+      // Obtenir le viewBox initial
+      const vb = svgElement.viewBox.baseVal;
+      if (vb.width && vb.height) {
+        viewBox = { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
+      } else {
+        // Fallback si viewBox n'est pas défini
+        const width = svgElement.width.baseVal.value || svgElement.clientWidth;
+        const height =
+          svgElement.height.baseVal.value || svgElement.clientHeight;
+        viewBox = { x: 0, y: 0, width, height };
+        svgInstance.viewbox(0, 0, width, height);
       }
 
-      // Get the svg element - check it's actually an SVG
-      const svgElement = doc.documentElement;
-      if (svgElement.tagName.toLowerCase() !== 'svg') {
-        console.error('Root element is not an SVG');
-        return;
+      // Appliquer le zoom initial
+      if (initialZoom !== 1) {
+        applyZoom(initialZoom);
       }
 
-      // Now we can safely assert this is an SVGSVGElement
-      const svgNode = svgElement as unknown as SVGSVGElement;
+      return svgInstance;
+    };
 
-      // Get original viewBox
-      let viewBox = svgNode.getAttribute('viewBox');
-      let originalViewBox: [number, number, number, number] | null = null;
+    // Fonction pour appliquer le zoom
+    const applyZoom = (zoom: number, centerX?: number, centerY?: number) => {
+      if (!svgInstance) return;
 
-      if (viewBox) {
-        const viewBoxValues = viewBox.split(/\s+/).map(Number);
-        if (viewBoxValues.length === 4) {
-          originalViewBox = viewBoxValues as [number, number, number, number];
-        }
+      const newZoom = Math.min(Math.max(zoom, minZoom), maxZoom);
+
+      // Si le niveau de zoom n'a pas changé, ne rien faire
+      if (newZoom === currentZoom) return;
+
+      const svgElement = svgInstance.node;
+      const svgRect = svgElement.getBoundingClientRect();
+
+      // Déterminer le centre du zoom
+      const cx = centerX !== undefined ? centerX : svgRect.width / 2;
+      const cy = centerY !== undefined ? centerY : svgRect.height / 2;
+
+      // Calculer le point dans les coordonnées du viewBox
+      const pt = svgElement.createSVGPoint();
+      pt.x = cx;
+      pt.y = cy;
+      const svgP = pt.matrixTransform(svgElement.getScreenCTM()?.inverse());
+
+      // Calculer le nouveau viewBox
+      const zoomRatio = currentZoom / newZoom;
+      const newWidth = viewBox.width * zoomRatio;
+      const newHeight = viewBox.height * zoomRatio;
+
+      // Ajuster la position pour que le zoom soit centré sur le point
+      const newX = svgP.x - (svgP.x - viewBox.x) * zoomRatio;
+      const newY = svgP.y - (svgP.y - viewBox.y) * zoomRatio;
+
+      // Appliquer le nouveau viewBox
+      svgInstance.viewbox(newX, newY, newWidth, newHeight);
+
+      // Mettre à jour les variables
+      viewBox = { x: newX, y: newY, width: newWidth, height: newHeight };
+      currentZoom = newZoom;
+
+      // Appeler le callback si défini
+      if (onZoom) onZoom(currentZoom);
+    };
+
+    // Gestionnaire d'événement de la molette
+    const handleWheel = (e: WheelEvent) => {
+      if (!wheelZoomEnabled || !zoomEnabled || !svgInstance) return;
+
+      e.preventDefault();
+
+      // Déterminer la direction du zoom
+      const delta = e.deltaY < 0 ? 1 : -1;
+      const zoomDelta = delta * zoomFactor;
+      const newZoom = currentZoom * (1 + zoomDelta);
+
+      // Appliquer le zoom centré sur la position de la souris
+      applyZoom(newZoom, e.clientX, e.clientY);
+    };
+
+    // Gestionnaire d'événement pour commencer le panoramique
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!panEnabled || !svgInstance || e.button !== 0) return;
+
+      e.preventDefault();
+
+      isPanning = true;
+      startPoint = { x: e.clientX, y: e.clientY };
+
+      // Ajouter la classe pour le curseur grab
+      if (containerRef.current) {
+        containerRef.current.style.cursor = 'grabbing';
       }
+    };
 
-      if (!originalViewBox) {
-        // If no viewBox or invalid format, create one based on width and height
-        const width = parseFloat(svgNode.getAttribute('width') || '100');
-        const height = parseFloat(svgNode.getAttribute('height') || '100');
-        originalViewBox = [0, 0, width, height];
-        svgNode.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    // Gestionnaire d'événement pour le panoramique en cours
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isPanning || !svgInstance) return;
+
+      e.preventDefault();
+
+      const dx = e.clientX - startPoint.x;
+      const dy = e.clientY - startPoint.y;
+
+      // Convertir le déplacement en coordonnées du viewBox
+      const svgElement = svgInstance.node;
+      const scale = viewBox.width / svgElement.clientWidth;
+
+      const newX = viewBox.x - dx * scale;
+      const newY = viewBox.y - dy * scale;
+
+      // Appliquer le nouveau viewBox
+      svgInstance.viewbox(newX, newY, viewBox.width, viewBox.height);
+
+      // Mettre à jour les variables
+      viewBox.x = newX;
+      viewBox.y = newY;
+      startPoint = { x: e.clientX, y: e.clientY };
+
+      // Appeler le callback si défini
+      if (onPan) onPan(newX, newY);
+    };
+
+    // Gestionnaire d'événement pour terminer le panoramique
+    const handleMouseUp = () => {
+      isPanning = false;
+
+      // Restaurer le curseur
+      if (containerRef.current) {
+        containerRef.current.style.cursor = 'grab';
       }
+    };
 
-      // Ensure SVG is responsive
-      svgNode.setAttribute('width', '100%');
-      svgNode.setAttribute('height', '100%');
-      svgNode.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    // Fonction pour réinitialiser le zoom
+    const resetZoom = () => {
+      if (!svgInstance) return;
 
-      // Add the SVG to the container
-      container.appendChild(svgNode);
+      const svgElement = svgInstance.node;
+      const vb = svgElement.viewBox.baseVal;
 
-      // At this point, the SVG is in the DOM, so we can select it with D3
-      // Make sure to get the actual DOM element using querySelector
-      const svgInDOM = container.querySelector('svg');
-      if (!svgInDOM) {
-        console.error('SVG not found in DOM after appending');
-        return;
-      }
+      viewBox = { x: vb.x, y: vb.y, width: vb.width, height: vb.height };
+      currentZoom = 1;
 
-      // Create D3 selection with proper type assertion
-      const svg = d3.select(svgInDOM as SVGSVGElement);
+      svgInstance.viewbox(viewBox.x, viewBox.y, viewBox.width, viewBox.height);
 
-      // Check if we need to create a container group
-      let g = svg.select<SVGGElement>('g.zoom-layer');
+      if (onZoom) onZoom(1);
+    };
 
-      // If the zoom layer doesn't exist, create it
-      if (g.empty()) {
-        // Add a new group element for zooming
-        g = svg.append<SVGGElement>('g').attr('class', 'zoom-layer');
+    // Observer pour surveiller quand le SVG est ajouté au DOM
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          const svgElement = containerRef.current?.querySelector('svg');
+          if (svgElement && !svgInstance) {
+            svgInstance = initSvg(svgElement);
 
-        // Move children into the group
-        // Get direct children of SVG (not including g.zoom-layer we just created)
-        const gNode = g.node();
-        if (gNode) {
-          // Get all child nodes that should be moved to the zoom layer
-          const childNodes = Array.from(svgInDOM.childNodes);
-          for (const child of childNodes) {
-            // Skip defs, text nodes, and our zoom layer
-            if (
-              child.nodeName !== 'defs' &&
-              child.nodeName !== '#text' &&
-              child !== gNode
-            ) {
-              // Create a clone of the node (deep clone with all descendants)
-              const clone = child.cloneNode(true);
+            // Ajouter les gestionnaires d'événements
+            if (wheelZoomEnabled) {
+              containerRef.current?.addEventListener('wheel', handleWheel, {
+                passive: false,
+              });
+            }
 
-              // Append the clone to the zoom layer group
-              gNode.appendChild(clone);
+            if (panEnabled) {
+              containerRef.current?.addEventListener(
+                'mousedown',
+                handleMouseDown,
+              );
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
 
-              // Remove the original node
-              if (child.parentNode) {
-                child.parentNode.removeChild(child);
+              // Ajouter la classe pour le curseur grab
+              if (containerRef.current) {
+                containerRef.current.style.cursor = 'grab';
               }
             }
           }
         }
-      }
+      });
+    });
 
-      // Create zoom behavior
-      const zoom = d3
-        .zoom<SVGSVGElement, unknown>()
-        .scaleExtent([minZoom, maxZoom])
-        .on('zoom', (event) => {
-          g.attr('transform', event.transform.toString());
-        });
+    // Commencer à observer
+    if (containerRef.current) {
+      observer.observe(containerRef.current, {
+        childList: true,
+        subtree: true,
+      });
 
-      // Apply zoom behavior to the SVG
-      svg.call(zoom as any);
+      // Vérifier si le SVG existe déjà
+      const svgElement = containerRef.current.querySelector('svg');
+      if (svgElement) {
+        svgInstance = initSvg(svgElement);
 
-      // Initialize with center view if requested
-      if (centerOnLoad && originalViewBox) {
-        const [, , vbWidth, vbHeight] = originalViewBox;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-
-        // Calculate scale to fit the SVG in the container
-        const scaleX = containerWidth / vbWidth;
-        const scaleY = containerHeight / vbHeight;
-        const scale = Math.min(scaleX, scaleY, initialZoom);
-
-        // Calculate center position
-        const centerX = vbWidth / 2;
-        const centerY = vbHeight / 2;
-
-        // Set initial transform
-        const transform = d3.zoomIdentity
-          .translate(containerWidth / 2, containerHeight / 2)
-          .scale(scale)
-          .translate(-centerX, -centerY);
-
-        svg.call((zoom as any).transform, transform);
-      } else {
-        // Just apply initial zoom
-        svg.call((zoom as any).transform, d3.zoomIdentity.scale(initialZoom));
-      }
-
-      // Add handler for window resize
-      const handleResize = () => {
-        if (!originalViewBox) return;
-
-        const [, , vbWidth, vbHeight] = originalViewBox;
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
-
-        // Calculate scale to fit
-        const scaleX = containerWidth / vbWidth;
-        const scaleY = containerHeight / vbHeight;
-        const scale = Math.min(scaleX, scaleY, maxZoom);
-
-        // Calculate center position
-        const centerX = vbWidth / 2;
-        const centerY = vbHeight / 2;
-
-        // Create the transition
-        svg
-          .transition()
-          .duration(zoomDuration)
-          .call(
-            (zoom as any).transform,
-            d3.zoomIdentity
-              .translate(containerWidth / 2, containerHeight / 2)
-              .scale(scale)
-              .translate(-centerX, -centerY),
-          );
-      };
-
-      window.addEventListener('resize', handleResize);
-
-      // Return a cleanup function
-      return () => {
-        window.removeEventListener('resize', handleResize);
-        if (svg.node()) {
-          svg.on('.zoom', null);
+        // Ajouter les gestionnaires d'événements
+        if (wheelZoomEnabled) {
+          containerRef.current.addEventListener('wheel', handleWheel, {
+            passive: false,
+          });
         }
-      };
-    } catch (error) {
-      console.error('Error setting up SVG zoom/pan:', error);
+
+        if (panEnabled) {
+          containerRef.current.addEventListener('mousedown', handleMouseDown);
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+
+          // Ajouter la classe pour le curseur grab
+          containerRef.current.style.cursor = 'grab';
+        }
+      }
     }
-  }, [
-    svgContent,
-    containerRef,
-    minZoom,
-    maxZoom,
-    initialZoom,
-    centerOnLoad,
-    zoomDuration,
-  ]);
+
+    // Nettoyer les gestionnaires d'événements lors du démontage
+    return () => {
+      observer.disconnect();
+
+      if (containerRef.current) {
+        containerRef.current.removeEventListener('wheel', handleWheel);
+        containerRef.current.removeEventListener('mousedown', handleMouseDown);
+      }
+
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [containerRef, options]);
+
+  // Retourner les méthodes pour contrôler le zoom et le panoramique à partir du composant
+  return {
+    zoomIn: () => {
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const svg = SVG(svgElement);
+        const vb = svg.viewbox();
+
+        // Calculer le nouveau zoom
+        const zoomFactor = options.zoomFactor || 0.1;
+        const newZoomFactor = 1 + zoomFactor;
+
+        // Calculer le nouveau viewBox
+        const newWidth = vb.width / newZoomFactor;
+        const newHeight = vb.height / newZoomFactor;
+
+        // Centrer le zoom
+        const newX = vb.x + (vb.width - newWidth) / 2;
+        const newY = vb.y + (vb.height - newHeight) / 2;
+
+        // Appliquer le nouveau viewBox
+        svg.viewbox(newX, newY, newWidth, newHeight);
+
+        // Calculer le niveau de zoom approximatif
+        const svgNative = svgElement as SVGSVGElement;
+        const origWidth = svgNative.viewBox.baseVal.width;
+        const currentZoom = origWidth / newWidth;
+
+        if (options.onZoom) options.onZoom(currentZoom);
+      }
+    },
+    zoomOut: () => {
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const svg = SVG(svgElement);
+        const vb = svg.viewbox();
+
+        // Calculer le nouveau zoom
+        const zoomFactor = options.zoomFactor || 0.1;
+        const newZoomFactor = 1 - zoomFactor;
+
+        // Calculer le nouveau viewBox
+        const newWidth = vb.width / newZoomFactor;
+        const newHeight = vb.height / newZoomFactor;
+
+        // Centrer le zoom
+        const newX = vb.x + (vb.width - newWidth) / 2;
+        const newY = vb.y + (vb.height - newHeight) / 2;
+
+        // Appliquer le nouveau viewBox
+        svg.viewbox(newX, newY, newWidth, newHeight);
+
+        // Calculer le niveau de zoom approximatif
+        const svgNative = svgElement as SVGSVGElement;
+        const origWidth = svgNative.viewBox.baseVal.width;
+        const currentZoom = origWidth / newWidth;
+
+        if (options.onZoom) options.onZoom(currentZoom);
+      }
+    },
+    resetZoom: () => {
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const svg = SVG(svgElement);
+        const svgNative = svgElement as SVGSVGElement;
+
+        // Restaurer le viewBox d'origine si disponible
+        if (svgNative.viewBox.baseVal) {
+          const originalVB = svgNative.viewBox.baseVal;
+          svg.viewbox(
+            originalVB.x,
+            originalVB.y,
+            originalVB.width,
+            originalVB.height,
+          );
+        } else {
+          // Sinon, utiliser les dimensions actuelles du SVG
+          svg.viewbox(
+            0,
+            0,
+            svgNative.width.baseVal.value,
+            svgNative.height.baseVal.value,
+          );
+        }
+
+        if (options.onZoom) options.onZoom(1);
+      }
+    },
+    fitContent: () => {
+      const svgElement = containerRef.current?.querySelector('svg');
+      if (svgElement) {
+        const svg = SVG(svgElement);
+
+        // Trouver les limites de tous les éléments dans le SVG
+        const bbox = svg.bbox();
+
+        // Ajouter une marge
+        const margin = 20;
+        const viewbox = {
+          x: bbox.x - margin,
+          y: bbox.y - margin,
+          width: bbox.width + 2 * margin,
+          height: bbox.height + 2 * margin,
+        };
+
+        // Appliquer le viewBox
+        svg.viewbox(viewbox.x, viewbox.y, viewbox.width, viewbox.height);
+      }
+    },
+  };
 };
