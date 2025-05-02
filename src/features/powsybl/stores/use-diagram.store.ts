@@ -27,6 +27,7 @@ export interface DiagramStore extends DiagramData {
   subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
   subscriptionStatus: SldSubscriptionStatus;
+  getNodeEquipmentId: (nodeId: string) => string | null;
 }
 
 // ------------------------------
@@ -172,5 +173,20 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           isLoading: false,
         });
       });
+  },
+
+  /**
+   * Récupère l'equipment_id d'un nœud à partir de son id
+   */
+  getNodeEquipmentId: (nodeId: string) => {
+    const { metadata } = get();
+
+    if (!metadata || !metadata.nodes) {
+      return null;
+    }
+
+    const node = metadata.nodes.find((node) => node.id === nodeId);
+
+    return node?.equipmentId || null;
   },
 }));

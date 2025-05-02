@@ -9,6 +9,10 @@ import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type'
 import { feeders_with_dynawo_id } from '../utils/mapping';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 import ContextMenu from '../components/context-menu';
+import {
+  get_close_dj_from_equipement_id,
+  get_open_dj_from_equipement_id,
+} from '../utils/events';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -23,6 +27,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     loadDiagram,
     subscribeDiagram,
     unsubscribeDiagram,
+    getNodeEquipmentId,
   } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [svgInstance, setSvgInstance] = useState<Svg | null>(null);
@@ -35,12 +40,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     wheelZoomEnabled: true,
     panEnabled: true,
     initialZoom: 1,
-    onZoom: (zoomLevel) => {
-      console.log(`Zoom level: ${zoomLevel}`);
-    },
-    onPan: (x, y) => {
-      console.log(`Pan position: ${x}, ${y}`);
-    },
   });
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
 
@@ -126,17 +125,33 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   // Add handler for toggling breakers
   const handleToggleBreaker = (breakerId: string, isClosed: boolean) => {
     // Implement breaker toggle logic here
+    const equipmentId = getNodeEquipmentId(breakerId);
     console.log(
       `Toggle breaker ${breakerId} to ${!isClosed ? 'closed' : 'open'}`,
     );
+    console.log(`equipement ${equipmentId}`);
 
     // Example implementation - you can customize based on your needs
     if (svgInstance && svgContainerRef.current) {
       const breakerElement = svgInstance.findOne(`#${breakerId}`);
       if (breakerElement) {
         if (isClosed) {
+          // TODO action
+          // OPEN now
+
+          if (equipmentId) {
+            const openDj = get_open_dj_from_equipement_id(equipmentId);
+            console.log(openDj);
+          }
+
           breakerElement.removeClass('sld-closed');
         } else {
+          // CLOSE now
+          if (equipmentId) {
+            const closeDj = get_close_dj_from_equipement_id(equipmentId);
+            console.log(closeDj);
+          }
+
           breakerElement.addClass('sld-closed');
         }
       }
