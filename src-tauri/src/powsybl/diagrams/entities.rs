@@ -1,11 +1,13 @@
 use super::errors::SubscriptionResult;
-use crate::{errors::SubscriptionError, powsybl::entities::TelemetryCurves};
+use crate::powsybl::entities::TelemetryCurves;
 use log::{debug, error, info, trace};
+use serde::Serialize;
+use std::sync::Arc;
 use tauri::ipc::Channel;
 use tokio::sync::broadcast;
-use tokio::time::{Duration, Instant, interval};
-use std::sync::Arc;
 use tokio::sync::Mutex;
+use tokio::time::{interval, Duration};
+use zeromq::SocketSend;
 use zeromq::{Socket, SocketRecv};
 
 #[derive(Debug, Clone)]
@@ -41,25 +43,25 @@ impl ZmqSubscription {
             "Starting ZMQ monitoring for feeder {} on {} at 60fps",
             self.feeder_id, self.config.url
         );
-        
+
         let mut socket = self.create_and_connect_socket().await?;
-        
+
         // Frame duration for 60fps
         let frame_duration = Duration::from_micros(1_000_000 / 60);
         let mut frame_interval = interval(frame_duration);
-        
+
         // Store the latest telemetry data
         let latest_telemetry = Arc::new(Mutex::new(None::<TelemetryCurves>));
         let sender_telemetry = latest_telemetry.clone();
-        
+
         // Spawn a separate task to send data at 60fps
         let channel = self.channel.clone();
         let feeder_id = self.feeder_id.clone();
-        
+
         let send_task = tokio::spawn(async move {
             loop {
                 frame_interval.tick().await;
-                
+
                 // Send the latest data if available
                 let mut telemetry_guard = sender_telemetry.lock().await;
                 if let Some(telemetry) = telemetry_guard.take() {
@@ -70,7 +72,7 @@ impl ZmqSubscription {
                 }
             }
         });
-        
+
         loop {
             tokio::select! {
                 _ = shutdown_rx.recv() => {
@@ -94,10 +96,10 @@ impl ZmqSubscription {
                 }
             }
         }
-        
+
         // Abort the send task when shutting down
         send_task.abort();
-        
+
         info!("ZMQ monitoring finished for feeder {}", self.feeder_id);
         Ok(())
     }
@@ -109,23 +111,43 @@ impl ZmqSubscription {
         Ok(socket)
     }
 
-    async fn process_message(&self, message: zeromq::ZmqMessage) -> SubscriptionResult<Option<TelemetryCurves>> {
+    async fn process_message(
+        &self,
+        message: zeromq::ZmqMessage,
+    ) -> SubscriptionResult<Option<TelemetryCurves>> {
         debug!("ZMQ message received for feeder {}", self.feeder_id);
-        
+
         if let Some(frame) = message.get(0) {
             let data = String::from_utf8(frame.to_vec())
                 .unwrap_or_else(|_| String::from("[non-UTF8 data]"));
-            
+
             trace!("  JSON data size: {} characters", data.len());
-            
+
             let telemetry: TelemetryCurves = serde_json::from_str(&data)?;
-            
+
             debug!("  Successfully deserialized to TelemetryCurves");
             debug!("  Number of curves: {}", telemetry.curves.values.len());
-            
+
             return Ok(Some(telemetry));
         }
-        
+
         Ok(None)
+    }
+
+    pub async fn send_json<T: Serialize>(&self, data: &T) -> SubscriptionResult<()> {
+        let json_data = serde_json::to_string(data)?;
+        debug!("Sending JSON data via ZMQ: {}", json_data);
+
+        let mut socket = zeromq::PubSocket::new();
+        socket.connect(&self.config.url).await?;
+
+        // Attendre un court instant pour permettre la connexion
+        tokio::time::sleep(Duration::from_millis(100)).await;
+
+        // Créer et envoyer le message
+        socket.send(json_data.into()).await?;
+
+        debug!("JSON message sent successfully");
+        Ok(())
     }
 }

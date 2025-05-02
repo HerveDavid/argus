@@ -61,6 +61,8 @@ pub fn run() {
             get_single_line_diagram_with_metadata,
             subscribe_single_line_diagram,
             unsubscribe_single_line_diagram,
+            send_open_dj,
+            send_close_dj,
         ])
         .setup(|app| {
             app.manage(AppState::default());

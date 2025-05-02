@@ -13,6 +13,7 @@ import {
   get_close_dj_from_equipement_id,
   get_open_dj_from_equipement_id,
 } from '../utils/events';
+import { sendCloseDj, sendOpenDj } from '@/features/powsybl/api/events-single-line-diagram';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -123,7 +124,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   };
 
   // Add handler for toggling breakers
-  const handleToggleBreaker = (breakerId: string, isClosed: boolean) => {
+  const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
     // Implement breaker toggle logic here
     const equipmentId = getNodeEquipmentId(breakerId);
     console.log(
@@ -142,6 +143,9 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           if (equipmentId) {
             const openDj = get_open_dj_from_equipement_id(equipmentId);
             console.log(openDj);
+            if (openDj && openDj.found && openDj.data) {
+              await sendOpenDj(openDj.data);
+            }
           }
 
           breakerElement.removeClass('sld-closed');
@@ -150,6 +154,9 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           if (equipmentId) {
             const closeDj = get_close_dj_from_equipement_id(equipmentId);
             console.log(closeDj);
+            if (closeDj && closeDj.found && closeDj.data) {
+              await sendCloseDj(closeDj.data);
+            }
           }
 
           breakerElement.addClass('sld-closed');
