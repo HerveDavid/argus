@@ -4,74 +4,72 @@ import { useDiagramStore } from '../../../stores/use-diagram.store';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
 /**
- * Hook pour synchroniser les métadonnées du diagramme électrique avec le SVG
- * Gère également les mises à jour des informations de flux de puissance active
+ * Hook to synchronize electrical diagram metadata with the SVG
+ * Also handles updates for active power flow information
  */
 export const useSvgUpdate = (
   svgContent: string | null,
   svgContainerRef: RefObject<HTMLDivElement>,
 ) => {
-  // Récupérer les métadonnées depuis le store
+  // Get metadata from the store
   const metadata = useDiagramStore((state) => state.metadata);
   const previousMetadataRef = React.useRef<any>(null);
 
   /**
-   * Fonction pour mettre à jour les informations d'un feeder dans le SVG
-   * Pour l'instant, ne traite que les valeurs ARROW_ACTIVE
+   * Function to update feeder information in the SVG
+   * Currently only processes ARROW_ACTIVE values
    */
   const updateFeederInfo = useCallback(
     (id: string, value: number) => {
       if (!svgContainerRef.current) return;
 
-      // Utiliser d3 pour sélectionner l'élément SVG
+      // Use d3 to select the SVG element
       const svg = d3.select(svgContainerRef.current).select('svg');
       if (svg.empty()) {
-        console.warn('SVG non trouvé dans le conteneur');
+        console.warn('SVG not found in container');
         return;
       }
 
-      // Vérifier que c'est bien un élément de type ARROW_ACTIVE
+      // Check that it's an ARROW_ACTIVE type element
       if (!id.includes('ARROW_ACTIVE')) {
-        console.warn(
-          'Seuls les éléments ARROW_ACTIVE sont pris en charge actuellement',
-        );
+        console.warn('Only ARROW_ACTIVE elements are currently supported');
         return;
       }
 
-      // Sélectionner l'élément de groupe du feeder
+      // Select the feeder group element
       const feederGroup = svg.select(`#${id}`);
       if (feederGroup.empty()) {
-        console.warn(`Élément avec l'ID ${id} non trouvé dans le SVG`);
+        console.warn(`Element with ID ${id} not found in SVG`);
         return;
       }
 
-      // Sélectionner l'élément texte dans le groupe
+      // Select the text element in the group
       const textElement = feederGroup.select('.sld-label');
       if (textElement.empty()) {
-        console.warn(`Élément texte non trouvé dans le feeder ${id}`);
+        console.warn(`Text element not found in feeder ${id}`);
         return;
       }
 
-      // Mettre à jour la valeur en conservant l'unité MW
+      // Update the value while preserving the MW unit
       const text = `${value} MW`;
       textElement.text(text);
 
-      // Ajouter une petite animation pour mettre en évidence la mise à jour
+      // Add a small animation to highlight the update
       textElement
         .style('fill', 'red')
         .transition()
         .duration(1000)
         .style('fill', 'black');
 
-      console.log(`Mise à jour de ${id} avec la valeur: ${value} MW`);
+      console.log(`Updated ${id} with value: ${value} MW`);
     },
     [svgContainerRef],
   );
 
-  // Fonction pour traiter les messages de mise à jour
+  // Function to process update messages
   const handleUpdateMessage = useCallback(
     (message: TeleInformation) => {
-      // Traiter uniquement les messages de type TM (télémesure)
+      // Only process TM (telemetry) type messages
       if (message.ti === 'TM' && message.data.id.includes('ARROW_ACTIVE')) {
         updateFeederInfo(message.data.id, message.data.value);
       }
@@ -82,22 +80,22 @@ export const useSvgUpdate = (
   useEffect(() => {
     if (!svgContent || !svgContainerRef.current || !metadata) return;
 
-    // Utiliser d3 pour accéder au SVG
+    // Use d3 to access the SVG
     const svg = d3.select(svgContainerRef.current).select('svg');
     if (svg.empty()) return;
 
-    // Éviter les mises à jour inutiles si les métadonnées n'ont pas changé
+    // Avoid unnecessary updates if metadata hasn't changed
     if (metadata === previousMetadataRef.current) return;
     previousMetadataRef.current = metadata;
 
-    // Ajouter des interactions au SVG
+    // Add interactions to the SVG
     svg
       .style('cursor', 'pointer')
       .on('mouseover', function (event) {
-        // Récupérer l'élément survolé
+        // Get the hovered element
         const target = d3.select(event.target);
 
-        // Si c'est un élément avec un ID, on peut ajouter un effet visuel
+        // If it's an element with an ID, we can add a visual effect
         if (
           target.attr('id') &&
           (target.classed('sld-breaker') ||
@@ -106,7 +104,7 @@ export const useSvgUpdate = (
             target.classed('sld-generator'))
         ) {
           target.style('stroke-width', function () {
-            // Augmenter l'épaisseur du contour
+            // Increase the outline thickness
             const currentWidth = parseFloat(
               target.style('stroke-width') || '1',
             );
@@ -115,7 +113,7 @@ export const useSvgUpdate = (
         }
       })
       .on('mouseout', function (event) {
-        // Réinitialiser le style au survol
+        // Reset the hover style
         const target = d3.select(event.target);
         if (target.attr('id')) {
           target.style('stroke-width', null);

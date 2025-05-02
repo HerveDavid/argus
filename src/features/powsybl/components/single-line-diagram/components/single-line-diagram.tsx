@@ -8,6 +8,7 @@ import { useSvgUpdate } from '../hooks/use-svg-update';
 import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
 import { feeders_with_dynawo_id } from '../utils/mapping';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
+import ContextMenu from '../components/context-menu';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -24,7 +25,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     unsubscribeDiagram,
   } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [, setSvgInstance] = useState<Svg | null>(null);
+  const [svgInstance, setSvgInstance] = useState<Svg | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
   const {} = useSvgZoomPan(svgContainerRef, {
@@ -42,6 +43,108 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     },
   });
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
+
+  // Add state for context menu
+  const [contextMenu, setContextMenu] = useState<{
+    visible: boolean;
+    x: number;
+    y: number;
+    targetElement: SVGElement | null;
+  }>({
+    visible: false,
+    x: 0,
+    y: 0,
+    targetElement: null,
+  });
+
+  // Create a ref to store timing information for manual throttling
+  const lastCallTimeRef = useRef<number>(0);
+  const throttleDelayMs = 100; // 100ms throttle
+
+  // Function to find parent with ID (utility function)
+  const findParentWithId = (
+    element: Element | null,
+    maxDepth: number = 5,
+  ): Element | null => {
+    if (!element) return null;
+    if (element.id) return element;
+    if (maxDepth <= 0) return null;
+    return findParentWithId(element.parentElement, maxDepth - 1);
+  };
+
+  // Context menu handler
+  const handleContextMenu = (
+    e: Event,
+    isLabelClick = false,
+    labelElement: SVGElement | null = null,
+  ) => {
+    e.preventDefault();
+
+    // Manual throttling implementation
+    const now = Date.now();
+    if (now - lastCallTimeRef.current < throttleDelayMs) {
+      return;
+    }
+    lastCallTimeRef.current = now;
+
+    const mouseEvent = e as MouseEvent;
+
+    // Get coordinates relative to the SVG container
+    const containerRect = svgContainerRef.current?.getBoundingClientRect();
+    if (containerRect) {
+      // Calculate coordinates relative to the container
+      const relativeX = mouseEvent.clientX - containerRect.left;
+      const relativeY = mouseEvent.clientY - containerRect.top;
+
+      // If it's a click on a label, use the label as target
+      // otherwise use the element targeted by the event
+      const targetElement = isLabelClick
+        ? labelElement
+        : (e.target as SVGElement | null);
+
+      let element: SVGElement | null = targetElement;
+      if (!isLabelClick && element) {
+        const foundParent = findParentWithId(element);
+        // Type cast the result to SVGElement if it exists
+        element = foundParent as SVGElement | null;
+      }
+
+      setContextMenu({
+        visible: true,
+        x: relativeX,
+        y: relativeY,
+        targetElement: element || targetElement,
+      });
+    }
+  };
+
+  // Close context menu
+  const closeContextMenu = () => {
+    setContextMenu((prev) => ({ ...prev, visible: false }));
+  };
+
+  // Add handler for toggling breakers
+  const handleToggleBreaker = (breakerId: string, isClosed: boolean) => {
+    // Implement breaker toggle logic here
+    console.log(
+      `Toggle breaker ${breakerId} to ${!isClosed ? 'closed' : 'open'}`,
+    );
+
+    // Example implementation - you can customize based on your needs
+    if (svgInstance && svgContainerRef.current) {
+      const breakerElement = svgInstance.findOne(`#${breakerId}`);
+      if (breakerElement) {
+        if (isClosed) {
+          breakerElement.removeClass('sld-closed');
+        } else {
+          breakerElement.addClass('sld-closed');
+        }
+      }
+    }
+
+    // Close the context menu after action
+    closeContextMenu();
+  };
 
   useEffect(() => {
     if (lineId) {
@@ -101,6 +204,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           instance.size('100%', '100%');
           setSvgInstance(instance);
 
+          // Add context menu event listeners
+          svgElement.addEventListener('contextmenu', handleContextMenu);
+
+          // Set up nodes and connections classes
           instance.find('.node').forEach((node) => {
             node.addClass('diagram-node');
           });
@@ -110,6 +217,16 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
         }
       }, 100);
     }
+
+    // Cleanup event listeners
+    return () => {
+      if (svgContainerRef.current) {
+        const svgElement = svgContainerRef.current.querySelector('svg');
+        if (svgElement) {
+          svgElement.removeEventListener('contextmenu', handleContextMenu);
+        }
+      }
+    };
   }, [svgContent]);
 
   const createSvgContent = () => {
@@ -139,6 +256,17 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
             style={{ width: '100%', height: '100%', overflow: 'hidden' }}
             dangerouslySetInnerHTML={createSvgContent()}
           />
+
+          {/* Render the context menu when visible */}
+          {contextMenu.visible && (
+            <ContextMenu
+              x={contextMenu.x}
+              y={contextMenu.y}
+              targetElement={contextMenu.targetElement}
+              onClose={closeContextMenu}
+              onToggleBreaker={handleToggleBreaker}
+            />
+          )}
         </>
       )}
     </div>

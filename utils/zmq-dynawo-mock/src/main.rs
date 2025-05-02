@@ -123,6 +123,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         socket.send(json_data.into()).await?;
 
         // Attendre 1 seconde avant d'envoyer le prochain message
-        tokio::time::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }
