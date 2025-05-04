@@ -18,8 +18,8 @@ echo "Executing script on $OS platform"
 TEMP_SPEC_DIR=$(mktemp -d)
 echo "Using temporary directory for spec files: $TEMP_SPEC_DIR"
 
-# Ensure the src-tauri/binaries/ directory exists
-mkdir -p src-tauri/binaries/
+# Ensure the src-tauri/crates/app/binaries/ directory exists
+mkdir -p src-tauri/crates/app/binaries/
 
 # Function to setup and activate virtual environment
 setup_venv() {
@@ -91,19 +91,19 @@ case $OS in
         echo "Executing Linux-specific commands..."
         setup_venv
         echo "Running PyInstaller for Linux..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-unknown-linux-gnu --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-unknown-linux-gnu --distpath src-tauri/crates/app/binaries/ src-sidecars/powsybl/main.py
         ;;
     "MacOS")
         echo "Executing MacOS-specific commands..."
         setup_venv
         echo "Running PyInstaller for macOS..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-apple-darwin --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-apple-darwin --distpath src-tauri/crates/app/binaries/ src-sidecars/powsybl/main.py
         ;;
     "Windows")
         echo "Executing Windows-specific commands..."
         setup_venv
         echo "Running PyInstaller for Windows..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-pc-windows-msvc --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-pc-windows-msvc --distpath src-tauri/crates/app/binaries/ src-sidecars/powsybl/main.py
         ;;
     *)
         echo "Unsupported OS: $OS"
