@@ -2,6 +2,7 @@ use log::{debug, info};
 use tauri::{AppHandle, Manager, Runtime};
 
 use crate::entities::{EventsData, Feeders, SldMetadata, SldResponse};
+use crate::entry::ReferenceMapper;
 use crate::errors::{Result, SldError};
 use crate::state::SldState;
 use crate::utils::create_subscription;
@@ -72,13 +73,9 @@ pub async fn update_feeders<R: Runtime>(
     feeders: Feeders,
 ) -> Result<SldResponse> {
     let state = app_handle.state::<SldState>();
-    state
-        .try_write()
-        .map_err(|_| SldError::LockError)?
-        .mapping
-        .feeders
-        .data
-        .clone_from(&feeders.data);
+    let mapping = ReferenceMapper::from(feeders);
+
+    state.try_write().map_err(|_| SldError::LockError)?.mapping = Some(mapping);
 
     Ok(SldResponse {
         status: "updated".to_string(),
@@ -91,13 +88,7 @@ pub async fn update_events<R: Runtime>(
     events: EventsData,
 ) -> Result<SldResponse> {
     let state = app_handle.state::<SldState>();
-    state
-        .try_write()
-        .map_err(|_| SldError::LockError)?
-        .mapping
-        .events
-        .data
-        .clone_from(&events.data);
+    state.try_write().map_err(|_| SldError::LockError)?.events = Some(events);
 
     Ok(SldResponse {
         status: "updated".to_string(),

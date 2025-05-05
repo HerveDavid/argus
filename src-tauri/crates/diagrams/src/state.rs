@@ -1,4 +1,5 @@
-use crate::entities::{CurveData, EventsData, Feeders};
+use crate::entities::{CurveData, EventsData};
+use crate::entry::ReferenceMapper;
 
 use std::collections::HashMap;
 use tokio::sync::{broadcast, watch};
@@ -15,18 +16,13 @@ pub struct ZmqConfig {
     pub url_receiver: String,
 }
 
-#[derive(Default)]
-pub struct Mapping {
-    pub feeders: Feeders,
-    pub events: EventsData,
-}
-
 pub struct SldStateInner {
     pub subscriptions: HashMap<String, SubscriptionHandle>,
     pub sender: watch::Sender<CurveData>,
     pub process: JoinHandle<()>,
     pub config: ZmqConfig,
-    pub mapping: Mapping,
+    pub mapping: Option<ReferenceMapper>,
+    pub events: Option<EventsData>,
 }
 
 impl Default for SldStateInner {
@@ -44,7 +40,8 @@ impl Default for SldStateInner {
             sender,
             process,
             config: zmq_subscription,
-            mapping: Default::default(),
+            mapping: None,
+            events: None,
         }
     }
 }

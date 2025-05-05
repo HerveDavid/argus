@@ -1,63 +1,82 @@
+use bimap::BiMap;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use uuid::Uuid;
+
+use crate::entities::Feeders;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Mapping {
+pub struct Entry {
     pub svg_id: String,
     pub equipment_id: String,
     pub dynawo_id: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct ReferenceMapper {
-    entries: HashMap<Uuid, Mapping>,     // By id
-    by_svg: HashMap<String, Uuid>,       // equipmentId -> Vec<id>
-    by_equipment: HashMap<String, Uuid>, // equipmentId -> Vec<id>
-    by_dynawo: HashMap<String, Uuid>,    // dynawo_id -> id
+    entries: Vec<Entry>,
+    svg_to_index: BiMap<String, usize>,
+    equipment_to_index: BiMap<String, usize>,
+    dynawo_to_index: BiMap<String, usize>,
 }
 
 impl ReferenceMapper {
-    pub fn new(entries: Vec<Mapping>) -> Self {
-        let mut entries_map = HashMap::new();
-        let mut by_svg = HashMap::new();
-        let mut by_equipment = HashMap::new();
-        let mut by_dynawo = HashMap::new();
+    pub fn new(entries: Vec<Entry>) -> Self {
+        let mut svg_to_index = BiMap::new();
+        let mut equipment_to_index = BiMap::new();
+        let mut dynawo_to_index = BiMap::new();
 
-        for entry in entries {
-            let id = Uuid::new_v4();
-
-            entries_map.insert(id.clone(), entry.clone());
-            by_svg.insert(entry.svg_id.clone(), id.clone());
-            by_equipment.insert(entry.equipment_id.clone(), id.clone());
-            by_dynawo.insert(entry.dynawo_id.clone(), id.clone());
+        for (index, entry) in entries.iter().enumerate() {
+            svg_to_index.insert(entry.svg_id.clone(), index);
+            equipment_to_index.insert(entry.equipment_id.clone(), index);
+            dynawo_to_index.insert(entry.dynawo_id.clone(), index);
         }
 
         Self {
-            entries: entries_map,
-            by_svg,
-            by_equipment,
-            by_dynawo,
+            entries,
+            svg_to_index,
+            equipment_to_index,
+            dynawo_to_index,
         }
     }
 
-    pub fn get_by_uuid(&self, uuid: &Uuid) -> Option<&Mapping> {
-        self.entries.get(uuid)
+    pub fn get_by_index(&self, index: usize) -> Option<&Entry> {
+        self.entries.get(index)
     }
 
-    pub fn get_by_svg(&self, svg_id: &str) -> Option<&Mapping> {
-        self.by_svg.get(svg_id).and_then(|id| self.entries.get(id))
+    pub fn get_by_svg(&self, svg_id: &str) -> Option<&Entry> {
+        self.svg_to_index
+            .get_by_left(svg_id)
+            .and_then(|&index| self.entries.get(index))
     }
 
-    pub fn get_by_equipment(&self, equipment_id: &str) -> Option<&Mapping> {
-        self.by_equipment
-            .get(equipment_id)
-            .and_then(|id| self.entries.get(id))
+    pub fn get_by_equipment(&self, equipment_id: &str) -> Option<&Entry> {
+        self.equipment_to_index
+            .get_by_left(equipment_id)
+            .and_then(|&index| self.entries.get(index))
     }
 
-    pub fn get_by_dynawo(&self, dynawo_id: &str) -> Option<&Mapping> {
-        self.by_dynawo
-            .get(dynawo_id)
-            .and_then(|id| self.entries.get(id))
+    pub fn get_by_dynawo(&self, dynawo_id: &str) -> Option<&Entry> {
+        self.dynawo_to_index
+            .get_by_left(dynawo_id)
+            .and_then(|&index| self.entries.get(index))
+    }
+
+    pub fn get_index_by_svg(&self, svg_id: &str) -> Option<usize> {
+        self.svg_to_index.get_by_left(svg_id).copied()
+    }
+}
+
+impl From<Feeders> for ReferenceMapper {
+    fn from(feeders: Feeders) -> Self {
+        let mut entries = Vec::new();
+
+        for feeder in feeders.data {
+            entries.push(Entry {
+                svg_id: feeder.id,
+                equipment_id: feeder.equipment_id,
+                dynawo_id: feeder.dynawo_id,
+            });
+        }
+
+        Self::new(entries)
     }
 }
