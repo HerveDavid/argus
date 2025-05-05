@@ -1,7 +1,3 @@
-use std::sync::{Arc, Mutex};
-use tauri::{Manager, RunEvent};
-use tauri_plugin_shell::process::CommandChild;
-
 mod powsybl;
 mod settings;
 mod shared;
@@ -10,6 +6,8 @@ mod state;
 use powsybl::commands::*;
 use settings::commands::*;
 use state::AppState;
+
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
