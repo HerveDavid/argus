@@ -16,6 +16,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
         .invoke_handler(tauri::generate_handler![
             commands::subscribe_diagram,
             commands::unsubscribe_diagram,
+            commands::update_feeders,
+            commands::update_events,
+            commands::event_open_breaker,
+            commands::event_close_breaker,
         ])
         .setup(|app, _| {
             app.manage(SldState::default());
