@@ -6,6 +6,7 @@ use tauri::{
 
 mod commands;
 mod entities;
+mod entry;
 mod errors;
 mod state;
 mod utils;
