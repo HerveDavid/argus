@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 tauri = { workspace = true, features = [] }
+tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
