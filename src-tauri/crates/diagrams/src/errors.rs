@@ -18,8 +18,14 @@ pub enum SldError {
     #[error("UTF-8 error: {0}")]
     Utf8Error(#[from] std::str::Utf8Error),
 
-    #[error("IO error: {0}")]
-    IoError(#[from] std::io::Error),
+    #[error("Failed to connect to ZMQ server: {0}")]
+    ZmqConnectionError(#[from] zeromq::ZmqError),
+
+    #[error("Failed to send data throught channel: {0}")]
+    ChannelSendError(String),
+
+    #[error("Task already exists for feeder: {0}")]
+    TaskAlreadyExists(String),
 }
 
 // Implement Serialize for SldError for Tauri command compatibility

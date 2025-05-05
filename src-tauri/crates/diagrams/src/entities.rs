@@ -18,12 +18,12 @@ pub struct Feeders {
     pub feeders: Vec<Feeder>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CurveData {
     pub curves: Curves,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Curves {
     pub values: HashMap<String, f64>,
     pub time: i32,
