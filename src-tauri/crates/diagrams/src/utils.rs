@@ -4,27 +4,7 @@ use crate::state::SldState;
 
 use log::{debug, error, info, trace};
 use tokio::sync::{broadcast, watch};
-use tokio::task::JoinHandle;
-use tokio::time::{Duration, interval};
 use zeromq::{Socket, SocketRecv};
-
-pub fn create_process(mut receiver: watch::Receiver<CurveData>) -> JoinHandle<()> {
-    tokio::spawn(async move {
-        let mut interval_timer = interval(Duration::from_secs_f64(1.0 / 60.0));
-        let mut latest_value = receiver.borrow().clone();
-
-        loop {
-            tokio::select! {
-                _ = receiver.changed() => {
-                    latest_value = receiver.borrow_and_update().clone();
-                }
-                _ = interval_timer.tick() => {
-                    println!("{:?}", latest_value);
-                }
-            }
-        }
-    })
-}
 
 pub async fn create_subscription(state: &SldState, id: String) -> Result<()> {
     let url = {
@@ -44,7 +24,9 @@ pub async fn create_subscription(state: &SldState, id: String) -> Result<()> {
                     url
                 );
 
-                if let Err(e) = handle_subscription(url.as_str(), sender, shutdown_rx).await {
+                if let Err(e) =
+                    handle_subscription(url.as_str(), id_clone.as_str(), sender, shutdown_rx).await
+                {
                     error!(
                         "Subscription error for feeder {}: {:?}",
                         id_clone.clone(),
@@ -53,11 +35,13 @@ pub async fn create_subscription(state: &SldState, id: String) -> Result<()> {
                 }
             })
         });
+
     Ok(())
 }
 
 async fn handle_subscription(
     url: &str,
+    id: &str,
     sender: watch::Sender<CurveData>,
     mut shutdown_rx: broadcast::Receiver<()>,
 ) -> Result<()> {
@@ -65,6 +49,7 @@ async fn handle_subscription(
     loop {
         tokio::select! {
             _ = shutdown_rx.recv() => {
+                info!("Shutdown signal received for feeder {}", id);
                 break;
             }
             result = socket.recv() => {
@@ -91,18 +76,12 @@ async fn create_sub_socket(url: &str) -> Result<zeromq::SubSocket> {
     Ok(socket)
 }
 
-async fn create_pub_socket(url: &str) -> Result<zeromq::PubSocket> {
-    let mut socket = zeromq::PubSocket::new();
-    socket.connect(url).await?;
+// async fn create_pub_socket(url: &str) -> Result<zeromq::PubSocket> {
+//     let mut socket = zeromq::PubSocket::new();
+//     socket.connect(url).await?;
 
-    Ok(socket)
-}
-
-struct Subscription {
-    id: String,
-    socket: zeromq::SubSocket,
-    sender: watch::Sender<CurveData>,
-}
+//     Ok(socket)
+// }
 
 async fn handle_message(
     message: zeromq::ZmqMessage,
@@ -116,10 +95,10 @@ async fn handle_message(
 
         let telemetry: CurveData = serde_json::from_str(&data)?;
         debug!("  Successfully deserialized to TelemetryCurves");
-        debug!("  Number of curves: {}", telemetry.curves.values.len());
+        debug!("  Number of curves: {}", telemetry.data.values.len());
 
         sender
-            .send(telemetry.clone())
+            .send(telemetry)
             .map_err(|e| SldError::ChannelSendError(e.to_string()))?;
 
         debug!("  Data successfully sent via channel");

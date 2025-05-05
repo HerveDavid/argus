@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Clone, Deserialize)]
 pub struct Feeder {
     pub id: String,
     #[serde(rename = "equipmentId")]
@@ -13,14 +13,14 @@ pub struct Feeder {
     pub dynawo_id: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Feeders {
-    pub feeders: Vec<Feeder>,
+    pub data: Vec<Feeder>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct CurveData {
-    pub curves: Curves,
+    pub data: Curves,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -29,16 +29,16 @@ pub struct Curves {
     pub time: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
     pub equipement_id: String,
     pub value: String,
     pub event_string: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct EventsData {
-    pub events: Vec<Event>,
+    pub data: Vec<Event>,
 }
 
 #[derive(Serialize, Deserialize)]
