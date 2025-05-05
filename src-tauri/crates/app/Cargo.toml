@@ -40,3 +40,5 @@ base64 = "0.22.1"
 uuid = "1.16.0"
 log = "0.4.27"
 zmq = "0.10.0"
+
+sidecars = { path = "../sidecars" }

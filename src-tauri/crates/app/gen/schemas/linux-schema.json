@@ -6357,6 +6357,36 @@
           "markdownDescription": "Denies the stdin_write command without any pre-configured scope."
         },
         {
+          "description": "\n#### This default permission set includes:\n\n- `allow-start-sidecar`\n- `allow-shutdown-sidecar`",
+          "type": "string",
+          "const": "sidecars:default",
+          "markdownDescription": "\n#### This default permission set includes:\n\n- `allow-start-sidecar`\n- `allow-shutdown-sidecar`"
+        },
+        {
+          "description": "Enables the shutdown_sidecar command without any pre-configured scope.",
+          "type": "string",
+          "const": "sidecars:allow-shutdown-sidecar",
+          "markdownDescription": "Enables the shutdown_sidecar command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the start_sidecar command without any pre-configured scope.",
+          "type": "string",
+          "const": "sidecars:allow-start-sidecar",
+          "markdownDescription": "Enables the start_sidecar command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the shutdown_sidecar command without any pre-configured scope.",
+          "type": "string",
+          "const": "sidecars:deny-shutdown-sidecar",
+          "markdownDescription": "Denies the shutdown_sidecar command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the start_sidecar command without any pre-configured scope.",
+          "type": "string",
+          "const": "sidecars:deny-start-sidecar",
+          "markdownDescription": "Denies the start_sidecar command without any pre-configured scope."
+        },
+        {
           "description": "This permission set configures what kind of\noperations are available from the store plugin.\n\n#### Granted Permissions\n\nAll operations are enabled by default.\n\n\n#### This default permission set includes:\n\n- `allow-load`\n- `allow-get-store`\n- `allow-set`\n- `allow-get`\n- `allow-has`\n- `allow-delete`\n- `allow-clear`\n- `allow-reset`\n- `allow-keys`\n- `allow-values`\n- `allow-entries`\n- `allow-length`\n- `allow-reload`\n- `allow-save`",
           "type": "string",
           "const": "store:default",

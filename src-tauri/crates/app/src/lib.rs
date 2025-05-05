@@ -5,12 +5,12 @@ use tauri_plugin_shell::process::CommandChild;
 mod powsybl;
 mod settings;
 mod shared;
-mod sidecars;
+// mod sidecars;
 mod state;
 
 use powsybl::commands::*;
 use settings::commands::*;
-use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
+// use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
 use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -30,10 +30,8 @@ pub fn run() {
                 ))
                 .build(),
         )
+        .plugin(sidecars::init())
         .invoke_handler(tauri::generate_handler![
-            // Sidecars
-            start_sidecar,
-            shutdown_sidecar,
             // Settings
             set_server_url,
             get_server_url,
@@ -66,21 +64,8 @@ pub fn run() {
         ])
         .setup(|app| {
             app.manage(AppState::default());
-
-            // Store the initial sidecar process in the app state
-            app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
-
-            let app_handle = app.handle().clone();
-            // Spawn the Python sidecar on startup
-            spawn_and_monitor_sidecar(app_handle).ok();
-
             Ok(())
         })
-        .build(tauri::generate_context!())
-        .expect("error while running tauri application")
-        .run(|app_handle, event| match event {
-            // Ensure the Python sidecar is killed when the app is closed
-            RunEvent::ExitRequested { .. } => despawn_sidecar(app_handle),
-            _ => {}
-        });
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
