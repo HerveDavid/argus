@@ -2,6 +2,7 @@
 name = "diagrams"
 version = "0.0.0"
 edition = "2024"
+links = "diagrams"
 
 [dependencies]
 tauri = { workspace = true, features = [] }

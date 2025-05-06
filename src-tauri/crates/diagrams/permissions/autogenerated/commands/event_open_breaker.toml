@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-event-open-breaker"
+description = "Enables the event_open_breaker command without any pre-configured scope."
+commands.allow = ["event_open_breaker"]
+
+[[permission]]
+identifier = "deny-event-open-breaker"
+description = "Denies the event_open_breaker command without any pre-configured scope."
+commands.deny = ["event_open_breaker"]

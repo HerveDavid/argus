@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-unsubscribe-diagram"
+description = "Enables the unsubscribe_diagram command without any pre-configured scope."
+commands.allow = ["unsubscribe_diagram"]
+
+[[permission]]
+identifier = "deny-unsubscribe-diagram"
+description = "Denies the unsubscribe_diagram command without any pre-configured scope."
+commands.deny = ["unsubscribe_diagram"]

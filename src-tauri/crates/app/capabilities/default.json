@@ -71,6 +71,7 @@
     "store:allow-save",
     "dialog:default",
     "log:default",
-    "sidecars:default"
+    "sidecars:default",
+    "diagrams:default"
   ]
 }

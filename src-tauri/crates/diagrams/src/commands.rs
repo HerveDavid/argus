@@ -12,10 +12,7 @@ pub async fn subscribe_diagram<R: Runtime>(
     app_handle: AppHandle<R>,
     metadata: SldMetadata,
 ) -> Result<SldResponse> {
-    debug!(
-        "subscribe_single_line_diagram called with SLD metadata: {:?}",
-        metadata
-    );
+    debug!("subscribe_diagram called with SLD metadata: {:?}", metadata);
 
     let state = app_handle.state::<SldState>();
     let active_feeders = metadata.get_active_arrow_feeders();
@@ -98,7 +95,7 @@ pub async fn update_events<R: Runtime>(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn event_open_breaker<R: Runtime>(
     app_handle: AppHandle<R>,
-    id: String,
+    svg_id: String,
 ) -> Result<SldResponse> {
     let state = app_handle.state::<SldState>();
     let guard = state.read().map_err(|_| SldError::LockError)?;
@@ -106,40 +103,27 @@ pub async fn event_open_breaker<R: Runtime>(
     let mapping = guard.mapping.as_ref();
     let events = guard.events.as_ref();
 
-    if mapping.is_none() {
-        return Ok(SldResponse {
-            status: "mapping is not defined".to_string(),
-        });
-    }
+    let status = match (mapping, events) {
+        (Some(mapping), Some(EventsData { data })) => mapping
+            .get_by_svg(&svg_id)
+            .and_then(|Entry { equipment_id, .. }| {
+                data.iter()
+                    .find(|e| e.equipement_id == *equipment_id && e.value == "1")
+                    .inspect(|e| println!("TODO Implemented zmq {e:?}"))
+                    .map(|_| String::new())
+            })
+            .unwrap_or_else(|| format!("no matching event found for {}", svg_id)),
+        (None, _) => "mapping is not defined".to_string(),
+        (_, None) => "events is not defined".to_string(),
+    };
 
-    if events.is_none() {
-        return Ok(SldResponse {
-            status: "events is not defined".to_string(),
-        });
-    }
-
-    if let Some(mapping) = mapping {
-        if let Some(Entry { equipment_id, .. }) = mapping.get_by_equipment(id.as_str()) {
-            if let Some(EventsData { data }) = events {
-                for event in data {
-                    if event.equipement_id.eq(equipment_id) && event.value.eq("1") {
-                        println!("{:?}", event);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    Ok(SldResponse {
-        status: "".to_string(),
-    })
+    Ok(SldResponse { status })
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn event_close_breaker<R: Runtime>(
     app_handle: AppHandle<R>,
-    id: String,
+    svg_id: String,
 ) -> Result<SldResponse> {
     let state = app_handle.state::<SldState>();
     let guard = state.read().map_err(|_| SldError::LockError)?;
@@ -147,32 +131,19 @@ pub async fn event_close_breaker<R: Runtime>(
     let mapping = guard.mapping.as_ref();
     let events = guard.events.as_ref();
 
-    if mapping.is_none() {
-        return Ok(SldResponse {
-            status: "mapping is not defined".to_string(),
-        });
-    }
+    let status = match (mapping, events) {
+        (Some(mapping), Some(EventsData { data })) => mapping
+            .get_by_svg(&svg_id)
+            .and_then(|Entry { equipment_id, .. }| {
+                data.iter()
+                    .find(|e| e.equipement_id == *equipment_id && e.value == "0")
+                    .inspect(|e| println!("TODO Implemented zmq {e:?}"))
+                    .map(|_| String::new())
+            })
+            .unwrap_or_else(|| format!("no matching event found for {}", svg_id)),
+        (None, _) => "mapping is not defined".to_string(),
+        (_, None) => "events is not defined".to_string(),
+    };
 
-    if events.is_none() {
-        return Ok(SldResponse {
-            status: "events is not defined".to_string(),
-        });
-    }
-
-    if let Some(mapping) = mapping {
-        if let Some(Entry { equipment_id, .. }) = mapping.get_by_equipment(id.as_str()) {
-            if let Some(EventsData { data }) = events {
-                for event in data {
-                    if event.equipement_id.eq(equipment_id) && event.value.eq("0") {
-                        println!("{:?}", event);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    Ok(SldResponse {
-        status: "".to_string(),
-    })
+    Ok(SldResponse { status })
 }

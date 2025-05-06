@@ -4,16 +4,8 @@ import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
 import { SVG, Svg } from '@svgdotjs/svg.js';
 import '../styles/diagram-animations.css';
-import { useSvgUpdate } from '../hooks/use-svg-update';
-import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
-import { feeders_with_dynawo_id } from '../utils/mapping';
-import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
+
 import ContextMenu from '../components/context-menu';
-import {
-  get_close_dj_from_equipement_id,
-  get_open_dj_from_equipement_id,
-} from '../utils/events';
-import { sendCloseDj, sendOpenDj } from '@/features/powsybl/api/events-single-line-diagram';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -21,17 +13,9 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = '100%',
   className = '',
 }) => {
-  const {
-    svgBlob,
-    isLoading,
-    error,
-    loadDiagram,
-    subscribeDiagram,
-    unsubscribeDiagram,
-    getNodeEquipmentId,
-  } = useDiagramStore();
+  const { svgBlob, isLoading, error, loadDiagram } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
-  const [svgInstance, setSvgInstance] = useState<Svg | null>(null);
+  const [, setSvgInstance] = useState<Svg | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
   const {} = useSvgZoomPan(svgContainerRef, {
@@ -42,7 +26,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     panEnabled: true,
     initialZoom: 1,
   });
-  const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
 
   // Add state for context menu
   const [contextMenu, setContextMenu] = useState<{
@@ -123,51 +106,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     setContextMenu((prev) => ({ ...prev, visible: false }));
   };
 
-  // Add handler for toggling breakers
-  const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
-    // Implement breaker toggle logic here
-    const equipmentId = getNodeEquipmentId(breakerId);
-    console.log(
-      `Toggle breaker ${breakerId} to ${!isClosed ? 'closed' : 'open'}`,
-    );
-    console.log(`equipement ${equipmentId}`);
-
-    // Example implementation - you can customize based on your needs
-    if (svgInstance && svgContainerRef.current) {
-      const breakerElement = svgInstance.findOne(`#${breakerId}`);
-      if (breakerElement) {
-        if (isClosed) {
-          // TODO action
-          // OPEN now
-
-          if (equipmentId) {
-            const openDj = get_open_dj_from_equipement_id(equipmentId);
-            console.log(openDj);
-            if (openDj && openDj.found && openDj.data) {
-              await sendOpenDj(openDj.data);
-            }
-          }
-
-          breakerElement.removeClass('sld-closed');
-        } else {
-          // CLOSE now
-          if (equipmentId) {
-            const closeDj = get_close_dj_from_equipement_id(equipmentId);
-            console.log(closeDj);
-            if (closeDj && closeDj.found && closeDj.data) {
-              await sendCloseDj(closeDj.data);
-            }
-          }
-
-          breakerElement.addClass('sld-closed');
-        }
-      }
-    }
-
-    // Close the context menu after action
-    closeContextMenu();
-  };
-
   useEffect(() => {
     if (lineId) {
       loadDiagram(lineId);
@@ -184,38 +122,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       reader.readAsText(svgBlob);
     }
   }, [svgBlob]);
-
-  useEffect(() => {
-    const mapper = (tc: TelemetryCurves) => {
-      for (const dynawoId in tc.curves.values) {
-        const id = feeders_with_dynawo_id.find((value) =>
-          dynawoId.includes(value.dynawo_id),
-        );
-
-        if (id?.id) {
-          const tm: TeleInformation = {
-            ti: 'TM',
-            data: { id: id.id, value: tc.curves.values[dynawoId] },
-          };
-          console.log('TM: ', tm);
-          handleUpdateMessage(tm);
-        } else {
-          console.log('NO TM');
-        }
-      }
-    };
-
-    const subscribe = async () => {
-      await loadDiagram(lineId);
-      subscribeDiagram(mapper);
-    };
-
-    subscribe();
-
-    return () => {
-      unsubscribeDiagram();
-    };
-  }, [lineId, loadDiagram]);
 
   useEffect(() => {
     if (svgContent && svgContainerRef.current) {
@@ -286,7 +192,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
               y={contextMenu.y}
               targetElement={contextMenu.targetElement}
               onClose={closeContextMenu}
-              onToggleBreaker={handleToggleBreaker}
+              onToggleBreaker={() => console.log('toggle breaker')}
             />
           )}
         </>

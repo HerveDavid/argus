@@ -96,6 +96,7 @@ version = "0.1.0"
 dependencies = [
  "base64 0.22.1",
  "crossbeam",
+ "diagrams",
  "futures",
  "log",
  "once_cell",
@@ -351,6 +352,12 @@ name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
+
+[[package]]
+name = "bimap"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "230c5f1ca6a325a32553f8640d31ac9b49f2411e901e427570154868b46da4f7"
 
 [[package]]
 name = "bitflags"
@@ -953,6 +960,22 @@ dependencies = [
  "quote",
  "rustc_version",
  "syn 2.0.101",
+]
+
+[[package]]
+name = "diagrams"
+version = "0.0.0"
+dependencies = [
+ "bimap",
+ "crossbeam",
+ "log",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.12",
+ "tokio",
+ "zeromq",
 ]
 
 [[package]]
@@ -5317,10 +5340,6 @@ name = "version_check"
 version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
-
-[[package]]
-name = "visualizer"
-version = "0.0.0"
 
 [[package]]
 name = "vswhom"

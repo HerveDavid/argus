@@ -1,0 +1,12 @@
+"$schema" = "schemas/schema.json"
+
+[default]
+description = ""
+permissions = [
+    "allow-subscribe-diagram",
+    "allow-unsubscribe-diagram",
+    "allow-update-feeders",
+    "allow-update-events",
+    "allow-event-open-breaker",
+    "allow-event-close-breaker",
+]

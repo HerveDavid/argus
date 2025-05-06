@@ -4377,6 +4377,84 @@
           "markdownDescription": "Denies the unminimize command without any pre-configured scope."
         },
         {
+          "description": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`",
+          "type": "string",
+          "const": "diagrams:default",
+          "markdownDescription": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`"
+        },
+        {
+          "description": "Enables the event_close_breaker command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-event-close-breaker",
+          "markdownDescription": "Enables the event_close_breaker command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the event_open_breaker command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-event-open-breaker",
+          "markdownDescription": "Enables the event_open_breaker command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the subscribe_diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-subscribe-diagram",
+          "markdownDescription": "Enables the subscribe_diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the unsubscribe_diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-unsubscribe-diagram",
+          "markdownDescription": "Enables the unsubscribe_diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the update_events command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-update-events",
+          "markdownDescription": "Enables the update_events command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the update_feeders command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:allow-update-feeders",
+          "markdownDescription": "Enables the update_feeders command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the event_close_breaker command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-event-close-breaker",
+          "markdownDescription": "Denies the event_close_breaker command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the event_open_breaker command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-event-open-breaker",
+          "markdownDescription": "Denies the event_open_breaker command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the subscribe_diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-subscribe-diagram",
+          "markdownDescription": "Denies the subscribe_diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the unsubscribe_diagram command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-unsubscribe-diagram",
+          "markdownDescription": "Denies the unsubscribe_diagram command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the update_events command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-update-events",
+          "markdownDescription": "Denies the update_events command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the update_feeders command without any pre-configured scope.",
+          "type": "string",
+          "const": "diagrams:deny-update-feeders",
+          "markdownDescription": "Denies the update_feeders command without any pre-configured scope."
+        },
+        {
           "description": "This permission set configures the types of dialogs\navailable from the dialog plugin.\n\n#### Granted Permissions\n\nAll dialog types are enabled.\n\n\n\n#### This default permission set includes:\n\n- `allow-ask`\n- `allow-confirm`\n- `allow-message`\n- `allow-save`\n- `allow-open`",
           "type": "string",
           "const": "dialog:default",
