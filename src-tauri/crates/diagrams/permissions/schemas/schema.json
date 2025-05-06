@@ -367,10 +367,10 @@
           "markdownDescription": "Denies the update_feeders command without any pre-configured scope."
         },
         {
-          "description": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`",
+          "description": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`\n- `core:event:default`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`"
+          "markdownDescription": "\n#### This default permission set includes:\n\n- `allow-subscribe-diagram`\n- `allow-unsubscribe-diagram`\n- `allow-update-feeders`\n- `allow-update-events`\n- `allow-event-open-breaker`\n- `allow-event-close-breaker`\n- `core:event:default`"
         }
       ]
     }

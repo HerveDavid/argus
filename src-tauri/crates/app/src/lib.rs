@@ -21,7 +21,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(sidecars::init())
-        .plugin(diagrams::init())
+        // .plugin(diagrams::init())
         .invoke_handler(tauri::generate_handler![
             // Settings
             set_server_url,
@@ -52,9 +52,16 @@ pub fn run() {
             unsubscribe_single_line_diagram,
             send_open_dj,
             send_close_dj,
+            diagrams::commands::subscribe_diagram,
+            diagrams::commands::unsubscribe_diagram,
+            diagrams::commands::update_feeders,
+            diagrams::commands::update_events,
+            diagrams::commands::event_open_breaker,
+            diagrams::commands::event_close_breaker,
         ])
         .setup(|app| {
             app.manage(AppState::default());
+            app.manage(diagrams::state::SldState::default());
             Ok(())
         })
         .run(tauri::generate_context!())

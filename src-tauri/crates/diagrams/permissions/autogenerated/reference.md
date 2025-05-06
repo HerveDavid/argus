@@ -10,6 +10,7 @@
 - `allow-update-events`
 - `allow-event-open-breaker`
 - `allow-event-close-breaker`
+- `core:event:default`
 
 ## Permission Table
 

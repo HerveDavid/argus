@@ -1,7 +1,7 @@
 use log::{debug, info};
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::{AppHandle, Manager, Runtime, ipc::Channel};
 
-use crate::entities::{EventsData, Feeders, SldMetadata, SldResponse};
+use crate::entities::{CurveData, EventsData, Feeders, SldMetadata, SldResponse};
 use crate::entry::{Entry, ReferenceMapper};
 use crate::errors::{Result, SldError};
 use crate::state::SldState;
@@ -11,11 +11,14 @@ use crate::utils::create_subscription;
 pub async fn subscribe_diagram<R: Runtime>(
     app_handle: AppHandle<R>,
     metadata: SldMetadata,
+    channel: Channel<CurveData>,
 ) -> Result<SldResponse> {
     debug!("subscribe_diagram called with SLD metadata: {:?}", metadata);
 
     let state = app_handle.state::<SldState>();
     let active_feeders = metadata.get_active_arrow_feeders();
+
+    state.try_write().map_err(|_| SldError::LockError)?.channel = Some(channel);
 
     info!("Active feeders found: {}", active_feeders.len());
 
@@ -28,6 +31,11 @@ pub async fn subscribe_diagram<R: Runtime>(
 
         create_subscription(&state, id).await?;
     }
+
+    state
+        .try_write()
+        .map_err(|_| SldError::LockError)?
+        .start_process();
 
     Ok(SldResponse {
         status: "connected".to_string(),

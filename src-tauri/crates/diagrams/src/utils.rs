@@ -95,7 +95,7 @@ async fn handle_message(
 
         let telemetry: CurveData = serde_json::from_str(&data)?;
         debug!("  Successfully deserialized to TelemetryCurves");
-        debug!("  Number of curves: {}", telemetry.data.values.len());
+        debug!("  Number of curves: {}", telemetry.curves.values.len());
 
         sender
             .send(telemetry)

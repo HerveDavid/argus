@@ -69,7 +69,7 @@ impl From<Feeders> for ReferenceMapper {
     fn from(feeders: Feeders) -> Self {
         let mut entries = Vec::new();
 
-        for feeder in feeders.data {
+        for feeder in feeders.feeders {
             entries.push(Entry {
                 svg_id: feeder.id,
                 equipment_id: feeder.equipment_id,

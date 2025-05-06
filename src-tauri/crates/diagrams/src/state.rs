@@ -3,8 +3,13 @@ use crate::entry::ReferenceMapper;
 
 use std::collections::HashMap;
 use tauri::async_runtime::JoinHandle;
+use tauri::ipc::Channel;
 use tokio::sync::{broadcast, watch};
 use tokio::time::{Duration, interval};
+
+const URL_SENDER: &str = "tcp://localhost:5555";
+const URL_RECEIVER: &str = "tcp://localhost:5556";
+const FPS_TARGET: f64 = 10.0;
 
 pub struct SubscriptionHandle {
     pub handle: JoinHandle<()>,
@@ -19,42 +24,43 @@ pub struct ZmqConfig {
 pub struct SldStateInner {
     pub subscriptions: HashMap<String, SubscriptionHandle>,
     pub sender: watch::Sender<CurveData>,
-    pub process: JoinHandle<()>,
+    pub process: Option<JoinHandle<()>>,
     pub config: ZmqConfig,
     pub mapping: Option<ReferenceMapper>,
     pub events: Option<EventsData>,
+    pub channel: Option<Channel<CurveData>>,
 }
 
 impl Default for SldStateInner {
     fn default() -> Self {
-        let (sender, receiver) = watch::channel(CurveData::default());
-        let process = Self::create_process(receiver);
+        let (sender, _) = watch::channel(CurveData::default());
 
-        let zmq_subscription = ZmqConfig {
-            url_sender: "tcp://*:5555".to_string(),
-            url_receiver: "tcp://*:5556".to_string(),
+        let config = ZmqConfig {
+            url_sender: URL_SENDER.to_string(),
+            url_receiver: URL_RECEIVER.to_string(),
         };
 
         Self {
             subscriptions: Default::default(),
             sender,
-            process,
-            config: zmq_subscription,
+            process: None,
+            config,
             mapping: None,
             events: None,
+            channel: None,
         }
     }
 }
 
 impl Drop for SldStateInner {
     fn drop(&mut self) {
-        self.process.abort();
+        if self.process.is_some() {
+            self.process.as_ref().unwrap().abort();
+        }
     }
 }
 
 impl SldStateInner {
-    const FPS_TARGET: f64 = 60.0;
-
     pub fn spawn_task<F>(&mut self, id: String, task_fn: F)
     where
         F: FnOnce(watch::Sender<CurveData>, broadcast::Receiver<()>) -> JoinHandle<()>,
@@ -85,19 +91,32 @@ impl SldStateInner {
         self.subscriptions.contains_key(id)
     }
 
-    fn create_process(mut receiver: watch::Receiver<CurveData>) -> JoinHandle<()> {
+    pub fn start_process(&mut self) {
+        if let Some(channel) = self.channel.clone() {
+            let (sender, receiver) = watch::channel(CurveData::default());
+            let process = Self::create_process(receiver, channel);
+
+            self.sender = sender;
+            self.process = Some(process);
+        }
+    }
+
+    fn create_process(
+        mut receiver: watch::Receiver<CurveData>,
+        channel: Channel<CurveData>,
+    ) -> JoinHandle<()> {
         tauri::async_runtime::spawn(async move {
-            let mut interval_timer =
-                interval(Duration::from_secs_f64(1.0 / SldStateInner::FPS_TARGET));
-            let mut _latest_value = receiver.borrow().clone();
+            let mut interval_timer = interval(Duration::from_secs_f64(1.0 / FPS_TARGET));
+            let mut latest_value = receiver.borrow().clone();
 
             loop {
                 tokio::select! {
                     _ = receiver.changed() => {
-                        _latest_value = receiver.borrow_and_update().clone();
+                        latest_value = receiver.borrow_and_update().clone();
                     }
                     _ = interval_timer.tick() => {
-                        // println!("{:?}", latest_value);
+                        channel.send(latest_value.clone()).unwrap();
+                        println!("sended");
                     }
                 }
             }

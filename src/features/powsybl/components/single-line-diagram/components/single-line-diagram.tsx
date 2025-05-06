@@ -13,7 +13,14 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   height = '100%',
   className = '',
 }) => {
-  const { svgBlob, isLoading, error, loadDiagram } = useDiagramStore();
+  const {
+    svgBlob,
+    isLoading,
+    error,
+    loadDiagram,
+    subscribeDiagram,
+    unsubscribeDiagram,
+  } = useDiagramStore();
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [, setSvgInstance] = useState<Svg | null>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -109,7 +116,12 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   useEffect(() => {
     if (lineId) {
       loadDiagram(lineId);
+      subscribeDiagram(console.log);
     }
+
+    return () => {
+      unsubscribeDiagram();
+    };
   }, [lineId, loadDiagram]);
 
   useEffect(() => {

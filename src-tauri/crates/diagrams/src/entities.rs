@@ -15,12 +15,12 @@ pub struct Feeder {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Feeders {
-    pub data: Vec<Feeder>,
+    pub feeders: Vec<Feeder>,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct CurveData {
-    pub data: Curves,
+    pub curves: Curves,
 }
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]

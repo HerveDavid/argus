@@ -9,6 +9,9 @@ import {
   unsubscribeSLD,
 } from '../services/subscription-ti.service';
 
+import { info, trace } from '@tauri-apps/plugin-log';
+
+
 // ------------------------------
 // Types
 // ------------------------------
@@ -156,7 +159,6 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
 
     set({ isLoading: true, error: null });
 
-    // Utilisation de runPromise comme recommandé dans les best practices
     Effect.runPromise(unsubscribeSLD(currentLineId, metadata))
       .then((response) => {
         set({
