@@ -17,7 +17,7 @@ pub async fn create_subscription(state: &SldState, id: String) -> Result<()> {
         .try_write()
         .map_err(|_| SldError::LockError)?
         .spawn_task(id, |sender, shutdown_rx| {
-            tokio::spawn(async move {
+            tauri::async_runtime::spawn(async move {
                 info!(
                     "Starting ZMQ monitoring for feeder {} on {}",
                     id_clone.clone(),

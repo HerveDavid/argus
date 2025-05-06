@@ -2,8 +2,8 @@ use crate::entities::{CurveData, EventsData};
 use crate::entry::ReferenceMapper;
 
 use std::collections::HashMap;
+use tauri::async_runtime::JoinHandle;
 use tokio::sync::{broadcast, watch};
-use tokio::task::JoinHandle;
 use tokio::time::{Duration, interval};
 
 pub struct SubscriptionHandle {
@@ -86,18 +86,18 @@ impl SldStateInner {
     }
 
     fn create_process(mut receiver: watch::Receiver<CurveData>) -> JoinHandle<()> {
-        tokio::spawn(async move {
+        tauri::async_runtime::spawn(async move {
             let mut interval_timer =
                 interval(Duration::from_secs_f64(1.0 / SldStateInner::FPS_TARGET));
-            let mut latest_value = receiver.borrow().clone();
+            let mut _latest_value = receiver.borrow().clone();
 
             loop {
                 tokio::select! {
                     _ = receiver.changed() => {
-                        latest_value = receiver.borrow_and_update().clone();
+                        _latest_value = receiver.borrow_and_update().clone();
                     }
                     _ = interval_timer.tick() => {
-                        println!("{:?}", latest_value);
+                        // println!("{:?}", latest_value);
                     }
                 }
             }
