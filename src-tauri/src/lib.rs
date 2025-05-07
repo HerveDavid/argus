@@ -3,6 +3,7 @@ use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
 mod broker;
+mod diagrams;
 mod powsybl;
 mod settings;
 mod shared;
@@ -62,6 +63,13 @@ pub fn run() {
             get_single_line_diagram_with_metadata,
             subscribe_single_line_diagram,
             unsubscribe_single_line_diagram,
+            // diagrams
+            diagrams::commands::subscribe_diagram,
+            diagrams::commands::unsubscribe_diagram,
+            diagrams::commands::update_feeders,
+            diagrams::commands::update_events,
+            diagrams::commands::event_open_breaker,
+            diagrams::commands::event_close_breaker,
         ])
         .setup(|app| {
             app.manage(AppState::default());
