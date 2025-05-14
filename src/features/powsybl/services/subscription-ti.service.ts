@@ -70,11 +70,18 @@ export const unsubscribeSLD = (id: string, sld_metadata: SldMetadata) =>
     );
   });
 
-export const connectBroker = () =>
+export const connectBroker = (handler: (values: Record<string, number>) => void) =>
   Effect.gen(function* () {
+    // Création d'un nouveau channel
+    const channel = new Channel<Record<string, number>>();
+    channel.onmessage = handler;
+
+    // Invocation de l'API Tauri
     return yield* Effect.tryPromise({
       try: () =>
-        invoke<SldSubscriptionResponse>('connect_broker'),
+        invoke<SldSubscriptionResponse>('connect_broker', {
+          channel,
+        }),
       catch: (error) => console.error(error),
     });
   });

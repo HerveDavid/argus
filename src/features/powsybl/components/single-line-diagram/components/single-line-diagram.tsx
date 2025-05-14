@@ -82,38 +82,38 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     toggleBreaker,
   );
 
-  // Charger le diagramme lors du montage et quand lineId change
-  useEffect(() => {
-    const mapper = (tc: TelemetryCurves) => {
-      for (const dynawoId in tc.curves.values) {
-        const id = feeders_with_dynawo_id.find((value) =>
-          dynawoId.includes(value.dynawo_id),
-        );
+  // // Charger le diagramme lors du montage et quand lineId change
+  // useEffect(() => {
+  //   const mapper = (tc: TelemetryCurves) => {
+  //     for (const dynawoId in tc.curves.values) {
+  //       const id = feeders_with_dynawo_id.find((value) =>
+  //         dynawoId.includes(value.dynawo_id),
+  //       );
 
-        if (id?.id) {
-          const tm: TeleInformation = {
-            ti: 'TM',
-            data: { id: id.id, value: tc.curves.values[dynawoId] },
-          };
-          console.log('TM: ', tm);
-          handleUpdateMessage(tm);
-        } else {
-          console.log('NO TM');
-        }
-      }
-    };
+  //       if (id?.id) {
+  //         const tm: TeleInformation = {
+  //           ti: 'TM',
+  //           data: { id: id.id, value: tc.curves.values[dynawoId] },
+  //         };
+  //         console.log('TM: ', tm);
+  //         handleUpdateMessage(tm);
+  //       } else {
+  //         console.log('NO TM');
+  //       }
+  //     }
+  //   };
 
-    const subscribe = async () => {
-      await loadDiagram(lineId);
-      subscribeDiagram(mapper);
-    };
+  //   const subscribe = async () => {
+  //     await loadDiagram(lineId);
+  //     subscribeDiagram(mapper);
+  //   };
 
-    subscribe();
+  //   subscribe();
 
-    return () => {
-      unsubscribeDiagram();
-    };
-  }, [lineId, loadDiagram]);
+  //   return () => {
+  //     unsubscribeDiagram();
+  //   };
+  // }, [lineId, loadDiagram]);
 
   useEffect(() => {
     if (svgBlob) {
@@ -126,8 +126,27 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   }, [svgBlob]);
 
   useEffect(() => {
-    connectBroker();
-  }, [svgContent]);
+    const mapper = (tc: Record<string, number>) => {
+      for (const [id, value] of Object.entries(tc)) {
+        const id_finded = feeders_with_dynawo_id.find((val) =>
+          id.includes(val.dynawo_id),
+        );
+
+        if (id_finded) {
+          const tm: TeleInformation = {
+            ti: 'TM',
+            data: { id: id_finded.id, value },
+          };
+          console.log('TM: ', tm);
+          handleUpdateMessage(tm);
+        } else {
+          console.log('NO TM');
+        }
+      }
+    };
+
+    connectBroker(mapper);
+  }, [[lineId, loadDiagram]]);
 
   // Vérifier que le SVG est bien chargé dans le DOM
   useEffect(() => {

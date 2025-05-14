@@ -27,7 +27,7 @@ export interface DiagramStore extends DiagramData {
   resetDiagram: () => void;
   subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
-  connectBroker: () => void;
+  connectBroker: (handler: (ti: Record<string, number>) => void) => void;
   subscriptionStatus: SldSubscriptionStatus;
 }
 
@@ -176,7 +176,9 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       });
   },
 
-  connectBroker: () => {
-    Effect.runPromise(connectBroker()).then(console.log).catch(console.error);
+  connectBroker: (handler) => {
+    Effect.runPromise(connectBroker(handler))
+      .then(console.log)
+      .catch(console.error);
   },
 }));

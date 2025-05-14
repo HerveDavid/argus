@@ -1,11 +1,12 @@
 use async_nats::Message;
 use futures::stream::StreamExt;
 use std::collections::HashMap;
+use tauri::ipc::Channel;
 
 use super::errors::BrokerResult;
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn connect_broker() -> BrokerResult<()> {
+pub async fn connect_broker(channel: Channel<HashMap<String, f64>>) -> BrokerResult<()> {
     println!("Connexion au serveur NATS...");
     let client = async_nats::connect("nats://localhost:4222").await?;
     println!("Connecté au serveur NATS!");
@@ -42,6 +43,8 @@ pub async fn connect_broker() -> BrokerResult<()> {
                                 println!("{}: {} = {:.2}", i+1, key, value);
                             }
                             println!("... et {} autres valeurs", telemetry_values.len() - 5);
+
+                            channel.send(telemetry_values.clone()).unwrap();
                         }
                     }
                 }
