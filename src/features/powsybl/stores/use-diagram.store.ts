@@ -5,6 +5,7 @@ import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram
 import { SldSubscriptionStatus } from '../types/sld-subscription.type';
 import { TelemetryCurves } from '../types/telemetry-curves.type';
 import {
+  connectBroker,
   subscribeSLD,
   unsubscribeSLD,
 } from '../services/subscription-ti.service';
@@ -26,6 +27,7 @@ export interface DiagramStore extends DiagramData {
   resetDiagram: () => void;
   subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
+  connectBroker: () => void;
   subscriptionStatus: SldSubscriptionStatus;
 }
 
@@ -172,5 +174,9 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           isLoading: false,
         });
       });
+  },
+
+  connectBroker: () => {
+    Effect.runPromise(connectBroker()).then(console.log).catch(console.error);
   },
 }));

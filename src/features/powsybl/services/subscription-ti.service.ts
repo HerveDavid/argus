@@ -69,3 +69,12 @@ export const unsubscribeSLD = (id: string, sld_metadata: SldMetadata) =>
       new SubscriptionSLDError(id, 'No existed in channel map'),
     );
   });
+
+export const connectBroker = () =>
+  Effect.gen(function* () {
+    return yield* Effect.tryPromise({
+      try: () =>
+        invoke<SldSubscriptionResponse>('connect_broker'),
+      catch: (error) => console.error(error),
+    });
+  });

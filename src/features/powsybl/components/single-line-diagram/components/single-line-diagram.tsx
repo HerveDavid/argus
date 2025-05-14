@@ -28,6 +28,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     loadDiagram,
     subscribeDiagram,
     unsubscribeDiagram,
+    connectBroker,
   } = useDiagramStore();
 
   const [svgContent, setSvgContent] = useState<string | null>(null);
@@ -123,6 +124,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       setSvgContent(null);
     }
   }, [svgBlob]);
+
+  useEffect(() => {
+    connectBroker();
+  }, [svgContent]);
 
   // Vérifier que le SVG est bien chargé dans le DOM
   useEffect(() => {
