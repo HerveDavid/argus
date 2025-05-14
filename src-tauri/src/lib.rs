@@ -51,8 +51,8 @@ pub fn run() {
             get_voltage_levels,
             get_voltage_levels_by_id,
             get_paginated_voltage_levels,
-            get_voltage_levels_for_substation,
-            search_voltage_levels,
+            // get_voltage_levels_for_substation,
+            // search_voltage_levels,
             load_voltage_levels,
             // Diagrams
             get_single_line_diagram,

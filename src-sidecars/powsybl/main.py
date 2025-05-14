@@ -1,60 +1,63 @@
-import sys
-import asyncio
 import logging
-from domain.network import NetworkService
-from interfaces import (
-    zmq_server,
-    start_stdin_thread,
-    force_close_port,
-    check_port_in_use,
-)
+import asyncio
+import hypercorn.asyncio
+import hypercorn.config
+from quart import Quart
+
+from domain.network.services.network_service import NetworkService
+from interfaces.api.routes import register_api_routes
+from interfaces.sse.routes import register_sse_routes
 
 
-address = "tcp://localhost:5555"
+async def create_app():
+    """Factory function to create and initialize the application."""
+    # Create app
+    app = Quart(__name__)
+    app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024  # 500 Mo
 
-
-async def main():
-    """Main entry point for the ZMQ server with better error handling."""
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-    logger = logging.getLogger("main")
 
-    # Check if port is already in use
-    if await check_port_in_use(address):
-        logger.warning(f"Port is already in use: {address}")
-        if force_close_port(5555):
-            logger.info("Successfully closed existing process on port 5555")
-        else:
-            logger.error("Failed to close existing process")
-            return
-
-    # Create network service
+    # Initialize services
     network_service = NetworkService()
-    start_stdin_thread(network_service)
 
-    # Start ZMQ server
-    logger.info("Starting ZMQ server...")
-    try:
-        await zmq_server(network_service, bind_address=address)
-    except Exception as e:
-        logger.error(f"Error starting server: {e}")
-    finally:
-        logger.info("Application shutdown complete")
-        sys.exit(0)
+    # Try to load the last network
+    result = await network_service.load_last_network()
+    if result:
+        app.logger.warning(f"Could not load previous network: {result}")
+    else:
+        app.logger.info("Previous network loaded successfully")
+
+    # Clean up old network files
+    await network_service.cleanup_old_networks(max_files=5)
+
+    # Register all routes
+    register_sse_routes(app)
+    register_api_routes(app, network_service)
+
+    return app
 
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nServer shutting down gracefully...")
-    except Exception as e:
-        print(f"\nError: {e}")
-    finally:
-        # Ensure all ZMQ resources are cleaned up
-        import zmq
+    # Hypercorn configuration
+    config = hypercorn.config.Config()
+    config.h2_protocol = True
+    config.insecure_bind = ["0.0.0.0:8000"]
+    config.alpn_protocols = ["h2c", "http/1.1"]
+    config.read_timeout = 300
+    config.write_timeout = 300
+    config.request_max_size = 500 * 1024 * 1024  # 500 Mo
+    config.timeout_keep_alive = 600  # 10 minutes
+    config.worker_class = "asyncio"  # Use asyncio for stability
+    config.graceful_timeout = 300.0
+    config.keep_alive_timeout = 300.0
 
-        zmq.Context().term()
+    # Create and run app with modern asyncio approach
+    async def main():
+        app = await create_app()
+        await hypercorn.asyncio.serve(app, config)
+
+    asyncio.run(main())

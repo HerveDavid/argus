@@ -5,8 +5,14 @@ use uuid;
 
 #[derive(Debug, Error)]
 pub enum PowsyblError {
+    #[error("Server URL not configured")]
+    ServerUrlNotConfigured,
+
     #[error("API error: {0}")]
     ApiError(String),
+
+    #[error("Request failed: {0}")]
+    RequestError(#[from] tauri_plugin_http::reqwest::Error),
 
     #[error("Lock error")]
     LockError,

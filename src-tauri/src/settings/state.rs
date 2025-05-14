@@ -27,7 +27,7 @@ impl Default for SettingsState {
 
         Self {
             client: Arc::new(client),
-            server_url: None,
+            server_url: Some("http://localhost:2376".to_string()),
             zmq_client: Arc::new(zmq_client),
             zmq_url: Some("".to_string()),
         }
