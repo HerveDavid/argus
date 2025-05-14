@@ -35,6 +35,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             // Broker (nats)
             connect_broker,
+            disconnect_broker,
             // Sidecars
             start_sidecar,
             shutdown_sidecar,

@@ -6,6 +6,7 @@ import { SldSubscriptionStatus } from '../types/sld-subscription.type';
 import { TelemetryCurves } from '../types/telemetry-curves.type';
 import {
   connectBroker,
+  disconnectBroker,
   subscribeSLD,
   unsubscribeSLD,
 } from '../services/subscription-ti.service';
@@ -27,7 +28,12 @@ export interface DiagramStore extends DiagramData {
   resetDiagram: () => void;
   subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
-  connectBroker: (handler: (ti: Record<string, number>) => void) => void;
+  connectBroker: (
+    id: string,
+    handler: (ti: Record<string, number>) => void,
+  ) => void;
+  disconnectBroker: (id: string) => void;
+
   subscriptionStatus: SldSubscriptionStatus;
 }
 
@@ -176,8 +182,14 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       });
   },
 
-  connectBroker: (handler) => {
-    Effect.runPromise(connectBroker(handler))
+  connectBroker: (id, handler) => {
+    Effect.runPromise(connectBroker(id, handler))
+      .then(console.log)
+      .catch(console.error);
+  },
+
+  disconnectBroker: (id) => {
+    Effect.runPromise(disconnectBroker(id))
       .then(console.log)
       .catch(console.error);
   },

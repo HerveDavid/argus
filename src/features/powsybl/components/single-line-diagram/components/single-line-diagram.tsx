@@ -11,7 +11,6 @@ import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 // Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
-import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
 import { feeders_with_dynawo_id } from '../utils/mapping';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
@@ -26,9 +25,8 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     isLoading,
     error,
     loadDiagram,
-    subscribeDiagram,
-    unsubscribeDiagram,
     connectBroker,
+    disconnectBroker,
   } = useDiagramStore();
 
   const [svgContent, setSvgContent] = useState<string | null>(null);
@@ -145,7 +143,11 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       }
     };
 
-    connectBroker(mapper);
+    connectBroker(lineId, mapper);
+
+    return () => {
+      disconnectBroker(lineId);
+    };
   }, [[lineId, loadDiagram]]);
 
   // Vérifier que le SVG est bien chargé dans le DOM
