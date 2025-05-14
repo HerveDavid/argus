@@ -3,6 +3,7 @@ use futures::stream::StreamExt;
 use log::debug;
 use std::collections::HashMap;
 use tauri::{ipc::Channel, State};
+use tokio::sync::broadcast;
 
 use crate::{broker::errors::BrokerError, state::AppState};
 
@@ -27,6 +28,8 @@ pub async fn connect_broker(
     let mut stop_subscription = client.subscribe("stop").await?;
 
     let mut telemetry_values: HashMap<String, f64> = HashMap::new();
+    let (stop_tx, stop_rx) = broadcast::channel::<()>(1);
+    let mut stop_receiver = stop_rx;
 
     let task = tokio::spawn(async move {
         loop {
@@ -47,10 +50,14 @@ pub async fn connect_broker(
                 Some(msg) = stop_subscription.next() => {
                     if let Ok(payload) = std::str::from_utf8(&msg.payload) {
                         if payload == "stop" {
-                            println!("Message d'arrêt reçu. Arrêt du client.");
+                            debug!("Message d'arrêt reçu. Arrêt du client.");
                             break;
                         }
                     }
+                }
+                _ = stop_receiver.recv() => {
+                    debug!("Signal d'arrêt reçu. Arrêt du client.");
+                    break;
                 }
             }
         }
@@ -59,7 +66,10 @@ pub async fn connect_broker(
     let mut state_guard = state
         .try_write()
         .map_err(|e| BrokerError::LockError(e.to_string()))?;
-    state_guard.broker.channels.insert(substation_id, task);
+    state_guard
+        .broker
+        .channels
+        .insert(substation_id, (task, stop_tx));
 
     Ok(())
 }
@@ -72,6 +82,10 @@ pub async fn disconnect_broker(
     let mut state_guard = state
         .try_write()
         .map_err(|e| BrokerError::LockError(e.to_string()))?;
+
+    if let Some((_, stop_sender)) = state_guard.broker.channels.get(&substation_id) {
+        let _ = stop_sender.send(());
+    }
 
     state_guard.broker.channels.remove(&substation_id);
 
