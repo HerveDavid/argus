@@ -9,6 +9,7 @@ mod shared;
 mod sidecars;
 mod state;
 
+use broker::commands::*;
 use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
@@ -32,6 +33,8 @@ pub fn run() {
                 .build(),
         )
         .invoke_handler(tauri::generate_handler![
+            // Broker (nats)
+            connect_broker,
             // Sidecars
             start_sidecar,
             shutdown_sidecar,
