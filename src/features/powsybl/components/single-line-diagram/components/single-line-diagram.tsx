@@ -155,6 +155,18 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
         }}
+        onClick={(e) => {
+          if (contextMenu.visible) {
+            const target = e.target as Node;
+            const menuElement = document.querySelector('.context-menu');
+            const isClickInsideMenu =
+              menuElement && menuElement.contains(target);
+
+            if (!isClickInsideMenu) {
+              closeContextMenu();
+            }
+          }
+        }}
       >
         <div
           className="w-full h-full"
