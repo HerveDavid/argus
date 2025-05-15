@@ -163,9 +163,6 @@ pub fn search_voltage_levels(
 
             fields.iter().any(|field| match field.as_str() {
                 "id" => voltage_level.id.to_lowercase().contains(&query),
-                "name" => voltage_level.name.to_lowercase().contains(&query),
-                "substation_id" => voltage_level.substation_id.to_lowercase().contains(&query),
-                "topology_kind" => voltage_level.topology_kind.to_lowercase().contains(&query),
                 _ => false,
             })
         })

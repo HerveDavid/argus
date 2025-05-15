@@ -12,10 +12,12 @@ pub mod entities;
 pub mod errors;
 pub mod state;
 
+const ENDPOINT: &str = "tcp://localhost:4267";
+
 // Helper function to send ZMQ request
 async fn send_zmq_request(method: &str, params: Option<Value>) -> PowsyblResult<Value> {
     let mut socket = zeromq::ReqSocket::new();
-    socket.connect("tcp://localhost:5555").await?;
+    socket.connect(ENDPOINT).await?;
 
     // Generate a unique request ID
     let request_id = Uuid::new_v4().to_string();
@@ -30,7 +32,7 @@ async fn send_zmq_request(method: &str, params: Option<Value>) -> PowsyblResult<
     let request_str = serde_json::to_string(&request)?;
     socket.send(request_str.into()).await?;
 
-    // Receice a response
+    // Receive a response
     let response_msg = socket.recv().await?;
     let response_bytes = response_msg
         .get(0)

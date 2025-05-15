@@ -20,6 +20,14 @@ pub enum PowsyblError {
     #[error("Serde JSON error: {0}")]
     SerdeJsonError(#[from] serde_json::Error),
 
+    #[error("JSON parse error at {path}: {message}")]
+    SerdeJsonDetailedError {
+        message: String,
+        path: String,
+        line: Option<usize>,
+        column: Option<usize>,
+    },
+
     #[error("UTF-8 error: {0}")]
     Utf8Error(#[from] std::str::Utf8Error),
 

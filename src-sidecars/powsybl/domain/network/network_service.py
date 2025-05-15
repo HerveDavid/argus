@@ -361,6 +361,8 @@ class NetworkService:
 
                 result["voltage_levels"].append(vl_data)
 
+            print(result)
+
             return result, None
         except Exception as e:
             return None, f"Error retrieving voltage levels: {str(e)}"

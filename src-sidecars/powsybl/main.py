@@ -10,7 +10,7 @@ from interfaces import (
 )
 
 
-address = "tcp://localhost:5555"
+address = "tcp://localhost:4267"
 
 
 async def main():

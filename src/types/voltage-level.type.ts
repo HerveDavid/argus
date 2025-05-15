@@ -4,8 +4,8 @@ export interface VoltageLevel {
   low_voltage_limit: number | null;
   name: string;
   nominal_v: number;
-  substation_id: string;
-  topology_kind: string;
+  substation_id: string | null;
+  topology_kind: string | null;
 }
 
 export interface VoltageLevels {

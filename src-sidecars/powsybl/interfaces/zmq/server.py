@@ -188,7 +188,7 @@ def start_stdin_thread(network_service):
 
 
 # Alternative function to check if port is in use before starting
-async def check_port_in_use(address="tcp://localhost:5555"):
+async def check_port_in_use(address="tcp://localhost:4267"):
     """Check if the port is already in use."""
     context = zmq.Context()
     socket = context.socket(zmq.REP)

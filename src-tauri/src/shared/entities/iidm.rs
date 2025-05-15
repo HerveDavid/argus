@@ -16,12 +16,8 @@ pub struct Substations {
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct VoltageLevel {
-    pub high_voltage_limit: Option<f64>,
     pub id: String,
-    pub low_voltage_limit: Option<f64>,
-    pub name: String,
     pub nominal_v: f64,
-    pub substation_id: String,
     pub topology_kind: String,
 }
 
