@@ -92,6 +92,11 @@ pub async fn disconnect_broker(
     Ok(())
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub async fn event_broker() -> BrokerResult<()> {
+    Ok(())
+}
+
 fn process_telemetry_message(msg: Message, values: &mut HashMap<String, f64>) {
     if let Ok(payload) = std::str::from_utf8(&msg.payload) {
         if let Some(index) = payload.find(':') {
