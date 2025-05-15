@@ -1,0 +1,9 @@
+[package]
+name = "nats-mock"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-nats = "0.40.0"
+rand = "0.9.1"
+tokio = { version = "1.45.0", features = ["full"] }

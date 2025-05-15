@@ -8,10 +8,8 @@ import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
 import { useDiagramEffects } from '../hooks/use-diagram-effects';
 import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 
-// Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
-import { TelemetryCurves } from '@/features/powsybl/types/telemetry-curves.type';
 import { feeders_with_dynawo_id } from '../utils/mapping';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
 
@@ -26,15 +24,14 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     isLoading,
     error,
     loadDiagram,
-    subscribeDiagram,
-    unsubscribeDiagram,
+    connectBroker,
+    disconnectBroker,
   } = useDiagramStore();
 
   const [svgContent, setSvgContent] = useState<string | null>(null);
   const [isSvgReady, setIsSvgReady] = useState(false);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fonction pour basculer l'état d'un disjoncteur avec effet de clignotement
   const toggleBreaker = (breakerId: string, isClosed: boolean) => {
     if (!svgContainerRef.current) return;
 
@@ -64,14 +61,12 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     setContextMenu((prev) => ({ ...prev, visible: false }));
   };
 
-  // Utiliser les hooks personnalisés
   const { contextMenu, handleContextMenu, closeContextMenu, setContextMenu } =
     useContextMenu(svgContainerRef);
 
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
   useSvgManipulation(svgContent, svgContainerRef);
 
-  // N'utiliser le hook de zoom que lorsque le SVG est prêt
   useSvgZoomPan(isSvgReady ? svgContent : null, svgContainerRef);
 
   const { applyBlinkEffect } = useDiagramEffects(
@@ -81,18 +76,21 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     toggleBreaker,
   );
 
-  // Charger le diagramme lors du montage et quand lineId change
   useEffect(() => {
-    const mapper = (tc: TelemetryCurves) => {
-      for (const dynawoId in tc.curves.values) {
-        const id = feeders_with_dynawo_id.find((value) =>
-          dynawoId.includes(value.dynawo_id),
+    loadDiagram(lineId);
+  }, [lineId]);
+
+  useEffect(() => {
+    const mapper = (tc: Record<string, number>) => {
+      for (const [id, value] of Object.entries(tc)) {
+        const id_finded = feeders_with_dynawo_id.find((val) =>
+          id.includes(val.dynawo_id),
         );
 
-        if (id?.id) {
+        if (id_finded) {
           const tm: TeleInformation = {
             ti: 'TM',
-            data: { id: id.id, value: tc.curves.values[dynawoId] },
+            data: { id: id_finded.id, value },
           };
           console.log('TM: ', tm);
           handleUpdateMessage(tm);
@@ -102,17 +100,12 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
       }
     };
 
-    const subscribe = async () => {
-      await loadDiagram(lineId);
-      subscribeDiagram(mapper);
-    };
-
-    subscribe();
+    connectBroker(lineId, mapper);
 
     return () => {
-      unsubscribeDiagram();
+      disconnectBroker(lineId);
     };
-  }, [lineId, loadDiagram]);
+  }, [[lineId]]);
 
   useEffect(() => {
     if (svgBlob) {
@@ -124,10 +117,8 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     }
   }, [svgBlob]);
 
-  // Vérifier que le SVG est bien chargé dans le DOM
   useEffect(() => {
     if (svgContent && svgContainerRef.current) {
-      // Utiliser requestAnimationFrame pour s'assurer que le DOM est mis à jour
       requestAnimationFrame(() => {
         const svg = svgContainerRef.current?.querySelector('svg');
         if (svg) {
@@ -163,6 +154,18 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+        }}
+        onClick={(e) => {
+          if (contextMenu.visible) {
+            const target = e.target as Node;
+            const menuElement = document.querySelector('.context-menu');
+            const isClickInsideMenu =
+              menuElement && menuElement.contains(target);
+
+            if (!isClickInsideMenu) {
+              closeContextMenu();
+            }
+          }
         }}
       >
         <div

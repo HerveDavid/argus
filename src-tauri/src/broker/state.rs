@@ -1,17 +1,12 @@
-use std::sync::Arc;
+use std::collections::HashMap;
 
-use zeromq::Socket;
-
+#[derive(Default)]
 pub struct BrokerState {
-    pub context: Arc<zeromq::RepSocket>,
+    pub channels: HashMap<
+        String,
+        (
+            tokio::task::JoinHandle<()>,
+            tokio::sync::broadcast::Sender<()>,
+        ),
+    >,
 }
-
-// impl Default for BrokerState {
-//     fn default() -> Self {
-//         let mut socket = zeromq::RepSocket::new();
-//         socket.bind("tcp://localhost:5555").await.unwrap();
-//         Self {
-//             context: Arc::new(socket),
-//         }
-//     }
-// }

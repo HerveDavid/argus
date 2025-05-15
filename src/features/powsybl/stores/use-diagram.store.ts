@@ -5,6 +5,8 @@ import { getSingleLineDiagramWithMetadata } from '../api/get-single-line-diagram
 import { SldSubscriptionStatus } from '../types/sld-subscription.type';
 import { TelemetryCurves } from '../types/telemetry-curves.type';
 import {
+  connectBroker,
+  disconnectBroker,
   subscribeSLD,
   unsubscribeSLD,
 } from '../services/subscription-ti.service';
@@ -26,6 +28,12 @@ export interface DiagramStore extends DiagramData {
   resetDiagram: () => void;
   subscribeDiagram: (handler: (tc: TelemetryCurves) => void) => void;
   unsubscribeDiagram: () => void;
+  connectBroker: (
+    id: string,
+    handler: (ti: Record<string, number>) => void,
+  ) => void;
+  disconnectBroker: (id: string) => void;
+
   subscriptionStatus: SldSubscriptionStatus;
 }
 
@@ -73,6 +81,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         currentLineId: lineId,
       });
     } catch (error) {
+      console.error(error);
       set({
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',
@@ -172,5 +181,17 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
           isLoading: false,
         });
       });
+  },
+
+  connectBroker: (id, handler) => {
+    Effect.runPromise(connectBroker(id, handler))
+      .then(console.log)
+      .catch(console.error);
+  },
+
+  disconnectBroker: (id) => {
+    Effect.runPromise(disconnectBroker(id))
+      .then(console.log)
+      .catch(console.error);
   },
 }));
