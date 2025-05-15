@@ -81,6 +81,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
         currentLineId: lineId,
       });
     } catch (error) {
+      console.error(error);
       set({
         error:
           error instanceof Error ? error.message : 'Unknown error occurred',

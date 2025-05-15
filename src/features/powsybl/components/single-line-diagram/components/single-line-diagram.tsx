@@ -8,7 +8,6 @@ import { useSvgZoomPan } from '../hooks/use-svg-zoom-pan';
 import { useDiagramEffects } from '../hooks/use-diagram-effects';
 import { SingleLineDiagramProps } from '../types/single-line-diagram.type';
 
-// Import uniquement des styles d'animation
 import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
 import { feeders_with_dynawo_id } from '../utils/mapping';
@@ -33,7 +32,6 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   const [isSvgReady, setIsSvgReady] = useState(false);
   const svgContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fonction pour basculer l'état d'un disjoncteur avec effet de clignotement
   const toggleBreaker = (breakerId: string, isClosed: boolean) => {
     if (!svgContainerRef.current) return;
 
@@ -63,14 +61,12 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     setContextMenu((prev) => ({ ...prev, visible: false }));
   };
 
-  // Utiliser les hooks personnalisés
   const { contextMenu, handleContextMenu, closeContextMenu, setContextMenu } =
     useContextMenu(svgContainerRef);
 
   const { handleUpdateMessage } = useSvgUpdate(svgContent, svgContainerRef);
   useSvgManipulation(svgContent, svgContainerRef);
 
-  // N'utiliser le hook de zoom que lorsque le SVG est prêt
   useSvgZoomPan(isSvgReady ? svgContent : null, svgContainerRef);
 
   const { applyBlinkEffect } = useDiagramEffects(
@@ -79,6 +75,10 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     handleContextMenu,
     toggleBreaker,
   );
+
+  useEffect(() => {
+    loadDiagram(lineId);
+  }, [lineId]);
 
   useEffect(() => {
     const mapper = (tc: Record<string, number>) => {
@@ -105,7 +105,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     return () => {
       disconnectBroker(lineId);
     };
-  }, [[lineId, loadDiagram]]);
+  }, [[lineId]]);
 
   useEffect(() => {
     if (svgBlob) {
@@ -117,10 +117,8 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     }
   }, [svgBlob]);
 
-  // Vérifier que le SVG est bien chargé dans le DOM
   useEffect(() => {
     if (svgContent && svgContainerRef.current) {
-      // Utiliser requestAnimationFrame pour s'assurer que le DOM est mis à jour
       requestAnimationFrame(() => {
         const svg = svgContainerRef.current?.querySelector('svg');
         if (svg) {
