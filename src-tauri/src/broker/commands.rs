@@ -100,8 +100,10 @@ pub async fn event_broker() -> BrokerResult<()> {
 fn process_telemetry_message(msg: Message, values: &mut HashMap<String, f64>) {
     if let Ok(payload) = std::str::from_utf8(&msg.payload) {
         if let Some(index) = payload.find(':') {
+            // Expected format is {"ID": VALUE}
             let (id, value_str) = payload.split_at(index);
-            let value_str = &value_str[1..];
+            let id = &id[2 .. id.len() - 1];
+            let value_str = &value_str[2 .. value_str.len() - 1];
 
             if let Ok(value) = value_str.parse::<f64>() {
                 values.insert(id.to_string(), value);
