@@ -348,18 +348,13 @@ class NetworkService:
                 vl_data = {
                     "id": vl_id,
                     "name": vl.get("name", ""),
-                    "substation_id": vl.get("substation_id", ""),
                     "nominal_v": vl.get("nominal_v", 0),
-                    "high_voltage_limit": vl.get("high_voltage_limit", 0),
-                    "low_voltage_limit": vl.get("low_voltage_limit", 0),
-                    "topology_kind": vl.get("topology_kind", ""),
+                    "topology_kind": vl.get("topology_kind", "NODE_BREAKER"),
                 }
 
-                # Add optional attributes if available
-                if "fictitious" in vl:
-                    vl_data["fictitious"] = bool(vl["fictitious"])
-
                 result["voltage_levels"].append(vl_data)
+
+            print(result)
 
             return result, None
         except Exception as e:

@@ -41,6 +41,34 @@ defaultVoltageLevels.set('MQIS P6', {
   substation_id: 'MQIS',
   topology_kind: '',
 });
+defaultVoltageLevels.set('MQIS P7', {
+  high_voltage_limit: 245,
+  id: 'MQIS P7',
+  low_voltage_limit: 220,
+  name: '',
+  nominal_v: 225,
+  substation_id: 'MQIS',
+  topology_kind: '',
+});
+defaultVoltageLevels.set('MQIS P3', {
+  high_voltage_limit: 245,
+  id: 'MQIS P3',
+  low_voltage_limit: 220,
+  name: '',
+  nominal_v: 225,
+  substation_id: 'MQIS',
+  topology_kind: '',
+});
+defaultVoltageLevels.set('MQIS P1', {
+  high_voltage_limit: 245,
+  id: 'MQIS P1',
+  low_voltage_limit: 220,
+  name: '',
+  nominal_v: 225,
+  substation_id: 'MQIS',
+  topology_kind: '',
+});
+
 
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   substations: defaultSubstations,
