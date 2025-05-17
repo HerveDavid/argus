@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 
 use super::errors::{SettingResult, SettingsError};
-use crate::{shared::entities::dynawo::GameMasterOutputs, state::AppState};
+use crate::{shared::entities::dynawo::GameMasterOutput, state::AppState};
 use serde::Serialize;
 use tauri::State;
 use toml::Value;
@@ -67,7 +67,7 @@ pub async fn load_config_file(
     let content = fs::read_to_string(&outputs_file_abs_path)
         .map_err(|e| SettingsError::FileRead(e.to_string()))?;
 
-    let game_master_outputs: GameMasterOutputs = serde_json::from_str(&content)
+    let game_master_outputs: Vec<GameMasterOutput> = serde_json::from_str(&content)
         .map_err(|e| SettingsError::Deserialization(e.to_string()))?;
 
     app_state.settings.game_master_outputs = Some(game_master_outputs);

@@ -24,8 +24,3 @@ pub struct GameMasterOutput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unit: Option<String>,
 }
-
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct GameMasterOutputs {
-    pub data: Vec<GameMasterOutput>,
-}
