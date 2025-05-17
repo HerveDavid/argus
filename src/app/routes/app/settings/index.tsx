@@ -1,24 +1,21 @@
 import EditorLayout from '@/components/layouts/editor';
 import { useState } from 'react';
-import ProxySettings from './proxy-settings';
 import { Button } from '@/components/ui/button';
 import { Link } from '@/components/ui/link';
 import { paths } from '@/config/paths';
-import ServerUrlSettings from './connection-settings';
+
 import ProfileSettings from './profile-settings';
+import ConfigurationSettings from './configuration-settings';
+
 import {
   ArrowLeft,
   User,
-  Bell,
-  Link2,
-  Globe,
   ChevronRight,
   Settings as SettingsIcon,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ZmqUrlSettings from './zmq-connection-settings';
 
 const TABS = [
   {
@@ -28,29 +25,10 @@ const TABS = [
     description: 'Manage your personal settings and preferences',
   },
   {
-    id: 'notifications',
-    label: 'Notifications',
-    icon: <Bell size={18} />,
-    badge: '4',
-    description: 'Configure how and when you receive notifications',
-  },
-  {
-    id: 'connections',
-    label: 'Connections',
-    icon: <Link2 size={18} />,
-    description: 'Manage server and API connections',
-  },
-  {
-    id: 'zmq',
-    label: 'Zmq',
-    icon: <Link2 size={18} />,
-    description: 'Manage server and API connections',
-  },
-  {
-    id: 'proxy',
-    label: 'Proxy',
-    icon: <Globe size={18} />,
-    description: 'Configure proxy settings for network connections',
+    id: 'config',
+    label: 'Configuration',
+    icon: <User size={18} />,
+    description: 'Manage simulation settings',
   },
 ];
 
@@ -95,11 +73,10 @@ const HomeSettings = () => {
                     <Button
                       key={tab.id}
                       variant={activeTab === tab.id ? 'secondary' : 'ghost'}
-                      className={`w-full justify-start gap-3 px-3 font-medium ${
-                        activeTab === tab.id
-                          ? 'bg-secondary text-secondary-foreground'
-                          : ''
-                      }`}
+                      className={`w-full justify-start gap-3 px-3 font-medium ${activeTab === tab.id
+                        ? 'bg-secondary text-secondary-foreground'
+                        : ''
+                        }`}
                       onClick={() => setActiveTab(tab.id)}
                     >
                       <span className="flex items-center gap-2">
@@ -112,9 +89,8 @@ const HomeSettings = () => {
                         )}
                         <ChevronRight
                           size={16}
-                          className={`ml-2 text-muted-foreground transition-transform ${
-                            activeTab === tab.id ? 'rotate-90' : ''
-                          }`}
+                          className={`ml-2 text-muted-foreground transition-transform ${activeTab === tab.id ? 'rotate-90' : ''
+                            }`}
                         />
                       </div>
                     </Button>
@@ -171,17 +147,8 @@ const HomeSettings = () => {
                 </div>
 
                 <div className="mt-4 w-full h-full">
-                  {activeTab === 'connections' && <ServerUrlSettings />}
-                  {activeTab === 'proxy' && <ProxySettings />}
-                  {activeTab == 'zmq' && <ZmqUrlSettings />}
                   {activeTab === 'profile' && <ProfileSettings />}
-                  {activeTab === 'notifications' && (
-                    <div className="p-4 rounded-lg border border-border bg-card shadow-sm">
-                      <p className="text-muted-foreground text-center py-12">
-                        Notifications settings will be implemented soon
-                      </p>
-                    </div>
-                  )}
+                  {activeTab === 'config' && <ConfigurationSettings />}
                 </div>
               </div>
             </div>
