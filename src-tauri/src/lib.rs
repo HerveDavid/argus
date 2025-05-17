@@ -39,6 +39,7 @@ pub fn run() {
             set_zmq_url,
             set_zmq_subscription,
             get_zmq_url,
+            load_config_file,
             // Loaders
             load_client,
             // Substations

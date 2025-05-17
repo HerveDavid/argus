@@ -1,3 +1,4 @@
+mod config;
 mod proxy;
 mod url;
 mod zmq;
