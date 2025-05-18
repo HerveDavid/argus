@@ -9,31 +9,27 @@ CREATE TABLE IF NOT EXISTS substations (
 CREATE TABLE IF NOT EXISTS voltage_levels (
     id TEXT PRIMARY KEY,
     nominal_v FLOAT NOT NULL,
-    topology_kind TEXT NOT NULL,
+    topology_kind TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS feeder_infos (
     id TEXT PRIMARY KEY,
     component_type TEXT NOT NULL,
     equipment_id TEXT NOT NULL,
-    side TEXT,
+    side TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sld_metadata (
-    id TEXT PRIMARY KEY AUTO_INCREMENT,
+    id TEXT PRIMARY KEY,
     feeder_info_id TEXT NOT NULL,
     parent_id TEXT NOT NULL,
     parent_type TEXT NOT NULL CHECK (parent_type IN ('voltage_level', 'substation')),
-    FOREIGN KEY (feeder_info_id) REFERENCES feeder_infos(id),
-    FOREIGN KEY (parent_id) REFERENCES voltage_levels(id) 
-        WHEN parent_type = 'voltage_level'
-        ELSE REFERENCES substations(id)
+    FOREIGN KEY (feeder_info_id) REFERENCES feeder_infos(id)
 );
 
 -- Création d'un index pour optimiser les recherches
-CREATE INDEX IF NOT EXISTS idx_metadata_parent 
-ON metadata(parent_id, parent_type);
-
+CREATE INDEX IF NOT EXISTS idx_metadata_parent
+ON sld_metadata(parent_id, parent_type);
 
 CREATE TABLE IF NOT EXISTS dynawo_game_master_outputs (
     id TEXT PRIMARY KEY,
@@ -42,5 +38,5 @@ CREATE TABLE IF NOT EXISTS dynawo_game_master_outputs (
     equipment_id TEXT,
     side TEXT,
     component_type TEXT,
-    unit TEXT,
+    unit TEXT
 );
