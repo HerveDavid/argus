@@ -10,7 +10,10 @@ mod shared;
 mod sidecars;
 mod state;
 
-use broker::commands::*;
+use broker::{
+    commands::*,
+    state::{BrokerState, BrokerStateInner},
+};
 use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
@@ -73,10 +76,15 @@ pub fn run() {
             spawn_and_monitor_sidecar(app_handle).ok();
 
             tauri::async_runtime::block_on(async move {
-                let state = AppStateInner::new(&app.handle())
+                let app_state = AppStateInner::new(&app.handle())
                     .await
                     .expect("Failed to initialize app state");
-                app.manage(state);
+                app.manage(app_state);
+
+                let broker_state = BrokerStateInner::new()
+                    .await
+                    .expect("Failed to initialize broker state");
+                app.manage(BrokerState::new(broker_state));
             });
 
             Ok(())
