@@ -43,6 +43,7 @@
     "@tauri-apps/plugin-log": "~2",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-shell": "~2.2.0",
+    "@tauri-apps/plugin-sql": "~2",
     "@tauri-apps/plugin-store": "~2",
     "@types/three": "^0.173.0",
     "class-variance-authority": "^0.7.1",

@@ -3,6 +3,7 @@ use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
 mod broker;
+mod database;
 mod powsybl;
 mod settings;
 mod shared;
@@ -13,11 +14,12 @@ use broker::commands::*;
 use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
-use state::AppState;
+use state::AppStateInner;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
@@ -63,14 +65,19 @@ pub fn run() {
             unsubscribe_single_line_diagram,
         ])
         .setup(|app| {
-            app.manage(AppState::default());
-
             // Store the initial sidecar process in the app state
             app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
 
             let app_handle = app.handle().clone();
             // Spawn the Python sidecar on startup
             spawn_and_monitor_sidecar(app_handle).ok();
+
+            tauri::async_runtime::block_on(async move {
+                let state = AppStateInner::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize app state");
+                app.manage(state);
+            });
 
             Ok(())
         })

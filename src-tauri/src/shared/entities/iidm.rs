@@ -2,10 +2,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Substation {
-    pub country: String,
-    pub geo_tags: String,
     pub id: String,
     pub name: String,
+    pub country: String,
+    pub geo_tags: String,
     pub tso: String,
 }
 

@@ -1,12 +1,11 @@
 use std::collections::HashMap;
 
+pub type Task = (
+    tokio::task::JoinHandle<()>,
+    tokio::sync::broadcast::Sender<()>,
+);
+
 #[derive(Default)]
 pub struct BrokerState {
-    pub channels: HashMap<
-        String,
-        (
-            tokio::task::JoinHandle<()>,
-            tokio::sync::broadcast::Sender<()>,
-        ),
-    >,
+    pub channels: HashMap<String, Task>,
 }
