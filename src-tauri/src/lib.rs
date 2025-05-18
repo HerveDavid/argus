@@ -1,3 +1,4 @@
+use database::{DatabaseInner, DatabaseState};
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
@@ -81,6 +82,13 @@ pub fn run() {
                     .expect("Failed to initialize app state");
                 app.manage(app_state);
 
+                // Database state
+                let database_state = DatabaseInner::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize database state");
+                app.manage(DatabaseState::new(database_state));
+
+                // Broker state
                 let broker_state = BrokerStateInner::new()
                     .await
                     .expect("Failed to initialize broker state");
