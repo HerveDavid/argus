@@ -10,6 +10,7 @@ use crate::{broker::errors::BrokerError, state::AppState};
 use super::errors::BrokerResult;
 
 const ADDRESS: &str = "nats://localhost:4222";
+const TOPIC: &str = "GameMaster";
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn connect_broker(
@@ -20,9 +21,9 @@ pub async fn connect_broker(
     let client = async_nats::connect(ADDRESS).await?;
 
     let mut telemetry_subscription = client
-        .subscribe(format!("GameMaster.{}", substation_id))
+        .subscribe(format!("{}.{}", TOPIC, substation_id))
         .await?;
-    debug!("Subscribe to topic 'GameMaster.{}'", substation_id);
+    debug!("Subscribe to topic '{}.{}'", TOPIC, substation_id);
     let mut time_subscription = client.subscribe("time").await?;
 
     let mut stop_subscription = client.subscribe("stop").await?;
@@ -102,7 +103,7 @@ fn process_telemetry_message(msg: Message, values: &mut HashMap<String, f64>) {
         if let Some(index) = payload.find(':') {
             // Expected format is {"ID": VALUE}
             let (id, value_str) = payload.split_at(index);
-            let id = &id[2..id.len() - 1];
+            let id = &id;
             let value_str = &value_str[2..value_str.len() - 1];
 
             if let Ok(value) = value_str.parse::<f64>() {

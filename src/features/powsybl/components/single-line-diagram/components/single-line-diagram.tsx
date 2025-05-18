@@ -82,6 +82,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   useEffect(() => {
     const mapper = (tc: Record<string, number>) => {
+      console.log(tc)
       for (const [id, value] of Object.entries(tc)) {
         const id_finded = feeders_with_dynawo_id.find((val) =>
           id.includes(val.dynawo_id),
