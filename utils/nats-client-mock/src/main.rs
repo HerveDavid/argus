@@ -23,7 +23,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Stockage des dernières valeurs de télémétrie
     let mut telemetry_values: HashMap<String, f64> = HashMap::new();
-    let mut last_time: u64 = 0;
+    let mut last_time: f64 = 0.0;
     let start_time = Instant::now();
 
     println!("En attente de messages...");
@@ -35,7 +35,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
             Some(msg) = time_subscription.next() => {
                 if let Ok(time_str) = std::str::from_utf8(&msg.payload) {
-                    if let Ok(time) = time_str.parse::<u64>() {
+                    if let Ok(time) = time_str.parse::<f64>() {
                         last_time = time;
                         println!("\nTemps reçu: {}", time);
 

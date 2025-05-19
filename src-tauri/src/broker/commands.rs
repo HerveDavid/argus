@@ -39,7 +39,7 @@ pub async fn connect_broker(
                 }
                 Some(msg) = time_subscription.next() => {
                     if let Ok(time_str) = std::str::from_utf8(&msg.payload) {
-                        if let Ok(_) = time_str.parse::<u64>() {
+                        if let Ok(time_float) = time_str.parse::<f64>() {
 
                             if !telemetry_values.is_empty() {
                                 channel.send(telemetry_values.clone()).unwrap();
