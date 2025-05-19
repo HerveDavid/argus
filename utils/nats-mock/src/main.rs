@@ -122,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             values.insert(id.to_string(), value);
 
-            let message = format!("{{{}: {}}}", id, value);
+            let message = format!("{{\"{}\": {}}}", id, value);
 
             let subject = "GameMaster.MQIS"; // All ID seem to come from the MQIS substation
 
