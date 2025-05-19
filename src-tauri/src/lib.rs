@@ -48,7 +48,10 @@ pub fn run() {
             load_config_file,
             // Loaders
             load_client,
-            load_game_master_outputs_in_db, // Substations
+            load_game_master_outputs_in_db,
+            load_iidm_file,
+            upload_iidm,
+            // Substations
             get_substations,
             get_substation_by_id,
             get_paginated_substations,

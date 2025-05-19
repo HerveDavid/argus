@@ -13,7 +13,6 @@ use crate::{
         },
         utils::InsertExt,
     },
-    state::AppState,
 };
 use serde::Serialize;
 use tauri::State;
@@ -26,15 +25,9 @@ pub struct ConfigResponse {
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_config_file(
-    // state: State<'_, AppState>,
     state: State<'_, DatabaseState>,
     config_path: String,
 ) -> SettingResult<ConfigResponse> {
-    // Lock the state with error handling
-    // let mut app_state = state
-    //     .write()
-    //     .map_err(|e| SettingsError::StateLock(e.to_string()))?;
-
     if config_path.is_empty() {
         return Err(SettingsError::InvalidPath("Config path is empty".into()));
     }
@@ -78,12 +71,6 @@ pub async fn load_config_file(
         ));
     }
 
-    let content = fs::read_to_string(&outputs_file_abs_path)
-        .map_err(|e| SettingsError::FileRead(e.to_string()))?;
-
-    let game_master_outputs: Vec<GameMasterOutput> = serde_json::from_str(&content)
-        .map_err(|e| SettingsError::Deserialization(e.to_string()))?;
-
     let config = serde_json::json!({
        "dynawo_game_master_outputs_file": outputs_file_abs_path
     });
@@ -91,11 +78,33 @@ pub async fn load_config_file(
     let state = state.lock().await;
     save_setting(&state.pool, "config", &config).await?;
 
-    if let Some(theme) = get_setting(&state.pool, "config").await? {
-        println!("Theme mode: {}", theme);
+    Ok(ConfigResponse {
+        status: "configured".into(),
+    })
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_iidm_file(
+    state: State<'_, DatabaseState>,
+    iidm_path: String,
+) -> SettingResult<ConfigResponse> {
+    if iidm_path.is_empty() {
+        return Err(SettingsError::InvalidPath("IIDM path is empty".into()));
     }
 
-    // app_state.settings.game_master_outputs = Some(game_master_outputs);
+    let config_path = Path::new(&iidm_path);
+    if !config_path.exists() {
+        return Err(SettingsError::FileNotFound(
+            config_path.to_string_lossy().to_string(),
+        ));
+    }
+
+    let config = serde_json::json!({
+       "iidm_path": config_path
+    });
+
+    let state = state.lock().await;
+    save_setting(&state.pool, "iidm", &config).await?;
 
     Ok(ConfigResponse {
         status: "configured".into(),
@@ -121,12 +130,26 @@ pub async fn load_substations_in_db(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_game_master_outputs_in_db(
     db_state: State<'_, DatabaseState>,
-    game_master_outputs: Vec<GameMasterOutput>,
-) -> SettingResult<()> {
+) -> SettingResult<ConfigResponse> {
     let state = db_state.lock().await;
-    game_master_outputs.insert(&state.pool).await?;
+    if let Some(config) = get_setting(&state.pool, "config").await? {
+        let path = config["dynawo_game_master_outputs_file"].as_str().unwrap();
+        let content =
+            fs::read_to_string(path).map_err(|e| SettingsError::FileRead(e.to_string()))?;
 
-    Ok(())
+        let game_master_outputs: Vec<GameMasterOutput> = serde_json::from_str(&content)
+            .map_err(|e| SettingsError::Deserialization(e.to_string()))?;
+
+        game_master_outputs.insert(&state.pool).await?;
+
+        return Ok(ConfigResponse {
+            status: "configued".to_string(),
+        });
+    } else {
+        return Ok(ConfigResponse {
+            status: "no file yet".to_string(),
+        });
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]

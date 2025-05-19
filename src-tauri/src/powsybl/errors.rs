@@ -39,6 +39,9 @@ pub enum PowsyblError {
 
     #[error("UUID error: {0}")]
     UuidError(#[from] uuid::Error),
+
+    #[error("Sqlite error error: {0}")]
+    Sqlite(#[from] sqlx::Error),
 }
 
 // Implement Serialize for PowsyblError for Tauri command compatibility

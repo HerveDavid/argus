@@ -40,3 +40,8 @@ CREATE TABLE IF NOT EXISTS dynawo_game_master_outputs (
     component_type TEXT,
     unit TEXT
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value JSON NOT NULL
+);

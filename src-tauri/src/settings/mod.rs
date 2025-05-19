@@ -12,7 +12,7 @@ pub mod entities;
 pub mod errors;
 pub mod state;
 
-async fn save_setting(pool: &Pool<Sqlite>, key: &str, value: &Value) -> SettingResult<()> {
+pub async fn save_setting(pool: &Pool<Sqlite>, key: &str, value: &Value) -> SettingResult<()> {
     let json_str = value.to_string();
 
     sqlx::query(
@@ -28,7 +28,7 @@ async fn save_setting(pool: &Pool<Sqlite>, key: &str, value: &Value) -> SettingR
     Ok(())
 }
 
-async fn get_setting(pool: &Pool<Sqlite>, key: &str) -> SettingResult<Option<Value>> {
+pub async fn get_setting(pool: &Pool<Sqlite>, key: &str) -> SettingResult<Option<Value>> {
     let result = sqlx::query_as::<_, (String,)>("SELECT value FROM settings WHERE key = ?")
         .bind(key)
         .fetch_optional(pool)
@@ -37,7 +37,7 @@ async fn get_setting(pool: &Pool<Sqlite>, key: &str) -> SettingResult<Option<Val
     Ok(result.map(|(json_str,)| serde_json::from_str(&json_str).unwrap()))
 }
 
-async fn get_setting_value(
+pub async fn get_setting_value(
     pool: &Pool<Sqlite>,
     key: &str,
     path: &str,
@@ -58,7 +58,7 @@ async fn get_setting_value(
     }))
 }
 
-async fn update_setting_value(
+pub async fn update_setting_value(
     pool: &Pool<Sqlite>,
     key: &str,
     path: &str,
@@ -78,7 +78,7 @@ async fn update_setting_value(
     Ok(())
 }
 
-async fn merge_setting(pool: &Pool<Sqlite>, key: &str, updates: &Value) -> SettingResult<()> {
+pub async fn merge_setting(pool: &Pool<Sqlite>, key: &str, updates: &Value) -> SettingResult<()> {
     let existing = get_setting(pool, key).await?;
 
     let final_value = match existing {
@@ -94,7 +94,7 @@ async fn merge_setting(pool: &Pool<Sqlite>, key: &str, updates: &Value) -> Setti
     Ok(())
 }
 
-fn merge_json(target: &mut Value, source: &Value) {
+pub fn merge_json(target: &mut Value, source: &Value) {
     if let (Some(target_obj), Some(source_obj)) = (target.as_object_mut(), source.as_object()) {
         for (key, value) in source_obj {
             if !target_obj.contains_key(key) {
@@ -108,7 +108,11 @@ fn merge_json(target: &mut Value, source: &Value) {
     }
 }
 
-async fn remove_setting_property(pool: &Pool<Sqlite>, key: &str, path: &str) -> SettingResult<()> {
+pub async fn remove_setting_property(
+    pool: &Pool<Sqlite>,
+    key: &str,
+    path: &str,
+) -> SettingResult<()> {
     sqlx::query(
         "UPDATE settings 
          SET value = json_remove(value, ?) 
@@ -122,7 +126,7 @@ async fn remove_setting_property(pool: &Pool<Sqlite>, key: &str, path: &str) -> 
     Ok(())
 }
 
-async fn get_all_setting_keys(pool: &Pool<Sqlite>) -> SettingResult<Vec<String>> {
+pub async fn get_all_setting_keys(pool: &Pool<Sqlite>) -> SettingResult<Vec<String>> {
     let rows = sqlx::query_as::<_, (String,)>("SELECT key FROM settings")
         .fetch_all(pool)
         .await?;
