@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import EditorLayout from '@/components/layouts/editor';
 import { useSubstationDetails } from '@/features/powsybl/hooks/use-substation-details';
 import { SubstationViewer } from '@/features/powsybl/components/single-line-diagram/components/substation-viewer';
@@ -8,10 +8,13 @@ import { useParams } from 'react-router';
 import { Substation } from '@/types/substation.type';
 import { useVoltageLevelDetails } from '@/features/powsybl/hooks/use-voltage-level-details';
 import { VoltageLevel } from '@/types/voltage-level.type';
+import { Commands } from '@/features/powsybl/components/commands';
+import { useDiagramStore } from '@/features/powsybl/stores/use-diagram.store';
 // Main component
 const StateView = () => {
   // Params route
   const { substationId, type } = useParams();
+  const { loadDiagram } = useDiagramStore();
 
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
@@ -33,7 +36,11 @@ const StateView = () => {
     {
       id: 'commands',
       label: 'Commands',
-      content: <div className="p-4">Commands</div>,
+      content: (
+        <div className="h-full w-full">
+          <Commands />
+        </div>
+      ),
     },
     {
       id: 'logbook',
@@ -41,6 +48,12 @@ const StateView = () => {
       content: <div className="p-4">Logbook</div>,
     },
   ];
+
+  useEffect(() => {
+    if (substationId) {
+      loadDiagram(substationId);
+    }
+  }, [substationId]);
 
   return (
     <EditorLayout>
