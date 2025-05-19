@@ -1,7 +1,17 @@
 use std::{fs, path::Path};
 
 use super::errors::{SettingResult, SettingsError};
-use crate::{shared::entities::dynawo::GameMasterOutput, state::AppState};
+use crate::{
+    database::DatabaseState,
+    shared::{
+        entities::{
+            dynawo::GameMasterOutput,
+            iidm::{Substation, VoltageLevel},
+        },
+        utils::InsertExt,
+    },
+    state::AppState,
+};
 use serde::Serialize;
 use tauri::State;
 use toml::Value;
@@ -75,4 +85,39 @@ pub async fn load_config_file(
     Ok(ConfigResponse {
         status: "configured".into(),
     })
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_voltage_levels_in_db(
+    db_state: State<'_, DatabaseState>,
+    voltage_levels: Vec<VoltageLevel>,
+) -> SettingResult<()> {
+    Ok(())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_substations_in_db(
+    db_state: State<'_, DatabaseState>,
+    substations: Vec<Substation>,
+) -> SettingResult<()> {
+    Ok(())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_game_master_outputs_in_db(
+    db_state: State<'_, DatabaseState>,
+    game_master_outputs: Vec<GameMasterOutput>,
+) -> SettingResult<()> {
+    let state = db_state.lock().await;
+    game_master_outputs.insert(&state.pool).await?;
+
+    Ok(())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn load_feeder_info_in_db(
+    db_state: State<'_, DatabaseState>,
+    game_master_outputs: Vec<GameMasterOutput>,
+) -> SettingResult<()> {
+    Ok(())
 }

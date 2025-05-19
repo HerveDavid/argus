@@ -24,8 +24,11 @@ pub enum SettingsError {
     #[error("Deserialization error: {0}")]
     Deserialization(String),
 
-    #[error("Invalid condig error: {0}")]
+    #[error("Invalid config error: {0}")]
     InvalidConfig(String),
+
+    #[error("Sqlite error error: {0}")]
+    Sqlite(#[from] sqlx::Error),
 }
 
 // Implement Serialize for SettingsError for Tauri command compatibility

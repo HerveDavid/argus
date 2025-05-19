@@ -48,7 +48,7 @@ pub fn run() {
             load_config_file,
             // Loaders
             load_client,
-            // Substations
+            load_game_master_outputs_in_db, // Substations
             get_substations,
             get_substation_by_id,
             get_paginated_substations,
@@ -69,18 +69,20 @@ pub fn run() {
             unsubscribe_single_line_diagram,
         ])
         .setup(|app| {
-            // Store the initial sidecar process in the app state
-            app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
-
-            let app_handle = app.handle().clone();
-            // Spawn the Python sidecar on startup
-            spawn_and_monitor_sidecar(app_handle).ok();
-
             tauri::async_runtime::block_on(async move {
+                // Global app state (todo: to remove)
                 let app_state = AppStateInner::new(&app.handle())
                     .await
                     .expect("Failed to initialize app state");
                 app.manage(app_state);
+
+                // Sidecar state
+                // Store the initial sidecar process in the app state
+                app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+
+                let app_handle = app.handle().clone();
+                // Spawn the Python sidecar on startup
+                spawn_and_monitor_sidecar(app_handle).ok();
 
                 // Database state
                 let database_state = DatabaseInner::new(&app.handle())

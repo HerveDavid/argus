@@ -2,7 +2,7 @@ use super::entities::{FetchStatus, PaginatedResponse, PaginationParams};
 use super::errors::{PowsyblError, PowsyblResult};
 use super::send_zmq_request;
 
-use crate::shared::entities::iidm::{InsertExt, Substation};
+use crate::shared::entities::iidm::Substation;
 use crate::state::AppState;
 
 use tauri::State;
