@@ -1,6 +1,9 @@
 use std::{fs, path::Path};
 
-use super::errors::{SettingResult, SettingsError};
+use super::{
+    errors::{SettingResult, SettingsError},
+    get_setting, save_setting,
+};
 use crate::{
     database::DatabaseState,
     shared::{
@@ -23,13 +26,14 @@ pub struct ConfigResponse {
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_config_file(
-    state: State<'_, AppState>,
+    // state: State<'_, AppState>,
+    state: State<'_, DatabaseState>,
     config_path: String,
 ) -> SettingResult<ConfigResponse> {
     // Lock the state with error handling
-    let mut app_state = state
-        .write()
-        .map_err(|e| SettingsError::StateLock(e.to_string()))?;
+    // let mut app_state = state
+    //     .write()
+    //     .map_err(|e| SettingsError::StateLock(e.to_string()))?;
 
     if config_path.is_empty() {
         return Err(SettingsError::InvalidPath("Config path is empty".into()));
@@ -80,7 +84,18 @@ pub async fn load_config_file(
     let game_master_outputs: Vec<GameMasterOutput> = serde_json::from_str(&content)
         .map_err(|e| SettingsError::Deserialization(e.to_string()))?;
 
-    app_state.settings.game_master_outputs = Some(game_master_outputs);
+    let config = serde_json::json!({
+       "dynawo_game_master_outputs_file": outputs_file_abs_path
+    });
+
+    let state = state.lock().await;
+    save_setting(&state.pool, "config", &config).await?;
+
+    if let Some(theme) = get_setting(&state.pool, "config").await? {
+        println!("Theme mode: {}", theme);
+    }
+
+    // app_state.settings.game_master_outputs = Some(game_master_outputs);
 
     Ok(ConfigResponse {
         status: "configured".into(),

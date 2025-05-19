@@ -9,7 +9,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { FolderIcon } from 'lucide-react';
-
+import { setConfig } from '@/features/settings/components/config/api';
+import { Effect } from 'effect';
 
 export default function FileSelector() {
   const [filePath, setFilePath] = useState('No file selected');
@@ -21,14 +22,17 @@ export default function FileSelector() {
         multiple: false,
         filters: [
           {
-            name: "Config",
-            extensions: ["toml"],
-          }
-        ]
+            name: 'Config',
+            extensions: ['toml'],
+          },
+        ],
       });
 
       if (selectedPath) {
         setFilePath(selectedPath.toString());
+        Effect.runPromise(setConfig(selectedPath.toString()))
+          .then(console.log)
+          .catch(console.error);
       }
     } catch (err) {
       console.error('Error selecting file:', err);

@@ -1,13 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
+import { Effect } from 'effect';
 
-export async function setConfig(
-  config_path: string,
-): Promise<{ status: string }> {
-  try {
-    return await invoke<{ status: string }>('load_config_file', {
-      config_path,
+export const setConfig = (config_path: string) =>
+  Effect.gen(function* () {
+    return yield* Effect.tryPromise({
+      try: () =>
+        invoke<{ status: string }>('load_config_file', {
+          config_path,
+        }),
+      catch: (error) => console.error(error),
     });
-  } catch (error) {
-    throw new Error(`Failed to configure proxy: ${error}`);
-  }
-}
+  });
