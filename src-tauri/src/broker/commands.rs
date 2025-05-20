@@ -52,13 +52,21 @@ pub async fn connect_broker(
     // Find dynawo_id in dynawo_game_master_outputs with metadata
 
     // let state = app.try_read().unwrap();
-    let ouputs = app.try_write().unwrap();
-    let outputs: Vec<GameMasterOutput> = ouputs
-        .settings
-        .game_master_outputs
-        .as_ref()
-        .unwrap()
-        .clone();
+    let outputs = match app.try_write() {
+        Ok(guard) => {
+            match &guard.settings.game_master_outputs {
+                Some(game_outputs) => game_outputs.clone(),
+                None => {
+                    warn!("Game master outputs not initialized");
+                    Vec::new() // Return empty vector
+                }
+            }
+        },
+        Err(err) => {
+            warn!("Failed to acquire AppState lock: {:?}", err);
+            Vec::new() // Return empty vector
+        }
+    };
 
     // let toto = app.try_read().unwrap();
     let task = tokio::spawn(async move {
