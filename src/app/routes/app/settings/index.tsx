@@ -12,6 +12,7 @@ import {
   User,
   ChevronRight,
   Settings as SettingsIcon,
+  FileCode,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -27,7 +28,7 @@ const TABS = [
   {
     id: 'config',
     label: 'Configuration',
-    icon: <User size={18} />,
+    icon: <FileCode size={18} />,
     description: 'Manage simulation settings',
   },
 ];
