@@ -82,22 +82,28 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   useEffect(() => {
     const mapper = (tc: Record<string, number>) => {
-      console.log(tc)
+      console.log(tc);
       for (const [id, value] of Object.entries(tc)) {
-        const id_finded = feeders_with_dynawo_id.find((val) =>
-          id.includes(val.dynawo_id),
-        );
+        const tm: TeleInformation = {
+          ti: 'TM',
+          data: { id, value },
+        };
 
-        if (id_finded) {
-          const tm: TeleInformation = {
-            ti: 'TM',
-            data: { id: id_finded.id, value },
-          };
-          console.log('TM: ', tm);
-          handleUpdateMessage(tm);
-        } else {
-          console.log('NO TM');
-        }
+        handleUpdateMessage(tm);
+        // const id_finded = feeders_with_dynawo_id.find((val) =>
+        //   id.includes(val.dynawo_id),
+        // );
+
+        // if (id_finded) {
+        //   const tm: TeleInformation = {
+        //     ti: 'TM',
+        //     data: { id: id_finded.id, value },
+        //   };
+        //   console.log('TM: ', tm);
+        //   handleUpdateMessage(tm);
+        // } else {
+        //   console.log('NO TM');
+        // }
       }
     };
 

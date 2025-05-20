@@ -5,6 +5,11 @@ use std::collections::HashMap;
 use tauri::{ipc::Channel, State};
 use tokio::sync::broadcast;
 
+use crate::{
+    database::DatabaseState, shared::entities::dynawo::GameMasterOutput, sld_metadata::SldMetadata,
+    state::AppState,
+};
+
 use super::{errors::BrokerResult, state::BrokerState};
 
 const TOPIC: &str = "GameMaster";
@@ -12,7 +17,9 @@ const TOPIC: &str = "GameMaster";
 #[tauri::command(rename_all = "snake_case")]
 pub async fn connect_broker(
     state: State<'_, BrokerState>,
+    app: State<'_, AppState>,
     substation_id: String,
+    metadata: SldMetadata,
     channel: Channel<HashMap<String, f64>>,
 ) -> BrokerResult<()> {
     // Vérifier d'abord si une connexion existe déjà pour cette sous-station
@@ -42,6 +49,18 @@ pub async fn connect_broker(
     // Handler channel for stopping
     let (stop_tx, mut stop_rx) = broadcast::channel::<()>(1);
 
+    // Find dynawo_id in dynawo_game_master_outputs with metadata
+
+    // let state = app.try_read().unwrap();
+    let ouputs = app.try_write().unwrap();
+    let outputs: Vec<GameMasterOutput> = ouputs
+        .settings
+        .game_master_outputs
+        .as_ref()
+        .unwrap()
+        .clone();
+
+    // let toto = app.try_read().unwrap();
     let task = tokio::spawn(async move {
         // Values state
         let mut telemetry_values: HashMap<String, f64> = HashMap::new();
@@ -51,11 +70,12 @@ pub async fn connect_broker(
             tokio::select! {
                 Some(msg) = telemetry_subscription.next() => {
                     debug!("Message de télémétrie reçu sur '{}'", topic);
-                    process_telemetry_message(msg, &mut telemetry_values);
+                    process_telemetry_message(msg, &mut telemetry_values, &outputs);
+
                 }
                 Some(msg) = time_subscription.next() => {
                     if let Ok(time_str) = std::str::from_utf8(&msg.payload) {
-                        if let Ok(time) = time_str.parse::<u64>() {
+                        if let Ok(time) = time_str.parse::<f64>() {
                             debug!("Message de temps reçu: {}", time);
                             if !telemetry_values.is_empty() {
                                 match channel.send(telemetry_values.clone()) {
@@ -130,19 +150,38 @@ pub async fn disconnect_broker(
     Ok(())
 }
 
-fn process_telemetry_message(msg: Message, values: &mut HashMap<String, f64>) {
+fn process_telemetry_message(
+    msg: Message,
+    values: &mut HashMap<String, f64>,
+    outputs: &Vec<GameMasterOutput>,
+) {
     if let Ok(payload) = std::str::from_utf8(&msg.payload) {
         if let Some(index) = payload.find(':') {
             // Expected format is {"ID": VALUE}
+
             let (id, value_str) = payload.split_at(index);
             let id = &id[1..id.len()];
 
-            let value_str = &value_str[2..value_str.len() - 1];
-            if let Ok(value) = value_str.parse::<f64>() {
-                values.insert(id.to_string(), value);
+            let aa = find(outputs, id);
 
-                println!("Télémétrie reçue: {} = {:.2}", id, value);
+            if let Some(id) = aa {
+                let value_str = &value_str[2..value_str.len() - 1];
+                if let Ok(value) = value_str.parse::<f64>() {
+                    values.insert(id.clone(), value);
+
+                    println!("Télémétrie reçue: {} = {:.2}", id, value);
+                }
             }
         }
     }
+}
+
+fn find(outputs: &Vec<GameMasterOutput>, id: &str) -> Option<String> {
+    for o in outputs {
+        if id.contains(&o.dynawo_id) {
+            return o.graphical_id.clone();
+        }
+    }
+
+    None
 }

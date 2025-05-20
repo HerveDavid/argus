@@ -31,12 +31,12 @@ export const useSvgUpdate = (
       }
 
       // Vérifier que c'est bien un élément de type ARROW_ACTIVE
-      if (!id.includes('ARROW_ACTIVE')) {
-        console.warn(
-          'Seuls les éléments ARROW_ACTIVE sont pris en charge actuellement',
-        );
-        return;
-      }
+      // if (!id.includes('ARROW_ACTIVE')) {
+      //   console.warn(
+      //     'Seuls les éléments ARROW_ACTIVE sont pris en charge actuellement',
+      //   );
+      //   return;
+      // }
 
       // Sélectionner l'élément de groupe du feeder
       const feederGroup = svg.select(`#${id}`);
@@ -72,7 +72,7 @@ export const useSvgUpdate = (
   const handleUpdateMessage = useCallback(
     (message: TeleInformation) => {
       // Traiter uniquement les messages de type TM (télémesure)
-      if (message.ti === 'TM' && message.data.id.includes('ARROW_ACTIVE')) {
+      if (message.ti === 'TM') {
         updateFeederInfo(message.data.id, message.data.value);
       }
     },

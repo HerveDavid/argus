@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS dynawo_game_master_outputs (
     id TEXT PRIMARY KEY,
     dynawo_id TEXT NOT NULL,
     topic TEXT NOT NULL,
+    graphical_id TEXT,
     equipment_id TEXT,
     side TEXT,
     component_type TEXT,

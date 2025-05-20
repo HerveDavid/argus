@@ -13,6 +13,7 @@ use crate::{
         },
         utils::InsertExt,
     },
+    state::AppState,
 };
 use serde::Serialize;
 use tauri::State;
@@ -127,25 +128,65 @@ pub async fn load_substations_in_db(
     Ok(())
 }
 
+use log::{debug, info, warn};
+use std::time::Instant;
+
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_game_master_outputs_in_db(
     db_state: State<'_, DatabaseState>,
+    app_state: State<'_, AppState>,
 ) -> SettingResult<ConfigResponse> {
+    let start = Instant::now();
     let state = db_state.lock().await;
+
     if let Some(config) = get_setting(&state.pool, "config").await? {
         let path = config["dynawo_game_master_outputs_file"].as_str().unwrap();
+        info!("Chargement du fichier de sorties Game Master: {}", path);
+
+        // Mesurer le temps de lecture du fichier
+        let file_start = Instant::now();
         let content =
             fs::read_to_string(path).map_err(|e| SettingsError::FileRead(e.to_string()))?;
+        debug!(
+            "Fichier lu en {:?}, taille: {} bytes",
+            file_start.elapsed(),
+            content.len()
+        );
 
+        // Mesurer le temps de désérialisation
+        let deser_start = Instant::now();
         let game_master_outputs: Vec<GameMasterOutput> = serde_json::from_str(&content)
             .map_err(|e| SettingsError::Deserialization(e.to_string()))?;
+        let count = game_master_outputs.len();
+        info!(
+            "Désérialisation de {} sorties Game Master terminée en {:?}",
+            count,
+            deser_start.elapsed()
+        );
 
-        game_master_outputs.insert(&state.pool).await?;
+        // Log avant l'insertion
+        info!(
+            "Début de l'insertion de {} éléments dans la base de données...",
+            count
+        );
+
+        // Mesurer le temps d'insertion
+        let insert_start = Instant::now();
+
+        // Implémenter la fonction d'insertion optimisée ici
+        // Si vous utilisez l'implémentation que j'ai fournie, elle affichera ses propres logs
+        // game_master_outputs.insert(&state.pool).await?;
+
+        let mut state = app_state.try_write().unwrap();
+        println!("GAME MASTER OUTPUS LEN : {}", &game_master_outputs.len());
+        state.settings.game_master_outputs = Some(game_master_outputs);
+
 
         return Ok(ConfigResponse {
-            status: "configued".to_string(),
+            status: format!("configuré avec {} sorties Game Master", count),
         });
     } else {
+        warn!("Aucun fichier de configuration trouvé pour les sorties Game Master");
         return Ok(ConfigResponse {
             status: "no file yet".to_string(),
         });

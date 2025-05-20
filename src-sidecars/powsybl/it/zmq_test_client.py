@@ -38,7 +38,7 @@ class ZmqTestClient:
 
         print(f"<<< Réponse reçue:")
         print(f"    Status: {response.get('status')}")
-        print(f"    Résultat: {json.dumps(response.get('result'), indent=2)[:500]}...")
+        print(f"    Résultat: {json.dumps(response.get('result'), indent=2)}...")
 
         return response
 
