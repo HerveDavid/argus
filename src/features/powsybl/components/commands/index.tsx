@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDiagramStore } from '../../stores/use-diagram.store';
 import { breaker_events } from './breaker_events';
 import { load_reductions } from './load-reduction';
@@ -35,30 +35,57 @@ export const Commands: React.FC<CommandsProps> = () => {
 
   // Format pour l'envoi à l'orchestrateur
   const getMessagePayload = (id, value) => {
-    return JSON.stringify({ [id]: value });
+    // Si la valeur est booléenne, la convertir en 0 ou 1
+    const numericValue = typeof value === 'boolean' ? (value ? 1 : 0) : value;
+    return JSON.stringify({ [id]: numericValue });
   };
 
   const handleSwitchChange = (id) => {
+    // Inverser l'état actuel du disjoncteur
+    const newBoolValue = !switchStates[id];
+    // La valeur numérique correspondante (0 pour fermé, 1 pour ouvert)
+    const newNumericValue = newBoolValue ? 1 : 0;
+
     setSwitchStates((prev) => ({
       ...prev,
-      [id]: !prev[id],
+      [id]: newBoolValue,
     }));
+
+    // Générer et afficher le payload avec la valeur numérique
+    const payload = getMessagePayload(id, newNumericValue);
+    console.log(payload);
   };
 
   const handleSliderChange = (id, value) => {
+    // Mettre à jour l'UI pendant le glissement, sans log
+    const newValue = value[0]; // Slider renvoie un tableau de valeurs
     setSliderValues((prev) => ({
       ...prev,
-      [id]: value[0], // Slider renvoie un tableau de valeurs
+      [id]: newValue,
     }));
   };
 
+  const handleSliderCommit = (id, value) => {
+    // Log uniquement lorsque le slider est relâché
+    const newValue = value[0];
+
+    // Générer et afficher le payload
+    const payload = getMessagePayload(id, newValue);
+    console.log(payload);
+  };
+
   const handleLoadReductionChange = (id, checked) => {
+    // Log uniquement lors du changement de réduction de charge
     // Si le switch est activé, on définit la valeur à -0.05, sinon à 0
     const newValue = checked ? -0.05 : 0;
     setLoadReductionValues((prev) => ({
       ...prev,
       [id]: newValue,
     }));
+
+    // Générer et afficher le payload
+    const payload = getMessagePayload(id, newValue);
+    console.log(payload);
   };
 
   if (!metadata) {
@@ -101,7 +128,7 @@ export const Commands: React.FC<CommandsProps> = () => {
                                 switchStates[id] ? 'success' : 'secondary'
                               }
                             >
-                              {switchStates[id] ? 'Open' : 'Close'}
+                              {switchStates[id] ? 'Open (1)' : 'Close (0)'}
                             </Badge>
                           </div>
                         </TableCell>
@@ -160,6 +187,9 @@ export const Commands: React.FC<CommandsProps> = () => {
                               onValueChange={(value) =>
                                 handleSliderChange(id, value)
                               }
+                              onValueCommit={(value) =>
+                                handleSliderCommit(id, value)
+                              }
                               className="w-full"
                             />
                           </div>
@@ -178,7 +208,7 @@ export const Commands: React.FC<CommandsProps> = () => {
           <Card className="h-full flex flex-col">
             <CardHeader className="border-b">
               <CardTitle className="text-lg font-medium text-gray-800">
-                Load Reductions
+                Load Reductions (Un-5%)
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-hidden">
