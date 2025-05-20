@@ -1,8 +1,7 @@
 import EditorLayout from '@/components/layouts/editor';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
-import { Link } from '@/components/ui/link';
-import { paths } from '@/config/paths';
 
 import ProfileSettings from './profile-settings';
 import ConfigurationSettings from './configuration-settings';
@@ -35,6 +34,11 @@ const TABS = [
 
 const HomeSettings = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const navigate = useNavigate();
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
 
   return (
     <EditorLayout>
@@ -44,14 +48,15 @@ const HomeSettings = () => {
           <div className="px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <Link
-                  to={paths.home.path}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Back to previous page"
+                  onClick={handleGoBack}
                   className="text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Button variant="ghost" size="icon" aria-label="Back to home">
-                    <ArrowLeft size={18} />
-                  </Button>
-                </Link>
+                  <ArrowLeft size={18} />
+                </Button>
                 <div className="flex items-center gap-2">
                   <SettingsIcon size={20} className="text-primary" />
                   <h1 className="text-xl font-semibold tracking-tight">
@@ -74,10 +79,11 @@ const HomeSettings = () => {
                     <Button
                       key={tab.id}
                       variant={activeTab === tab.id ? 'secondary' : 'ghost'}
-                      className={`w-full justify-start gap-3 px-3 font-medium ${activeTab === tab.id
-                        ? 'bg-secondary text-secondary-foreground'
-                        : ''
-                        }`}
+                      className={`w-full justify-start gap-3 px-3 font-medium ${
+                        activeTab === tab.id
+                          ? 'bg-secondary text-secondary-foreground'
+                          : ''
+                      }`}
                       onClick={() => setActiveTab(tab.id)}
                     >
                       <span className="flex items-center gap-2">
@@ -90,8 +96,9 @@ const HomeSettings = () => {
                         )}
                         <ChevronRight
                           size={16}
-                          className={`ml-2 text-muted-foreground transition-transform ${activeTab === tab.id ? 'rotate-90' : ''
-                            }`}
+                          className={`ml-2 text-muted-foreground transition-transform ${
+                            activeTab === tab.id ? 'rotate-90' : ''
+                          }`}
                         />
                       </div>
                     </Button>

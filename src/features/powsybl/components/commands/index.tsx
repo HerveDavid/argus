@@ -68,17 +68,17 @@ export const Commands: React.FC<CommandsProps> = () => {
   return (
     <div className="w-full h-full p-4">
       {/* Conteneur flex pour les trois cartes côte à côte */}
-      <div className="flex flex-row gap-4 h-full">
+      <div className="flex flex-col md:flex-row gap-4 h-full">
         {/* Première carte - Circuit Breaker Commands */}
         <div className="flex-1">
-          <Card className="h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="border-b">
               <CardTitle className="text-lg font-medium text-gray-800">
                 Circuit Breaker Commands
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="h-96 overflow-auto">
+            <CardContent className="p-0 flex-1 overflow-hidden">
+              <div className="h-full overflow-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow>
@@ -116,14 +116,14 @@ export const Commands: React.FC<CommandsProps> = () => {
 
         {/* Deuxième carte - Generator Active Power Controls */}
         <div className="flex-1">
-          <Card className="h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="border-b">
               <CardTitle className="text-lg font-medium text-gray-800">
                 Generator Active Power Controls
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="h-96 overflow-auto">
+            <CardContent className="p-0 flex-1 overflow-hidden">
+              <div className="h-full overflow-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow>
@@ -175,14 +175,14 @@ export const Commands: React.FC<CommandsProps> = () => {
 
         {/* Troisième carte - Load Reductions */}
         <div className="flex-1">
-          <Card className="h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader className="border-b">
               <CardTitle className="text-lg font-medium text-gray-800">
                 Load Reductions
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0">
-              <div className="h-96 overflow-auto">
+            <CardContent className="p-0 flex-1 overflow-hidden">
+              <div className="h-full overflow-auto">
                 <Table>
                   <TableHeader className="sticky top-0 bg-background z-10">
                     <TableRow>
