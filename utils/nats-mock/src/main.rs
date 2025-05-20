@@ -96,10 +96,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Start sending loop");
 
-    let mut time_counter: u64 = 0;
+    let mut time_counter: f64 = 0.0;
 
     loop {
-        time_counter += 1;
+        time_counter += 1.0;
 
         let mut values = HashMap::new();
 
@@ -122,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             values.insert(id.to_string(), value);
 
-            let message = format!("{{{}: {}}}", id, value);
+            let message = format!("{{\"{}\": {}}}", id, value);
 
             let subject = "GameMaster.MQIS"; // All ID seem to come from the MQIS substation
 
@@ -138,7 +138,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         tokio::time::sleep(Duration::from_secs(1)).await;
 
-        if time_counter > 50 {
+        if time_counter > 50.0 {
             break;
         }
     }
