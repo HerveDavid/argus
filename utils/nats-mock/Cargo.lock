@@ -609,6 +609,7 @@ name = "nats-mock"
 version = "0.1.0"
 dependencies = [
  "async-nats",
+ "futures",
  "rand 0.9.1",
  "tokio",
 ]
