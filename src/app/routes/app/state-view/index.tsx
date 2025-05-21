@@ -10,6 +10,7 @@ import { useVoltageLevelDetails } from '@/features/powsybl/hooks/use-voltage-lev
 import { VoltageLevel } from '@/types/voltage-level.type';
 import { Commands } from '@/features/powsybl/components/commands';
 import { useDiagramStore } from '@/features/powsybl/stores/use-diagram.store';
+
 // Main component
 const StateView = () => {
   // Params route
@@ -18,6 +19,7 @@ const StateView = () => {
 
   // State
   const [activeTab, setActiveTab] = useState<string>('get-started');
+
   const elementDetails =
     type === 'substation'
       ? useSubstationDetails(substationId)
@@ -45,7 +47,7 @@ const StateView = () => {
     {
       id: 'logbook',
       label: 'Logbook',
-      content: <div className="p-4">Logbook</div>,
+      content: <div className="h-full w-full p-4">Logbook</div>,
     },
   ];
 
@@ -53,12 +55,11 @@ const StateView = () => {
     if (substationId) {
       loadDiagram(substationId);
     }
-  }, [substationId]);
+  }, [substationId, loadDiagram]);
 
   return (
     <EditorLayout>
-      {/* Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="h-full w-full flex flex-col">
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
@@ -70,12 +71,12 @@ const StateView = () => {
             onTabChange={setActiveTab}
             element={elementDetails.data as VoltageLevel | Substation}
           />
-          <div className="flex-1 overflow-hidden p-5 pt-2 bg-secondary">
+          <div className="flex-1 overflow-hidden bg-secondary">
             {tabs.map((tab) => (
               <TabsContent
                 key={tab.id}
                 value={tab.id}
-                className="h-full flex-1"
+                className="h-full"
               >
                 {tab.content}
               </TabsContent>
@@ -86,4 +87,5 @@ const StateView = () => {
     </EditorLayout>
   );
 };
+
 export default StateView;

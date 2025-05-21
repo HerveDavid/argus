@@ -5,6 +5,11 @@ import { Folder, Layers, Waypoints } from 'lucide-react';
 import BottomMenuBar from './bottom-menu-bar';
 import LeftSideBar from './left-sidebar';
 import { Toaster } from '@/components/ui/sonner';
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@/components/ui/resizable';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -24,7 +29,17 @@ export const EditorLayout = ({ children }: LayoutProps) => {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex w-full h-full">
           <LeftSideBar sidebarItems={sidebarItems} />
-          {children}
+          <div className="flex-1 overflow-hidden">
+            <ResizablePanelGroup direction="vertical" className="h-full">
+              <ResizablePanel defaultSize={75} minSize={30}>
+                <div className="h-full w-full">{children}</div>
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={25} minSize={2}>
+                <div className="p-4">Two</div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
         </div>
       </div>
       <Toaster />

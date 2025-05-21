@@ -24,7 +24,6 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         <StoreProvider stores={defaultSettings}>
           <ThemeProvider>
             <QueryClientProvider client={queryClient}>
-              {import.meta.env.DEV && <ReactQueryDevtools />}
               {children}
             </QueryClientProvider>
           </ThemeProvider>

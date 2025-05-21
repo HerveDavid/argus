@@ -9,19 +9,19 @@ export const SubstationViewer: React.FC<SubstationViewerProps> = ({
   substationId,
 }) => {
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="flex-1 bg-secondary overflow-hidden">
-        <div className="h-full w-full flex items-center justify-center bg-secondary">
-          {substationId && (
-            <SingleLineDiagram
-              lineId={substationId}
-              width="100%"
-              height="100%"
-              className="bg-background border rounded-sm"
-            />
-          )}
+    <div className="relative w-full h-full p-3">
+      {substationId ? (
+        <SingleLineDiagram
+          lineId={substationId}
+          width="100%"
+          height="100%"
+          className="absolute inset-0 bg-background border rounded-sm"
+        />
+      ) : (
+        <div className="absolute inset-0 flex items-center justify-center bg-secondary">
+          <p>No substation selected</p>
         </div>
-      </div>
+      )}
     </div>
   );
 };
