@@ -9,8 +9,14 @@ pub enum BrokerError {
     #[error("Nats connect error: {0}")]
     NatsConnectError(#[from] async_nats::ConnectError),
 
-    #[error("Nats subssribe error: {0}")]
+    #[error("Nats subscribe error: {0}")]
     NatsSubscribeError(#[from] async_nats::SubscribeError),
+
+    #[error("Nats publish error: {0}")]
+    NatsPublishError(#[from] async_nats::PublishError),
+
+    #[error("Serialization error: {0}")]
+    SerializationError(#[from] serde_json::Error),
 }
 
 // Implement Serialize for PowsyblError for Tauri command compatibility

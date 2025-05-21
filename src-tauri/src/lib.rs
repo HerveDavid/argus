@@ -36,6 +36,7 @@ pub fn run() {
             // Broker (nats)
             connect_broker,
             disconnect_broker,
+            send_command_broker,
             // Sidecars
             start_sidecar,
             shutdown_sidecar,

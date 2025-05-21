@@ -103,3 +103,15 @@ export const disconnectBroker = (substation_id: string) =>
       catch: (error) => console.error(error),
     });
   });
+
+export const sendBroker = (command: { [key: string]: number }) =>
+  Effect.gen(function* () {
+    // Invocation de l'API Tauri
+    return yield* Effect.tryPromise({
+      try: () =>
+        invoke<SldSubscriptionResponse>('send_command_broker', {
+          command,
+        }),
+      catch: (error) => console.error(error),
+    });
+  });

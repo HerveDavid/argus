@@ -14,6 +14,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Effect } from 'effect';
+import { sendBroker } from '../../services/subscription-ti.service';
 
 export interface CommandsProps {
   lineId?: string;
@@ -37,7 +39,13 @@ export const Commands: React.FC<CommandsProps> = () => {
   const getMessagePayload = (id, value) => {
     // Si la valeur est booléenne, la convertir en 0 ou 1
     const numericValue = typeof value === 'boolean' ? (value ? 1 : 0) : value;
-    return JSON.stringify({ [id]: numericValue });
+
+    const message = { [id]: numericValue };
+    console.log(message);
+
+    Effect.runPromise(sendBroker(message))
+      .then(console.log)
+      .catch(console.error);
   };
 
   const handleSwitchChange = (id) => {
@@ -52,8 +60,7 @@ export const Commands: React.FC<CommandsProps> = () => {
     }));
 
     // Générer et afficher le payload avec la valeur numérique
-    const payload = getMessagePayload(id, newNumericValue);
-    console.log(payload);
+    getMessagePayload(id, newNumericValue);
   };
 
   const handleSliderChange = (id, value) => {
@@ -70,8 +77,7 @@ export const Commands: React.FC<CommandsProps> = () => {
     const newValue = value[0];
 
     // Générer et afficher le payload
-    const payload = getMessagePayload(id, newValue);
-    console.log(payload);
+    getMessagePayload(id, newValue);
   };
 
   const handleLoadReductionChange = (id, checked) => {
@@ -84,8 +90,7 @@ export const Commands: React.FC<CommandsProps> = () => {
     }));
 
     // Générer et afficher le payload
-    const payload = getMessagePayload(id, newValue);
-    console.log(payload);
+    getMessagePayload(id, newValue);
   };
 
   if (!metadata) {

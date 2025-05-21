@@ -6,11 +6,13 @@ use tauri::{ipc::Channel, State};
 use tokio::sync::broadcast;
 
 use crate::{
-    database::DatabaseState, shared::entities::dynawo::GameMasterOutput, sld_metadata::SldMetadata,
-    state::AppState,
+    shared::entities::dynawo::GameMasterOutput, sld_metadata::SldMetadata, state::AppState,
 };
 
-use super::{errors::BrokerResult, state::BrokerState};
+use super::{
+    errors::{BrokerError, BrokerResult},
+    state::BrokerState,
+};
 
 const TOPIC: &str = "GameMaster";
 
@@ -49,8 +51,6 @@ pub async fn connect_broker(
     // Handler channel for stopping
     let (stop_tx, mut stop_rx) = broadcast::channel::<()>(1);
 
-    // Find dynawo_id in dynawo_game_master_outputs with metadata
-
     // let state = app.try_read().unwrap();
     let outputs = match app.try_write() {
         Ok(guard) => {
@@ -61,7 +61,7 @@ pub async fn connect_broker(
                     Vec::new() // Return empty vector
                 }
             }
-        },
+        }
         Err(err) => {
             warn!("Failed to acquire AppState lock: {:?}", err);
             Vec::new() // Return empty vector
@@ -156,6 +156,37 @@ pub async fn disconnect_broker(
     }
 
     Ok(())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn send_command_broker(
+    state: State<'_, BrokerState>,
+    command: serde_json::Value,
+) -> BrokerResult<()> {
+    // Log when the function is called
+    log::info!("send_command_broker called with command: {}", command);
+    
+    // Get a nats client
+    let state = state.lock().await;
+    let command_str = serde_json::to_string(&command)?;
+    
+    log::debug!("Publishing command to topic: {}{}", TOPIC, "Control");
+    
+    // Try to publish the message and log the result
+    match state
+        .client
+        .publish(format!("{}{}", TOPIC, "Control"), command_str.into())
+        .await
+    {
+        Ok(_) => {
+            log::info!("Command successfully published to broker");
+            Ok(())
+        },
+        Err(err) => {
+            log::error!("Failed to publish command to broker: {}", err);
+            Err(err.into())
+        }
+    }
 }
 
 fn process_telemetry_message(
