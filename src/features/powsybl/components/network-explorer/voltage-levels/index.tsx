@@ -38,7 +38,7 @@ export const VoltageLevelsExplorer = forwardRef<ExplorerRef>((_props, ref) => {
     clearSearch,
     searchFields,
     setSearchFields,
-  } = useVoltageLevels(18);
+  } = useVoltageLevels(15);
 
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState('');

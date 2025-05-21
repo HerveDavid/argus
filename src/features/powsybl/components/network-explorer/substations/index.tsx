@@ -38,7 +38,7 @@ export const SubstationsExplorer = forwardRef<ExplorerRef>((_props, ref) => {
     clearSearch,
     searchFields,
     setSearchFields,
-  } = useSubstations(18);
+  } = useSubstations(15);
 
   const navigate = useNavigate();
   const [inputValue, setInputValue] = useState('');
