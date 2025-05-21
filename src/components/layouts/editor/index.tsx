@@ -16,7 +16,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { Button } from '@/components/ui/button';
+import TimelineComponent from '@/features/powsybl/components/timeline';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -55,9 +55,11 @@ export const EditorLayout = ({ children }: LayoutProps) => {
 
               {isPanelVisible && (
                 <>
-                  <ResizableHandle />
+                  <ResizableHandle withHandle />
                   <ResizablePanel defaultSize={25} minSize={2}>
-                    <div className="p-4">Two</div>
+                    <div className="p-4">
+                      <TimelineComponent></TimelineComponent>
+                    </div>
                   </ResizablePanel>
                 </>
               )}
