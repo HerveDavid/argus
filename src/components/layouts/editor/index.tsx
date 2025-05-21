@@ -47,7 +47,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
           <div className="flex-1 overflow-hidden flex flex-col">
             <ResizablePanelGroup direction="vertical" className="h-full">
               <ResizablePanel
-                defaultSize={isPanelVisible ? 75 : 100}
+                defaultSize={isPanelVisible ? 70 : 100}
                 minSize={30}
               >
                 <div className="h-full w-full">{children}</div>
@@ -56,7 +56,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
               {isPanelVisible && (
                 <>
                   <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={25} minSize={2}>
+                  <ResizablePanel defaultSize={30} minSize={2}>
                     <div className="p-4">
                       <TimelineComponent></TimelineComponent>
                     </div>

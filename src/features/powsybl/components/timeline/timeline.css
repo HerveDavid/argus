@@ -2,13 +2,14 @@
     transform: rotate(45deg);
     transform-origin: 0 0;
     white-space: nowrap;
-    font-size: 12px;
-    margin-top: 5px;
+    color: var(--foreground);
+    font-size: var(--font-m);
 }
 
 .vis-item {
     border: none;
     border-color: none;
+    background-color: transparent;
 }
 
 .vis-item.vis-dot {

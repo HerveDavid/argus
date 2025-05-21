@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Timeline, DataSet } from 'vis-timeline/standalone';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
 import './timeline.css';
+import { stack } from 'd3';
 
 const TimelineComponent = () => {
   const timelineRef = useRef(null);
@@ -9,20 +10,61 @@ const TimelineComponent = () => {
   useEffect(() => {
     // Données d'événements
     const events = [
-      { message: 'SVC Area : new level 0.05', time: '260.0000' },
+      {
+        message: 'SVC Area : new level 0.05',
+        modelName: 'RST_TRI_PP7',
+        time: '260.0000',
+      },
       {
         message: 'Voltage regulator : lower limit reached (UsRef)',
+        modelName: 'DM_TRICAT 3',
         time: '278.0000',
       },
-      { message: 'SVC Area : new level -0.2', time: '340.0000' },
-      { message: 'SVC Area : new level 0.04', time: '440.0000' },
-      { message: 'SVC Area : new level -0.21', time: '480.0000' },
-      { message: 'SVC Area : new level 0.03', time: '620.0000' },
-      { message: 'SVC Area : new level -0.22', time: '630.0000' },
-      { message: 'SVC Area : new level -0.23', time: '770.0000' },
-      { message: 'SVC Area : new level 0.02', time: '810.0000' },
-      { message: 'SVC Area : new level -0.24', time: '910.0000' },
-      { message: 'SVC Area : new level 0.01', time: '990.0000' },
+      {
+        message: 'SVC Area : new level -0.2',
+        modelName: 'RST_NEOULP6',
+        time: '340.0000',
+      },
+      {
+        message: 'SVC Area : new level 0.04',
+        modelName: 'RST_TRI_PP7',
+        time: '440.0000',
+      },
+      {
+        message: 'SVC Area : new level -0.21',
+        modelName: 'RST_NEOULP6',
+        time: '480.0000',
+      },
+      {
+        message: 'SVC Area : new level 0.03',
+        modelName: 'RST_TRI_PP7',
+        time: '620.0000',
+      },
+      {
+        message: 'SVC Area : new level -0.22',
+        modelName: 'RST_NEOULP6',
+        time: '630.0000',
+      },
+      {
+        message: 'SVC Area : new level -0.23',
+        modelName: 'RST_NEOULP6',
+        time: '770.0000',
+      },
+      {
+        message: 'SVC Area : new level 0.02',
+        modelName: 'RST_TRI_PP7',
+        time: '810.0000',
+      },
+      {
+        message: 'SVC Area : new level -0.24',
+        modelName: 'RST_NEOULP6',
+        time: '910.0000',
+      },
+      {
+        message: 'SVC Area : new level 0.01',
+        modelName: 'RST_TRI_PP7',
+        time: '990.0000',
+      },
     ];
 
     // Configuration des items
@@ -32,7 +74,7 @@ const TimelineComponent = () => {
         content: event.message,
         start: parseFloat(event.time),
         type: 'point',
-        title: `${event.message}<br>Temps: ${event.time}`,
+        title: `${event.message}<br>Temps: ${event.time}<br>Model: ${event.modelName}`,
       })),
     );
 
@@ -71,9 +113,9 @@ const TimelineComponent = () => {
   }, []);
 
   return (
-    <div className="events-timeline-container">
-      <h2>Timeline des événements système</h2>
-      <div ref={timelineRef} />
+    <div>
+      <h2 className='mb-2'>Timeline</h2>
+      <div className="bg-secondary" ref={timelineRef} />
     </div>
   );
 };
