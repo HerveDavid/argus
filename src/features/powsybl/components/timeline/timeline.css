@@ -1,12 +1,17 @@
 .vis-item-content {
-    transform: rotate(45deg);
+    /* transform: rotate(45deg);
     transform-origin: 0 0;
-    white-space: nowrap;
+    white-space: nowrap; */
     color: var(--foreground);
     font-size: var(--font-m);
 }
 
-.vis-item {
+.current {
+    background-color: var(--destructive);
+}
+
+
+/* .vis-item {
     border: none;
     border-color: none;
     background-color: transparent;
@@ -19,4 +24,4 @@
 .vis-item.vis-selected {
     border: none;
     border-color: none;
-}
+} */

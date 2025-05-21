@@ -67,7 +67,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
 
             <button
               onClick={togglePanel}
-              className="bg-gray-200 hover:bg-accent-foreground text-gray-700 flex items-center justify-center py-1 w-full border-t"
+              className="bg-gray-200 hover:bg-secondary text-gray-700 flex items-center justify-center py-1 w-full border-t"
             >
               {isPanelVisible ? (
                 <>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Timeline, DataSet } from 'vis-timeline/standalone';
 import 'vis-timeline/styles/vis-timeline-graph2d.css';
+import './timeline.css';
 
 // Define types for our events
 interface EventData {
@@ -147,13 +148,10 @@ const TimelineComponent: React.FC = () => {
   ];
 
   useEffect(() => {
-    // Define colors for different models
-    const colorMap: { [key: string]: string } = {
-      RST_TRI_PP7: '#4CAF50', // Green
-      'DM_TRICAT 3': '#2196F3', // Blue
-      RST_NEOULP6: '#FF5722', // Orange
-      'MQIS P7_MQIS 7COUPL DJ_OC': '#9C27B0', // Purple
-      'MQIS Y761': '#F44336', // Red
+    // Define colors based on field type using CSS variables
+    const colorMap = {
+      description: 'var(--warning)', // Using warning color for descriptions (was red)
+      message: 'var(--info)', // Using info color for messages (was blue)
     };
 
     // Create timeline items with colors
@@ -163,11 +161,16 @@ const TimelineComponent: React.FC = () => {
     initialEvents.forEach((event, index) => {
       const displayText = event.message || event.description || 'Unknown event';
 
+      // Determine color based on which field is present
+      const colorKey = event.description ? 'description' : 'message';
+      const color = colorMap[colorKey];
+      const foregroundColor = event.description
+        ? 'var(--warning-foreground)'
+        : 'var(--info-foreground)';
+
       items.add({
         id: index + 1,
-        content: `<div class="timeline-item" style="color: ${
-          colorMap[event.modelName] || '#000'
-        }">
+        content: `<div class="timeline-item" style="color: ${foregroundColor}">
                     ${displayText}
                   </div>`,
         start: parseFloat(event.time),
@@ -175,8 +178,8 @@ const TimelineComponent: React.FC = () => {
         title: `${displayText}<br>Time: ${event.time}<br>Model: ${
           event.modelName
         }${event.type ? '<br>Type: ' + event.type : ''}`,
-        style: `background-color: ${colorMap[event.modelName] || '#ccc'}; 
-                color: white; 
+        style: `background-color: ${color}; 
+                color: ${foregroundColor}; 
                 border-radius: 4px; 
                 padding: 2px 6px;`,
       });
@@ -289,21 +292,24 @@ const TimelineComponent: React.FC = () => {
   const addNewEvent = (event: EventData): void => {
     if (!itemsRef.current) return;
 
-    const colorMap: { [key: string]: string } = {
-      RST_TRI_PP7: '#4CAF50', // Green
-      'DM_TRICAT 3': '#2196F3', // Blue
-      RST_NEOULP6: '#FF5722', // Orange
-      'MQIS P7_MQIS 7COUPL DJ_OC': '#9C27B0', // Purple
-      'MQIS Y761': '#F44336', // Red
+    // Define colors based on field type using CSS variables
+    const colorMap = {
+      description: 'var(--warning)', // Using warning color for descriptions (was red)
+      message: 'var(--info)', // Using info color for messages (was blue)
     };
 
     const displayText = event.message || event.description || 'Unknown event';
 
+    // Determine color based on which field is present
+    const colorKey = event.description ? 'description' : 'message';
+    const color = colorMap[colorKey];
+    const foregroundColor = event.description
+      ? 'var(--warning-foreground)'
+      : 'var(--info-foreground)';
+
     itemsRef.current.add({
       id: nextId,
-      content: `<div class="timeline-item" style="color: ${
-        colorMap[event.modelName] || '#000'
-      }">
+      content: `<div class="timeline-item" style="color: ${foregroundColor}">
                   ${displayText}
                 </div>`,
       start: parseFloat(event.time),
@@ -311,8 +317,8 @@ const TimelineComponent: React.FC = () => {
       title: `${displayText}<br>Time: ${event.time}<br>Model: ${
         event.modelName
       }${event.type ? '<br>Type: ' + event.type : ''}`,
-      style: `background-color: ${colorMap[event.modelName] || '#ccc'}; 
-              color: white; 
+      style: `background-color: ${color}; 
+              color: ${foregroundColor}; 
               border-radius: 4px; 
               padding: 2px 6px;`,
     });
