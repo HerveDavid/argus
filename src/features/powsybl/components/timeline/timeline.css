@@ -1,27 +1,26 @@
 .vis-item-content {
-    /* transform: rotate(45deg);
+    transform: rotate(45deg);
     transform-origin: 0 0;
-    white-space: nowrap; */
+    white-space: nowrap;
     color: var(--foreground);
-    font-size: var(--font-m);
+    font-size: var(--font-xs);
 }
 
 .current {
     background-color: var(--destructive);
 }
 
-
-/* .vis-item {
-    border: none;
-    border-color: none;
+.vis-item {
+    border-color: transparent;
     background-color: transparent;
-}
-
-.vis-item.vis-dot {
-    color: transparent;
 }
 
 .vis-item.vis-selected {
     border: none;
-    border-color: none;
-} */
+    border-color: transparent;
+    background-color: transparent;
+}
+
+.vis-text {
+    font-size: var(--font-xs);
+}
