@@ -16,6 +16,37 @@ export const useSvgUpdate = (
   const previousMetadataRef = React.useRef<any>(null);
 
   /**
+   * Fonction pour initialiser les valeurs par défaut des feeders
+   */
+  const initializeFeederValues = useCallback(() => {
+    if (!svgContainerRef.current) return;
+
+    // Utiliser d3 pour sélectionner l'élément SVG
+    const svg = d3.select(svgContainerRef.current).select('svg');
+    if (svg.empty()) {
+      console.warn('SVG non trouvé dans le conteneur');
+      return;
+    }
+
+    // Sélectionner tous les éléments text à l'intérieur des groupes avec la classe sld-feeder-info
+    const feederInfoTextElements = svg.selectAll('.sld-feeder-info .sld-label');
+
+    if (feederInfoTextElements.empty()) {
+      console.warn(
+        'Aucun élément texte trouvé dans les groupes sld-feeder-info',
+      );
+      return;
+    }
+
+    // Mettre la valeur par défaut "****" pour tous les éléments texte
+    feederInfoTextElements.text('****');
+
+    console.log(
+      `Initialisation de ${feederInfoTextElements.size()} éléments feeder-info avec la valeur par défaut "****"`,
+    );
+  }, [svgContainerRef]);
+
+  /**
    * Fonction pour mettre à jour les informations d'un feeder dans le SVG
    * Pour l'instant, ne traite que les valeurs ARROW_ACTIVE
    */
@@ -52,9 +83,10 @@ export const useSvgUpdate = (
         return;
       }
 
-      // Mettre à jour la valeur en conservant l'unité 
+      // Mettre à jour la valeur en conservant l'unité
       // Seulement 4 decimal
       const text = `${parseFloat(value.toFixed(4))}`;
+
       textElement.text(text);
 
       // Ajouter une petite animation pour mettre en évidence la mise à jour
@@ -91,6 +123,9 @@ export const useSvgUpdate = (
     if (metadata === previousMetadataRef.current) return;
     previousMetadataRef.current = metadata;
 
+    // Initialiser les valeurs par défaut des feeders
+    initializeFeederValues();
+
     // Ajouter des interactions au SVG
     svg
       .style('cursor', 'pointer')
@@ -122,7 +157,7 @@ export const useSvgUpdate = (
           target.style('stroke-width', null);
         }
       });
-  }, [svgContent, svgContainerRef, metadata]);
+  }, [svgContent, svgContainerRef, metadata, initializeFeederValues]);
 
   return {
     handleUpdateMessage,
