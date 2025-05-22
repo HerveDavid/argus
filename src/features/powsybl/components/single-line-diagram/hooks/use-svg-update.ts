@@ -130,9 +130,10 @@ export const useSvgUpdate = (
     const svg = d3.select(svgContainerRef.current).select('svg');
     if (svg.empty()) return;
 
-    // Éviter les mises à jour inutiles si les métadonnées n'ont pas changé
-    if (metadata === previousMetadataRef.current) return;
-    previousMetadataRef.current = metadata;
+    /*  Désactivé pour faire apparaitre des étoiles !! (Pas encore trouvé ce que ça casse) */
+    // // Éviter les mises à jour inutiles si les métadonnées n'ont pas changé
+    // if (metadata === previousMetadataRef.current) return;
+    // previousMetadataRef.current = metadata;
 
     // Initialiser les valeurs par défaut des feeders
     initializeFeederValues();
