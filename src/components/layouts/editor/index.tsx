@@ -56,7 +56,7 @@ export const EditorLayout = ({ children }: LayoutProps) => {
               {isPanelVisible && (
                 <>
                   <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={30} minSize={2}>
+                  <ResizablePanel defaultSize={45} minSize={2}>
                     <div className="p-4">
                       <TimelineComponent></TimelineComponent>
                     </div>

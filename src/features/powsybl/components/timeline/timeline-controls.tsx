@@ -3,13 +3,30 @@ import React from 'react';
 import { Play, Pause, RotateCcw, Trash2 } from 'lucide-react';
 import { useTimelineStore } from './timeline-store';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface TimelineControlsProps {
+  onForceCleanup?: () => void;
+  windowBoundaries?: {
+    start: number;
+    end: number;
+    center: number;
+  };
   className?: string;
+  onRecenterToCursor?: () => void;
 }
 
 const TimelineControls: React.FC<TimelineControlsProps> = ({
+  onForceCleanup,
+  windowBoundaries,
   className = '',
+  onRecenterToCursor,
 }) => {
   const {
     isPlaying,
@@ -22,36 +39,45 @@ const TimelineControls: React.FC<TimelineControlsProps> = ({
     cleanupOldEvents,
   } = useTimelineStore();
 
-  const handleSpeedChange = (newSpeed: number) => {
-    setSpeed(newSpeed);
+  const handleSpeedChange = (value: string) => {
+    setSpeed(parseFloat(value));
   };
 
   const speedOptions = [0.25, 0.5, 1, 2, 4, 8];
 
+  const handleCleanup = () => {
+    if (onForceCleanup) {
+      onForceCleanup();
+    } else {
+      cleanupOldEvents();
+    }
+  };
+
   return (
     <div
-      className={`flex items-center gap-4 p-4 bg-card rounded-lg border ${className}`}
+      className={`flex items-center gap-2 p-2 bg-card rounded-lg border ${className}`}
     >
       {/* Play/Pause Button */}
-      <Button onClick={() => setPlaying(!isPlaying)}>
+      <Button onClick={() => setPlaying(!isPlaying)} size="sm">
         {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-        {isPlaying ? 'Pause' : 'Play'}
+        <span className="ml-2">{isPlaying ? 'Pause' : 'Play'}</span>
       </Button>
 
       {/* Speed Control */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium">Speed:</label>
-        <select
-          value={speed}
-          onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
-          className="px-2 py-1 border rounded text-sm bg-background"
-        >
-          {speedOptions.map((speedOption) => (
-            <option key={speedOption} value={speedOption}>
-              {speedOption}x
-            </option>
-          ))}
-        </select>
+        <Select value={speed.toString()} onValueChange={handleSpeedChange}>
+          <SelectTrigger className="w-20">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {speedOptions.map((speedOption) => (
+              <SelectItem key={speedOption} value={speedOption.toString()}>
+                {speedOption}x
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Current Time Display */}
@@ -66,14 +92,26 @@ const TimelineControls: React.FC<TimelineControlsProps> = ({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 ml-auto">
-        <Button onClick={cleanupOldEvents} title="Clean up old events">
-          <Trash2 size={14} />
-          Cleanup
+        <Button onClick={onRecenterToCursor} title="" variant="ghost">
+          📍
         </Button>
-
-        <Button onClick={reset} title="Reset timeline">
+        <Button
+          onClick={handleCleanup}
+          title="Clean up old events"
+          size="sm"
+          variant="outline"
+        >
+          <Trash2 size={14} />
+          <span className="ml-2">Cleanup</span>
+        </Button>
+        <Button
+          onClick={reset}
+          title="Reset timeline"
+          size="sm"
+          variant="outline"
+        >
           <RotateCcw size={14} />
-          Reset
+          <span className="ml-2">Reset</span>
         </Button>
       </div>
     </div>

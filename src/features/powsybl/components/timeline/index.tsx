@@ -1,7 +1,4 @@
-// components/TimelineComponent.tsx
-import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React, { useCallback, useEffect } from 'react';
 import TimelineVisualization from './timeline-visualization';
 import TimelineControls from './timeline-controls';
 import { useTimelineInitialization } from './use-timeline-data';
@@ -12,18 +9,7 @@ import {
   usePerformanceMonitor,
 } from './use-sliding-window';
 import './timeline.css';
-
-// Create a query client with optimized settings
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 1000,
-      gcTime: 300000, // 5 minutes
-    },
-  },
-});
+import { useTimelineStore } from './timeline-store';
 
 // Performance Statistics Component
 const PerformanceStats: React.FC = () => {
@@ -54,6 +40,7 @@ const PerformanceStats: React.FC = () => {
 const TimelineInner: React.FC = () => {
   // Initialize timeline data
   const { data: initialData, isLoading, error } = useTimelineInitialization();
+  const { currentTime, setCurrentTime } = useTimelineStore();
 
   // Setup sliding window with automatic cleanup
   const {
@@ -69,6 +56,10 @@ const TimelineInner: React.FC = () => {
     eventGenerationRate: 0.05,
     updateInterval: 50,
   });
+  
+  const recenterToCursor = useCallback(() => {
+    setCurrentTime(windowBoundaries.center || currentTime);
+  }, [windowBoundaries, currentTime]);
 
   // Prefetch next window when scrolling fast
   useEffect(() => {
@@ -105,7 +96,7 @@ const TimelineInner: React.FC = () => {
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xs font-semibold">Timeline</h1>
+        <h1 className="text-xs uppercase">Timeline</h1>
         <div className="flex items-center space-x-2 text-xs">
           <div
             className={`flex items-center space-x-1 ${
@@ -129,6 +120,7 @@ const TimelineInner: React.FC = () => {
       <TimelineControls
         onForceCleanup={forceCleanup}
         windowBoundaries={windowBoundaries}
+        onRecenterToCursor={recenterToCursor}
       />
 
       {/* Timeline Visualization */}
@@ -141,32 +133,11 @@ const TimelineInner: React.FC = () => {
         />
 
         {/* Window boundaries indicator */}
-        <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-background/80 p-1 rounded">
+        <div className="absolute top-2 left-2 text-xs text-muted-foreground bg-background/80 p-1 rounded">
           Window: {windowBoundaries.start.toFixed(1)} →{' '}
           {windowBoundaries.end.toFixed(1)}
         </div>
       </div>
-
-      {/* Debug information in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <details className="text-xs">
-          <summary className="cursor-pointer text-muted-foreground">
-            Debug Info
-          </summary>
-          <pre className="p-2 bg-muted rounded text-xs overflow-auto">
-            {JSON.stringify(
-              {
-                visibleEventsCount: visibleEvents.length,
-                windowBoundaries,
-                isRunning,
-                isCleaningUp,
-              },
-              null,
-              2,
-            )}
-          </pre>
-        </details>
-      )}
     </div>
   );
 };
