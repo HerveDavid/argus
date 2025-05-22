@@ -61,14 +61,6 @@ export const useSvgUpdate = (
         return;
       }
 
-      // Vérifier que c'est bien un élément de type ARROW_ACTIVE
-      // if (!id.includes('ARROW_ACTIVE')) {
-      //   console.warn(
-      //     'Seuls les éléments ARROW_ACTIVE sont pris en charge actuellement',
-      //   );
-      //   return;
-      // }
-
       // Sélectionner l'élément de groupe du feeder
       const feederGroup = svg.select(`#${id}`);
       if (feederGroup.empty()) {
@@ -84,10 +76,24 @@ export const useSvgUpdate = (
       }
 
       // Mettre à jour la valeur en conservant l'unité
-      // Seulement 4 decimal
+      // Seulement 4 décimales
       const text = `${parseFloat(value.toFixed(4))}`;
-
       textElement.text(text);
+
+      // Gérer les classes sld-in et sld-out en fonction du signe de la valeur
+      if (value > 0) {
+        // Valeur positive: ajouter sld-out et retirer sld-in
+        feederGroup.classed('sld-out', true);
+        feederGroup.classed('sld-in', false);
+      } else if (value < 0) {
+        // Valeur négative: ajouter sld-in et retirer sld-out
+        feederGroup.classed('sld-in', true);
+        feederGroup.classed('sld-out', false);
+      } else {
+        // Valeur nulle: retirer les deux classes
+        feederGroup.classed('sld-in', false);
+        feederGroup.classed('sld-out', false);
+      }
 
       // Ajouter une petite animation pour mettre en évidence la mise à jour
       textElement
@@ -96,7 +102,11 @@ export const useSvgUpdate = (
         .duration(1000)
         .style('fill', 'black');
 
-      console.log(`Mise à jour de ${id} avec la valeur: ${value}`);
+      console.log(
+        `Mise à jour de ${id} avec la valeur: ${value} (${
+          value > 0 ? 'sld-in' : value < 0 ? 'sld-out' : 'neutre'
+        })`,
+      );
     },
     [svgContainerRef],
   );
