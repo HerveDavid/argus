@@ -9,8 +9,8 @@ from interfaces import (
     check_port_in_use,
 )
 
-
-address = "tcp://localhost:4267"
+port = 4267
+address = f"tcp://localhost:{port}"
 
 
 async def main():
@@ -25,8 +25,8 @@ async def main():
     # Check if port is already in use
     if await check_port_in_use(address):
         logger.warning(f"Port is already in use: {address}")
-        if force_close_port(5555):
-            logger.info("Successfully closed existing process on port 5555")
+        if force_close_port(port):
+            logger.info(f"Successfully closed existing process on port {port}")
         else:
             logger.error("Failed to close existing process")
             return
