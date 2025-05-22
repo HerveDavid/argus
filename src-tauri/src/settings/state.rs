@@ -2,11 +2,16 @@ use reqwest;
 use std::sync::Arc;
 use zeromq::Socket;
 
+use crate::shared::entities::dynawo::GameMasterOutput;
+
 pub struct SettingsState {
     pub client: Arc<reqwest::Client>,
     pub server_url: Option<String>,
     pub zmq_client: Arc<zeromq::SubSocket>,
     pub zmq_url: Option<String>,
+
+    // input files from haulogy works
+    pub game_master_outputs: Option<Vec<GameMasterOutput>>,
 }
 
 impl Default for SettingsState {
@@ -30,6 +35,7 @@ impl Default for SettingsState {
             server_url: None,
             zmq_client: Arc::new(zmq_client),
             zmq_url: Some("".to_string()),
+            game_master_outputs: None,
         }
     }
 }

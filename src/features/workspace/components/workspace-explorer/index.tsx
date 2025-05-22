@@ -36,7 +36,7 @@ export const WorkspaceExplorer: React.FC = () => {
         <h3 className="uppercase text-sm">Workspace</h3>
       </div>
 
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="multiple" collapsible className="w-full">
         <AccordionItem value="item-1" className="px-2">
           <AccordionTrigger className="text-xs text-gray-500">
             Substations ({substationArray.length})

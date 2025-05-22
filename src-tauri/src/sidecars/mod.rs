@@ -1,10 +1,10 @@
 pub mod commands;
 
+use log::{debug, error, info, warn};
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
-use log::{info, error, debug, warn};
 
 // Helper function to spawn the sidecar and monitor its stdout/stderr
 pub fn spawn_and_monitor_sidecar(app_handle: tauri::AppHandle) -> Result<(), String> {

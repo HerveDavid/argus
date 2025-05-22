@@ -70,6 +70,8 @@
     "store:allow-reload",
     "store:allow-save",
     "dialog:default",
-    "log:default"
+    "log:default",
+    "sql:default",
+    "sql:allow-execute"
   ]
 }

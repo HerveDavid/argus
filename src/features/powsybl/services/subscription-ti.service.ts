@@ -72,6 +72,7 @@ export const unsubscribeSLD = (id: string, sld_metadata: SldMetadata) =>
 
 export const connectBroker = (
   substation_id: string,
+  metadata: SldMetadata,
   handler: (values: Record<string, number>) => void,
 ) =>
   Effect.gen(function* () {
@@ -84,6 +85,7 @@ export const connectBroker = (
       try: () =>
         invoke<SldSubscriptionResponse>('connect_broker', {
           substation_id,
+          metadata,
           channel,
         }),
       catch: (error) => console.error(error),
@@ -97,6 +99,18 @@ export const disconnectBroker = (substation_id: string) =>
       try: () =>
         invoke<SldSubscriptionResponse>('disconnect_broker', {
           substation_id,
+        }),
+      catch: (error) => console.error(error),
+    });
+  });
+
+export const sendBroker = (command: { [key: string]: number }) =>
+  Effect.gen(function* () {
+    // Invocation de l'API Tauri
+    return yield* Effect.tryPromise({
+      try: () =>
+        invoke<SldSubscriptionResponse>('send_command_broker', {
+          command,
         }),
       catch: (error) => console.error(error),
     });

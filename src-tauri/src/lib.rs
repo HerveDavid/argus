@@ -1,23 +1,29 @@
+use database::{DatabaseInner, DatabaseState};
 use std::sync::{Arc, Mutex};
 use tauri::{Manager, RunEvent};
 use tauri_plugin_shell::process::CommandChild;
 
 mod broker;
+mod database;
 mod powsybl;
 mod settings;
 mod shared;
 mod sidecars;
 mod state;
 
-use broker::commands::*;
+use broker::{
+    commands::*,
+    state::{BrokerState, BrokerStateInner},
+};
 use powsybl::commands::*;
 use settings::commands::*;
 use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
-use state::AppState;
+use state::AppStateInner;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_sql::Builder::new().build())
         .plugin(tauri_plugin_log::Builder::new().build())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
@@ -30,6 +36,7 @@ pub fn run() {
             // Broker (nats)
             connect_broker,
             disconnect_broker,
+            send_command_broker,
             // Sidecars
             start_sidecar,
             shutdown_sidecar,
@@ -39,8 +46,12 @@ pub fn run() {
             set_zmq_url,
             set_zmq_subscription,
             get_zmq_url,
+            load_config_file,
             // Loaders
             load_client,
+            load_game_master_outputs_in_db,
+            load_iidm_file,
+            upload_iidm,
             // Substations
             get_substations,
             get_substation_by_id,
@@ -62,14 +73,33 @@ pub fn run() {
             unsubscribe_single_line_diagram,
         ])
         .setup(|app| {
-            app.manage(AppState::default());
+            tauri::async_runtime::block_on(async move {
+                // Global app state (todo: to remove)
+                let app_state = AppStateInner::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize app state");
+                app.manage(app_state);
 
-            // Store the initial sidecar process in the app state
-            app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
+                // Sidecar state
+                // Store the initial sidecar process in the app state
+                app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
 
-            let app_handle = app.handle().clone();
-            // Spawn the Python sidecar on startup
-            spawn_and_monitor_sidecar(app_handle).ok();
+                let app_handle = app.handle().clone();
+                // Spawn the Python sidecar on startup
+                spawn_and_monitor_sidecar(app_handle).ok();
+
+                // Database state
+                let database_state = DatabaseInner::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize database state");
+                app.manage(DatabaseState::new(database_state));
+
+                // Broker state
+                let broker_state = BrokerStateInner::new()
+                    .await
+                    .expect("Failed to initialize broker state");
+                app.manage(BrokerState::new(broker_state));
+            });
 
             Ok(())
         })

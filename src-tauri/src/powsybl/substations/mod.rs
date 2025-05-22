@@ -23,7 +23,6 @@ pub async fn get_substations(state: State<'_, AppState>) -> PowsyblResult<Vec<Su
                 "Failed to parse substations".to_string(),
             ));
         };
-
     // Update the state
     {
         let mut app_state = state.write().map_err(|_| PowsyblError::LockError)?;
@@ -43,6 +42,7 @@ pub async fn get_substations(state: State<'_, AppState>) -> PowsyblResult<Vec<Su
 #[tauri::command(rename_all = "snake_case")]
 pub async fn load_substations(state: State<'_, AppState>) -> PowsyblResult<FetchStatus> {
     let substations = get_substations(state).await?;
+
     Ok(FetchStatus {
         success: true,
         message: format!("Loaded {} substations sucessfully", substations.len()),

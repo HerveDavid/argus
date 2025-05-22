@@ -11,6 +11,24 @@ pub enum SettingsError {
 
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+
+    #[error("Invalid path: {0}")]
+    InvalidPath(String),
+
+    #[error("File not found: {0}")]
+    FileNotFound(String),
+
+    #[error("File not enable to read: {0}")]
+    FileRead(String),
+
+    #[error("Deserialization error: {0}")]
+    Deserialization(String),
+
+    #[error("Invalid config error: {0}")]
+    InvalidConfig(String),
+
+    #[error("Sqlite error error: {0}")]
+    Sqlite(#[from] sqlx::Error),
 }
 
 // Implement Serialize for SettingsError for Tauri command compatibility

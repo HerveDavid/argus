@@ -184,9 +184,13 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   },
 
   connectBroker: (id, handler) => {
-    Effect.runPromise(connectBroker(id, handler))
-      .then(console.log)
-      .catch(console.error);
+    const { metadata } = get();
+
+    if (metadata) {
+      Effect.runPromise(connectBroker(id, metadata, handler))
+        .then(console.log)
+        .catch(console.error);
+    }
   },
 
   disconnectBroker: (id) => {
