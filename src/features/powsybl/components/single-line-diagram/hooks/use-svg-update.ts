@@ -53,6 +53,7 @@ export const useSvgUpdate = (
   const updateFeederInfo = useCallback(
     (id: string, value: number) => {
       if (!svgContainerRef.current) return;
+      if (id == "") return;
 
       // Utiliser d3 pour sélectionner l'élément SVG
       const svg = d3.select(svgContainerRef.current).select('svg');
