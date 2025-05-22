@@ -22,17 +22,16 @@ const TimelineVisualization: React.FC<TimelineVisualizationProps> = ({
 
   const { events, currentTime, getAbsoluteTime } = useTimelineStore();
 
-
   // Color configuration
   const colorConfig = useMemo(
     () => ({
       description: {
-        background: 'transparent',
+        background: 'var(--background)',
         foreground: 'transparent',
       },
       message: {
-        background: 'transparent',
-        foreground: 'transparent',
+        background: 'var(--background)',
+        foreground: 'var(--highlight-foreground)',
       },
     }),
     [],
@@ -54,7 +53,7 @@ const TimelineVisualization: React.FC<TimelineVisualizationProps> = ({
         content: `<div class="timeline-item" style="color: ${colors.foreground}">
                   ${displayText}
                 </div>`,
-        start: absoluteTime, // Utiliser le temps absolu au lieu de event.time
+        start: absoluteTime,
         type: 'box' as const,
         title: `${displayText}<br>Time: ${new Date(
           absoluteTime,
@@ -90,13 +89,25 @@ const TimelineVisualization: React.FC<TimelineVisualizationProps> = ({
         overflowMethod: 'cap',
       },
       snap: null,
-      zoomMin: 60,
+      // Zoom configuration pour avoir le zoom par défaut à la minute
+      zoomMin: 1000, // 1 seconde minimum
+      zoomMax: 1000 * 60 * 60 * 24, // 24 heures maximum
+      // Définir le zoom initial (en millisecondes)
+      // 60000 ms = 1 minute de largeur visible
+      start: new Date(Date.now() - 30000), // 30 secondes avant maintenant
+      end: new Date(Date.now() + 30000), // 30 secondes après maintenant
       format: {
         minorLabels: {
           millisecond: 'SSS',
-          second: 's',
-          minute: 'HH:mm',
+          second: 's.SSS',
+          minute: 'mm:ss',
           hour: 'HH:mm',
+        },
+        majorLabels: {
+          millisecond: 's',
+          second: 'mm:ss',
+          minute: 'HH:mm',
+          hour: 'DD/MM',
         },
       },
     };
@@ -126,21 +137,28 @@ const TimelineVisualization: React.FC<TimelineVisualizationProps> = ({
     ) {
       return;
     }
-  
+
     try {
       const { getAbsoluteTime } = useTimelineStore.getState();
       const minTime = Math.min(...events.map((e) => e.time));
       const absoluteMinTime = getAbsoluteTime(minTime);
       const absoluteCurrentTime = getAbsoluteTime(currentTime);
-      
+
       timelineInstanceRef.current.addCustomTime(absoluteCurrentTime, 'current');
       timelineInstanceRef.current.setCustomTimeTitle('Current Time', 'current');
-      timelineInstanceRef.current.setWindow(absoluteMinTime, absoluteMinTime + windowSize);
+
+      // Définir la fenêtre initiale avec un zoom d'1 minute (60000 ms)
+      const windowDuration = 60000; // 1 minute en millisecondes
+      timelineInstanceRef.current.setWindow(
+        absoluteCurrentTime - windowDuration / 2,
+        absoluteCurrentTime + windowDuration / 2,
+      );
+
       customTimeInitializedRef.current = true;
     } catch (error) {
       console.warn('Failed to initialize custom time:', error);
     }
-  }, [events.length > 0, windowSize]);
+  }, [events.length > 0, windowSize, currentTime]);
 
   // Update timeline items when events change
   useEffect(() => {
@@ -163,18 +181,18 @@ const TimelineVisualization: React.FC<TimelineVisualizationProps> = ({
     if (!timelineInstanceRef.current || !customTimeInitializedRef.current) {
       return;
     }
-  
+
     try {
       const { getAbsoluteTime } = useTimelineStore.getState();
       const absoluteCurrentTime = getAbsoluteTime(currentTime);
-      
+
       // Update marker position
       timelineInstanceRef.current.setCustomTime(absoluteCurrentTime, 'current');
-  
+
       // Update visible window to follow the marker
       const window = timelineInstanceRef.current.getWindow();
       const currentWindowSize = window.end - window.start;
-  
+
       // Keep the marker at 70% of the visible window
       timelineInstanceRef.current.setWindow(
         absoluteCurrentTime - currentWindowSize * 0.7,

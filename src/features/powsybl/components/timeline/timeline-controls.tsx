@@ -1,6 +1,6 @@
 // components/TimelineControls.tsx
 import React from 'react';
-import { Play, Pause, RotateCcw, Trash2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Trash2, Locate } from 'lucide-react';
 import { useTimelineStore } from './timeline-store';
 import { Button } from '@/components/ui/button';
 import {
@@ -93,7 +93,7 @@ const TimelineControls: React.FC<TimelineControlsProps> = ({
       {/* Action Buttons */}
       <div className="flex items-center gap-2 ml-auto">
         <Button onClick={onRecenterToCursor} title="" variant="ghost">
-          📍
+          <Locate />
         </Button>
         <Button
           onClick={handleCleanup}
