@@ -85,6 +85,7 @@ pub async fn connect_broker(
                     if let Ok(time_str) = std::str::from_utf8(&msg.payload) {
                         if let Ok(time) = time_str.parse::<f64>() {
                             debug!("Message de temps reçu: {}", time);
+
                             if !telemetry_values.is_empty() {
                                 match channel.send(telemetry_values.clone()) {
                                     Ok(_) => debug!("Données envoyées au canal ({} valeurs)", telemetry_values.len()),

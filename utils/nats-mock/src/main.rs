@@ -103,10 +103,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     });
 
     println!("Start sending loop");
+
     let mut time_counter: f64 = 0.0;
 
     loop {
         time_counter += 1.0;
+
         let mut values = HashMap::new();
 
         for id in &telemetry_ids {
@@ -123,6 +125,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             values.insert(id.to_string(), value);
             let message = format!("{{\"{}\": {}}}", id, value);
+
             let subject = "GameMaster.MQIS"; // All ID seem to come from the MQIS substation
             
             client.publish(subject, message.clone().into()).await?;
@@ -143,6 +146,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // if time_counter > 50.0 {
         //     break;
         // }
+
     }
 
     // Annoncer l'arrêt sur GameMasterControl
