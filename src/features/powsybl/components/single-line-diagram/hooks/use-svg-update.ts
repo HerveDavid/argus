@@ -52,8 +52,9 @@ export const useSvgUpdate = (
         return;
       }
 
-      // Mettre à jour la valeur en conservant l'unité MW
-      const text = `${value} MW`;
+      // Mettre à jour la valeur en conservant l'unité 
+      // Seulement 4 decimal
+      const text = `${parseFloat(value.toFixed(4))}`;
       textElement.text(text);
 
       // Ajouter une petite animation pour mettre en évidence la mise à jour
@@ -63,7 +64,7 @@ export const useSvgUpdate = (
         .duration(1000)
         .style('fill', 'black');
 
-      console.log(`Mise à jour de ${id} avec la valeur: ${value} MW`);
+      console.log(`Mise à jour de ${id} avec la valeur: ${value}`);
     },
     [svgContainerRef],
   );
