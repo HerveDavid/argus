@@ -25,19 +25,14 @@ pub async fn connect_broker(
     channel: Channel<HashMap<String, f64>>,
 ) -> BrokerResult<()> {
     // Vérifier d'abord si une connexion existe déjà pour cette sous-station
-    {
-        let state_lock = state.lock().await;
-        if state_lock.channels.contains_key(&substation_id) {
-            info!(
-                "Une connexion existe déjà pour '{}'. Réutilisation.",
-                substation_id
-            );
-            return Ok(());
-        }
-    }
-
-    // Build a nats client
     let mut state = state.lock().await;
+    if state.channels.contains_key(&substation_id) {
+        info!(
+            "Une connexion existe déjà pour '{}'. Réutilisation.",
+            substation_id
+        );
+        return Ok(());
+    }
 
     // Subscribe to topic
     let topic = format!("{}.{}", TOPIC, substation_id);
@@ -77,9 +72,12 @@ pub async fn connect_broker(
         loop {
             tokio::select! {
                 Some(msg) = telemetry_subscription.next() => {
-                    debug!("Message de télémétrie reçu sur '{}'", topic);
+                    let milliseconds_timestamp: u128 = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_millis();
+                    debug!("Message de télémétrie reçu sur '{}' (time:{}): {:?}", topic, milliseconds_timestamp, &msg.payload);
                     process_telemetry_message(msg, &mut telemetry_values, &outputs);
-
                 }
                 Some(msg) = time_subscription.next() => {
                     if let Ok(time_str) = std::str::from_utf8(&msg.payload) {

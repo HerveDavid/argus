@@ -82,11 +82,11 @@ export const useSvgUpdate = (
       textElement.text(text);
 
       // Gérer les classes sld-in et sld-out en fonction du signe de la valeur
-      if (value > 1e-4) {
+      if (value >= 1e-4) {
         // Valeur positive: ajouter sld-out et retirer sld-in
         feederGroup.classed('sld-out', true);
         feederGroup.classed('sld-in', false);
-      } else if (value < -1e-4) {
+      } else if (value <= -1e-4) {
         // Valeur négative: ajouter sld-in et retirer sld-out
         feederGroup.classed('sld-in', true);
         feederGroup.classed('sld-out', false);
