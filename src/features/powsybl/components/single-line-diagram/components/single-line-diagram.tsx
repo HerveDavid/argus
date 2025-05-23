@@ -12,6 +12,8 @@ import '../styles/diagram-animations.css';
 import { useSvgUpdate } from '../hooks/use-svg-update';
 import { feeders_with_dynawo_id } from '../utils/mapping';
 import { TeleInformation } from '@/features/powsybl/types/tele-information.type';
+import { Effect } from 'effect';
+import { sendBreaker } from '@/features/powsybl/services/subscription-ti.service';
 
 const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
   lineId,
@@ -50,10 +52,17 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
         // Si fermé → ouvrir
         breakerElement.classList.remove('sld-closed');
         breakerElement.classList.add('sld-open');
+
+        Effect.runPromise(sendBreaker(breakerId, 1.00));
+
       } else {
         // Si ouvert → fermer
         breakerElement.classList.remove('sld-open');
         breakerElement.classList.add('sld-closed');
+
+        Effect.runPromise(sendBreaker(breakerId, 0.00));
+
+
       }
     }, 600); // Le délai correspond à la durée de l'animation
 

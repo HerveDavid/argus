@@ -17,6 +17,12 @@ pub enum BrokerError {
 
     #[error("Serialization error: {0}")]
     SerializationError(#[from] serde_json::Error),
+
+    #[error("State error error: {0}")]
+    StateError(String),
+
+    #[error("Validation error error: {0}")]
+    ValidationError(String),
 }
 
 // Implement Serialize for PowsyblError for Tauri command compatibility

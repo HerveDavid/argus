@@ -37,6 +37,7 @@ pub fn run() {
             connect_broker,
             disconnect_broker,
             send_command_broker,
+            send_command_breaker,
             // Sidecars
             start_sidecar,
             shutdown_sidecar,

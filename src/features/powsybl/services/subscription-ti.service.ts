@@ -115,3 +115,16 @@ export const sendBroker = (command: { [key: string]: number }) =>
       catch: (error) => console.error(error),
     });
   });
+
+export const sendBreaker = (graphical_id: string, value: number) =>
+  Effect.gen(function* () {
+    // Invocation de l'API Tauri
+    return yield* Effect.tryPromise({
+      try: () =>
+        invoke<SldSubscriptionResponse>('send_command_breaker', {
+          graphical_id,
+          value,
+        }),
+      catch: (error) => console.error(error),
+    });
+  });

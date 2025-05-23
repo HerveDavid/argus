@@ -166,13 +166,13 @@ pub async fn send_command_broker(
 ) -> BrokerResult<()> {
     // Log when the function is called
     log::info!("send_command_broker called with command: {}", command);
-    
+
     // Get a nats client
     let state = state.lock().await;
     let command_str = serde_json::to_string(&command)?;
-    
+
     log::debug!("Publishing command to topic: {}{}", TOPIC, "Control");
-    
+
     // Try to publish the message and log the result
     match state
         .client
@@ -182,7 +182,7 @@ pub async fn send_command_broker(
         Ok(_) => {
             log::info!("Command successfully published to broker");
             Ok(())
-        },
+        }
         Err(err) => {
             log::error!("Failed to publish command to broker: {}", err);
             Err(err.into())
@@ -224,4 +224,74 @@ fn find(outputs: &Vec<GameMasterOutput>, id: &str) -> Option<String> {
     }
 
     None
+}
+
+fn find_from_graphical_id(outputs: &Vec<GameMasterOutput>, graphical_id: &str) -> Option<String> {
+    outputs
+        .iter()
+        .find(|o| o.graphical_id.as_ref().map_or(false, |g| g == graphical_id))
+        .and_then(|o| o.equipment_id.clone())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn send_command_breaker(
+    app: State<'_, AppState>,
+    state: State<'_, BrokerState>,
+    graphical_id: String,
+    value: f64,
+) -> BrokerResult<()> {
+    // For ShardedLock, try_read() returns Result<Guard, TryLockError>
+    let outputs = match app.try_read() {
+        Ok(guard) => {
+            match &guard.settings.game_master_outputs {
+                Some(game_outputs) => {
+                    log::debug!("Successfully acquired AppState read lock, found {} outputs", game_outputs.len());
+                    game_outputs.clone()
+                }
+                None => {
+                    warn!("Game master outputs not initialized");
+                    return Err(BrokerError::StateError("Game master outputs not initialized".to_string()));
+                }
+            }
+        }
+        Err(_) => {
+            warn!("Failed to acquire AppState read lock: WouldBlock");
+            return Err(BrokerError::LockError("AppState read lock unavailable".to_string()));
+        }
+    };
+
+    // Find the equipment ID from graphical ID
+    let equipment_id = find_from_graphical_id(&outputs, &graphical_id)
+        .ok_or_else(|| {
+            warn!("Graphical ID not found: {}", graphical_id);
+            BrokerError::ValidationError(format!("Graphical ID not found: {}", graphical_id))
+        })?;
+
+    // Create command JSON with the equipment ID as the key
+    let command = serde_json::json!({
+        equipment_id: value
+    });
+
+    // Get NATS client
+    let state_guard = state.lock().await;
+    let command_str = serde_json::to_string(&command)
+        .map_err(|e| {
+            log::error!("Failed to serialize command: {}", e);
+            BrokerError::SerializationError(e)
+        })?;
+
+    let topic = format!("{}{}", TOPIC, "Control");
+    log::debug!("Publishing command to topic: {}", topic);
+
+    // Publish command
+    match state_guard.client.publish(topic, command_str.into()).await {
+        Ok(_) => {
+            log::info!("Command successfully published to broker");
+            Ok(())
+        }
+        Err(err) => {
+            log::error!("Failed to publish command to broker: {}", err);
+            Err(err.into())
+        }
+    }
 }

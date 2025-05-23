@@ -16,6 +16,7 @@ pub struct GameMasterOutput {
     pub graphical_id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "equipementId")]
     pub equipment_id: Option<String>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
