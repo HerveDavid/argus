@@ -86,10 +86,10 @@ export const useSvgZoomPan = (
       // Appliquer le comportement de zoom
       svgElement.call(zoom);
 
-      // Double-clic pour réinitialiser le zoom
-      svgElement.on('dblclick.zoom', () => {
-        resetZoom(svgElement);
-      });
+      // // Double-clic pour réinitialiser le zoom
+      // svgElement.on('dblclick.zoom', () => {
+      //   resetZoom(svgElement);
+      // });
 
       // Centrer et adapter le SVG au chargement initial
       resetZoom(svgElement);
