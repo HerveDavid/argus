@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "argus",
+        "title": "GameMaster - State View",
         "width": 1920,
         "height": 1080
       }
@@ -32,6 +32,8 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["binaries/powsybl"]
+    "externalBin": [
+      "binaries/powsybl"
+    ]
   }
 }
