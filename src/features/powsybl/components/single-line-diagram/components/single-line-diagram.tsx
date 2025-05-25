@@ -43,28 +43,33 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
     );
     if (!breakerElement || !(breakerElement instanceof SVGElement)) return;
 
-    // Appliquer l'effet de clignotement
-    applyBlinkEffect(breakerElement, !isClosed);
+    // // Appliquer l'effet de clignotement
+    // applyBlinkEffect(breakerElement, !isClosed);
 
     // Changer l'état après un court délai pour que l'effet soit visible
-    setTimeout(() => {
-      if (isClosed) {
-        // Si fermé → ouvrir
-        breakerElement.classList.remove('sld-closed');
-        breakerElement.classList.add('sld-open');
+    // setTimeout(() => {
+    if (isClosed) {
+      console.log("Open breaker", breakerId)
+      // Si fermé → ouvrir
+      breakerElement.classList.add('sld-switching');
+      breakerElement.classList.remove('sld-closed');
+      breakerElement.classList.add('sld-open');
 
-        Effect.runPromise(sendBreaker(breakerId, 1.00));
+      Effect.runPromise(sendBreaker(breakerId, 1.00));
 
-      } else {
-        // Si ouvert → fermer
-        breakerElement.classList.remove('sld-open');
-        breakerElement.classList.add('sld-closed');
+    } else {
+      console.log("Close breaker", breakerId)
 
-        Effect.runPromise(sendBreaker(breakerId, 0.00));
+      // Si ouvert → fermer
+      breakerElement.classList.add('sld-switching');
+      breakerElement.classList.remove('sld-open');
+      breakerElement.classList.add('sld-closed');
+
+      Effect.runPromise(sendBreaker(breakerId, 0.00));
 
 
-      }
-    }, 600); // Le délai correspond à la durée de l'animation
+    }
+    // }, 600); // Le délai correspond à la durée de l'animation
 
     // Fermer le menu contextuel
     setContextMenu((prev) => ({ ...prev, visible: false }));
@@ -91,7 +96,7 @@ const SingleLineDiagram: React.FC<SingleLineDiagramProps> = ({
 
   useEffect(() => {
     const mapper = (tc: Record<string, number>) => {
-      console.log(tc);
+      // console.log(tc);
       for (const [id, value] of Object.entries(tc)) {
         const tm: TeleInformation = {
           ti: 'TM',

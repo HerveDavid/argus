@@ -62,52 +62,71 @@ export const useSvgUpdate = (
         return;
       }
 
-      // Sélectionner l'élément de groupe du feeder
-      const feederGroup = svg.select(`#${id}`);
-      if (feederGroup.empty()) {
+      // Sélectionner l'élément du SVG
+      const svgElement = svg.select(`#${id}`);
+      if (svgElement.empty()) {
         console.warn(`Élément avec l'ID ${id} non trouvé dans le SVG`);
         return;
       }
 
-      // Sélectionner l'élément texte dans le groupe
-      const textElement = feederGroup.select('.sld-label');
-      if (textElement.empty()) {
-        console.warn(`Élément texte non trouvé dans le feeder ${id}`);
-        return;
-      }
+      // Element de type feeder avec une balise sld-label contenant la valeur
+      const textElement = svgElement.select('.sld-label');
+      if (!textElement.empty()) {
 
-      // Mettre à jour la valeur en conservant l'unité
-      // Seulement 4 décimales
-      const text = `${parseFloat(value.toFixed(4))}`;
-      textElement.text(text);
+        // Mettre à jour la valeur en conservant l'unité
+        // Seulement 4 décimales
+        const text = `${parseFloat(value.toFixed(4))}`;
+        textElement.text(text);
 
-      // Gérer les classes sld-in et sld-out en fonction du signe de la valeur
-      if (value >= 1e-4) {
-        // Valeur positive: ajouter sld-out et retirer sld-in
-        feederGroup.classed('sld-out', true);
-        feederGroup.classed('sld-in', false);
-      } else if (value <= -1e-4) {
-        // Valeur négative: ajouter sld-in et retirer sld-out
-        feederGroup.classed('sld-in', true);
-        feederGroup.classed('sld-out', false);
+        // Gérer les classes sld-in et sld-out en fonction du signe de la valeur
+        if (value >= 1e-4) {
+          // Valeur positive: ajouter sld-out et retirer sld-in
+          svgElement.classed('sld-out', true);
+          svgElement.classed('sld-in', false);
+        } else if (value <= -1e-4) {
+          // Valeur négative: ajouter sld-in et retirer sld-out
+          svgElement.classed('sld-in', true);
+          svgElement.classed('sld-out', false);
+        } else {
+          // Valeur nulle: retirer les deux classes
+          svgElement.classed('sld-in', false);
+          svgElement.classed('sld-out', false);
+        }
+
+        // Ajouter une petite animation pour mettre en évidence la mise à jour
+        textElement
+          .style('fill', 'red')
+          .transition()
+          .duration(1000)
+          .style('fill', 'black');
+      // console.log(
+      //   `Mise à jour de ${id} avec la valeur: ${value} (${
+      //     value > 0 ? 'sld-in' : value < 0 ? 'sld-out' : 'neutre'
+      //   })`,
+      // );
+      } else if (svgElement.classed('sld-open') || svgElement.classed('sld-closed')) {
+        // Breaker element
+        const value_int = parseInt(value.toFixed(value))
+        if (svgElement.classed('sld-switching'))
+          console.log("element switching: ", id)
+        if (value_int == 1 && svgElement.classed('sld-open') && svgElement.classed('sld-switching')) {
+          console.log("fin switching open", id)
+          svgElement.classed('sld-switching', false)
+        } else if (value_int == 2 && svgElement.classed('sld-closed') && svgElement.classed('sld-switching')) {
+          console.log("fin switching close", id)
+          svgElement.classed('sld-switching', false)
+        } else if (value_int == 1 && svgElement.classed('sld-closed') && !svgElement.classed('sld-switching')) {
+          svgElement.classed('sld-open', true);
+          svgElement.classed('sld-closed', false);
+          console.log("open switch ", id)
+        } else if (value_int == 2 && svgElement.classed('sld-open') && !svgElement.classed('sld-switching')) {
+          svgElement.classed('sld-open', false);
+          svgElement.classed('sld-closed', true);
+          console.log("close switch ", id)
+        }
       } else {
-        // Valeur nulle: retirer les deux classes
-        feederGroup.classed('sld-in', false);
-        feederGroup.classed('sld-out', false);
+        console.log(`Element not managed: ${id}`)
       }
-
-      // Ajouter une petite animation pour mettre en évidence la mise à jour
-      textElement
-        .style('fill', 'red')
-        .transition()
-        .duration(1000)
-        .style('fill', 'black');
-
-      console.log(
-        `Mise à jour de ${id} avec la valeur: ${value} (${
-          value > 0 ? 'sld-in' : value < 0 ? 'sld-out' : 'neutre'
-        })`,
-      );
     },
     [svgContainerRef],
   );

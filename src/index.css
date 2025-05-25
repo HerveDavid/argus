@@ -479,6 +479,7 @@
   .sld-busbar-section.sld-bus-disconnected {stroke-dasharray: 3,3 !important;}
 
   /* Components */
+  .sld-switching {stroke: var(--sld-vl-color, #c80000) !important; fill: none !important;}
   .sld-disconnector {stroke-width: 3 !important; stroke: var(--color-foreground) !important; fill: none !important;}
   /* .sld-breaker {stroke-width: 2 !important; stroke: blue !important; fill: white !important;} */
   /* .sld-load-break-switch {stroke: blue !important; fill: white !important;} */
