@@ -79,14 +79,18 @@ export const Header = () => {
       >
         <LeftMenu />
       </div>
-      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">&nbsp;</div>
+      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+        &nbsp;
+      </div>
       <div
         className="relative flex-1 flex justify-center"
         onMouseDown={stopPropagation}
       >
         <CenterMenu />
       </div>
-      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">&nbsp;</div>
+      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+        &nbsp;
+      </div>
       <div
         className="relative flex-1 flex justify-end"
         onMouseDown={stopPropagation}

@@ -1,4 +1,5 @@
 import { IDockviewPanelProps } from 'dockview';
+
 import {
   ContextMenu,
   ContextMenuContent,

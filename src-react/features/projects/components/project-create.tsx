@@ -25,12 +25,7 @@ export const ProjectCreate = ({ open, onOpenChange }: ProjectCreateProps) => {
   const [configPath, setConfigPath] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const {
-    setCurrentProject,
-    setCurrentProjectPath,
-    setCurrentConfigPath,
-    addRecentProject,
-  } = useProjectsStore();
+  const { setCurrentProject, addRecentProject } = useProjectsStore();
 
   const handleSelectConfigFile = async () => {
     try {
@@ -78,17 +73,23 @@ export const ProjectCreate = ({ open, onOpenChange }: ProjectCreateProps) => {
         projectDir = `/Projects/${projectName.trim()}`;
       }
 
-      // First add to recent projects with the new data
+      // Create the new project object
+      const newProject = {
+        name: projectName.trim(),
+        path: projectDir,
+        configPath: configPath || '',
+        lastAccessed: new Date(),
+      };
+
+      // Set as current project
+      setCurrentProject(newProject);
+
+      // Add to recent projects
       addRecentProject({
         name: projectName.trim(),
         path: projectDir,
         configPath: configPath || '',
       });
-
-      // Then update current project state
-      setCurrentProject(projectName.trim());
-      setCurrentProjectPath(projectDir);
-      setCurrentConfigPath(configPath || '');
 
       // Reset form and close dialog
       resetForm();

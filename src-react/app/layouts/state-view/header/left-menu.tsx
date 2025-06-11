@@ -1,5 +1,7 @@
+import { invoke } from '@tauri-apps/api/core';
 import { MenuIcon } from 'lucide-react';
 
+import { Button } from '@/components/ui/button';
 import {
   Menubar,
   MenubarContent,
@@ -12,9 +14,14 @@ import {
 import { ProjectWidget } from '@/features/projects';
 
 export const LeftMenu = () => {
+  const loadProject = async () => {
+    await invoke('load_settings').catch(console.error);
+  };
+
   return (
-    <div className="">
+    <div className="flex">
       <MenuDropdown />
+      <Button onClick={loadProject}>Reload</Button>
     </div>
   );
 };

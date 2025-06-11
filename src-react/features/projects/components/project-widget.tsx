@@ -25,8 +25,6 @@ export const ProjectWidget = () => {
 
   const {
     currentProject,
-    currentProjectPath,
-    currentConfigPath,
     switchToProject,
     removeRecentProject,
     clearRecentProjects,
@@ -34,25 +32,29 @@ export const ProjectWidget = () => {
   } = useProjectsStore();
 
   const handleSwitchProject = (project: Project) => switchToProject(project);
+
   const handleRemoveProject = (projectPath: string, e: React.MouseEvent) => {
     e.stopPropagation();
     removeRecentProject(projectPath);
   };
+
   const handleClearRecentProjects = (e: React.MouseEvent) => {
     e.stopPropagation();
     clearRecentProjects();
   };
+
   const handleEditCurrentProject = (e: React.MouseEvent) => {
     e.stopPropagation();
     setShowEditDialog(true);
   };
 
+  // Filter out current project from recent projects list
   const sortedRecentProjects = getRecentProjectsSorted().filter(
-    (project) => project.path !== currentProjectPath,
+    (project) => project.path !== currentProject?.path,
   );
 
-  const displayName = currentProject || 'No Project';
-  const initials = getProjectInitials(currentProject);
+  const displayName = currentProject?.name || 'No Project';
+  const initials = getProjectInitials(displayName);
   const hasRecentProjects = sortedRecentProjects.length > 0;
   const hasNoProjects = !currentProject && !hasRecentProjects;
 
@@ -70,19 +72,14 @@ export const ProjectWidget = () => {
             <ChevronDown className="size-4" />
           </div>
         </MenubarTrigger>
-
         <MenubarContent className="w-80">
           {currentProject && (
             <CurrentProjectSection
               project={currentProject}
-              projectPath={currentProjectPath}
-              configPath={currentConfigPath}
               onEdit={handleEditCurrentProject}
             />
           )}
-
           <ActionsSection onCreateProject={() => setShowCreateDialog(true)} />
-
           {hasRecentProjects && (
             <RecentProjectsSection
               projects={sortedRecentProjects}
@@ -91,7 +88,6 @@ export const ProjectWidget = () => {
               onClearAll={handleClearRecentProjects}
             />
           )}
-
           {hasNoProjects && <EmptyState />}
         </MenubarContent>
       </MenubarMenu>

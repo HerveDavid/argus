@@ -25,22 +25,15 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
   const [configPath, setConfigPath] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const {
-    currentProject,
-    currentProjectPath,
-    currentConfigPath,
-    setCurrentProject,
-    setCurrentConfigPath,
-    addRecentProject,
-  } = useProjectsStore();
+  const { currentProject, updateCurrentProject, addRecentProject } =
+    useProjectsStore();
 
-  // Initialize form with current project data
   useEffect(() => {
-    if (open) {
-      setProjectName(currentProject || '');
-      setConfigPath(currentConfigPath || '');
+    if (open && currentProject) {
+      setProjectName(currentProject.name || '');
+      setConfigPath(currentProject.configPath || '');
     }
-  }, [open, currentProject, currentConfigPath]);
+  }, [open, currentProject]);
 
   const handleSelectConfigFile = async () => {
     try {
@@ -64,21 +57,21 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
   };
 
   const handleUpdateProject = async () => {
-    if (!projectName.trim()) {
+    if (!projectName.trim() || !currentProject) {
       return;
     }
 
     setIsUpdating(true);
 
     try {
-      // Update current project state
-      setCurrentProject(projectName.trim());
-      setCurrentConfigPath(configPath || '');
+      updateCurrentProject({
+        name: projectName.trim(),
+        configPath: configPath || '',
+      });
 
-      // Update recent projects with the new data
       addRecentProject({
         name: projectName.trim(),
-        path: currentProjectPath,
+        path: currentProject.path,
         configPath: configPath || '',
       });
 
@@ -92,16 +85,22 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
   };
 
   const handleCancel = () => {
-    // Reset form to original values
-    setProjectName(currentProject || '');
-    setConfigPath(currentConfigPath || '');
+    if (currentProject) {
+      setProjectName(currentProject.name || '');
+      setConfigPath(currentProject.configPath || '');
+    }
     onOpenChange(false);
   };
 
   const isValid = projectName.trim().length > 0;
   const hasChanges =
-    projectName.trim() !== (currentProject || '') ||
-    configPath !== (currentConfigPath || '');
+    currentProject &&
+    (projectName.trim() !== currentProject.name ||
+      configPath !== currentProject.configPath);
+
+  if (!currentProject) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -131,7 +130,7 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
             <Label htmlFor="project-path">Project Path</Label>
             <Input
               id="project-path"
-              value={currentProjectPath || ''}
+              value={currentProject.path || ''}
               readOnly
               className="bg-muted text-muted-foreground"
             />

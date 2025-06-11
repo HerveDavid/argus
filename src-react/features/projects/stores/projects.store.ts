@@ -11,15 +11,14 @@ const KEY_CURRENT_PROJECT = 'current-project';
 const KEY_RECENT_PROJECTS = 'recent-projects';
 
 export interface ProjectsStore {
-  currentProject: string;
-  currentProjectPath: string;
-  currentConfigPath: string;
+  currentProject: Project | null;
   recentProjects: Project[];
   runtime: LiveManagedRuntime | null;
 
-  setCurrentProject: (project: string) => void;
-  setCurrentProjectPath: (path: string) => void;
-  setCurrentConfigPath: (path: string) => void;
+  setCurrentProject: (project: Project | null) => void;
+  updateCurrentProject: (
+    updates: Partial<Omit<Project, 'lastAccessed'>>,
+  ) => void;
 
   addRecentProject: (project: Omit<Project, 'lastAccessed'>) => void;
   removeRecentProject: (projectPath: string) => void;
@@ -30,22 +29,18 @@ export interface ProjectsStore {
   setRuntime: (runtime: LiveManagedRuntime) => void;
 }
 
-const getStoredCurrentProject = () => {
+const getStoredCurrentProject = (): Project | null => {
   try {
     const stored = localStorage.getItem(KEY_CURRENT_PROJECT);
-    return stored
-      ? JSON.parse(stored)
-      : {
-          currentProject: '',
-          currentProjectPath: '',
-          currentConfigPath: '',
-        };
-  } catch {
+    if (!stored) return null;
+
+    const parsed = JSON.parse(stored);
     return {
-      currentProject: '',
-      currentProjectPath: '',
-      currentConfigPath: '',
+      ...parsed,
+      lastAccessed: new Date(parsed.lastAccessed),
     };
+  } catch {
+    return null;
   }
 };
 
@@ -73,45 +68,44 @@ export const useProjectsStore = () =>
 const useProjectsStoreInner = create<ProjectsStore>()(
   devtools(
     subscribeWithSelector((set, get) => ({
-      ...initialCurrentProject,
+      currentProject: initialCurrentProject,
       recentProjects: initialRecentProjects,
       runtime: null,
 
-      setCurrentProject: (project: string) => {
+      setCurrentProject: (project: Project | null) => {
         set({ currentProject: project });
-        const currentState = get();
-        localStorage.setItem(
-          KEY_CURRENT_PROJECT,
-          JSON.stringify({
-            currentProject: project,
-            currentProjectPath: currentState.currentProjectPath,
-            currentConfigPath: currentState.currentConfigPath,
-          }),
-        );
+
+        if (project) {
+          localStorage.setItem(
+            KEY_CURRENT_PROJECT,
+            JSON.stringify({
+              ...project,
+              lastAccessed: project.lastAccessed.toISOString(),
+            }),
+          );
+        } else {
+          localStorage.removeItem(KEY_CURRENT_PROJECT);
+        }
       },
 
-      setCurrentProjectPath: (path: string) => {
-        set({ currentProjectPath: path });
+      updateCurrentProject: (
+        updates: Partial<Omit<Project, 'lastAccessed'>>,
+      ) => {
         const currentState = get();
-        localStorage.setItem(
-          KEY_CURRENT_PROJECT,
-          JSON.stringify({
-            currentProject: currentState.currentProject,
-            currentProjectPath: path,
-            currentConfigPath: currentState.currentConfigPath,
-          }),
-        );
-      },
+        if (!currentState.currentProject) return;
 
-      setCurrentConfigPath: (path: string) => {
-        set({ currentConfigPath: path });
-        const currentState = get();
+        const updatedProject: Project = {
+          ...currentState.currentProject,
+          ...updates,
+          lastAccessed: new Date(),
+        };
+
+        set({ currentProject: updatedProject });
         localStorage.setItem(
           KEY_CURRENT_PROJECT,
           JSON.stringify({
-            currentProject: currentState.currentProject,
-            currentProjectPath: currentState.currentProjectPath,
-            currentConfigPath: path,
+            ...updatedProject,
+            lastAccessed: updatedProject.lastAccessed.toISOString(),
           }),
         );
       },
@@ -171,14 +165,17 @@ const useProjectsStoreInner = create<ProjectsStore>()(
       },
 
       switchToProject: (project: Project) => {
-        set({
-          currentProject: project.name,
-          currentProjectPath: project.path,
-        });
+        const updatedProject: Project = {
+          ...project,
+          lastAccessed: new Date(),
+        };
+
+        set({ currentProject: updatedProject });
 
         get().addRecentProject({
           name: project.name,
           path: project.path,
+          configPath: project.configPath,
         });
       },
 
@@ -208,9 +205,13 @@ const useProjectsStoreInner = create<ProjectsStore>()(
 const syncWithRuntime = async (runtime: LiveManagedRuntime) => {
   const loadCurrentProjectEffect = Effect.gen(function* () {
     const client = yield* SettingsClient;
-    return yield* client.getSetting<typeof initialCurrentProject>(
-      KEY_CURRENT_PROJECT,
-    );
+    const project = yield* client.getSetting<any>(KEY_CURRENT_PROJECT);
+    return project
+      ? {
+          ...project,
+          lastAccessed: new Date(project.lastAccessed),
+        }
+      : null;
   });
 
   const loadRecentProjectsEffect = Effect.gen(function* () {
@@ -232,15 +233,17 @@ const syncWithRuntime = async (runtime: LiveManagedRuntime) => {
 
     const currentState = useProjectsStoreInner.getState();
 
-    if (
-      savedCurrentProject &&
-      (savedCurrentProject.currentProject !== currentState.currentProject ||
-        savedCurrentProject.currentProjectPath !==
-          currentState.currentProjectPath ||
-        savedCurrentProject.currentConfigPath !==
-          currentState.currentConfigPath)
-    ) {
-      useProjectsStoreInner.setState(savedCurrentProject);
+    if (savedCurrentProject) {
+      const currentProject = currentState.currentProject;
+      const shouldUpdate =
+        !currentProject ||
+        savedCurrentProject.name !== currentProject.name ||
+        savedCurrentProject.path !== currentProject.path ||
+        savedCurrentProject.configPath !== currentProject.configPath;
+
+      if (shouldUpdate) {
+        useProjectsStoreInner.setState({ currentProject: savedCurrentProject });
+      }
     }
 
     if (
@@ -256,11 +259,7 @@ const syncWithRuntime = async (runtime: LiveManagedRuntime) => {
 
 useProjectsStoreInner.subscribe(
   (state) => ({
-    currentProject: {
-      currentProject: state.currentProject,
-      currentProjectPath: state.currentProjectPath,
-      currentConfigPath: state.currentConfigPath,
-    },
+    currentProject: state.currentProject,
     recentProjects: state.recentProjects,
     runtime: state.runtime,
   }),
@@ -269,7 +268,13 @@ useProjectsStoreInner.subscribe(
 
     const saveCurrentProjectEffect = Effect.gen(function* () {
       const client = yield* SettingsClient;
-      yield* client.setSetting(KEY_CURRENT_PROJECT, currentProject);
+      const serializedProject = currentProject
+        ? {
+            ...currentProject,
+            lastAccessed: currentProject.lastAccessed.toISOString(),
+          }
+        : null;
+      yield* client.setSetting(KEY_CURRENT_PROJECT, serializedProject);
     });
 
     const saveRecentProjectsEffect = Effect.gen(function* () {

@@ -1,3 +1,5 @@
+use crate::project::error::Error;
+
 use super::entities::Project;
 use super::error::Result;
 
@@ -25,34 +27,62 @@ impl ProjectState {
         }))
     }
 
-    pub async fn load_settings(&mut self, pool: &Pool<Sqlite>) -> Result<()> {
-        let current_project = self.get_current_project(pool).await?;
+    pub async fn load_settings(&mut self, pool: &Pool<Sqlite>) -> Result<Project> {
+        let current_project = self
+            .get_current_project(pool)
+            .await?
+            .ok_or(Error::ProjectNotFound)?;
 
-        if let Some(project) = current_project {
-            let project_path = PathBuf::from(&project.path);
-            let argus_dir = project_path.join(ARGUS_DIR);
-            let db_file = argus_dir.join(format!("{}.duckdb", project.name));
+        let project_path = PathBuf::from(&current_project.path);
 
-            if !db_file.exists() {
-                self.create_project(&project_path, &project.name).await?;
-            } else {
-                let conn = Connection::open(&db_file)?;
-                self.conn = Some(std::sync::Mutex::new(conn));
-            }
-
-            self.project = Some(project);
+        if !project_path.exists() {
+            return Err(Error::InvalidConfig(format!(
+                "Project path does not exist: {}",
+                project_path.display()
+            )));
         }
 
-        Ok(())
+        let argus_dir = project_path.join(ARGUS_DIR);
+        let db_file = argus_dir.join(format!("{}.duckdb", current_project.name));
+
+        if !db_file.exists() {
+            self.create_project(&project_path, &current_project.name)
+                .await
+                .map_err(|e| {
+                    Error::InvalidConfig(format!(
+                        "Failed to create project '{}': {}",
+                        current_project.name, e
+                    ))
+                })?;
+        } else {
+            let conn = Connection::open(&db_file).map_err(|e| {
+                Error::InvalidConfig(format!(
+                    "Failed to open database '{}': {}",
+                    db_file.display(),
+                    e
+                ))
+            })?;
+            self.conn = Some(std::sync::Mutex::new(conn));
+        }
+
+        if self.conn.is_none() {
+            return Err(Error::InvalidConfig(format!(
+                "Failed to establish database connection for project '{}'",
+                current_project.name
+            )));
+        }
+
+        self.project = Some(current_project.clone());
+        Ok(current_project)
     }
 
     pub fn with_connection<T, F>(&self, f: F) -> Option<T>
     where
         F: FnOnce(&Connection) -> T,
     {
-        self.conn.as_ref().and_then(|mutex_conn| {
-            mutex_conn.lock().ok().map(|conn| f(&*conn))
-        })
+        self.conn
+            .as_ref()
+            .and_then(|mutex_conn| mutex_conn.lock().ok().map(|conn| f(&*conn)))
     }
 
     pub fn is_loaded(&self) -> bool {
@@ -85,6 +115,7 @@ impl ProjectState {
 
         if let Some(row) = row {
             let json_value: String = row.try_get("value")?;
+            log::debug!("{}", json_value);
             let project: Project = serde_json::from_str(&json_value)?;
             Ok(Some(project))
         } else {
@@ -95,9 +126,8 @@ impl ProjectState {
 
 impl Drop for ProjectState {
     fn drop(&mut self) {
-        if let Some(conn_mutex) = self.conn.take() {
-            // La connexion sera automatiquement fermée quand le Mutex sera droppé
-            drop(conn_mutex);
+        if let Some(conn) = self.conn.take() {
+            drop(conn);
         }
     }
 }
@@ -217,7 +247,7 @@ mod tests {
 
         // Vérifier que la connexion est établie
         assert!(state.conn.is_some());
-        
+
         // Tester l'utilisation de la connexion
         let result = state.with_connection(|_conn| true);
         assert_eq!(result, Some(true));
@@ -260,10 +290,10 @@ mod tests {
         };
 
         // Charger les settings sans projet courant
-        state.load_settings(&pool).await.unwrap();
+        let result = state.load_settings(&pool).await;
 
         // L'état ne devrait pas changer
-        assert!(!state.is_loaded());
+        assert!(result.is_err());
         assert!(state.get_project().is_none());
     }
 
@@ -405,6 +435,158 @@ mod tests {
             "test2",
             temp_dir.path().to_str().unwrap(),
         ));
+        assert!(state.is_loaded());
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_returns_current_project() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_path = temp_dir.path().to_str().unwrap();
+        let project_name = "test_project";
+
+        let pool = create_test_db().await;
+        let test_project = create_test_project(project_name, project_path);
+        insert_current_project(&pool, &test_project).await;
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Test que la fonction retourne le projet courant
+        let result = state.load_settings(&pool).await;
+        assert!(result.is_ok());
+
+        let returned_project = result.unwrap();
+        assert_eq!(returned_project.name, project_name);
+        assert_eq!(returned_project.path, project_path);
+
+        // Vérifier que l'état est aussi mis à jour
+        assert!(state.is_loaded());
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_invalid_project_path() {
+        let pool = create_test_db().await;
+        let invalid_path = "/path/that/does/not/exist";
+        let test_project = create_test_project("invalid_project", invalid_path);
+        insert_current_project(&pool, &test_project).await;
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Cela devrait retourner une erreur car le chemin n'existe pas
+        let result = state.load_settings(&pool).await;
+        assert!(result.is_err());
+
+        if let Err(Error::InvalidConfig(msg)) = result {
+            assert!(msg.contains("Project path does not exist"));
+        } else {
+            panic!("Expected InvalidConfig error");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_create_project_fails() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_path = temp_dir.path();
+
+        // Créer un fichier à la place du répertoire .argus pour forcer l'échec
+        let argus_file = project_path.join(ARGUS_DIR);
+        fs::write(&argus_file, "this is a file, not a directory").unwrap();
+
+        let pool = create_test_db().await;
+        let test_project = create_test_project("failing_project", project_path.to_str().unwrap());
+        insert_current_project(&pool, &test_project).await;
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Cela devrait échouer car on ne peut pas créer le répertoire
+        let result = state.load_settings(&pool).await;
+        assert!(result.is_err());
+
+        if let Err(Error::InvalidConfig(msg)) = result {
+            assert!(msg.contains("Failed to create project"));
+        } else {
+            panic!("Expected InvalidConfig error, got: {:?}", result);
+        }
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_corrupted_database() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_path = temp_dir.path();
+        let project_name = "corrupted_project";
+
+        // Créer la structure mais avec un fichier DB corrompu
+        let argus_dir = project_path.join(ARGUS_DIR);
+        fs::create_dir_all(&argus_dir).unwrap();
+        let db_file = argus_dir.join(format!("{}.duckdb", project_name));
+        fs::write(&db_file, "this is not a valid duckdb file").unwrap();
+
+        let pool = create_test_db().await;
+        let test_project = create_test_project(project_name, project_path.to_str().unwrap());
+        insert_current_project(&pool, &test_project).await;
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Cela devrait échouer car le fichier DB est corrompu
+        let result = state.load_settings(&pool).await;
+        assert!(result.is_err());
+
+        if let Err(Error::InvalidConfig(msg)) = result {
+            assert!(msg.contains("Failed to open database"));
+        } else {
+            panic!("Expected InvalidConfig error for corrupted database");
+        }
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_no_current_project_returns_none() {
+        let pool = create_test_db().await;
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Sans projet courant, devrait retourner None
+        let result = state.load_settings(&pool).await;
+        assert!(result.is_err());
+        assert!(!state.is_loaded());
+    }
+
+    #[tokio::test]
+    async fn test_load_settings_with_existing_valid_project() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_path = temp_dir.path();
+        let project_name = "valid_existing_project";
+
+        // Pré-créer un projet valide
+        let argus_dir = project_path.join(ARGUS_DIR);
+        fs::create_dir_all(&argus_dir).unwrap();
+        let db_file = argus_dir.join(format!("{}.duckdb", project_name));
+        Connection::open(&db_file).unwrap(); // Créer un vrai fichier DuckDB
+
+        let pool = create_test_db().await;
+        let test_project = create_test_project(project_name, project_path.to_str().unwrap());
+        insert_current_project(&pool, &test_project).await;
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Cela devrait réussir et retourner le projet
+        let result = state.load_settings(&pool).await.unwrap();
+        assert_eq!(result.name, project_name);
         assert!(state.is_loaded());
     }
 }
