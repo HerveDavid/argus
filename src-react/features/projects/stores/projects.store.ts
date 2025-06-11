@@ -174,13 +174,11 @@ const useProjectsStoreInner = create<ProjectsStore>()(
         set({
           currentProject: project.name,
           currentProjectPath: project.path,
-          currentConfigPath: project.configPath || '',
         });
 
         get().addRecentProject({
           name: project.name,
           path: project.path,
-          configPath: project.configPath,
         });
       },
 

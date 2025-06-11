@@ -1,6 +1,7 @@
 mod commands;
 mod settings;
 mod utils;
+mod project;
 
 use tauri::Manager;
 
@@ -16,7 +17,6 @@ pub fn run() {
         .plugin(
             tauri_plugin_log::Builder::new()
                 .filter(|metadata| {
-                    // Filtrer explicitement les logs SQLx
                     !metadata.target().starts_with("sqlx")
                 })
                 .build(),

@@ -132,6 +132,7 @@ dependencies = [
  "tauri-plugin-opener",
  "tauri-plugin-shell",
  "tauri-plugin-store",
+ "tempfile",
  "thiserror 2.0.12",
  "tokio",
  "tokio-util",
@@ -830,6 +831,8 @@ version = "1.2.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "16595d3be041c03b09d08d0858631facccee9221e579704070e6e9e4915d3bc7"
 dependencies = [
+ "jobserver",
+ "libc",
  "shlex",
 ]
 
@@ -2649,6 +2652,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8eaf4bc02d17cbdd7ff4c7438cafcdf7fb9a4613313ad11b4f8fefe7d3fa0130"
 
 [[package]]
+name = "jobserver"
+version = "0.1.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38f262f097c174adebe41eb73d66ae9c06b2844fb0da69969647bbddd9b0538a"
+dependencies = [
+ "getrandom 0.3.3",
+ "libc",
+]
+
+[[package]]
 name = "js-sys"
 version = "0.3.77"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2814,6 +2827,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "12cac9d03484c43fefac8b2066a253c9b0b3b0cd02cbe02a9ea2312f7e382618"
 dependencies = [
  "autocfg",
+ "cc",
  "flate2",
  "pkg-config",
  "serde",

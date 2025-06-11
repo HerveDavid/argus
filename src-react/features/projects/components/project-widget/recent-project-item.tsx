@@ -30,7 +30,7 @@ export const RecentProjectItem = ({
         {project.path}
       </div>
       <div className="flex items-center justify-between mt-1">
-        <ProjectFiles configPath={project.configPath} />
+        <ProjectFiles configPath={project.path} />
         <div className="text-xs text-muted-foreground">
           {formatProjectDate(project.lastAccessed)}
         </div>
