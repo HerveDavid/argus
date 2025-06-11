@@ -1,12 +1,13 @@
 use serde::Serialize;
 use thiserror::Error;
+use std::path::PathBuf;
 
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Sqlite error: {0}")]
     SqliteDatabase(#[from] sqlx::Error),
 
-    #[error("Duckdb error: {0}")]
+    #[error("DuckDB error: {0}")]
     DuckDbDatabase(#[from] duckdb::Error),
 
     #[error("IO error: {0}")]
@@ -14,12 +15,24 @@ pub enum Error {
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
-
-    #[error("Project not found")]
+    
+    #[error("No current project found")]
     ProjectNotFound,
 
-    #[error("Invalid project configuration: {0}")]
-    InvalidConfig(String),
+    #[error("Project path does not exist: {path}")]
+    ProjectPathNotFound { path: PathBuf },
+
+    #[error("Failed to create project '{name}': {source}")]
+    ProjectCreationFailed { name: String, source: Box<Error> },
+
+    #[error("Failed to open DuckDB database at '{path}': {source}")]
+    DatabaseConnectionFailed { 
+        path: PathBuf, 
+        #[source] source: duckdb::Error 
+    },
+    
+    #[error("Database connection not established for project '{name}'")]
+    ConnectionNotEstablished { name: String },
 }
 
 impl Serialize for Error {
@@ -27,7 +40,7 @@ impl Serialize for Error {
     where
         S: serde::ser::Serializer,
     {
-        serializer.serialize_str(self.to_string().as_ref())
+        serializer.serialize_str(&self.to_string())
     }
 }
 

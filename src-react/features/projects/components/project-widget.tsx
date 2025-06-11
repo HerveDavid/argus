@@ -26,12 +26,16 @@ export const ProjectWidget = () => {
   const {
     currentProject,
     switchToProject,
+    loadProject,
     removeRecentProject,
     clearRecentProjects,
     getRecentProjectsSorted,
   } = useProjectsStore();
 
-  const handleSwitchProject = (project: Project) => switchToProject(project);
+  const handleSwitchProject = async (project: Project) => {
+    switchToProject(project);
+    await loadProject();
+  };
 
   const handleRemoveProject = (projectPath: string, e: React.MouseEvent) => {
     e.stopPropagation();

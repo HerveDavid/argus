@@ -212,7 +212,7 @@ export class SettingsClient extends Effect.Service<SettingsClient>()(
 
             return result;
           }),
-      } as SettingsService;
+      } satisfies SettingsService;
     }),
   },
 ) {}

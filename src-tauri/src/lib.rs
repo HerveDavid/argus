@@ -85,7 +85,7 @@ pub fn run() {
             settings::sidecars::commands::start_sidecar,
             settings::sidecars::commands::shutdown_sidecar,
             // Project
-            project::commands::load_settings,
+            project::commands::load_project,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

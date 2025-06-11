@@ -25,7 +25,8 @@ export const ProjectCreate = ({ open, onOpenChange }: ProjectCreateProps) => {
   const [configPath, setConfigPath] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const { setCurrentProject, addRecentProject } = useProjectsStore();
+  const { setCurrentProject, addRecentProject, loadProject } =
+    useProjectsStore();
 
   const handleSelectConfigFile = async () => {
     try {
@@ -94,6 +95,8 @@ export const ProjectCreate = ({ open, onOpenChange }: ProjectCreateProps) => {
       // Reset form and close dialog
       resetForm();
       onOpenChange(false);
+
+      await loadProject();
     } catch (error) {
       console.error('Error creating project:', error);
     } finally {

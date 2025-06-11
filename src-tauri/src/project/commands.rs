@@ -1,3 +1,4 @@
+use log::info;
 use tauri::State;
 use tokio::sync::Mutex;
 
@@ -8,10 +9,19 @@ use super::error::Result;
 use super::state::ProjectState;
 
 #[tauri::command]
-pub async fn load_settings(
+pub async fn load_project(
     project_state: State<'_, Mutex<ProjectState>>,
     settings_state: State<'_, Mutex<DatabaseState>>,
 ) -> Result<entities::Project> {
+
+    info!("load_project command called");
+
     let pool = &settings_state.lock().await.pool;
-    project_state.lock().await.load_settings(pool).await
+    let result = project_state.lock().await.load_project(pool).await;
+
+    if let Ok(project) = &result {
+        info!("Project loaded: {}", project.path);
+    }
+
+    result
 }

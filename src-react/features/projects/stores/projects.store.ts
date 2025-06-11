@@ -6,6 +6,7 @@ import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
 import { LiveManagedRuntime } from '@/services/live-layer';
 import { Project } from '@/types/project';
+import { ProjectClient } from '../services/project.service';
 
 const KEY_CURRENT_PROJECT = 'current-project';
 const KEY_RECENT_PROJECTS = 'recent-projects';
@@ -25,6 +26,7 @@ export interface ProjectsStore {
   switchToProject: (project: Project) => void;
   clearRecentProjects: () => void;
   getRecentProjectsSorted: () => Project[];
+  loadProject: () => Promise<Project | undefined>;
 
   setRuntime: (runtime: LiveManagedRuntime) => void;
 }
@@ -196,6 +198,21 @@ const useProjectsStoreInner = create<ProjectsStore>()(
       setRuntime: (runtime) => {
         set({ runtime });
         syncWithRuntime(runtime);
+      },
+
+      loadProject: async () => {
+        const { runtime } = get();
+
+        if (!runtime) return;
+
+        const program = Effect.gen(function* () {
+          const projectClient = yield* ProjectClient;
+          const project = yield* projectClient.loadProject();
+          console.log('Project loaded:', project);
+          return project;
+        }).pipe(Effect.provide(ProjectClient.Default));
+
+        return await runtime.runPromise(program);
       },
     })),
     { name: 'projects-store' },

@@ -27,53 +27,79 @@ impl ProjectState {
         }))
     }
 
-    pub async fn load_settings(&mut self, pool: &Pool<Sqlite>) -> Result<Project> {
+    pub async fn load_project(&mut self, pool: &Pool<Sqlite>) -> Result<Project> {
         let current_project = self
             .get_current_project(pool)
             .await?
             .ok_or(Error::ProjectNotFound)?;
 
         let project_path = PathBuf::from(&current_project.path);
+        self.validate_project_path(&project_path)?;
 
-        if !project_path.exists() {
-            return Err(Error::InvalidConfig(format!(
-                "Project path does not exist: {}",
-                project_path.display()
-            )));
-        }
-
-        let argus_dir = project_path.join(ARGUS_DIR);
-        let db_file = argus_dir.join(format!("{}.duckdb", current_project.name));
-
-        if !db_file.exists() {
-            self.create_project(&project_path, &current_project.name)
-                .await
-                .map_err(|e| {
-                    Error::InvalidConfig(format!(
-                        "Failed to create project '{}': {}",
-                        current_project.name, e
-                    ))
-                })?;
-        } else {
-            let conn = Connection::open(&db_file).map_err(|e| {
-                Error::InvalidConfig(format!(
-                    "Failed to open database '{}': {}",
-                    db_file.display(),
-                    e
-                ))
-            })?;
-            self.conn = Some(std::sync::Mutex::new(conn));
-        }
+        let db_file = self.get_database_path(&project_path, &current_project.name);
+        self.ensure_database_connection(&db_file, &project_path, &current_project.name)
+            .await?;
 
         if self.conn.is_none() {
-            return Err(Error::InvalidConfig(format!(
-                "Failed to establish database connection for project '{}'",
-                current_project.name
-            )));
+            return Err(Error::ConnectionNotEstablished {
+                name: current_project.name.clone(),
+            });
         }
 
         self.project = Some(current_project.clone());
         Ok(current_project)
+    }
+
+    fn validate_project_path(&self, project_path: &PathBuf) -> Result<()> {
+        if !project_path.exists() {
+            return Err(Error::ProjectPathNotFound {
+                path: project_path.clone(),
+            });
+        }
+        Ok(())
+    }
+
+    fn get_database_path(&self, project_path: &PathBuf, project_name: &str) -> PathBuf {
+        let argus_dir = project_path.join(ARGUS_DIR);
+        argus_dir.join(format!("{}.duckdb", project_name))
+    }
+
+    async fn ensure_database_connection(
+        &mut self,
+        db_file: &PathBuf,
+        project_path: &PathBuf,
+        project_name: &str,
+    ) -> Result<()> {
+        if !db_file.exists() {
+            self.create_project_database(project_path, project_name)
+                .await?;
+        } else {
+            self.open_existing_database(db_file)?;
+        }
+        Ok(())
+    }
+
+    async fn create_project_database(
+        &mut self,
+        project_path: &PathBuf,
+        project_name: &str,
+    ) -> Result<()> {
+        self.create_project(project_path, project_name)
+            .await
+            .map_err(|e| Error::ProjectCreationFailed {
+                name: project_name.to_string(),
+                source: Box::new(e),
+            })
+    }
+
+    fn open_existing_database(&mut self, db_file: &PathBuf) -> Result<()> {
+        let conn = Connection::open(db_file).map_err(|e| Error::DatabaseConnectionFailed {
+            path: db_file.clone(),
+            source: e,
+        })?;
+
+        self.conn = Some(std::sync::Mutex::new(conn));
+        Ok(())
     }
 
     pub fn with_connection<T, F>(&self, f: F) -> Option<T>
@@ -290,7 +316,7 @@ mod tests {
         };
 
         // Charger les settings sans projet courant
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
 
         // L'état ne devrait pas changer
         assert!(result.is_err());
@@ -313,7 +339,7 @@ mod tests {
         };
 
         // Charger les settings avec un nouveau projet
-        state.load_settings(&pool).await.unwrap();
+        state.load_project(&pool).await.unwrap();
 
         // Vérifier que le projet a été créé et chargé
         assert!(state.is_loaded());
@@ -349,7 +375,7 @@ mod tests {
         };
 
         // Charger les settings avec un projet existant
-        state.load_settings(&pool).await.unwrap();
+        state.load_project(&pool).await.unwrap();
 
         // Vérifier que le projet a été chargé
         assert!(state.is_loaded());
@@ -454,7 +480,7 @@ mod tests {
         };
 
         // Test que la fonction retourne le projet courant
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
         assert!(result.is_ok());
 
         let returned_project = result.unwrap();
@@ -478,7 +504,7 @@ mod tests {
         };
 
         // Cela devrait retourner une erreur car le chemin n'existe pas
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
         assert!(result.is_err());
 
         if let Err(Error::InvalidConfig(msg)) = result {
@@ -507,7 +533,7 @@ mod tests {
         };
 
         // Cela devrait échouer car on ne peut pas créer le répertoire
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
         assert!(result.is_err());
 
         if let Err(Error::InvalidConfig(msg)) = result {
@@ -539,7 +565,7 @@ mod tests {
         };
 
         // Cela devrait échouer car le fichier DB est corrompu
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
         assert!(result.is_err());
 
         if let Err(Error::InvalidConfig(msg)) = result {
@@ -558,7 +584,7 @@ mod tests {
         };
 
         // Sans projet courant, devrait retourner None
-        let result = state.load_settings(&pool).await;
+        let result = state.load_project(&pool).await;
         assert!(result.is_err());
         assert!(!state.is_loaded());
     }
@@ -585,7 +611,7 @@ mod tests {
         };
 
         // Cela devrait réussir et retourner le projet
-        let result = state.load_settings(&pool).await.unwrap();
+        let result = state.load_project(&pool).await.unwrap();
         assert_eq!(result.name, project_name);
         assert!(state.is_loaded());
     }

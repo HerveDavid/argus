@@ -25,8 +25,12 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
   const [configPath, setConfigPath] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { currentProject, updateCurrentProject, addRecentProject } =
-    useProjectsStore();
+  const {
+    currentProject,
+    updateCurrentProject,
+    addRecentProject,
+    loadProject,
+  } = useProjectsStore();
 
   useEffect(() => {
     if (open && currentProject) {
@@ -76,6 +80,7 @@ export const ProjectEdit = ({ open, onOpenChange }: ProjectEditProps) => {
       });
 
       // Close dialog
+      await loadProject();
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating project:', error);
