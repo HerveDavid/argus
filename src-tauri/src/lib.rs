@@ -1,7 +1,7 @@
 mod commands;
+mod project;
 mod settings;
 mod utils;
-mod project;
 
 use tauri::Manager;
 
@@ -16,9 +16,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_log::Builder::new()
-                .filter(|metadata| {
-                    !metadata.target().starts_with("sqlx")
-                })
+                .filter(|metadata| !metadata.target().starts_with("sqlx"))
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
@@ -28,15 +26,20 @@ pub fn run() {
             tauri::async_runtime::block_on(async move {
                 app.manage(utils::channels::state::Channels::default());
                 app.manage(utils::tasks::state::Tasks::default());
-                
+
                 app.manage(settings::banner::state::BannerState::default());
-                
+
                 println!("-----------------------------------------------");
 
                 let settings_db = settings::database::state::DatabaseState::new(&app.handle())
                     .await
                     .expect("Failed to initialize settings db");
                 app.manage(settings_db);
+
+                let project_db = project::state::ProjectState::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize project db");
+                app.manage(project_db);
 
                 println!("-----------------------------------------------");
 
@@ -81,6 +84,8 @@ pub fn run() {
             // Sidecars
             settings::sidecars::commands::start_sidecar,
             settings::sidecars::commands::shutdown_sidecar,
+            // Project
+            project::commands::load_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

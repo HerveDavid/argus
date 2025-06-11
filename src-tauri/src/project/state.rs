@@ -10,9 +10,12 @@ const KEY_CURRENT_PROJECT: &str = "current-project";
 const ARGUS_DIR: &str = ".argus";
 
 pub struct ProjectState {
-    conn: Option<Connection>,
+    conn: Option<std::sync::Mutex<Connection>>,
     project: Option<Project>,
 }
+
+unsafe impl Send for ProjectState {}
+unsafe impl Sync for ProjectState {}
 
 impl ProjectState {
     pub async fn new(_app_handle: &AppHandle) -> Result<tokio::sync::Mutex<Self>> {
@@ -22,8 +25,8 @@ impl ProjectState {
         }))
     }
 
-    pub async fn load_settings(&mut self, pool: Pool<Sqlite>) -> Result<()> {
-        let current_project = self.get_current_project(&pool).await?;
+    pub async fn load_settings(&mut self, pool: &Pool<Sqlite>) -> Result<()> {
+        let current_project = self.get_current_project(pool).await?;
 
         if let Some(project) = current_project {
             let project_path = PathBuf::from(&project.path);
@@ -32,22 +35,32 @@ impl ProjectState {
 
             if !db_file.exists() {
                 self.create_project(&project_path, &project.name).await?;
+            } else {
+                let conn = Connection::open(&db_file)?;
+                self.conn = Some(std::sync::Mutex::new(conn));
             }
 
-            let conn = Connection::open(&db_file)?;
-            self.conn = Some(conn);
             self.project = Some(project);
         }
 
         Ok(())
     }
 
-    pub fn get_connection(&self) -> Option<&Connection> {
-        self.conn.as_ref()
+    pub fn with_connection<T, F>(&self, f: F) -> Option<T>
+    where
+        F: FnOnce(&Connection) -> T,
+    {
+        self.conn.as_ref().and_then(|mutex_conn| {
+            mutex_conn.lock().ok().map(|conn| f(&*conn))
+        })
     }
 
     pub fn is_loaded(&self) -> bool {
         self.conn.is_some() && self.project.is_some()
+    }
+
+    pub fn get_project(&self) -> Option<&Project> {
+        self.project.as_ref()
     }
 
     async fn create_project(&mut self, path: &Path, name: &str) -> Result<()> {
@@ -60,7 +73,7 @@ impl ProjectState {
         let db_path = argus_dir.join(format!("{}.duckdb", name));
         let conn = Connection::open(&db_path)?;
 
-        self.conn = Some(conn);
+        self.conn = Some(std::sync::Mutex::new(conn));
         Ok(())
     }
 
@@ -82,8 +95,9 @@ impl ProjectState {
 
 impl Drop for ProjectState {
     fn drop(&mut self) {
-        if let Some(conn) = self.conn.take() {
-            drop(conn);
+        if let Some(conn_mutex) = self.conn.take() {
+            // La connexion sera automatiquement fermée quand le Mutex sera droppé
+            drop(conn_mutex);
         }
     }
 }
@@ -132,13 +146,6 @@ mod tests {
             .unwrap();
     }
 
-    fn create_mock_app_handle() -> tauri::AppHandle {
-        // Note: En réalité, vous devriez utiliser un mock ou créer une instance de test
-        // Pour cet exemple, on assume qu'on peut créer un AppHandle vide
-        // Dans un vrai projet, vous pourriez utiliser tauri::test::mock_app()
-        unimplemented!("Use tauri::test::mock_app() or similar mock")
-    }
-
     #[tokio::test]
     async fn test_new_project_state() {
         let state = ProjectState {
@@ -149,7 +156,7 @@ mod tests {
 
         let locked_state = mutex_state.lock().await;
         assert!(!locked_state.is_loaded());
-        assert!(locked_state.get_connection().is_none());
+        assert!(locked_state.get_project().is_none());
     }
 
     #[tokio::test]
@@ -210,7 +217,38 @@ mod tests {
 
         // Vérifier que la connexion est établie
         assert!(state.conn.is_some());
-        assert!(state.get_connection().is_some());
+        
+        // Tester l'utilisation de la connexion
+        let result = state.with_connection(|_conn| true);
+        assert_eq!(result, Some(true));
+    }
+
+    #[tokio::test]
+    async fn test_with_connection() {
+        let temp_dir = TempDir::new().unwrap();
+        let project_path = temp_dir.path();
+        let project_name = "connection_test";
+
+        let mut state = ProjectState {
+            conn: None,
+            project: None,
+        };
+
+        // Pas de connexion
+        let result = state.with_connection(|_| "test");
+        assert!(result.is_none());
+
+        // Avec connexion
+        state
+            .create_project(project_path, project_name)
+            .await
+            .unwrap();
+
+        let result = state.with_connection(|_conn| {
+            // Ici vous pourriez exécuter des requêtes DuckDB
+            "connection works"
+        });
+        assert_eq!(result, Some("connection works"));
     }
 
     #[tokio::test]
@@ -222,11 +260,11 @@ mod tests {
         };
 
         // Charger les settings sans projet courant
-        state.load_settings(pool).await.unwrap();
+        state.load_settings(&pool).await.unwrap();
 
         // L'état ne devrait pas changer
         assert!(!state.is_loaded());
-        assert!(state.get_connection().is_none());
+        assert!(state.get_project().is_none());
     }
 
     #[tokio::test]
@@ -245,11 +283,11 @@ mod tests {
         };
 
         // Charger les settings avec un nouveau projet
-        state.load_settings(pool).await.unwrap();
+        state.load_settings(&pool).await.unwrap();
 
         // Vérifier que le projet a été créé et chargé
         assert!(state.is_loaded());
-        assert!(state.get_connection().is_some());
+        assert!(state.get_project().is_some());
 
         // Vérifier que les fichiers ont été créés
         let argus_dir = PathBuf::from(project_path).join(ARGUS_DIR);
@@ -281,11 +319,11 @@ mod tests {
         };
 
         // Charger les settings avec un projet existant
-        state.load_settings(pool).await.unwrap();
+        state.load_settings(&pool).await.unwrap();
 
         // Vérifier que le projet a été chargé
         assert!(state.is_loaded());
-        assert!(state.get_connection().is_some());
+        assert!(state.get_project().is_some());
     }
 
     #[tokio::test]
