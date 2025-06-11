@@ -46,8 +46,8 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
 
   return (
     <div className="flex flex-col h-full" onClick={handleSldClick}>
-      <header className={`shadow-sm border-b bg-sidebar`}>
-        <Breadcrumb className="mx-2 py-2 text-sm">
+      <header className="shadow-sm border-b bg-sidebar h-8 z-10">
+        <Breadcrumb className="mx-2 py-2 text-xs">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink>Home</BreadcrumbLink>
@@ -71,7 +71,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
           className="flex flex-1 overflow-hidden"
         >
           <ResizablePanel order={0} className="flex-1 overflow-hidden">
-            <div className="h-full p-2 bg-gradient-to-br from-background/10 to-foreground/7">
+            <div className="h-full bg-gradient-to-br from-background/10 to-foreground/7">
               <Sld id={id} />
             </div>
           </ResizablePanel>
@@ -87,7 +87,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
         </ResizablePanelGroup>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-hidden p-2 bg-gradient-to-br from-background/10 to-foreground/7">
+          <div className="flex-1 overflow-hidden bg-gradient-to-br from-background/10 to-foreground/7">
             <Sld id={id} />
           </div>
           <RightSidebar id={id} />
