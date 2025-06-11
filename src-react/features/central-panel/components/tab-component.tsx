@@ -12,7 +12,7 @@ import { useWindowHeaderStore } from '@/stores/window-header.store';
 
 const Default = (props: IDockviewPanelProps<{ title: string }>) => {
   const { setTitle } = useWindowHeaderStore();
-  const { removePanel } = useCentralPanelStore();
+  const { removePanel, removeGroup } = useCentralPanelStore();
 
   const handleClose = () => {
     removePanel(props.api.id);
@@ -20,6 +20,11 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
 
   const handleTabClick = () => {
     setTitle(props.params.title);
+  };
+
+  const handleCloseAll = () => {
+    const group = props.api.group;
+    removeGroup(group);
   };
 
   return (
@@ -32,7 +37,7 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
         <ContextMenuContent>
           <ContextMenuItem onClick={handleClose}>Close</ContextMenuItem>
           <ContextMenuItem>Close Others</ContextMenuItem>
-          <ContextMenuItem>Close All</ContextMenuItem>
+          <ContextMenuItem onClick={handleCloseAll}>Close All</ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem>Add in Favorites</ContextMenuItem>
           <ContextMenuSeparator />

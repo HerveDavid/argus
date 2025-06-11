@@ -1,5 +1,10 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
-import { AddPanelOptions, DockviewApi, SerializedDockview } from 'dockview';
+import {
+  AddPanelOptions,
+  DockviewApi,
+  DockviewGroupPanel,
+  SerializedDockview,
+} from 'dockview';
 import * as Effect from 'effect/Effect';
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
@@ -19,6 +24,7 @@ interface CentralPanelStore {
   addPanel: (panel: AddPanelOptions) => void;
   detachPanel: (id: string) => void;
   removePanel: (id: string) => void;
+  removeGroup: (group: DockviewGroupPanel) => void;
 }
 
 export const useCentralPanelStore = () =>
@@ -72,6 +78,18 @@ const useCentralPanelStoreInner = create<CentralPanelStore>()(
           height: 600,
           resizable: true,
           focus: true,
+        });
+      },
+
+      removeGroup: (group) => {
+        const { api } = get();
+
+        if (!api) return;
+
+        const panelIds = group.panels.map((panel) => panel.id);
+        panelIds.forEach((id) => {
+          const panel = api.getPanel(id);
+          if (panel) api.removePanel(panel);
         });
       },
     })),
