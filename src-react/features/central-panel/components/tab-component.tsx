@@ -1,5 +1,4 @@
 import { IDockviewPanelProps } from 'dockview';
-
 import {
   ContextMenu,
   ContextMenuContent,
@@ -13,6 +12,7 @@ import { useWindowHeaderStore } from '@/stores/window-header.store';
 const Default = (props: IDockviewPanelProps<{ title: string }>) => {
   const { setTitle } = useWindowHeaderStore();
   const { removePanel, removeGroup } = useCentralPanelStore();
+  const othersDisabled = props.api.group.panels.length <= 1;
 
   const handleClose = () => {
     removePanel(props.api.id);
@@ -26,7 +26,7 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
     const group = props.api.group;
     const panelIds = group.panels
       .map((panel) => panel.id)
-      .filter((id) => id !== props.params.title);
+      .filter((id) => id !== props.api.id);
     panelIds.forEach(removePanel);
   };
 
@@ -44,7 +44,10 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
         <ContextMenuTrigger>{props.api.title}</ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onClick={handleClose}>Close</ContextMenuItem>
-          <ContextMenuItem onClick={handleCloseOthers}>
+          <ContextMenuItem
+            onClick={handleCloseOthers}
+            disabled={othersDisabled}
+          >
             Close Others
           </ContextMenuItem>
           <ContextMenuItem onClick={handleCloseAll}>Close All</ContextMenuItem>
