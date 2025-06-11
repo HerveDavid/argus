@@ -1,0 +1,77 @@
+:root {
+  --dv-background-color: var(--background);
+  --dv-paneview-active-outline-color: var(--primary);
+  --dv-tabs-and-actions-container-font-size: 13px;
+  --dv-tabs-and-actions-container-height: 24px;
+  --dv-drag-over-background-color: color-mix(
+    in hsl,
+    var(--primary) 10%,
+    transparent
+  );
+  --dv-drag-over-border-color: var(--primary);
+  --dv-tabs-container-scrollbar-color: var(--muted-foreground);
+  --dv-group-view-background-color: var(--card);
+  --dv-tabs-and-actions-container-background-color: var(--background);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--muted);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--background);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: color-mix(
+    in hsl,
+    var(--muted) 80%,
+    var(--background)
+  );
+  --dv-tab-divider-color: var(--border);
+  --dv-activegroup-visiblepanel-tab-color: var(--card-foreground);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-hiddenpanel-tab-color: color-mix(
+    in hsl,
+    var(--muted-foreground) 70%,
+    transparent
+  );
+  --dv-separator-border: var(--border);
+  --dv-paneview-header-border-color: var(--border);
+  --dv-icon-hover-background-color: var(--accent);
+  --dv-floating-box-shadow: var(--shadow-lg);
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--primary);
+}
+
+.dark {
+  --dv-background-color: var(--background);
+  --dv-paneview-active-outline-color: var(--primary);
+  --dv-tabs-and-actions-container-font-size: 13px;
+  --dv-tabs-and-actions-container-height: 24px;
+  --dv-drag-over-background-color: color-mix(
+    in hsl,
+    var(--primary) 10%,
+    transparent
+  );
+  --dv-drag-over-border-color: var(--primary);
+  --dv-tabs-container-scrollbar-color: var(--muted-foreground);
+  --dv-group-view-background-color: var(--card);
+  --dv-tabs-and-actions-container-background-color: var(--background);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--card);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--muted);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--background);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: color-mix(
+    in hsl,
+    var(--muted) 80%,
+    var(--background)
+  );
+  --dv-tab-divider-color: var(--border);
+  --dv-activegroup-visiblepanel-tab-color: var(--card-foreground);
+  --dv-activegroup-hiddenpanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--muted-foreground);
+  --dv-inactivegroup-hiddenpanel-tab-color: color-mix(
+    in hsl,
+    var(--muted-foreground) 70%,
+    transparent
+  );
+  --dv-separator-border: var(--border);
+  --dv-paneview-header-border-color: var(--border);
+  --dv-icon-hover-background-color: var(--accent);
+  --dv-floating-box-shadow: var(--shadow-lg);
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--primary);
+}

@@ -1,0 +1,25 @@
+.header-glass {
+  background:
+    radial-gradient(
+      circle at 30% 40%,
+      hsla(220 8% 88% / 0.4) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      circle at 70% 60%,
+      hsla(210 6% 85% / 0.3) 0%,
+      transparent 60%
+    ),
+    linear-gradient(140deg, hsla(220 12% 94% / 0.8), hsla(225 8% 92% / 0.9));
+}
+
+.dark .header-glass {
+  background: linear-gradient(
+    135deg,
+    hsla(225 50% 15% / 0.4) 0%,
+    hsla(280 40% 15% / 0.3) 25%,
+    hsla(200 60% 10% / 0.2) 50%,
+    hsla(260 50% 15% / 0.3) 75%,
+    hsla(225 50% 20% / 0.35) 100%
+  );
+}
