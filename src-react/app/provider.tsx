@@ -7,7 +7,7 @@ import * as Duration from 'effect/Duration';
 import * as Layer from 'effect/Layer';
 import * as Logger from 'effect/Logger';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { ChannelClient } from '@/services/common/channel-client';
 import { QueryClient } from '@/services/common/query-client';
