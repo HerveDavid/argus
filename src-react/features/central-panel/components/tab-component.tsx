@@ -22,6 +22,14 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
     setTitle(props.params.title);
   };
 
+  const handleCloseOthers = () => {
+    const group = props.api.group;
+    const panelIds = group.panels
+      .map((panel) => panel.id)
+      .filter((id) => id !== props.params.title);
+    panelIds.forEach(removePanel);
+  };
+
   const handleCloseAll = () => {
     const group = props.api.group;
     removeGroup(group);
@@ -36,7 +44,9 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
         <ContextMenuTrigger>{props.api.title}</ContextMenuTrigger>
         <ContextMenuContent>
           <ContextMenuItem onClick={handleClose}>Close</ContextMenuItem>
-          <ContextMenuItem>Close Others</ContextMenuItem>
+          <ContextMenuItem onClick={handleCloseOthers}>
+            Close Others
+          </ContextMenuItem>
           <ContextMenuItem onClick={handleCloseAll}>Close All</ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem>Add in Favorites</ContextMenuItem>
