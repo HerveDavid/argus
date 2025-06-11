@@ -23,7 +23,7 @@
     /* Tailwind */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["././src-react/*"]
+      "@/*": ["./src-react/*"]
     }
   },
   "include": ["./src-react"],

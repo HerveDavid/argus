@@ -130,21 +130,21 @@ const config: Linter.Config[] = [
 
             // e.g. ./src-react/app can import from ./src-react/features but not the other way around
             {
-              target: '././src-react/features',
-              from: '././src-react/app',
+              target: './src-react/features',
+              from: './src-react/app',
             },
 
             // e.g ./src-react/features and ./src-react/app can import from these shared modules but not the other way around
             {
               target: [
-                '././src-react/components',
-                '././src-react/hooks',
-                '././src-react/lib',
-                '././src-react/services',
-                '././src-react/types',
-                '././src-react/utils',
+                './src-react/components',
+                './src-react/hooks',
+                './src-react/lib',
+                './src-react/services',
+                './src-react/types',
+                './src-react/utils',
               ],
-              from: ['././src-react/features', '././src-react/app'],
+              from: ['./src-react/features', './src-react/app'],
             },
           ],
         },

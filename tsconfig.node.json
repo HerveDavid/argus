@@ -7,7 +7,7 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["././src-react/*"]
+      "@/*": ["./src-react/*"]
     }
   },
   "include": ["vite.config.ts"]

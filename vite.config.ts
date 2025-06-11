@@ -11,7 +11,7 @@ export default defineConfig(async () => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "././src-react"),
+      "@": path.resolve(__dirname, "./src-react"),
     },
   },
 
@@ -32,8 +32,8 @@ export default defineConfig(async () => ({
         }
       : undefined,
     watch: {
-      // 3. tell vite to ignore watching `./src-react-tauri`
-      ignored: ["**/./src-react-tauri/**"],
+      // 3. tell vite to ignore watching `./src-tauri`
+      ignored: ["**/src-tauri/**"],
     },
   },
 }));
