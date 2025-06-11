@@ -28,7 +28,9 @@ pub fn run() {
             tauri::async_runtime::block_on(async move {
                 app.manage(utils::channels::state::Channels::default());
                 app.manage(utils::tasks::state::Tasks::default());
-
+                
+                app.manage(settings::banner::state::BannerState::default());
+                
                 println!("-----------------------------------------------");
 
                 let settings_db = settings::database::state::DatabaseState::new(&app.handle())
