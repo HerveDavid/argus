@@ -1,6 +1,7 @@
 import React from 'react';
 import { Substation } from '../../types/substation.type';
 import { Card } from '@/components/ui/card';
+import DraggableItem from '../draggable-item';
 
 interface SubstationListProps {
   substations: Substation[];
@@ -26,23 +27,30 @@ export const SubstationList: React.FC<SubstationListProps> = ({
   return (
     <div className="space-y-1">
       {substations.map((substation) => (
-        <Card key={substation.id} className="p-0 shadow-xs hover:bg-secondary">
-          <div
-            className={`cursor-pointer p-2 ${
-              selectedId === substation.id ? 'bg-blue-100' : 'hover:bg-gray-100'
-            }`}
-            onClick={() => onSelect(substation.id)}
+        <DraggableItem item={{ name: substation.id }}>
+          <Card
+            key={substation.id}
+            className="p-0 m-2 shadow-xs hover:bg-secondary"
           >
-            <div className="flex items-center justify-between">
-              <span className="font-medium truncate text-sm">
-                {substation.id}
-              </span>
-              <span className="font-medium truncate text-sm text-muted-foreground">
-                {substation.country}
-              </span>
+            <div
+              className={`cursor-pointer p-2 ${
+                selectedId === substation.id
+                  ? 'bg-blue-100'
+                  : 'hover:bg-gray-100'
+              }`}
+              onClick={() => onSelect(substation.id)}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-medium truncate text-sm">
+                  {substation.id}
+                </span>
+                <span className="font-medium truncate text-sm text-muted-foreground">
+                  {substation.country}
+                </span>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </DraggableItem>
       ))}
     </div>
   );

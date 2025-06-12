@@ -62,23 +62,6 @@ export const EquipmentExplorer = () => {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with refresh button */}
-      <div className="flex justify-between items-center border-b border-gray-200 p-2">
-        <h3 className="uppercase text-sm">Network Explorer</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleRefreshAll}
-          disabled={isRefreshing}
-          title="Reload all data"
-          className="h-7 w-7 p-0"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-        </Button>
-      </div>
-
       {/* Tab-based navigation */}
       <Tabs
         value={activeTab}

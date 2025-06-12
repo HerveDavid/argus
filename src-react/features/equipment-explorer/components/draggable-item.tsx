@@ -5,9 +5,10 @@ import { useWindowHeaderStore } from '@/stores/window-header.store';
 
 interface DraggableItemProps {
   item: { name: string };
+  children: React.ReactNode;
 }
 
-const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
+const DraggableItem: React.FC<DraggableItemProps> = ({ item, children }) => {
   const { setTitle } = useWindowHeaderStore();
   const { addPanel } = useCentralPanelStore();
 
@@ -32,12 +33,12 @@ const DraggableItem: React.FC<DraggableItemProps> = ({ item }) => {
   return (
     <span
       draggable={true}
-      className="cursor-pointer text-xs text-muted-foreground block p-2 m-1 border border-border rounded hover:bg-sidebar-accent"
+      className="cursor-pointer"
       onDragStart={handleDragStart}
       onClick={handleClick}
       tabIndex={1}
     >
-      {item.name}
+      {children}
     </span>
   );
 };
