@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -31,14 +31,6 @@ export const ProjectWidget = () => {
     clearRecentProjects,
     getRecentProjectsSorted,
   } = useProjectsStore();
-
-  useEffect(() => {
-    const initializeProject = async () => {
-      loadProject();
-    };
-
-    initializeProject();
-  }, [loadProject]);
 
   const handleSwitchProject = async (project: Project) => {
     switchToProject(project);

@@ -7,13 +7,15 @@ import * as Duration from 'effect/Duration';
 import * as Layer from 'effect/Layer';
 import * as Logger from 'effect/Logger';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { ChannelClient } from '@/services/common/channel-client';
 import { QueryClient } from '@/services/common/query-client';
 import { SettingsClient } from '@/services/common/settings-client';
 import { LiveManagedRuntime } from '@/services/live-layer';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
+import { ProjectClient } from '@/services/common/project-client';
+import { StartProvider } from './providers/start.provider';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -43,6 +45,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           QueryClient.make(queryClient),
           ChannelClient.Default,
           SettingsClient.Default,
+          ProjectClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),
         ).pipe(Layer.provide(Logger.pretty)),
       ),
@@ -51,7 +54,9 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RuntimeProvider runtime={runtime}>{children}</RuntimeProvider>
+      <RuntimeProvider runtime={runtime}>
+        <StartProvider>{children}</StartProvider>
+      </RuntimeProvider>
     </QueryClientProvider>
   );
 };

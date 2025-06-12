@@ -4,9 +4,9 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
+import { ProjectClient } from '@/services/common/project-client';
 import { LiveManagedRuntime } from '@/services/live-layer';
 import { Project } from '@/types/project';
-import { ProjectClient } from '../services/project.service';
 
 const KEY_CURRENT_PROJECT = 'current-project';
 const KEY_RECENT_PROJECTS = 'recent-projects';
@@ -202,7 +202,6 @@ const useProjectsStoreInner = create<ProjectsStore>()(
 
       loadProject: async () => {
         const { runtime } = get();
-
         if (!runtime) return;
 
         const program = Effect.gen(function* () {
@@ -210,7 +209,7 @@ const useProjectsStoreInner = create<ProjectsStore>()(
           const project = yield* projectClient.loadProject();
           console.log('Project loaded:', project);
           return project;
-        }).pipe(Effect.provide(ProjectClient.Default));
+        });
 
         return await runtime.runPromise(program);
       },

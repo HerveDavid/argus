@@ -8,7 +8,7 @@ interface ProjectService {
 }
 
 export class ProjectClient extends Effect.Service<ProjectClient>()(
-  '@/features/ProjectClient',
+  '@/common/ProjectClient',
   {
     dependencies: [],
     effect: Effect.gen(function* () {

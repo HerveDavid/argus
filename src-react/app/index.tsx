@@ -1,10 +1,13 @@
 import { Providers } from './provider';
+import { StartLoadingGate } from './providers/start.provider';
 import { AppRouter } from './router';
 
 export const App = () => {
   return (
     <Providers>
-      <AppRouter />
+      <StartLoadingGate fallback={<>Loading</>}>
+        <AppRouter />
+      </StartLoadingGate>
     </Providers>
   );
 };
