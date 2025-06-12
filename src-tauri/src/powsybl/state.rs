@@ -18,7 +18,7 @@ pub struct PowsyblState {
 }
 
 impl PowsyblState {
-    pub async fn new() -> tokio::sync::Mutex<Self> {
+    pub fn new() -> tokio::sync::Mutex<Self> {
         tokio::sync::Mutex::new(Self::default())
     }
 

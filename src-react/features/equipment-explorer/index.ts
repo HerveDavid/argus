@@ -1,1 +1,1 @@
-export { EquipmentExplorer as default } from './components/equipment-explorer';
+export { EquipmentExplorer } from './components/equipment-explorer';

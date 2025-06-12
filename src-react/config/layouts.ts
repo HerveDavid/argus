@@ -8,7 +8,7 @@ import {
   ClockIcon,
 } from 'lucide-react';
 
-import EquipmentExplorer from '@/features/equipment-explorer';
+import { EquipmentExplorer } from '@/features/equipment-explorer';
 import { EventsLog } from '@/features/events-log';
 import Terminal from '@/features/terminal';
 import Widgets from '@/features/widgets';
