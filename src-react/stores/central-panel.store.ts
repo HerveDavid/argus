@@ -57,6 +57,13 @@ const useCentralPanelStoreInner = create<CentralPanelStore>()(
       addPanel: (panel) => {
         const { api } = get();
         if (!api) return;
+
+        const existedPanel = api.getPanel(panel.id);
+        if (existedPanel) {
+          existedPanel.api.setActive();
+          return;
+        }
+
         api.addPanel(panel);
       },
 
