@@ -2,6 +2,7 @@ import React from 'react';
 import * as Effect from 'effect/Effect';
 import { ProjectClient } from '@/services/common/project-client';
 import { useRuntime } from '@/services/runtime/use-runtime';
+import { Duration } from 'effect';
 
 type StartState =
   | { status: 'idle' }
@@ -26,6 +27,9 @@ const StartService = {
     const projectClient = yield* ProjectClient;
     const project = yield* projectClient.loadProject();
     yield* Effect.logInfo('Project loaded successfully', { project });
+
+    yield* Effect.sleep(Duration.seconds(2));
+
     yield* Effect.logInfo('Application started successfully');
     return true;
   }),
