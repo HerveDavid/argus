@@ -7,6 +7,7 @@ import { SettingsClient } from '@/services/common/settings-client';
 import { ProjectClient } from '@/services/common/project-client';
 import { LiveManagedRuntime } from '@/services/live-layer';
 import { Project } from '@/types/project';
+import { invoke } from '@tauri-apps/api/core';
 
 const KEY_CURRENT_PROJECT = 'current-project';
 const KEY_RECENT_PROJECTS = 'recent-projects';
@@ -166,7 +167,7 @@ const useProjectsStoreInner = create<ProjectsStore>()(
         );
       },
 
-      switchToProject: (project: Project) => {
+      switchToProject: async (project: Project) => {
         const updatedProject: Project = {
           ...project,
           lastAccessed: new Date(),
@@ -179,6 +180,9 @@ const useProjectsStoreInner = create<ProjectsStore>()(
           path: project.path,
           configPath: project.configPath,
         });
+
+        // TODO: create a service
+        await invoke('load_substations');
       },
 
       clearRecentProjects: () => {

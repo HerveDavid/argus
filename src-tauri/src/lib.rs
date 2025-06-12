@@ -1,4 +1,6 @@
 mod commands;
+mod entities;
+mod powsybl;
 mod project;
 mod settings;
 mod utils;
@@ -49,6 +51,8 @@ pub fn run() {
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
 
+                app.manage(powsybl::state::PowsyblState::new());
+
                 println!("-----------------------------------------------");
             });
             Ok(())
@@ -89,6 +93,15 @@ pub fn run() {
             project::commands::clean_project,
             project::commands::is_loaded,
             project::commands::get_project,
+            // Powsybl
+            powsybl::commands::substations::get_substations,
+            powsybl::commands::substations::load_substations,
+            powsybl::commands::substations::get_paginated_substations,
+            powsybl::commands::substations::get_substation_by_id,
+            powsybl::commands::substations::search_substations,
+            powsybl::commands::sld::get_single_line_diagram_with_metadata,
+            powsybl::commands::sld::get_single_line_diagram,
+            powsybl::commands::sld::get_single_line_diagram_metadata,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
