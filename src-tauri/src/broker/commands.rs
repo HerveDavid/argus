@@ -35,7 +35,7 @@ pub async fn connect_broker(
     }
 
     // Subscribe to topic
-    let topic = format!("{}.{}", TOPIC, substation_id);
+    let topic = format!("{}.{}", TOPIC, substation_id.replace(".", "_"));  // Sanitize substation_id before use as topic ('.' is a delimiter in NATS)
     let mut telemetry_subscription = state.client.subscribe(topic.clone()).await?;
     debug!("Subscribe to topic '{}'", topic);
 
