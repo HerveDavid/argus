@@ -13,6 +13,9 @@ pub enum Error {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
+    #[error("InvalidConfig error: {0}")]
+    InvalidConfig(String),
+
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
     
