@@ -1,5 +1,5 @@
 import React from 'react';
-import { Substation } from '../../types/substation.type';
+import { Substation } from '@/types/substation';
 import { Card } from '@/components/ui/card';
 import DraggableItem from '../draggable-item';
 
@@ -27,11 +27,8 @@ export const SubstationList: React.FC<SubstationListProps> = ({
   return (
     <div className="space-y-1">
       {substations.map((substation) => (
-        <DraggableItem item={{ name: substation.id }}>
-          <Card
-            key={substation.id}
-            className="p-0 m-2 shadow-xs hover:bg-secondary"
-          >
+        <DraggableItem substation={substation} key={substation.id}>
+          <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
             <div
               className={`cursor-pointer p-2 ${
                 selectedId === substation.id

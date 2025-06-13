@@ -2,30 +2,34 @@ import React from 'react';
 
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { Substation } from '@/types/substation';
 
 interface DraggableItemProps {
-  item: { name: string };
+  substation: Substation;
   children: React.ReactNode;
 }
 
-const DraggableItem: React.FC<DraggableItemProps> = ({ item, children }) => {
+const DraggableItem: React.FC<DraggableItemProps> = ({
+  substation,
+  children,
+}) => {
   const { setTitle } = useWindowHeaderStore();
   const { addPanel } = useCentralPanelStore();
 
   const handleDragStart = (e: React.DragEvent<HTMLSpanElement>) => {
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify(item));
-    e.dataTransfer.setData('text/plain', item.name);
-    setTitle(item.name);
+    e.dataTransfer.setData('application/json', JSON.stringify(substation));
+    e.dataTransfer.setData('text/plain', substation.id);
+    setTitle(substation.id);
   };
 
   const handleClick = () => {
-    const title = item.name;
+    const title = substation.id;
     addPanel({
       id: title,
       tabComponent: 'default',
       component: 'sld',
-      params: { title },
+      params: { substation },
     });
     setTitle(title);
   };

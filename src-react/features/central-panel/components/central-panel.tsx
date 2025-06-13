@@ -14,13 +14,12 @@ import '../styles/dockview-theme.css';
 import { ComponentLayouts } from '@/config/central-panel';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-import { DraggedItem } from '../types/dragged-item.type';
 import { isDraggedItem } from '../utils';
-
 import { LeftHeaderActions } from './left-header-actions';
 import { RightHeaderActions } from './right-header-actions';
 import { TabComponent } from './tab-component';
 import { Watermark } from './watermark';
+import { Substation } from '@/types/substation';
 
 const customTailwindTheme: DockviewTheme = {
   name: 'tailwind-custom',
@@ -56,25 +55,25 @@ export const CentralPanel = () => {
       return;
     }
 
-    let parsedData: DraggedItem;
+    let substation: Substation;
     try {
-      parsedData = JSON.parse(dragData);
+      substation = JSON.parse(dragData);
     } catch (error) {
       console.error('Error parsing drag data:', error);
       return;
     }
 
-    if (!isDraggedItem(parsedData)) {
-      console.warn('Invalid drag data structure:', parsedData);
+    if (!isDraggedItem(substation)) {
+      console.warn('Invalid drag data structure:', substation);
       return;
     }
 
-    const title = parsedData.name;
+    const title = substation.id;
     const panel = {
       id: title,
       component: 'sld',
       tabComponent: 'default',
-      params: { title },
+      params: { substation: substation },
       position: {
         direction: positionToDirection(event.position),
         referenceGroup: event.group,

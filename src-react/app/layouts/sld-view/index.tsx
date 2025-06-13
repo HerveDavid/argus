@@ -18,15 +18,16 @@ import { Sld } from '@/features/single-line-diagram';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
 
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
+import { Substation } from '@/types/substation';
 
 export interface SldViewProps {
-  title: string;
+  substation: Substation;
 }
 
 export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
-  params,
+  params: { substation },
 }) => {
-  const { title: id } = params;
+  const { id } = substation;
   const {
     isOpen: isRightOpen,
     size: rightSize,
