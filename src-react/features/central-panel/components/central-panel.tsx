@@ -68,12 +68,11 @@ export const CentralPanel = () => {
       return;
     }
 
-    const title = substation.id;
     const panel = {
-      id: title,
+      id: substation.id,
       component: 'sld',
       tabComponent: 'default',
-      params: { substation: substation },
+      params: { substation },
       position: {
         direction: positionToDirection(event.position),
         referenceGroup: event.group,
