@@ -4,7 +4,6 @@ from .zmq import (
     shutdown_server,
     start_stdin_thread,
     check_broker_connection,
-    force_close_port,
 )
 
 __all__ = [
@@ -13,5 +12,4 @@ __all__ = [
     "shutdown_server",
     "start_stdin_thread",
     "check_broker_connection",
-    "force_close_port",
 ]
