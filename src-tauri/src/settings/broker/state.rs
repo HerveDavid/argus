@@ -60,8 +60,6 @@ impl BrokerState {
     }
 
     pub async fn start_proxy(&mut self) -> Result<()> {
-        log::info!("Starting ZMQ proxy...");
-
         loop {
             match self.sub_socket.recv().await {
                 Ok(message) => {

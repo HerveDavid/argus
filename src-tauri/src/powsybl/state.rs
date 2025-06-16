@@ -1,6 +1,7 @@
 use crate::entities::iidm::{Substation, VoltageLevel};
 use crate::powsybl::error::{PowsyblError, PowsyblResult};
 use serde_json::{json, Value};
+use sqlx::{Pool, Sqlite};
 use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
 use std::time::Duration;
@@ -25,12 +26,12 @@ pub struct PowsyblState {
     pub substations: BTreeMap<String, Substation>,
     pub voltage_levels: HashMap<String, VoltageLevel>,
     pub ti_subscriptions: HashMap<String, SubscriptionHandle>,
-    
+
     // Connexions ZMQ
     pub_socket: zeromq::PubSocket,
     sub_socket: Arc<TokioMutex<zeromq::SubSocket>>,
     pending_requests: Arc<TokioMutex<HashMap<String, tokio::sync::oneshot::Sender<Value>>>>,
-    
+
     // Handle pour la tâche d'écoute
     _listening_task: Option<JoinHandle<()>>,
 }
@@ -117,12 +118,17 @@ impl PowsyblState {
 
                 match message_result {
                     Ok(message) => {
-                        if let Ok((request_id, response)) = Self::parse_response_message(message).await {
+                        if let Ok((request_id, response)) =
+                            Self::parse_response_message(message).await
+                        {
                             // Acquérir le verrou sur pending_requests et traiter la réponse
                             let mut pending = pending_requests.lock().await;
                             if let Some(sender) = pending.remove(&request_id) {
                                 if let Err(_) = sender.send(response) {
-                                    log::warn!("Impossible d'envoyer la réponse pour ID: {}", request_id);
+                                    log::warn!(
+                                        "Impossible d'envoyer la réponse pour ID: {}",
+                                        request_id
+                                    );
                                 }
                             } else {
                                 log::warn!("Aucune requête en attente pour ID: {}", request_id);
@@ -139,9 +145,10 @@ impl PowsyblState {
     }
 
     async fn parse_response_message(message: ZmqMessage) -> PowsyblResult<(String, Value)> {
-        let message_bytes = message.get(0)
+        let message_bytes = message
+            .get(0)
             .ok_or_else(|| PowsyblError::JsonParseError("Message vide".to_string()))?;
-        
+
         let message_str = std::str::from_utf8(message_bytes)
             .map_err(|e| PowsyblError::JsonParseError(format!("Erreur UTF-8: {}", e)))?;
 
@@ -161,7 +168,9 @@ impl PowsyblState {
             }
         }
 
-        Err(PowsyblError::JsonParseError("Format de réponse invalide".to_string()))
+        Err(PowsyblError::JsonParseError(
+            "Format de réponse invalide".to_string(),
+        ))
     }
 
     pub async fn send_request(
@@ -171,7 +180,7 @@ impl PowsyblState {
         timeout_duration: Duration,
     ) -> PowsyblResult<Value> {
         let request_id = Uuid::new_v4().to_string();
-        
+
         let request = json!({
             "type": "request",
             "id": request_id,
@@ -181,7 +190,7 @@ impl PowsyblState {
 
         // Créer un channel pour recevoir la réponse
         let (tx, rx) = tokio::sync::oneshot::channel();
-        
+
         // Insérer dans pending_requests
         {
             let mut pending = self.pending_requests.lock().await;
@@ -189,7 +198,11 @@ impl PowsyblState {
         }
 
         // Envoyer la requête avec le topic powsybl.request (comme attendu par le Python)
-        let message = format!("{} {}", POWSYBL_REQUEST_TOPIC, serde_json::to_string(&request)?);
+        let message = format!(
+            "{} {}",
+            POWSYBL_REQUEST_TOPIC,
+            serde_json::to_string(&request)?
+        );
         self.pub_socket.send(message.into()).await?;
 
         log::debug!("Requête envoyée: {} (ID: {})", method, request_id);
@@ -241,7 +254,7 @@ impl Drop for PowsyblState {
             let _ = subscription.shutdown_sender.send(());
             subscription.handle.abort();
         }
-        
+
         // Arrêter la tâche d'écoute si elle existe
         if let Some(task) = &self._listening_task {
             task.abort();
