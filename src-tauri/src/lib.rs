@@ -56,7 +56,10 @@ pub fn run() {
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
 
-                app.manage(powsybl::state::PowsyblState::new());
+                let sybl = powsybl::state::PowsyblState::new()
+                    .await
+                    .expect("Failed to initialize powsybl");
+                app.manage(sybl);
 
                 println!("-----------------------------------------------");
             });
