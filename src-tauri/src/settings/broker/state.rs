@@ -66,8 +66,8 @@ impl BrokerState {
             match self.sub_socket.recv().await {
                 Ok(message) => {
                     if let Some(msg_bytes) = message.get(0) {
-                        if let Ok(msg_str) = std::str::from_utf8(msg_bytes) {
-                            log::debug!("Broker received: {}", msg_str);
+                        if let Ok(_msg_str) = std::str::from_utf8(msg_bytes) {
+                            log::debug!("Broker received a message");
                         }
                     }
 
