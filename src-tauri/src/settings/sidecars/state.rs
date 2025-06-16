@@ -57,17 +57,17 @@ impl SidecarsState {
             while let Some(event) = rx.recv().await {
                 match event {
                     CommandEvent::Stdout(line_bytes) => {
-                        let line = String::from_utf8_lossy(&line_bytes);
+                        let line = String::from_utf8_lossy(&line_bytes).trim_end().to_string();
                         debug!("Sidecar stdout: {}", line);
                         app_handle
-                            .emit("sidecar-stdout", line.to_string())
+                            .emit("sidecar-stdout", line)
                             .expect("Failed to emit sidecar stdout event");
                     }
                     CommandEvent::Stderr(line_bytes) => {
-                        let line = String::from_utf8_lossy(&line_bytes);
+                        let line = String::from_utf8_lossy(&line_bytes).trim_end().to_string();
                         warn!("Sidecar stderr: {}", line);
                         app_handle
-                            .emit("sidecar-stderr", line.to_string())
+                            .emit("sidecar-stderr", line)
                             .expect("Failed to emit sidecar stderr event");
                     }
                     CommandEvent::Error(error) => {
