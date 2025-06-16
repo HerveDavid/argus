@@ -1,6 +1,6 @@
 use crate::entities::iidm::{Substation, VoltageLevel};
 
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
 
@@ -12,7 +12,7 @@ pub struct SubscriptionHandle {
 
 #[derive(Debug, Default)]
 pub struct PowsyblState {
-    pub substations: HashMap<String, Substation>,
+    pub substations: BTreeMap<String, Substation>,
     pub voltage_levels: HashMap<String, VoltageLevel>,
     pub ti_subscriptions: HashMap<String, SubscriptionHandle>,
 }
