@@ -4,6 +4,7 @@ import { useLeftSidebarStore } from '../../stores/state-view.store';
 
 export const LeftSidebarPanel = () => {
   const { activeItem, closePanel } = useLeftSidebarStore();
+  const ContentComponent = activeItem.content;
   
   return (
     <div className="h-full bg-sidebar border-r flex flex-col">
@@ -19,7 +20,7 @@ export const LeftSidebarPanel = () => {
       
       {/* Contenu avec scroll */}
       <div className="flex-1 overflow-auto p-2">
-        {activeItem.content()}
+        <ContentComponent />
       </div>
     </div>
   );

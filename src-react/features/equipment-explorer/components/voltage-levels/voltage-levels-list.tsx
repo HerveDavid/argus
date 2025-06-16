@@ -3,20 +3,20 @@ import { Substation } from '@/types/substation';
 import { Card } from '@/components/ui/card';
 import DraggableItem from '../draggable-item';
 
-interface SubstationListProps {
+interface VoltageLevelsListProps {
   substations: Substation[];
   selectedId?: string;
   onSelect: (id: string) => void;
   isLoading: boolean;
 }
 
-export const SubstationList: React.FC<SubstationListProps> = ({
+export const VoltageLevelsList: React.FC<VoltageLevelsListProps> = ({
   substations,
   onSelect,
   isLoading,
 }) => {
   if (isLoading) {
-    return <>Loading substations...</>;
+    return <>Loading voltage levels...</>;
   }
 
   if (substations.length === 0) {

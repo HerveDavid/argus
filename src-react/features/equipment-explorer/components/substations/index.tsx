@@ -11,7 +11,6 @@ import { SubstationList } from './substations-list';
 import { PaginationControls } from '../pagination-controls';
 import { ErrorWithRetry } from '../../hooks/use-error-handling';
 import { useSubstations } from '../../hooks/use-substations';
-import { paths } from '@/config/paths';
 import { useNavigate } from 'react-router';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';

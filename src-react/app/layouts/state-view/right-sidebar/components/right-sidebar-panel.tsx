@@ -6,6 +6,7 @@ import { useRightSidebarStore } from '../../stores/state-view.store';
 
 export const RightSidebarPanel = () => {
   const { activeItem, closePanel } = useRightSidebarStore();
+  const ContentComponent = activeItem.content;
 
   return (
     <div className="h-full bg-sidebar border-l overflow-auto">
@@ -17,7 +18,9 @@ export const RightSidebarPanel = () => {
           <Minus />
         </Button>
       </div>
-      <div className="p-4">{activeItem.content()}</div>
+      <div className="p-4">
+        <ContentComponent />
+      </div>
     </div>
   );
 };

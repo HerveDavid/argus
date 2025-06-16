@@ -6,6 +6,7 @@ import { useToolsStore } from '../../stores/state-view.store';
 
 export const Tools = () => {
   const { activeItem, closePanel } = useToolsStore();
+  const ContentComponent = activeItem.content;
 
   return (
     <div className="flex flex-col bg-sidebar h-full">
@@ -19,7 +20,9 @@ export const Tools = () => {
         </Button>
       </div>
 
-      <div className="p-4 h-full">{activeItem.content()}</div>
+      <div className="p-4 h-full">
+        <ContentComponent />
+      </div>
     </div>
   );
 };

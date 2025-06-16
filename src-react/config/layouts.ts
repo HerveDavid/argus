@@ -13,6 +13,7 @@ import { EventsLog } from '@/features/events-log';
 import Terminal from '@/features/terminal';
 import Widgets from '@/features/widgets';
 import { SidebarItem } from '@/types/sidebar-item';
+import ChartComponent from '@/features/chart';
 
 export const leftSidebarPanels: SidebarItem[] = [
   {
@@ -31,7 +32,7 @@ export const leftSidebarPanels: SidebarItem[] = [
 
 export const leftSidebarTools: SidebarItem[] = [
   { id: 'terminal', icon: TerminalIcon, label: 'Terminal', content: Terminal },
-  { id: 'log', icon: LogsIcon, label: 'Log', content: Terminal },
+  { id: 'log', icon: LogsIcon, label: 'Log', content:  EventsLog},
 ] as const;
 
 export const rightSidebarPanels: SidebarItem[] = [
@@ -53,6 +54,6 @@ export const rightSidebarSlds: SidebarItem[] = [
     id: 'charts2',
     icon: CircleGaugeIcon,
     label: 'Charts2',
-    content: Terminal,
+    content: ChartComponent,
   },
 ];

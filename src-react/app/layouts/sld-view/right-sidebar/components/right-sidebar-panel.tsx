@@ -6,6 +6,8 @@ import { useRightSidebarStore } from '../hooks/use-right-sidebar-store';
 
 export const RightSidebarPanel = ({ id }: { id: string }) => {
   const { activeItem, closePanel } = useRightSidebarStore(id);
+  const ContentComponent = activeItem.content;
+
   return (
     <div className="h-full border-l bg-sidebar overflow-auto flex-1">
       <div className="flex items-center justify-between py-1 px-2 bg-sidebar shadow">
@@ -16,7 +18,9 @@ export const RightSidebarPanel = ({ id }: { id: string }) => {
           <Minus />
         </Button>
       </div>
-      <div className="p-4">{activeItem.content()}</div>
+      <div className="p-4">
+        <ContentComponent />
+      </div>
     </div>
   );
 };
