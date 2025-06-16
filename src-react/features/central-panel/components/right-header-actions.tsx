@@ -41,12 +41,12 @@ export const RightHeaderActions = (props: IDockviewHeaderActionsProps) => {
             <Maximize className="size-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-none w-[90vw] h-[90vh] max-h-[90vh] sm:max-w-none">
+        <DialogContent className="max-w-none w-[75vw] h-[75vh] max-h-[75vh] sm:max-w-none">
           <DialogHeader>
             <DialogTitle>{props.activePanel?.id}</DialogTitle>
-            <div className="w-full h-full">
+            <div className="">
               {props.activePanel?.id && (
-                <div className="w-full h-full">
+                <div className="">
                   <Sld id={props.activePanel.id} />
                 </div>
               )}
