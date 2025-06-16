@@ -30,11 +30,7 @@ export const SubstationList: React.FC<SubstationListProps> = ({
         <DraggableItem substation={substation} key={substation.id}>
           <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
             <div
-              className={`cursor-pointer p-2 ${
-                selectedId === substation.id
-                  ? 'bg-blue-100'
-                  : 'hover:bg-gray-100'
-              }`}
+              className="cursor-pointer p-2"
               onClick={() => onSelect(substation.id)}
             >
               <div className="flex items-center justify-between">

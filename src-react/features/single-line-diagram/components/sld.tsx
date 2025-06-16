@@ -4,20 +4,12 @@ import {
   Card,
   CardAction,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Loader2,
-  RefreshCw,
-  Trash2,
-  ZoomIn,
-  ZoomOut,
-  RotateCcw,
-} from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { useSldStore } from '../stores/sld.store';
 
 export interface SingleLineDiagram {
@@ -32,13 +24,8 @@ export const Sld: React.FC<SingleLineDiagram> = ({ id }) => {
     isError,
     diagramData,
     error,
-    lineId,
-    cacheSize,
     loadDiagram,
-    clearDiagram,
-    clearCache,
     retry,
-    isInCache,
   } = useSldStore();
 
   // Charge automatiquement le diagramme quand l'ID change
@@ -106,96 +93,13 @@ export const Sld: React.FC<SingleLineDiagram> = ({ id }) => {
       }
 
       // Ajuste la taille du SVG au container
-      svg
-        .attr('width', '100%')
-        .attr('height', '100%')
-        .style('border', '1px solid #e2e8f0')
-        .style('border-radius', '0.5rem');
+      svg.attr('width', '100%').attr('height', '100%');
 
       // Ajoute des événements aux éléments interactifs si nécessaire
-      addInteractivity(svg, diagramData.metadata);
     } catch (error) {
       console.error('Erreur lors du rendu SVG:', error);
     }
   }, [isLoaded, diagramData]);
-
-  // Fonction pour ajouter l'interactivité aux éléments SVG
-  const addInteractivity = (
-    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>,
-    metadata: any,
-  ) => {
-    // Ajoute des tooltips aux composants
-    svg
-      .selectAll('[data-equipment-id]')
-      .on('mouseover', function (event, d) {
-        const equipmentId = d3.select(this).attr('data-equipment-id');
-        // Créer et afficher tooltip
-        const tooltip = d3
-          .select('body')
-          .append('div')
-          .attr('class', 'sld-tooltip')
-          .style('opacity', 0)
-          .style('position', 'absolute')
-          .style('background', 'rgba(0, 0, 0, 0.8)')
-          .style('color', 'white')
-          .style('padding', '8px')
-          .style('border-radius', '4px')
-          .style('font-size', '12px')
-          .style('pointer-events', 'none')
-          .style('z-index', '1000');
-
-        tooltip.transition().duration(200).style('opacity', 1);
-
-        tooltip
-          .html(`Equipment ID: ${equipmentId}`)
-          .style('left', event.pageX + 10 + 'px')
-          .style('top', event.pageY - 10 + 'px');
-      })
-      .on('mouseout', function () {
-        d3.selectAll('.sld-tooltip').remove();
-      })
-      .on('click', function (event, d) {
-        const equipmentId = d3.select(this).attr('data-equipment-id');
-        console.log('Clicked equipment:', equipmentId);
-        // Ajouter votre logique de clic ici
-      });
-
-    // Ajoute des effets de survol
-    svg
-      .selectAll('rect, circle, path')
-      .style('cursor', 'pointer')
-      .on('mouseover', function () {
-        d3.select(this).style('opacity', 0.8);
-      })
-      .on('mouseout', function () {
-        d3.select(this).style('opacity', 1);
-      });
-  };
-
-  // Fonctions de contrôle du zoom
-  const handleZoomIn = () => {
-    const svg = d3.select(svgRef.current);
-    svg
-      .transition()
-      .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 1.5);
-  };
-
-  const handleZoomOut = () => {
-    const svg = d3.select(svgRef.current);
-    svg
-      .transition()
-      .call(d3.zoom<SVGSVGElement, unknown>().scaleBy as any, 1 / 1.5);
-  };
-
-  const handleResetZoom = () => {
-    const svg = d3.select(svgRef.current);
-    svg
-      .transition()
-      .call(
-        d3.zoom<SVGSVGElement, unknown>().transform as any,
-        d3.zoomIdentity,
-      );
-  };
 
   const renderContent = () => {
     if (isLoading) {
@@ -229,8 +133,17 @@ export const Sld: React.FC<SingleLineDiagram> = ({ id }) => {
     if (isLoaded && diagramData) {
       return (
         <div className="h-full flex flex-col">
+          {/* Container SVG avec D3 */}
+          <div className="flex-1 overflow-hidden bg-muted/25 border-1 rounded">
+            <svg
+              ref={svgRef}
+              className="w-full h-full"
+              style={{ minHeight: '400px' }}
+            />
+          </div>
+
           {/* Informations sur les métadonnées */}
-          <div className="mb-4 p-3 bg-muted rounded-lg">
+          <div className="mt-4 p-3 bg-muted rounded-lg">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
               <div>
                 <span className="font-medium">Composants: </span>
@@ -258,28 +171,6 @@ export const Sld: React.FC<SingleLineDiagram> = ({ id }) => {
               </div>
             </div>
           </div>
-
-          {/* Contrôles de zoom */}
-          <div className="mb-2 flex gap-2">
-            <Button onClick={handleZoomIn} variant="outline" size="sm">
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-            <Button onClick={handleZoomOut} variant="outline" size="sm">
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <Button onClick={handleResetZoom} variant="outline" size="sm">
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Container SVG avec D3 */}
-          <div className="flex-1 overflow-hidden bg-white rounded-lg">
-            <svg
-              ref={svgRef}
-              className="w-full h-full"
-              style={{ minHeight: '400px' }}
-            />
-          </div>
         </div>
       );
     }
@@ -297,43 +188,10 @@ export const Sld: React.FC<SingleLineDiagram> = ({ id }) => {
         <CardHeader>
           <CardTitle>
             <div className="flex items-center justify-between">
-              <h1>Diagramme Unifilaire - {id}</h1>
-              <div className="flex items-center gap-2">
-                {isInCache(id) && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                    En cache
-                  </span>
-                )}
-                <span className="text-xs text-muted-foreground">
-                  Cache: {cacheSize} éléments
-                </span>
-              </div>
+              <h1>{id}</h1>
             </div>
           </CardTitle>
-          <CardDescription>
-            {lineId ? `Ligne: ${lineId}` : 'Aucune ligne sélectionnée'}
-          </CardDescription>
-          <CardAction>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => loadDiagram(id)}
-                variant="outline"
-                size="sm"
-                disabled={isLoading}
-              >
-                <RefreshCw
-                  className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`}
-                />
-                Recharger
-              </Button>
-              {cacheSize > 0 && (
-                <Button onClick={clearCache} variant="outline" size="sm">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Vider le cache
-                </Button>
-              )}
-            </div>
-          </CardAction>
+          <CardAction></CardAction>
         </CardHeader>
 
         <CardContent className="flex-1 overflow-hidden">
