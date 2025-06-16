@@ -32,7 +32,7 @@ pub async fn get_single_line_diagram_with_metadata(
     );
 
     // Send ZMQ request to get diagram with metadata
-    let result = send_zmq_request("get_single_line_diagram", Some(params)).await?;
+    let result = send_zmq_request("get_single_line_diagram", Some(params.clone())).await?;
 
     // Parse response
     let svg = result
@@ -48,7 +48,7 @@ pub async fn get_single_line_diagram_with_metadata(
     let metadata: SldMetadata = serde_json::from_value(metadata_value.clone())
         .map_err(|e| PowsyblError::JsonParseError(e.to_string()))?;
 
-    log::debug!("get_single_line_diagram_with_metadata succeed");
+    log::debug!("get_single_line_diagram_with_metadata succeed, with args: {}", &params);
 
     Ok(DiagramResult { svg, metadata })
 }

@@ -45,6 +45,11 @@ pub fn run() {
 
                 println!("-----------------------------------------------");
 
+                let broker = settings::broker::state::BrokerState::new()
+                    .await
+                    .expect("Failed to initialize broker");
+                app.manage(broker);
+
                 let sidecars =
                     settings::sidecars::state::SidecarsState::new(&app.handle(), &SIDECARS)
                         .await
@@ -88,7 +93,7 @@ pub fn run() {
             // Sidecars
             settings::sidecars::commands::start_sidecar,
             settings::sidecars::commands::shutdown_sidecar,
-            // Project  
+            // Project
             project::commands::load_project,
             project::commands::clean_project,
             project::commands::is_loaded,
