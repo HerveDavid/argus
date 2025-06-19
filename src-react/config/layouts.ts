@@ -8,12 +8,12 @@ import {
   ClockIcon,
 } from 'lucide-react';
 
+import ChartComponent from '@/features/chart';
 import { EquipmentExplorer } from '@/features/equipment-explorer';
 import { EventsLog } from '@/features/events-log';
 import Terminal from '@/features/terminal';
 import Widgets from '@/features/widgets';
 import { SidebarItem } from '@/types/sidebar-item';
-import ChartComponent from '@/features/chart';
 
 export const leftSidebarPanels: SidebarItem[] = [
   {
@@ -32,7 +32,7 @@ export const leftSidebarPanels: SidebarItem[] = [
 
 export const leftSidebarTools: SidebarItem[] = [
   { id: 'terminal', icon: TerminalIcon, label: 'Terminal', content: Terminal },
-  { id: 'log', icon: LogsIcon, label: 'Log', content:  EventsLog},
+  { id: 'log', icon: LogsIcon, label: 'Log', content: EventsLog },
 ] as const;
 
 export const rightSidebarPanels: SidebarItem[] = [

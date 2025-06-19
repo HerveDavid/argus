@@ -1,6 +1,8 @@
-import { Project } from '@/types/project';
 import { invoke } from '@tauri-apps/api/core';
 import { Effect } from 'effect';
+
+import { Project } from '@/types/project';
+
 import { ProjectError } from './error';
 
 interface ProjectService {

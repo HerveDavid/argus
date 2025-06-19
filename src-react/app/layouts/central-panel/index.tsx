@@ -1,9 +1,10 @@
 import { IDockviewPanelProps } from 'dockview';
 
-import { SldView } from '@/app/layouts/sld-view';
 import { Substation } from '@/types/substation';
 
-export const ComponentLayouts: Record<
+import { SldView } from '../../layouts/sld-view';
+
+export const CentralPanelLayouts: Record<
   string,
   React.FunctionComponent<IDockviewPanelProps>
 > = {

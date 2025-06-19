@@ -15,11 +15,12 @@ import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { Substation } from '@/types/substation';
 
 import { isDraggedItem } from '../utils';
+
+import { customTailwindTheme } from './dockview-theme';
 import { LeftHeaderActions } from './left-header-actions';
 import { RightHeaderActions } from './right-header-actions';
 import { TabComponent } from './tab-component';
 import { Watermark } from './watermark';
-import { customTailwindTheme } from './dockview-theme';
 
 export interface CentralPanelProps {
   layouts: Record<string, React.FunctionComponent<IDockviewPanelProps>>;

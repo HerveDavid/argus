@@ -1,19 +1,22 @@
+import { AlertCircle, RefreshCw, Search, X } from 'lucide-react';
 import React, {
   useState,
   useCallback,
   forwardRef,
   useImperativeHandle,
 } from 'react';
-import { AlertCircle, RefreshCw, Search, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { SubstationList } from './substations-list';
-import { PaginationControls } from '../pagination-controls';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 import { ErrorWithRetry } from '../../hooks/use-error-handling';
 import { useSubstations } from '../../hooks/use-substations';
-import { useNavigate } from 'react-router';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { PaginationControls } from '../pagination-controls';
+
+import { SubstationList } from './substations-list';
 
 interface ExplorerRef {
   handleLoadAll: () => void;

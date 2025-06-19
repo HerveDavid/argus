@@ -1,4 +1,4 @@
-import { DockviewTheme } from "dockview";
+import { DockviewTheme } from 'dockview';
 
 export const customTailwindTheme: DockviewTheme = {
   name: 'tailwind-custom',

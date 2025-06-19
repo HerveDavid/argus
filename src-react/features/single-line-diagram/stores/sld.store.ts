@@ -1,5 +1,6 @@
-import { sldMachine } from '../machines/sld.machine';
 import { useActor } from '@xstate/react';
+
+import { sldMachine } from '../machines/sld.machine';
 
 // Hook React pour utiliser le store avec useActor (recommandé pour XState v5)
 export const useSldStore = () => {

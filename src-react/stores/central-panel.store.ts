@@ -12,7 +12,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { paths } from '@/config/paths';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
-import { LiveManagedRuntime } from '@/services/live-layer';
+import { LiveManagedRuntime } from '@/config/live-layer';
 
 const KEY_CENTRAL_PANEL_SETTING = 'central-panel-layout';
 

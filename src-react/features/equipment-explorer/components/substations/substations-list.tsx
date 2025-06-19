@@ -1,6 +1,8 @@
 import React from 'react';
-import { Substation } from '@/types/substation';
+
 import { Card } from '@/components/ui/card';
+import { Substation } from '@/types/substation';
+
 import DraggableItem from '../draggable-item';
 
 interface SubstationListProps {

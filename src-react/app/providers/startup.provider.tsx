@@ -1,7 +1,8 @@
-import React from 'react';
 import { Effect } from 'effect';
-import { useRuntime } from '@/services/runtime/use-runtime';
+import React from 'react';
+
 import { ProjectClient } from '@/services/common/project-client';
+import { useRuntime } from '@/services/runtime/use-runtime';
 
 export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
   children,

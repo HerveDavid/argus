@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { type LiveManagedRuntime } from '@/services/live-layer';
-
 import { RuntimeContext } from './runtime-context';
+
+import { type LiveManagedRuntime } from '@/config/live-layer';
 
 export const useRuntime = (): LiveManagedRuntime => {
   const runtime = React.useContext(RuntimeContext);

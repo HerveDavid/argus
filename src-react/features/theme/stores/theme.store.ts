@@ -4,7 +4,8 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
-import { LiveManagedRuntime } from '@/services/live-layer';
+
+import { LiveManagedRuntime } from '@/config/live-layer';
 
 const KEY_THEME_SETTING = 'theme-preference';
 

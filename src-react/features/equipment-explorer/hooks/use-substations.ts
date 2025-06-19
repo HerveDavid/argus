@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useErrorHandling } from './use-error-handling';
+import { useState, useEffect } from 'react';
+
 import {
   getPaginatedSubstations,
   loadSubstations,
   searchSubstations,
 } from '../api/get-substations';
+
+import { useErrorHandling } from './use-error-handling';
 
 // Query keys as constants for consistency
 const QUERY_KEYS = {

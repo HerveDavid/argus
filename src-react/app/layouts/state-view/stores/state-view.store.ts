@@ -9,8 +9,9 @@ import {
 } from '@/config/layouts';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
-import { LiveManagedRuntime } from '@/services/live-layer';
 import { SidebarItem } from '@/types/sidebar-item';
+
+import { LiveManagedRuntime } from '@/config/live-layer';
 
 interface SidebarConfig {
   name: string;

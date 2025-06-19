@@ -16,9 +16,9 @@ import {
 } from '@/components/ui/resizable';
 import { Sld } from '@/features/single-line-diagram';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { Substation } from '@/types/substation';
 
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
-import { Substation } from '@/types/substation';
 
 export interface SldViewProps {
   substation: Substation;

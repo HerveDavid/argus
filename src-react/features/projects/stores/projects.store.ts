@@ -1,13 +1,13 @@
+import { invoke } from '@tauri-apps/api/core';
 import * as Effect from 'effect/Effect';
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
-import { useStoreRuntime } from '@/hooks/use-store-runtime';
-import { SettingsClient } from '@/services/common/settings-client';
-import { ProjectClient } from '@/services/common/project-client';
 import { LiveManagedRuntime } from '@/config/live-layer';
+import { useStoreRuntime } from '@/hooks/use-store-runtime';
+import { ProjectClient } from '@/services/common/project-client';
+import { SettingsClient } from '@/services/common/settings-client';
 import { Project } from '@/types/project';
-import { invoke } from '@tauri-apps/api/core';
 
 const KEY_CURRENT_PROJECT = 'current-project';
 const KEY_RECENT_PROJECTS = 'recent-projects';

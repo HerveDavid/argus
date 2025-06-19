@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SubstationsExplorer } from './substations';
-
-import { cn } from '@/lib/utils';
 import { invoke } from '@tauri-apps/api/core';
+import React, { useState, useRef, useEffect } from 'react';
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
+
+import { SubstationsExplorer } from './substations';
 
 type TabType = 'substations' | 'voltageLevels';
 

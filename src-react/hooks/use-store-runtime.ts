@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { LiveManagedRuntime } from '@/services/live-layer';
+import { LiveManagedRuntime } from '@/config/live-layer';
 import { useRuntime } from '@/services/runtime/use-runtime';
 
 export interface StoreRuntime {

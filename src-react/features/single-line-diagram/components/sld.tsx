@@ -1,5 +1,8 @@
-import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import { Loader2, RefreshCw } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardAction,
@@ -8,8 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader2, RefreshCw } from 'lucide-react';
+
 import { useSldStore } from '../stores/sld.store';
 
 export interface SingleLineDiagram {

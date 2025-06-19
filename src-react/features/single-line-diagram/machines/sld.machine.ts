@@ -1,6 +1,7 @@
-import { setup, assign, fromPromise } from 'xstate';
-import { SldMetadata } from '@/types/sld-metadata';
 import { invoke } from '@tauri-apps/api/core';
+import { setup, assign, fromPromise } from 'xstate';
+
+import { SldMetadata } from '@/types/sld-metadata';
 
 export interface SldDiagramData {
   svg: string;

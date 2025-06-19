@@ -11,15 +11,15 @@ export default function LoadingScreen() {
         </div>
 
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2 tracking-wide">
-            Argus
-          </h1>
+          <h1 className="text-4xl font-bold mb-2 tracking-wide">Argus</h1>
           <p className="text-secondary-foreground text-sm">Loading...</p>
         </div>
       </div>
 
       <div className="absolute bottom-8 text-center">
-        <p className="text-secondary-foreground text-xs">© 2025 Argus - Version 0.1.0</p>
+        <p className="text-secondary-foreground text-xs">
+          © 2025 Argus - Version 0.1.0
+        </p>
       </div>
     </div>
   );
