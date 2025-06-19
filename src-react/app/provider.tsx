@@ -1,21 +1,21 @@
-import {
-  QueryClientProvider,
-  QueryClient as TanstackQueryClient,
-} from '@tanstack/react-query';
+import React from 'react';
 import { LogLevel } from 'effect';
 import * as Duration from 'effect/Duration';
 import * as Layer from 'effect/Layer';
 import * as Logger from 'effect/Logger';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
-import React from 'react';
+import {
+  QueryClientProvider,
+  QueryClient as TanstackQueryClient,
+} from '@tanstack/react-query';
 
 import { ChannelClient } from '@/services/common/channel-client';
 import { QueryClient } from '@/services/common/query-client';
 import { SettingsClient } from '@/services/common/settings-client';
-import { LiveManagedRuntime } from '@/services/live-layer';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 import { ProjectClient } from '@/services/common/project-client';
-import { StartProvider } from './providers/start.provider';
+import { LiveManagedRuntime } from '@/config/live-layer';
+import { StartupProvider } from './providers/startup.provider';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -55,7 +55,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   return (
     <QueryClientProvider client={queryClient}>
       <RuntimeProvider runtime={runtime}>
-        <StartProvider>{children}</StartProvider>
+        <StartupProvider>{children}</StartupProvider>
       </RuntimeProvider>
     </QueryClientProvider>
   );

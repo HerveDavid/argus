@@ -2,7 +2,7 @@ import {
   DockviewDidDropEvent,
   DockviewReact,
   DockviewReadyEvent,
-  DockviewTheme,
+  IDockviewPanelProps,
   positionToDirection,
 } from 'dockview';
 import React from 'react';
@@ -11,25 +11,21 @@ import 'dockview/dist/styles/dockview.css';
 import '../styles/central-panel.css';
 import '../styles/dockview-theme.css';
 
-import { ComponentLayouts } from '@/config/central-panel';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
+import { Substation } from '@/types/substation';
 
 import { isDraggedItem } from '../utils';
 import { LeftHeaderActions } from './left-header-actions';
 import { RightHeaderActions } from './right-header-actions';
 import { TabComponent } from './tab-component';
 import { Watermark } from './watermark';
-import { Substation } from '@/types/substation';
+import { customTailwindTheme } from './dockview-theme';
 
-const customTailwindTheme: DockviewTheme = {
-  name: 'tailwind-custom',
-  className: 'dockview-theme-tailwind-custom',
-  gap: 0,
-  dndOverlayMounting: 'absolute',
-  dndPanelOverlay: 'group',
-};
+export interface CentralPanelProps {
+  layouts: Record<string, React.FunctionComponent<IDockviewPanelProps>>;
+}
 
-export const CentralPanel = () => {
+export const CentralPanel: React.FC<CentralPanelProps> = ({ layouts }) => {
   const { api, setApi, addPanel } = useCentralPanelStore();
 
   React.useEffect(() => {
@@ -85,7 +81,7 @@ export const CentralPanel = () => {
     <div className="h-full flex flex-col">
       <DockviewReact
         watermarkComponent={Watermark}
-        components={ComponentLayouts}
+        components={layouts}
         onReady={onReady}
         tabComponents={TabComponent}
         theme={customTailwindTheme}

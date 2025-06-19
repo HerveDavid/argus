@@ -5,7 +5,7 @@ import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
 import { ProjectClient } from '@/services/common/project-client';
-import { LiveManagedRuntime } from '@/services/live-layer';
+import { LiveManagedRuntime } from '@/config/live-layer';
 import { Project } from '@/types/project';
 import { invoke } from '@tauri-apps/api/core';
 

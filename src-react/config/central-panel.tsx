@@ -3,7 +3,10 @@ import { IDockviewPanelProps } from 'dockview';
 import { SldView } from '@/app/layouts/sld-view';
 import { Substation } from '@/types/substation';
 
-export const ComponentLayouts = {
+export const ComponentLayouts: Record<
+  string,
+  React.FunctionComponent<IDockviewPanelProps>
+> = {
   default: ({ params: { title } }: IDockviewPanelProps<{ title: string }>) => {
     return <>Default {title}</>;
   },
