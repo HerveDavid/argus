@@ -133,7 +133,7 @@ const saveLayout = async (api: DockviewApi, runtime: LiveManagedRuntime) => {
       );
     });
     await runtime.runPromise(setEffect);
-    console.log('Layout sauvegardé');
+    console.log('Layout saved');
   } catch (error) {
     console.error('Erreur lors de la sauvegarde du panneau central:', error);
   }
