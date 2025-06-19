@@ -2,7 +2,7 @@ import { IDockviewPanelProps } from 'dockview';
 
 import { Substation } from '@/types/substation';
 
-import { SldView } from '../../layouts/sld-view';
+import { SldView } from '../sld-view';
 
 export const CentralPanelLayouts: Record<
   string,
