@@ -33,7 +33,7 @@ tokio-util = "0.7.15"
 thiserror = "2.0.12"
 log = "0.4.27"
 chrono = { version = "0.4.41", features = ["serde"] }
-duckdb = { version = "1.2.2", features = ["bundled"] }
+# duckdb = { version = "1.2.2", features = ["bundled"] }
 sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "chrono"] }
 uuid = "1.17.0"
 rand = "0.9.1"
