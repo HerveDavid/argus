@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<dynamicModelsArchitecture xmlns="http://www.rte-france.com/dynawo">
-    <blackBoxModel id="Disconnect_MQIS P7_MQIS 7AT762 DJ_OC" lib="EventConnectedStatus" parFile="InitEvents.par" parId="Disconnect_MQIS P7_MQIS 7AT762 DJ_OC"/>
-    <connect id1="Disconnect_MQIS P7_MQIS 7AT762 DJ_OC" var1="event_state1_value" id2="NETWORK" var2="MQIS P7_MQIS 7AT762 DJ_OC_state_value"/>
-    <blackBoxModel id="Disconnect_MQIS P7_MQIS 7AT764 DJ_OC" lib="EventConnectedStatus" parFile="InitEvents.par" parId="Disconnect_MQIS P7_MQIS 7AT764 DJ_OC"/>
-    <connect id1="Disconnect_MQIS P7_MQIS 7AT764 DJ_OC" var1="event_state1_value" id2="NETWORK" var2="MQIS P7_MQIS 7AT764 DJ_OC_state_value"/>
-</dynamicModelsArchitecture>
