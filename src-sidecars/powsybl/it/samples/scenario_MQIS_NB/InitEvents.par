@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parametersSet xmlns="http://www.rte-france.com/dynawo">
+    <set id="Disconnect_MQIS P7_MQIS 7AT762 DJ_OC">
+        <par type="DOUBLE" name="event_tEvent" value="10"/>
+        <par type="BOOL" name="event_open" value="true"/>
+    </set>
+    <set id="Disconnect_MQIS P7_MQIS 7AT764 DJ_OC">
+        <par type="DOUBLE" name="event_tEvent" value="20"/>
+        <par type="BOOL" name="event_open" value="true"/>
+    </set>
+</parametersSet>

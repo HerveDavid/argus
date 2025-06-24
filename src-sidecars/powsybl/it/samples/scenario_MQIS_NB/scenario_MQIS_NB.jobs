@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- cvgVersion = 8.11.0 -->
+<!-- cvgVersionBuild = CVG_V_8_11_0 -->
+<!-- cvgInfoBuild = CVG_8.11.0_R11-36 (9a4397e) -->
+<!-- cvgBranchBuild = test -->
+<!-- cvgBddDynaWaltz = version-29.04.25-stw -->
+<!-- cvgAssemblingVersion = 09b033b -->
+<!-- cvgSettingVersion = 09b033b -->
+<!-- cvgDynawoVersion = Dynawo :            1.7.0 (rev:HEAD-a7ae9af), Dynawo algorithms : 1.7.0 (rev:HEAD-ab4f171), Dynawo-RTE :        1.7.0 (rev:HEAD-945bd34), Dynawo-interface :  1.7.0 (rev:HEAD-3f5744a) -->
+<!-- cvgStudy = PtFige-20250212-1455-enrichi -->
+<!-- cvgIsStanway = true -->
+<!-- cvgStanwayLimitSetType = STUDY -->
+<!-- cvgUser = exp_sa -->
+<!-- cvgOrigin = export_state -->
+<!-- cvgCalculationType = simulation_T0 -->
+<!-- cvgDate = 30/04/2025 10:24 -->
+<jobs xmlns="http://www.rte-france.com/dynawo">
+    <job name="PtFige-20250212-1455-enrichi">
+        <solver lib="dynawo_SolverSIM" parFile="scenario_MQIS_NB.par" parId="0"/>
+        <modeler compileDir="outputs/compilation">
+            <network iidmFile="scenario_MQIS_NB.iidm" parFile="scenario_MQIS_NB.par" parId="1"/>
+            <dynModels dydFile="scenario_MQIS_NB.dyd"/>
+            <dynModels dydFile="InitEvents.dyd"/>
+            <dynModels dydFile="Events.dyd"/>
+            <precompiledModels useStandardModels="true"/>
+            <modelicaModels useStandardModels="true"/>
+        </modeler>
+        <simulation startTime="0" stopTime="200" criteriaStep="10" precision="1.0E-4" eventSubscriberActions="true" eventSubscriberTrigger="true" triggerSimulationTimeStepInS="1." publishToZmq="true" publishToZmqCurvesFormat="BYTES"/>
+            <!-- <criteria criteriaFile="scenario_MQIS_NB.crt"/>
+        </simulation> -->
+        <outputs directory="outputs">
+            <constraints exportMode="XML"/>
+            <timeline exportMode="XML"/>
+            <timetable step="3"/>
+            <finalState exportIIDMFile="false" exportDumpFile="false"/>
+            <curves inputFile="curves.xml" exportMode="XML"/>
+            <logs>
+                <appender tag="" file="dynamo.log" lvlFilter="INFO"/>
+            </logs>
+        </outputs>
+    </job>
+</jobs>

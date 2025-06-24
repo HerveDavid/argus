@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<curvesInput xmlns="http://www.rte-france.com/dynawo">
+  <curve model="NETWORK" variable="PREGUP7_2.2_U_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_i1_value"/>
+  <curve model="DM_BLAYAT 1" variable="governor_PmRefPu"/>
+  <curve model="DM_BLAYAT 1" variable="generator_PmPu"/>
+  <curve model="DM_BLAYAT 1" variable="generator_PGen"/>
+  <curve model="DM_BLAYAT 1" variable="governor_activeFrequencyRegulation_y"/>
+  <curve model="DM_RUNGI6T613" variable="load_PRefPu"/>
+  <curve model="DM_RUNGI6T613" variable="load_PPu"/>
+  <curve model="NETWORK" variable="RUNGI6T613_DeltaPc_value"/>
+  <curve model="NETWORK" variable="RUNGI6T613_Pc_value"/>
+  <curve model="NETWORK" variable="RUNGI6T613_P_value"/>
+  <curve model="NETWORK" variable="MQIS P6_MQIS 6FLEAC.1 SA.1_OC_state_value"/>
+  <curve model="NETWORK" variable="MQIS P6_MQIS 6FLEAC.1 SA.1_OC_swState_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_PRaw1_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_PRaw2_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_QRaw1_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_QRaw2_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_iS1ToS2Side1_value"/>
+  <curve model="NETWORK" variable="MQIS L31MQIS5_iS2ToS1Side2_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_PRaw1_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_PRaw2_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_QRaw1_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_QRaw2_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_iS1ToS2Side1_value"/>
+  <curve model="NETWORK" variable="MQIS Y761_iS2ToS1Side2_value"/>
+  <curve model="NETWORK" variable="BLAYA7AUX.Y712_P_value"/>
+  <curve model="NETWORK" variable="BLAYA7AUX.Y712_Q_value"/>
+  <curve model="NETWORK" variable="BLAYA7AUX.Y712_PRaw_value"/>
+  <curve model="NETWORK" variable="BLAYA7AUX.Y712_QRaw_value"/>
+</curvesInput>

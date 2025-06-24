@@ -1,138 +1,385 @@
 use super::config::ProjectConfig;
+use super::entities::{NetworkInfo, PythonRequest, PythonResponse};
 use super::error::{Error, Result};
 
-use duckdb::{Connection, ToSql};
+use std::collections::HashMap;
+use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::process::{Child, Command, Stdio};
+use std::sync::{Arc, Mutex};
+use tokio::sync::oneshot;
+use uuid::Uuid;
 
 pub struct DatabaseManager {
-    conn: Option<Mutex<Connection>>,
+    python_process: Option<Child>,
+    pending_requests: Arc<Mutex<HashMap<String, oneshot::Sender<PythonResponse>>>>,
+    network_path: Option<String>,
+    db_path: Option<String>,
+    is_ready: bool,
 }
 
 impl Default for DatabaseManager {
     fn default() -> Self {
-        Self { conn: None }
+        Self {
+            python_process: None,
+            pending_requests: Arc::new(Mutex::new(HashMap::new())),
+            network_path: None,
+            db_path: None,
+            is_ready: false,
+        }
     }
 }
 
 impl DatabaseManager {
+    /// Connect to the database using an existing sidecar process
+    pub async fn connect_with_sidecar(&mut self) -> Result<()> {
+        // Dans ce cas, le sidecar est déjà démarré par le système de sidecars
+        // On n'a pas besoin de démarrer un nouveau processus Python
+        self.is_ready = true;
+        Ok(())
+    }
+
+    /// Connect and initialize everything (network + database)
     pub async fn connect(
         &mut self,
         project_path: &Path,
         project_name: &str,
         config: &ProjectConfig,
     ) -> Result<()> {
+        // Start Python server if not using sidecar
+        if self.python_process.is_none() {
+            self.start_python_server().await?;
+        }
+
+        // Find network file
+        let network_path = self.find_network_file(project_path)?;
         let db_path = self.get_database_path(project_path, project_name, config);
 
-        if !db_path.exists() {
-            self.create_database(project_path, project_name, config)
-                .await?;
-        } else {
-            self.open_existing_database(&db_path)?;
-        }
+        // Load everything at once
+        self.load_all(&network_path, &db_path).await?;
+
+        self.network_path = Some(network_path);
+        self.db_path = Some(db_path.to_string_lossy().to_string());
+        self.is_ready = true;
+
+        Ok(())
+    }
+
+    /// Use this when the Python sidecar is already running
+    pub async fn initialize_with_existing_process(
+        &mut self,
+        process: Child,
+        project_path: &Path,
+        project_name: &str,
+        config: &ProjectConfig,
+    ) -> Result<()> {
+        // Set up the existing process
+        self.setup_process_communication(process).await?;
+
+        // Find network file
+        let network_path = self.find_network_file(project_path)?;
+        let db_path = self.get_database_path(project_path, project_name, config);
+
+        // Load everything
+        self.load_all(&network_path, &db_path).await?;
+
+        self.network_path = Some(network_path);
+        self.db_path = Some(db_path.to_string_lossy().to_string());
+        self.is_ready = true;
 
         Ok(())
     }
 
     pub fn disconnect(&mut self) {
-        self.conn = None;
+        if let Some(mut process) = self.python_process.take() {
+            // Send shutdown command gracefully
+            if let Some(stdin) = process.stdin.as_mut() {
+                let shutdown_cmd = serde_json::json!({
+                    "type": "request",
+                    "id": "shutdown",
+                    "method": "shutdown",
+                    "params": {}
+                });
+                let _ = writeln!(stdin, "{}", shutdown_cmd);
+                let _ = stdin.flush();
+            }
+
+            // Give it a moment to shutdown gracefully
+            std::thread::sleep(std::time::Duration::from_millis(100));
+
+            let _ = process.kill();
+            let _ = process.wait();
+        }
+        self.is_ready = false;
+        self.network_path = None;
+        self.db_path = None;
     }
 
     pub fn is_connected(&self) -> bool {
-        self.conn.is_some()
+        self.is_ready
     }
 
-    pub fn execute_query(&self, sql: &str, params: &[&dyn ToSql]) -> Result<i64> {
-        self.with_connection(|conn| -> duckdb::Result<i64> {
-            let rows_affected = conn.execute(sql, params)?;
-            Ok(rows_affected as i64)
-        })
-        .ok_or_else(|| Error::InvalidConfig("No active connection".to_string()))?
-        .map_err(Error::DuckDbDatabase)
-    }
-
-    pub fn query<T, F>(&self, sql: &str, params: &[&dyn ToSql], mapper: F) -> Result<Vec<T>>
-    where
-        F: Fn(&duckdb::Row) -> duckdb::Result<T>,
-    {
-        self.with_connection(|conn| -> duckdb::Result<Vec<T>> {
-            let mut stmt = conn.prepare(sql)?;
-            let rows = stmt.query_map(params, mapper)?;
-            let mut results = Vec::new();
-
-            for row in rows {
-                results.push(row?);
-            }
-
-            Ok(results)
-        })
-        .ok_or_else(|| Error::InvalidConfig("No active connection".to_string()))?
-        .map_err(Error::DuckDbDatabase)
-    }
-
-    pub fn insert_data<T: serde::Serialize>(&self, table_name: &str, data: &[T]) -> Result<i64> {
-        if data.is_empty() {
-            return Ok(0);
+    /// Execute a SQL query and return the number of affected rows
+    pub async fn execute_query(&self, sql: &str) -> Result<i64> {
+        if !self.is_connected() {
+            return Err(Error::InvalidConfig("No active connection".to_string()));
         }
 
-        let json_data = serde_json::to_string(data)?;
-        let sql = format!(
-            "INSERT INTO {} SELECT * FROM read_json_auto($1)",
-            table_name
-        );
+        let params = serde_json::json!({
+            "query": sql
+        });
 
-        self.execute_query(&sql, &[&json_data])
+        let response = self.send_request("execute_query", params).await?;
+
+        if response.status != 200 {
+            return Err(Error::InvalidConfig(
+                response
+                    .result
+                    .get("error")
+                    .and_then(|e| e.as_str())
+                    .unwrap_or("Query execution failed")
+                    .to_string(),
+            ));
+        }
+
+        let row_count = response
+            .result
+            .get("row_count")
+            .and_then(|r| r.as_u64())
+            .unwrap_or(0) as i64;
+
+        Ok(row_count)
     }
 
-    pub fn create_table(&self, table_name: &str, schema: &str) -> Result<i64> {
+    /// Execute a SQL query and map results using a custom mapper function
+    pub async fn query<T, F>(&self, sql: &str, mapper: F) -> Result<Vec<T>>
+    where
+        F: Fn(&serde_json::Value) -> Result<T>,
+    {
+        if !self.is_connected() {
+            return Err(Error::InvalidConfig("No active connection".to_string()));
+        }
+
+        let params = serde_json::json!({
+            "query": sql
+        });
+
+        let response = self.send_request("execute_query", params).await?;
+
+        if response.status != 200 {
+            return Err(Error::InvalidConfig(
+                response
+                    .result
+                    .get("error")
+                    .and_then(|e| e.as_str())
+                    .unwrap_or("Query execution failed")
+                    .to_string(),
+            ));
+        }
+
+        let data = response
+            .result
+            .get("data")
+            .and_then(|d| d.as_array())
+            .ok_or_else(|| Error::InvalidConfig("Invalid query response format".to_string()))?;
+
+        let mut results = Vec::new();
+        for row in data {
+            results.push(mapper(row)?);
+        }
+
+        Ok(results)
+    }
+
+    /// Create a table with the given schema
+    pub async fn create_table(&self, table_name: &str, schema: &str) -> Result<i64> {
         let sql = format!("CREATE TABLE IF NOT EXISTS {} ({})", table_name, schema);
-        self.execute_query(&sql, &[])
+        self.execute_query(&sql).await
     }
 
-    pub fn get_database_stats(&self) -> Result<Vec<(String, i64)>> {
-        let queries = vec![
-            (
-                "tables",
-                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'main'",
-            ),
-            (
-                "total_size",
-                "SELECT SUM(estimated_size) FROM pragma_database_size()",
-            ),
-        ];
+    /// Get network information
+    pub async fn get_network_info(&self) -> Result<NetworkInfo> {
+        if !self.is_connected() {
+            return Err(Error::InvalidConfig("No active connection".to_string()));
+        }
 
-        let mut stats = Vec::new();
+        let response = self
+            .send_request("get_network_info", serde_json::json!({}))
+            .await?;
 
-        for (name, sql) in queries {
-            let result: Vec<i64> = self.query(sql, &[], |row| Ok(row.get(0)?))?;
+        if response.status != 200 {
+            return Err(Error::InvalidConfig(
+                response
+                    .result
+                    .get("error")
+                    .and_then(|e| e.as_str())
+                    .unwrap_or("Failed to get network info")
+                    .to_string(),
+            ));
+        }
 
-            if let Some(value) = result.first() {
-                stats.push((name.to_string(), *value));
+        let network_info: NetworkInfo = serde_json::from_value(response.result)
+            .map_err(|e| Error::InvalidConfig(format!("Invalid network info format: {}", e)))?;
+
+        Ok(network_info)
+    }
+
+    /// Ping the server to check if it's alive
+    pub async fn ping(&self) -> Result<bool> {
+        if self.python_process.is_none() {
+            return Ok(false);
+        }
+
+        match self.send_request("ping", serde_json::json!({})).await {
+            Ok(response) => Ok(response.status == 200),
+            Err(_) => Ok(false),
+        }
+    }
+
+    // Private methods
+    async fn start_python_server(&mut self) -> Result<()> {
+        let cmd = Command::new("python")
+            .arg("-m")
+            .arg("src.main")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .map_err(|e| Error::InvalidConfig(format!("Failed to start Python server: {}", e)))?;
+
+        self.setup_process_communication(cmd).await
+    }
+
+    async fn setup_process_communication(&mut self, mut process: Child) -> Result<()> {
+        // Set up stdout reading for responses
+        if let Some(stdout) = process.stdout.take() {
+            let pending_requests = Arc::clone(&self.pending_requests);
+            tokio::spawn(async move {
+                let reader = BufReader::new(stdout);
+                for line in reader.lines() {
+                    if let Ok(line) = line {
+                        // Try to parse as response
+                        if let Ok(response) = serde_json::from_str::<PythonResponse>(&line) {
+                            if let Ok(mut pending) = pending_requests.lock() {
+                                if let Some(sender) = pending.remove(&response.id) {
+                                    let _ = sender.send(response);
+                                }
+                            }
+                        }
+                        // Ignore startup messages and other non-response JSON
+                    }
+                }
+            });
+        }
+
+        // Set up stderr reading for logging
+        if let Some(stderr) = process.stderr.take() {
+            tokio::spawn(async move {
+                let reader = BufReader::new(stderr);
+                for line in reader.lines() {
+                    if let Ok(line) = line {
+                        log::debug!("Python server: {}", line);
+                    }
+                }
+            });
+        }
+
+        self.python_process = Some(process);
+
+        // Wait for server to be ready
+        tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
+
+        Ok(())
+    }
+
+    async fn send_request(
+        &self,
+        method: &str,
+        params: serde_json::Value,
+    ) -> Result<PythonResponse> {
+        let process = self
+            .python_process
+            .as_ref()
+            .ok_or_else(|| Error::InvalidConfig("No Python process".to_string()))?;
+
+        let mut stdin = process
+            .stdin
+            .as_ref()
+            .ok_or_else(|| Error::InvalidConfig("No stdin access".to_string()))?;
+
+        let request_id = Uuid::new_v4().to_string();
+        let request = PythonRequest {
+            request_type: "request".to_string(),
+            id: request_id.clone(),
+            method: method.to_string(),
+            params,
+        };
+
+        let (sender, receiver) = oneshot::channel();
+
+        {
+            let mut pending = self
+                .pending_requests
+                .lock()
+                .map_err(|_| Error::InvalidConfig("Lock poisoned".to_string()))?;
+            pending.insert(request_id.clone(), sender);
+        }
+
+        let request_json = serde_json::to_string(&request)
+            .map_err(|e| Error::InvalidConfig(format!("JSON serialization failed: {}", e)))?;
+
+        writeln!(stdin, "{}", request_json)
+            .map_err(|e| Error::InvalidConfig(format!("Failed to write to stdin: {}", e)))?;
+
+        stdin
+            .flush()
+            .map_err(|e| Error::InvalidConfig(format!("Failed to flush stdin: {}", e)))?;
+
+        // Wait for response with timeout
+        let response = tokio::time::timeout(tokio::time::Duration::from_secs(30), receiver)
+            .await
+            .map_err(|_| Error::InvalidConfig("Request timeout".to_string()))?
+            .map_err(|_| Error::InvalidConfig("Request cancelled".to_string()))?;
+
+        Ok(response)
+    }
+
+    async fn load_all(&self, network_path: &str, db_path: &PathBuf) -> Result<()> {
+        let params = serde_json::json!({
+            "file_path": network_path,
+            "db_path": db_path.to_string_lossy()
+        });
+
+        let response = self.send_request("load_all", params).await?;
+
+        if response.status != 200 {
+            return Err(Error::InvalidConfig(
+                response
+                    .result
+                    .get("error")
+                    .and_then(|e| e.as_str())
+                    .unwrap_or("Failed to load network and database")
+                    .to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    fn find_network_file(&self, project_path: &Path) -> Result<String> {
+        let extensions = ["*.iidm", "*.xiidm", "*.jiidm"];
+
+        for ext in &extensions {
+            if let Ok(entries) = glob::glob(&project_path.join(ext).to_string_lossy()) {
+                for entry in entries {
+                    if let Ok(path) = entry {
+                        return Ok(path.to_string_lossy().to_string());
+                    }
+                }
             }
         }
 
-        let table_stats: Vec<(String, i64)> = self.query(
-            "SELECT table_name, estimated_size FROM pragma_database_size() WHERE estimated_size > 0",
-            &[],
-            |row| {
-                Ok((
-                    row.get::<_, String>(0)?,
-                    row.get::<_, i64>(1)?
-                ))
-            }
-        )?;
-
-        stats.extend(table_stats);
-        Ok(stats)
-    }
-
-    fn with_connection<T, F>(&self, f: F) -> Option<T>
-    where
-        F: FnOnce(&Connection) -> T,
-    {
-        self.conn
-            .as_ref()
-            .and_then(|mutex_conn| mutex_conn.lock().ok().map(|conn| f(&*conn)))
+        Err(Error::InvalidConfig("No network file found".to_string()))
     }
 
     fn get_database_path(
@@ -145,41 +392,14 @@ impl DatabaseManager {
         dir_project.join(format!("{}.{}", project_name, config.ext_project))
     }
 
-    async fn create_database(
-        &mut self,
-        project_path: &Path,
-        project_name: &str,
-        config: &ProjectConfig,
-    ) -> Result<()> {
-        let dir_project = project_path.join(&config.dir_project);
-
-        if !dir_project.exists() {
-            std::fs::create_dir_all(&dir_project)?;
-        }
-
-        let db_path = self.get_database_path(project_path, project_name, config);
-        let conn = Connection::open(&db_path)?;
-
-        self.conn = Some(Mutex::new(conn));
-        Ok(())
-    }
-
-    fn open_existing_database(&mut self, db_file: &PathBuf) -> Result<()> {
-        let conn = Connection::open(db_file).map_err(|e| Error::DatabaseConnectionFailed {
-            path: db_file.clone(),
-            source: e,
-        })?;
-
-        self.conn = Some(Mutex::new(conn));
-        Ok(())
+    pub fn get_network_path(&self) -> Option<&String> {
+        self.network_path.as_ref()
     }
 }
 
 impl Drop for DatabaseManager {
     fn drop(&mut self) {
-        if let Some(conn) = self.conn.take() {
-            drop(conn);
-        }
+        self.disconnect();
     }
 }
 
@@ -189,7 +409,6 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use tempfile::TempDir;
 
-    // Structure de test pour les insertions
     #[derive(Serialize, Deserialize, Debug, PartialEq)]
     struct TestRecord {
         id: i32,
@@ -197,7 +416,6 @@ mod tests {
         value: f64,
     }
 
-    // Helper pour créer une config de test
     fn create_test_config() -> ProjectConfig {
         ProjectConfig {
             dir_project: "test_db".to_string(),
@@ -206,7 +424,6 @@ mod tests {
         }
     }
 
-    // Helper pour créer un répertoire temporaire
     fn setup_temp_dir() -> TempDir {
         tempfile::tempdir().expect("Failed to create temp directory")
     }
@@ -218,281 +435,24 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_connect_creates_new_database() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        let result = db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await;
-
-        assert!(result.is_ok());
-        assert!(db_manager.is_connected());
-
-        // Vérifier que le fichier de base de données a été créé
-        let expected_path = temp_dir.path().join("test_db").join("test_project.duckdb");
-        assert!(expected_path.exists());
-    }
-
-    #[tokio::test]
-    async fn test_connect_opens_existing_database() {
-        let temp_dir = setup_temp_dir();
-        let config = create_test_config();
-
-        // Créer d'abord une base de données
-        let mut db_manager1 = DatabaseManager::default();
-        db_manager1
-            .connect(temp_dir.path(), "existing_project", &config)
-            .await
-            .unwrap();
-
-        // Créer une table pour vérifier la persistance
-        db_manager1
-            .create_table("test_table", "id INTEGER, name TEXT")
-            .unwrap();
-
-        db_manager1.disconnect();
-
-        // Rouvrir la base de données existante
-        let mut db_manager2 = DatabaseManager::default();
-        let result = db_manager2
-            .connect(temp_dir.path(), "existing_project", &config)
-            .await;
-
-        assert!(result.is_ok());
-        assert!(db_manager2.is_connected());
-
-        // Vérifier que la table existe toujours
-        let tables: Vec<String> = db_manager2
-            .query(
-                "SELECT table_name FROM information_schema.tables WHERE table_name = 'test_table'",
-                &[],
-                |row| Ok(row.get(0)?),
-            )
-            .unwrap();
-
-        assert_eq!(tables.len(), 1);
-        assert_eq!(tables[0], "test_table");
+    async fn test_ping_when_not_connected() {
+        let db_manager = DatabaseManager::default();
+        let result = db_manager.ping().await.unwrap();
+        assert!(!result);
     }
 
     #[tokio::test]
     async fn test_disconnect() {
-        let temp_dir = setup_temp_dir();
         let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        assert!(db_manager.is_connected());
-
         db_manager.disconnect();
         assert!(!db_manager.is_connected());
-    }
-
-    #[tokio::test]
-    async fn test_create_table() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        let result = db_manager.create_table(
-            "users",
-            "id INTEGER PRIMARY KEY, name VARCHAR(100), email VARCHAR(255)",
-        );
-
-        assert!(result.is_ok());
-        assert!(result.unwrap() >= 0);
-
-        // Vérifier que la table a été créée
-        let tables: Vec<String> = db_manager
-            .query(
-                "SELECT table_name FROM information_schema.tables WHERE table_name = 'users'",
-                &[],
-                |row| Ok(row.get(0)?),
-            )
-            .unwrap();
-
-        assert_eq!(tables.len(), 1);
-    }
-
-    #[tokio::test]
-    async fn test_execute_query() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        // Créer une table
-        db_manager
-            .create_table("test_execute", "id INTEGER, value TEXT")
-            .unwrap();
-
-        // Insérer des données
-        let result = db_manager.execute_query(
-            "INSERT INTO test_execute (id, value) VALUES (?, ?)",
-            &[&&1, &"test_value"],
-        );
-
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), 1); // Une ligne affectée
-    }
-
-    #[tokio::test]
-    async fn test_query_with_results() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        // Créer et peupler une table
-        db_manager
-            .create_table("test_query", "id INTEGER, name TEXT")
-            .unwrap();
-
-        db_manager
-            .execute_query(
-                "INSERT INTO test_query VALUES (1, 'Alice'), (2, 'Bob')",
-                &[],
-            )
-            .unwrap();
-
-        // Exécuter une requête de sélection
-        let results: Vec<(i32, String)> = db_manager
-            .query("SELECT id, name FROM test_query ORDER BY id", &[], |row| {
-                Ok((row.get(0)?, row.get(1)?))
-            })
-            .unwrap();
-
-        assert_eq!(results.len(), 2);
-        assert_eq!(results[0], (1, "Alice".to_string()));
-        assert_eq!(results[1], (2, "Bob".to_string()));
-    }
-
-    #[tokio::test]
-    #[ignore = "refactoring"]
-    async fn test_insert_data_json() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        // Créer une table compatible avec TestRecord
-        db_manager
-            .create_table(
-                "test_records",
-                "id INTEGER, name VARCHAR(100), value DOUBLE",
-            )
-            .unwrap();
-
-        // Préparer des données de test
-        let test_data = vec![
-            TestRecord {
-                id: 1,
-                name: "Record 1".to_string(),
-                value: 10.5,
-            },
-            TestRecord {
-                id: 2,
-                name: "Record 2".to_string(),
-                value: 20.7,
-            },
-        ];
-
-        // Insérer les données
-        let result = db_manager.insert_data("test_records", &test_data);
-        assert!(result.is_ok());
-
-        // Vérifier que les données ont été insérées
-        let inserted_records: Vec<TestRecord> = db_manager
-            .query(
-                "SELECT id, name, value FROM test_records ORDER BY id",
-                &[],
-                |row| {
-                    Ok(TestRecord {
-                        id: row.get(0)?,
-                        name: row.get(1)?,
-                        value: row.get(2)?,
-                    })
-                },
-            )
-            .unwrap();
-
-        assert_eq!(inserted_records, test_data);
-    }
-
-    #[tokio::test]
-    async fn test_insert_data_empty_slice() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        let empty_data: Vec<TestRecord> = vec![];
-        let result = db_manager.insert_data("any_table", &empty_data);
-
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), 0);
-    }
-
-    #[tokio::test]
-    async fn test_get_database_stats() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "test_project", &config)
-            .await
-            .unwrap();
-
-        // Créer quelques tables
-        db_manager
-            .create_table("table1", "id INTEGER, data TEXT")
-            .unwrap();
-        db_manager
-            .create_table("table2", "id INTEGER, value DOUBLE")
-            .unwrap();
-
-        let stats = db_manager.get_database_stats().unwrap();
-
-        // Vérifier qu'on a au moins les statistiques de base
-        let stats_map: std::collections::HashMap<String, i64> = stats.into_iter().collect();
-
-        assert!(stats_map.contains_key("tables"));
-        assert!(stats_map.contains_key("total_size"));
-        assert!(stats_map["tables"] >= 2); // Au moins nos 2 tables
     }
 
     #[tokio::test]
     async fn test_error_when_not_connected() {
         let db_manager = DatabaseManager::default();
 
-        let result = db_manager.execute_query("SELECT 1", &[]);
+        let result = db_manager.execute_query("SELECT 1").await;
         assert!(result.is_err());
 
         match result.unwrap_err() {
@@ -507,7 +467,7 @@ mod tests {
     async fn test_query_error_when_not_connected() {
         let db_manager = DatabaseManager::default();
 
-        let result: Result<Vec<i32>> = db_manager.query("SELECT 1", &[], |row| Ok(row.get(0)?));
+        let result: Result<Vec<i32>> = db_manager.query("SELECT 1", |_| Ok(1)).await;
 
         assert!(result.is_err());
         match result.unwrap_err() {
@@ -525,66 +485,19 @@ mod tests {
         let config = create_test_config();
 
         let path = db_manager.get_database_path(temp_dir.path(), "my_project", &config);
-
         let expected = temp_dir.path().join("test_db").join("my_project.duckdb");
 
         assert_eq!(path, expected);
     }
 
     #[tokio::test]
-    async fn test_create_database_creates_directory() {
-        let temp_dir = setup_temp_dir();
+    #[ignore = "requires python server and network file"]
+    async fn test_connect_with_sidecar() {
         let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
 
-        let result = db_manager
-            .create_database(temp_dir.path(), "test_project", &config)
-            .await;
-
+        // Test connecting when sidecar is already running
+        let result = db_manager.connect_with_sidecar().await;
         assert!(result.is_ok());
         assert!(db_manager.is_connected());
-
-        // Vérifier que le répertoire a été créé
-        let project_dir = temp_dir.path().join("test_db");
-        assert!(project_dir.exists());
-        assert!(project_dir.is_dir());
-    }
-
-    #[tokio::test]
-    async fn test_concurrent_access() {
-        let temp_dir = setup_temp_dir();
-        let mut db_manager = DatabaseManager::default();
-        let config = create_test_config();
-
-        db_manager
-            .connect(temp_dir.path(), "concurrent_test", &config)
-            .await
-            .unwrap();
-
-        db_manager
-            .create_table("concurrent_table", "id INTEGER, value TEXT")
-            .unwrap();
-
-        // Simuler des accès concurrents
-        let handles: Vec<_> = (0..5)
-            .map(|i| {
-                let query = format!("INSERT INTO concurrent_table VALUES ({}, 'value_{}')", i, i);
-                db_manager.execute_query(&query, &[])
-            })
-            .collect();
-
-        // Vérifier que toutes les opérations ont réussi
-        for result in handles {
-            assert!(result.is_ok());
-        }
-
-        // Vérifier le nombre total d'enregistrements
-        let count: Vec<i64> = db_manager
-            .query("SELECT COUNT(*) FROM concurrent_table", &[], |row| {
-                Ok(row.get(0)?)
-            })
-            .unwrap();
-
-        assert_eq!(count[0], 5);
     }
 }

@@ -9,10 +9,10 @@ use sqlx::{Pool, Sqlite};
 use tauri::AppHandle;
 
 pub struct ProjectState {
-    config: ProjectConfig,
-    repository: ProjectRepository,
-    database: DatabaseManager,
-    project: Option<Project>,
+    pub config: ProjectConfig,
+    pub repository: ProjectRepository,
+    pub database: DatabaseManager,
+    pub project: Option<Project>,
 }
 
 unsafe impl Send for ProjectState {}

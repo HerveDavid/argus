@@ -7,9 +7,6 @@ pub enum Error {
     #[error("Sqlite error: {0}")]
     SqliteDatabase(#[from] sqlx::Error),
 
-    #[error("DuckDB error: {0}")]
-    DuckDbDatabase(#[from] duckdb::Error),
-
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
@@ -27,12 +24,6 @@ pub enum Error {
 
     #[error("Failed to create project '{name}': {source}")]
     ProjectCreationFailed { name: String, source: Box<Error> },
-
-    #[error("Failed to open DuckDB database at '{path}': {source}")]
-    DatabaseConnectionFailed { 
-        path: PathBuf, 
-        #[source] source: duckdb::Error 
-    },
     
     #[error("Database connection not established for project '{name}'")]
     ConnectionNotEstablished { name: String },

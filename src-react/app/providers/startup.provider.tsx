@@ -16,9 +16,9 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
     startedRef.current = true;
 
     const program = Effect.gen(function* () {
-      const projectClient = yield* ProjectClient;
-      const project = yield* projectClient.loadProject();
-      yield* Effect.logInfo('Project loaded successfully', { project });
+      // const projectClient = yield* ProjectClient;
+      // const project = yield* projectClient.loadProject();
+      // yield* Effect.logInfo('Project loaded successfully', { project });
 
       yield* Effect.logInfo('Application started successfully');
     });

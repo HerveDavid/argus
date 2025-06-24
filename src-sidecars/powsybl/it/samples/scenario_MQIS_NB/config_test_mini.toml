@@ -1,0 +1,71 @@
+##################################################################################
+####                     Configuration template to fill in                    ####
+##################################################################################
+
+
+# Level of information to log, use standard Python level DEBUG, INFO, WARNING...
+log_level = "INFO"
+
+[master]
+period = 1
+speedup = 1
+myEnvDynawo_path = "/home/brettevilleoli/Projets/Dynawo/dynawo-rte/myEnvDynawoRTE.sh"
+
+[input_files]
+scenario_file = "scenarios.json"
+job_file = "scenario_MQIS_NB_test.jobs"
+dyd_file = "Events.dyd"
+par_file = "Events.par"
+dynawo_game_master_outputs_file = "dynawo_game_master_outputs_test_mini.json"
+dynawo_scada_outputs_file = "dynawo_scada_outputs.json"
+cyber_config_file = "cyber_config_fake.json"
+
+[hmi]
+location = "CC"
+line_button_ids = []
+bool_button_ids = ["MQIS P7_MQIS 7COUPL DJ_OC"]
+#
+# slider_config:
+#   . id : slider identifier
+#   . min : min value to be displayed
+#   . tmin : min value to be sent
+#   . max : max value to be displayed
+#   . tmax : max value to be sent
+#   . val : initial value
+#   . label : text to be shown before the slider
+#   . unit : text to be shown after the slider current value
+#
+sliders = [
+    {id="LoadReduction", min=95.0, tmin=-0.05, max=100.0, tmax=0.0, val=100.0, label="Load Reduction", unit=" %"}
+]
+subscribed_substations = ["MQIS", "BLAYA"]
+
+[hmi.plot_data]
+Flows = ["NETWORK_BRAUDL71MQIS_PRaw2_value"]
+
+[hmi.outputs_destination]
+"MQIS P7_MQIS 7COUPL DJ_OC" = "MQIS"
+LoadReduction = "CC"
+
+[game_master]
+# Blayais 2 est à 0
+line_button_ids = []
+bool_button_ids = ["MQIS P7_MQIS 7AT762 DJ_OC", "MQIS P7_MQIS 7AT764 DJ_OC", "MQIS P7_MQIS 7COUPL DJ_OC"]
+sliders = [
+    {id="LoadReduction", min=95.0, tmin=-0.05, max=100.0, tmax=0.0, val=100.0, label="Load Reduction", unit=" %"},
+    {id="GeneratorDeltaP_BLAYA7GR1", min=750.0, tmin=-0.15, max=940.0, tmax=0.0, val=940.0, label="Generator \u0394P BLAYA7GR1", unit=" MW"},
+    {id="GeneratorDeltaP_BLAYA7GR4", min=750.0, tmin=-0.15, max=940.0, tmax=0.0, val=940.0, label="Generator \u0394P BLAYA7GR4", unit=" MW"}
+]
+subscribed_substations = ["MQIS", "BLAYA"]
+
+[game_master.plot_data]
+# Powers = ["NETWORK_MQIS Y761_PRaw1_value", "NETWORK_MQIS Y762_PRaw1_value", "NETWORK_MQIS Y764_PRaw1_value"]
+Flows = ["NETWORK_MQIS Y761_PRaw1_value"]
+"Generators PGen" = ["DM_BLAYAT 1_generator_PGen", "DM_BLAYAT 3_generator_PGen", "DM_BLAYAT 4_generator_PGen"]
+#Generator_control = ["DM_BLAYAT 1_generator_PmPu_value", "DM_BLAYAT 4_generator_PmPu_value", "DM_BLAYAT 1_governor_deltaPmRefPu", "DM_BLAYAT 4_governor_deltaPmRefPu"]
+Frequency = ["OMEGA_REF_omegaRef_0_value"]
+
+[game_master.outputs_destination]
+"MQIS P7_MQIS 7COUPL DJ_OC" = "MQIS"
+GeneratorDeltaP_BLAYA7GR4 = "BLAYA"
+LoadReduction = "CC"

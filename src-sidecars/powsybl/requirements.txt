@@ -1,3 +1,10 @@
 pypowsybl
-pyinstaller
+pandas
+duckdb
+toml
 zmq
+pytest
+pytest-asyncio
+pytest-cov
+pyinstaller
+dependency-injector

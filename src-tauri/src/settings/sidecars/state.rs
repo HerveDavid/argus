@@ -107,6 +107,10 @@ impl SidecarsState {
 
         Ok(())
     }
+
+    pub fn get_process(&self, sidecar: &str) -> Option<&CommandChild> {
+        self.sidecars.get(sidecar)
+    }
 }
 
 impl Drop for SidecarsState {
