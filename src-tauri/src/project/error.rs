@@ -27,6 +27,36 @@ pub enum Error {
     
     #[error("Database connection not established for project '{name}'")]
     ConnectionNotEstablished { name: String },
+
+    #[error("Lock error")]
+    LockError,
+
+    #[error("JSON parse error: {0}")]
+    JsonParseError(String),
+
+    #[error("ZMQ error: {0}")]
+    ZmqError(#[from] zeromq::ZmqError),
+
+    #[error("JSON parse error at {path}: {message}")]
+    SerdeJsonDetailedError {
+        message: String,
+        path: String,
+        line: Option<usize>,
+        column: Option<usize>,
+    },
+
+    #[error("UTF-8 error: {0}")]
+    Utf8Error(#[from] std::str::Utf8Error),
+
+    #[error("Base64 decode error: {0}")]
+    Base64Error(#[from] base64::DecodeError),
+
+    #[error("UUID error: {0}")]
+    UuidError(#[from] uuid::Error),
+
+    #[error("API error: {0}")]
+    ApiError(String),
+
 }
 
 impl Serialize for Error {

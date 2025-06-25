@@ -38,13 +38,6 @@ pub fn run() {
                     .expect("Failed to initialize settings db");
                 app.manage(settings_db);
 
-                let project_db = project::state::ProjectState::new(&app.handle())
-                    .await
-                    .expect("Failed to initialize project db");
-                app.manage(project_db);
-
-                println!("-----------------------------------------------");
-
                 let broker = settings::broker::state::BrokerState::new()
                     .await
                     .expect("Failed to initialize broker");
@@ -55,6 +48,13 @@ pub fn run() {
                         .await
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
+
+                println!("-----------------------------------------------");
+
+                let project_db = project::state::ProjectState::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize project db");
+                app.manage(project_db);
 
                 let sybl = powsybl::state::PowsyblState::new()
                     .await
@@ -97,21 +97,21 @@ pub fn run() {
             settings::sidecars::commands::start_sidecar,
             settings::sidecars::commands::shutdown_sidecar,
             // Project
-            project::commands::load_project,
-            project::commands::clean_project,
-            project::commands::is_loaded,
-            project::commands::get_project,
-            project::commands::initialize_database,
-            project::commands::execute_query,
-            project::commands::query_database,
-            project::commands::get_network_info,
-            project::commands::get_database_stats,
-            project::commands::create_table,
-            project::commands::check_database_connection,
-            project::commands::disconnect_database,
-            project::commands::get_database_paths,
-            project::commands::get_substations_from_db,
-            project::commands::search_substations_in_db,
+            // project::commands::load_project,
+            // project::commands::clean_project,
+            // project::commands::is_loaded,
+            // project::commands::get_project,
+            // project::commands::initialize_database,
+            // project::commands::execute_query,
+            // project::commands::query_database,
+            // project::commands::get_network_info,
+            // project::commands::get_database_stats,
+            // project::commands::create_table,
+            // project::commands::check_database_connection,
+            // project::commands::disconnect_database,
+            // project::commands::get_database_paths,
+            // project::commands::get_substations_from_db,
+            // project::commands::search_substations_in_db,
             // Powsybl
             powsybl::commands::substations::get_substations,
             powsybl::commands::substations::load_substations,

@@ -63,7 +63,7 @@ class Server:
             # S'abonner aux messages pour ce client et aux broadcasts
             # setsockopt_string() is NOT async - remove await
             self.subscriber.setsockopt_string(zmq.SUBSCRIBE, f"{self.client_id}:")
-            self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "broadcast:")
+            self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "powsybl.request")
 
             # Attendre un peu pour que les connexions s'établissent
             await asyncio.sleep(0.1)
@@ -93,7 +93,7 @@ class Server:
         """Envoie un message via ZMQ"""
         try:
             message_str = json.dumps(message)
-            full_message = f"{topic}:{message_str}"
+            full_message = f"powsybl.response {message_str}"
             # send_string() IS async when using zmq.asyncio
             await self.publisher.send_string(full_message)
             self.log_to_stderr(f"Sent message to topic '{topic}'")
