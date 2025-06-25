@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { 
   Folder,
   ChevronRight,
@@ -12,6 +11,12 @@ import {
   Zap,
   ChevronLeft
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { useEquipment } from '../hooks/use-equipment';
 
 // Types basés sur votre code
 interface VoltageLevel {
@@ -43,17 +48,6 @@ interface SubstationQueryParams {
   tso?: string;
 }
 
-interface SubstationQueryResponse {
-  substations: Substation[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
-
-// Import du hook réel
-import { useEquipment } from '../hooks/use-equipment';
-
 const formatVoltage = (voltage: number) => {
   if (voltage >= 1000000) {
     return `${(voltage / 1000000).toFixed(0)}MV`;
@@ -64,11 +58,11 @@ const formatVoltage = (voltage: number) => {
 };
 
 const getVoltageLevelColor = (voltage: number) => {
-  if (voltage >= 400000) return 'text-red-600';
-  if (voltage >= 200000) return 'text-orange-600';
-  if (voltage >= 100000) return 'text-yellow-600';
-  if (voltage >= 50000) return 'text-green-600';
-  return 'text-blue-600';
+  if (voltage >= 400000) return 'text-destructive';
+  if (voltage >= 200000) return 'text-warning';
+  if (voltage >= 100000) return 'text-info';
+  if (voltage >= 50000) return 'text-success';
+  return 'text-primary';
 };
 
 const getTopologyIcon = (topology: string) => {
@@ -108,41 +102,41 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
     return (
       <div>
         <div
-          className="flex items-center py-2 px-3 cursor-pointer hover:bg-gray-50 rounded-sm border-b border-gray-100"
-          style={{ paddingLeft: `${level * 12 + 8}px` }}
+          className="flex items-center py-3 px-4 cursor-pointer hover:bg-accent/50 rounded-sm border-b"
+          style={{ paddingLeft: `${level * 12 + 16}px` }}
           onClick={handleToggle}
         >
           {expanded ? (
-            <ChevronDown className="w-4 h-4 mr-2 text-gray-600" />
+            <ChevronDown className="w-4 h-4 mr-2 text-muted-foreground" />
           ) : (
-            <ChevronRight className="w-4 h-4 mr-2 text-gray-600" />
+            <ChevronRight className="w-4 h-4 mr-2 text-muted-foreground" />
           )}
           {expanded ? (
-            <FolderOpen className="w-5 h-5 mr-3 text-blue-500" />
+            <FolderOpen className="w-5 h-5 mr-3 text-primary" />
           ) : (
-            <Folder className="w-5 h-5 mr-3 text-blue-500" />
+            <Folder className="w-5 h-5 mr-3 text-primary" />
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm font-medium text-gray-900">{sub.id}</span>
-                <span className="text-sm text-gray-600">{sub.name || 'Sans nom'}</span>
+                <span className="font-mono text-sm font-medium text-foreground">{sub.id}</span>
+                <span className="text-sm text-muted-foreground">{sub.name || 'Sans nom'}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="inline-flex px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                <Badge variant="secondary" className="text-xs">
                   {sub.tso}
-                </span>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
+                </Badge>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <MapPin className="h-3 w-3" />
                   {sub.country}
                 </div>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-muted-foreground">
                   {sub.voltage_levels?.length || 0} niveau{(sub.voltage_levels?.length || 0) > 1 ? 'x' : ''}
                 </span>
               </div>
             </div>
             {sub.geo_tags && (
-              <div className="text-xs text-gray-400 font-mono mt-1">
+              <div className="text-xs text-muted-foreground font-mono mt-1">
                 📍 {sub.geo_tags}
               </div>
             )}
@@ -150,7 +144,7 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
         </div>
         
         {expanded && item.children && (
-          <div className="bg-gray-50">
+          <div className="bg-muted/30">
             {item.children.map((child: any, index: number) => (
               <FileTreeItem key={index} item={child} level={level + 1} />
             ))}
@@ -164,30 +158,34 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
     const vl = item.voltageLevel;
     return (
       <div
-        className="flex items-center py-2 px-3 hover:bg-gray-100 rounded-sm"
+        className="flex items-center py-2 px-4 hover:bg-accent/30 rounded-sm"
         style={{ paddingLeft: `${level * 12 + 20}px` }}
       >
         <div className="w-4 h-4 mr-2" />
-        <File className="w-4 h-4 mr-3 text-gray-400" />
+        <File className="w-4 h-4 mr-3 text-muted-foreground" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-sm text-gray-700">{vl.id}</span>
-              <span className="text-sm text-gray-600">{vl.name || 'Sans nom'}</span>
+              <span className="font-mono text-sm text-foreground">{vl.id}</span>
+              <span className="text-sm text-muted-foreground">{vl.name || 'Sans nom'}</span>
             </div>
             <div className="flex items-center gap-3">
               <span className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}>
                 {formatVoltage(vl.nominal_v)}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {getTopologyIcon(vl.topology_kind)} {vl.topology_kind}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
             <span>Min: {formatVoltage(vl.low_voltage_limit)}</span>
             <span>Max: {formatVoltage(vl.high_voltage_limit)}</span>
-            {vl.fictitious && <span className="text-orange-500">⚠️ Fictif</span>}
+            {vl.fictitious && (
+              <Badge variant="destructive" className="text-xs">
+                ⚠️ Fictif
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -247,53 +245,52 @@ export const EquipmentExplorer = () => {
 
   if (error) {
     return (
-      <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg border">
-        <div className="p-6">
-          <div className="text-center text-red-600">
+      <Card className="w-full max-w-6xl mx-auto">
+        <CardContent className="p-6">
+          <div className="text-center text-destructive">
             Erreur lors du chargement des données
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg border">
-      {/* Header */}
-      <div className="border-b p-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2 mb-4">
-          <Zap className="h-6 w-6 text-blue-600" />
+    <Card className="w-full max-w-6xl mx-auto">
+      <CardHeader className="space-y-4">
+        <CardTitle className="flex items-center gap-2 text-2xl">
+          <Zap className="h-6 w-6 text-primary" />
           Explorateur d'Équipements - Postes électriques
-        </h2>
+        </CardTitle>
         
-        {/* Barre de recherche */}
         <div className="relative">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <input
+          <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+          <Input
             type="text"
             placeholder="Rechercher par ID, nom, pays, TSO ou niveau de tension..."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="pl-10"
           />
         </div>
-      </div>
+      </CardHeader>
       
-      <div className="p-6">
+      <CardContent className="space-y-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin mr-2 text-blue-600" />
-            <span>Chargement des postes...</span>
+            <Loader2 className="h-6 w-6 animate-spin mr-2 text-primary" />
+            <span className="text-muted-foreground">Chargement des postes...</span>
           </div>
         ) : (
           <>
-            {/* Statistiques */}
-            <div className="mb-4 text-sm text-gray-600 flex items-center justify-between">
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>
                 {data?.total || 0} poste(s) trouvé(s)
                 {searchTerm && ` pour "${searchTerm}"`}
               </span>
-              <button
+              <Button
+                variant="link"
+                size="sm"
                 onClick={() => {
                   if (expandedSubstations.size === treeData.length) {
                     setExpandedSubstations(new Set());
@@ -301,20 +298,19 @@ export const EquipmentExplorer = () => {
                     setExpandedSubstations(new Set(treeData.map(item => item.id)));
                   }
                 }}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                className="h-auto p-0 text-xs"
               >
                 {expandedSubstations.size === treeData.length ? 'Tout replier' : 'Tout déplier'}
-              </button>
+              </Button>
             </div>
 
-            {/* Tree View */}
-            <div className="border rounded-lg bg-white">
+            <Card className="border-border">
               {treeData.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <CardContent className="p-8 text-center text-muted-foreground">
                   Aucun poste trouvé
-                </div>
+                </CardContent>
               ) : (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-border">
                   {treeData.map((item) => (
                     <FileTreeItem
                       key={item.id}
@@ -326,59 +322,60 @@ export const EquipmentExplorer = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </Card>
 
-            {/* Pagination */}
             {data && data.totalPages > 1 && (
-              <div className="flex items-center justify-between mt-6">
-                <div className="text-sm text-gray-600">
-                  Page {data.page} sur {data.totalPages}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage <= 1}
-                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                    Précédent
-                  </button>
-                  
-                  {/* Numéros de page */}
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                      const pageNum = i + 1;
-                      const isCurrentPage = pageNum === currentPage;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-10 h-10 text-sm font-medium rounded-md border ${
-                            isCurrentPage
-                              ? 'bg-blue-600 text-white border-blue-600'
-                              : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
+              <>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Page {data.page} sur {data.totalPages}
                   </div>
-                  
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage >= data.totalPages}
-                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Suivant
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Précédent
+                    </Button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
+                        const pageNum = i + 1;
+                        const isCurrentPage = pageNum === currentPage;
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={isCurrentPage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handlePageChange(pageNum)}
+                            className="w-10 h-10 p-0"
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage >= data.totalPages}
+                    >
+                      Suivant
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
