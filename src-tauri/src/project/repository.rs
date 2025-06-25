@@ -1,27 +1,25 @@
 use crate::project::config::ProjectConfig;
 
 use super::entities::Project;
-use super::error::Result;
+use super::error::{Error, Result};
 
 use sqlx::{Pool, Row, Sqlite};
 
 pub struct ProjectRepository {
     config: ProjectConfig,
+    pub project: Option<Project>,
 }
 
 impl Default for ProjectRepository {
     fn default() -> Self {
         Self {
             config: ProjectConfig::default(),
+            project: None,
         }
     }
 }
 
 impl ProjectRepository {
-    pub fn new(config: ProjectConfig) -> Self {
-        Self { config }
-    }
-
     pub async fn get_current_project(&self, pool: &Pool<Sqlite>) -> Result<Option<Project>> {
         let row = sqlx::query("SELECT value FROM settings WHERE key = ?")
             .bind(&self.config.key_project)
@@ -49,36 +47,25 @@ impl ProjectRepository {
         Ok(())
     }
 
-    pub async fn get_setting<T>(&self, pool: &Pool<Sqlite>, key: &str) -> Result<Option<T>>
-    where
-        T: serde::de::DeserializeOwned,
-    {
-        let row = sqlx::query("SELECT value FROM settings WHERE key = ?")
-            .bind(key)
-            .fetch_optional(pool)
-            .await?;
+    pub async fn load_current_project(&mut self, pool: &Pool<Sqlite>) -> Result<Project> {
+        let project = self
+            .get_current_project(pool)
+            .await?
+            .ok_or(Error::ProjectNotFound)?;
 
-        if let Some(row) = row {
-            let json_value: String = row.try_get("value")?;
-            let value: T = serde_json::from_str(&json_value)?;
-            Ok(Some(value))
-        } else {
-            Ok(None)
+        let project_argus_path = std::path::Path::new(&project.path).join(&self.config.dir_project);
+
+        if !project_argus_path.exists() {
+            tokio::fs::create_dir_all(&project_argus_path)
+                .await
+                .map_err(|e| Error::ProjectCreationFailed {
+                    name: project.name.clone(),
+                    source: Box::new(Error::Io(e)),
+                })?;
         }
-    }
 
-    pub async fn set_setting<T>(&self, pool: &Pool<Sqlite>, key: &str, value: &T) -> Result<()>
-    where
-        T: serde::Serialize,
-    {
-        let json_value = serde_json::to_string(value)?;
+        self.project = Some(project.clone());
 
-        sqlx::query("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)")
-            .bind(key)
-            .bind(&json_value)
-            .execute(pool)
-            .await?;
-
-        Ok(())
+        Ok(project)
     }
 }
