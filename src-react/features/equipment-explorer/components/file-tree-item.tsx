@@ -4,13 +4,22 @@ import {
   ChevronDown,
   File,
   FolderOpen,
+  EllipsisVertical,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from '@/components/ui/dropdown-menu';
 import { Substation, VoltageLevel } from '@/types/substation';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 
 import { DraggableItem } from './draggable-item';
 import { formatVoltage, getVoltageLevelColor, getTopologyIcon } from '../utils';
+import { useWindowHeaderStore } from '@/stores/window-header.store';
 
 export interface FileTreeItemProps {
   item: {
@@ -32,9 +41,26 @@ export const FileTreeItem = ({
   expanded = false,
   onToggle,
 }: FileTreeItemProps) => {
+  const { setTitle } = useWindowHeaderStore();
+  const { addPanel } = useCentralPanelStore();
+
   const handleToggle = () => {
     if (item.type === 'substation' && onToggle) {
       onToggle();
+    }
+  };
+
+  const openSubstation = () => {
+    if (item.type == 'substation') {
+      const substation = item.substation!;
+      const title = substation.id;
+      addPanel({
+        id: title,
+        tabComponent: 'default',
+        component: 'sld',
+        params: { substation },
+      });
+      setTitle(title);
     }
   };
 
@@ -44,9 +70,13 @@ export const FileTreeItem = ({
       <div className="space-y-1">
         <DraggableItem substation={sub}>
           <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
-            <div className="cursor-pointer p-3" onClick={handleToggle}>
+            <div
+              className="p-3"
+              onClick={handleToggle}
+              onDoubleClick={() => {}}
+            >
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-1 truncate items-center gap-2">
                   {expanded ? (
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   ) : (
@@ -62,7 +92,7 @@ export const FileTreeItem = ({
                     {sub.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-1 truncate items-center gap-2">
                   {sub.tso && (
                     <Badge variant="secondary" className="text-xs">
                       {sub.tso}
@@ -76,18 +106,25 @@ export const FileTreeItem = ({
                     {(sub.voltage_levels?.length || 0) > 1 ? 's' : ''}
                   </span>
                 </div>
-              </div>
-              {sub.geo_tags && (
-                <div className="text-xs text-muted-foreground font-mono mt-2 ml-6">
-                  📍 {sub.geo_tags}
+                <div className="flex">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="hover:bg-accent rounded-sm hover:text-accent-foreground text-muted-foreground">
+                      <EllipsisVertical className="size-4 text-muted-foreground" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem onClick={openSubstation}>
+                        Open Panel
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              )}
+              </div>
             </div>
           </Card>
         </DraggableItem>
 
         {expanded && item.children && (
-          <div className="ml-4 space-y-1">
+          <div className="ml-4">
             {item.children.map((child: any, index: number) => (
               <FileTreeItem key={index} item={child} level={level + 1} />
             ))}
@@ -101,7 +138,7 @@ export const FileTreeItem = ({
     const vl = item.voltageLevel;
     return (
       <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
-        <div className="cursor-pointer p-3">
+        <div className="p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <File className="w-4 h-4 text-muted-foreground" />

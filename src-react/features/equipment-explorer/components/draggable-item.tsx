@@ -39,7 +39,7 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
       draggable={true}
       className="cursor-pointer"
       onDragStart={handleDragStart}
-      // onClick={handleClick}
+      onDoubleClick={handleClick}
       tabIndex={1}
     >
       {children}
