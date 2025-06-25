@@ -1,7 +1,5 @@
 use crate::project::repository::ProjectRepository;
 
-use super::config::ProjectConfig;
-use super::entities::Project;
 use super::error::Result;
 use super::manager::DatabaseManager;
 

@@ -2,13 +2,15 @@ import asyncio
 import json
 import sys
 import uuid
-from pathlib import Path
-from typing import Dict, Any, Optional
 import signal
-
-import pypowsybl as pp
 import zmq
 import zmq.asyncio
+import toml
+import pypowsybl as pp
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from typing import Dict, Any, Optional
+from pathlib import Path
 
 from src.app.controllers.repository_controller import RepositoryController
 from src.shared.request import Request
@@ -39,6 +41,7 @@ class Server:
 
         self.handlers = {
             "load_network": self.handle_load_network,
+            "load_config": self.handle_load_config,
             "set_database": self.handle_set_database,
             "reset_database": self.handle_reset_database,
             "execute_query": self.handle_execute_query,
@@ -110,15 +113,16 @@ class Server:
             except zmq.Again:
                 return None
 
-            # Séparer le topic du message
-            if ":" not in raw_message:
+            # CORRECTION: Séparer le topic du message en utilisant l'espace, pas les deux-points
+            # Format attendu: "topic message_json"
+            if " " not in raw_message:
                 self.log_to_stderr(f"Invalid message format: {raw_message}")
                 return None
 
-            topic, message_str = raw_message.split(":", 1)
+            topic, message_str = raw_message.split(" ", 1)  # Split sur le premier espace seulement
             message = json.loads(message_str)
 
-            self.log_to_stderr(f"Received message from topic '{topic}'")
+            self.log_to_stderr(f"Received message from topic '{topic}': {message.get('method', 'unknown')}")
             return topic, message
 
         except json.JSONDecodeError as e:
@@ -265,6 +269,167 @@ class Server:
                 .build()
                 .to_dict()
             )
+
+    async def handle_load_config(self, request: Request) -> Dict[str, Any]:
+        """Charge un fichier de configuration TOML et extrait le fichier IIDM du job file"""
+        try:
+            config_path = request.params.get("config_path")
+            if not config_path:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("config_path parameter is required")
+                    .build()
+                    .to_dict()
+                )
+
+            if not Path(config_path).exists():
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(404)
+                    .with_error(f"Config file not found: {config_path}")
+                    .build()
+                    .to_dict()
+                )
+
+            # Charger le fichier TOML
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = toml.load(f)
+            except Exception as e:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error(f"Failed to parse TOML config: {str(e)}")
+                    .build()
+                    .to_dict()
+                )
+
+            # Extraire le job_file de la configuration
+            job_file = config.get("input_files", {}).get("job_file")
+            if not job_file:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("job_file not found in config [input_files] section")
+                    .build()
+                    .to_dict()
+                )
+
+            # Construire le chemin absolu du job file (relatif au dossier du config)
+            config_dir = Path(config_path).parent
+            job_file_path = config_dir / job_file
+
+            if not job_file_path.exists():
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(404)
+                    .with_error(f"Job file not found: {job_file_path}")
+                    .build()
+                    .to_dict()
+                )
+
+            # Parser le fichier XML jobs
+            try:
+                tree = ET.parse(job_file_path)
+                root = tree.getroot()
+                
+                # Chercher l'élément network avec l'attribut iidmFile
+                # Namespace pour dynawo
+                ns = {'dynawo': 'http://www.rte-france.com/dynawo'}
+                network_elem = root.find('.//dynawo:network[@iidmFile]', ns)
+                
+                if network_elem is None:
+                    # Essayer sans namespace au cas où
+                    network_elem = root.find('.//network[@iidmFile]')
+                
+                if network_elem is None:
+                    return (
+                        ResponseBuilder()
+                        .with_id(request.id)
+                        .with_status(400)
+                        .with_error("No network element with iidmFile attribute found in job file")
+                        .build()
+                        .to_dict()
+                    )
+
+                iidm_file = network_elem.get('iidmFile')
+                if not iidm_file:
+                    return (
+                        ResponseBuilder()
+                        .with_id(request.id)
+                        .with_status(400)
+                        .with_error("iidmFile attribute is empty")
+                        .build()
+                        .to_dict()
+                    )
+
+                # Construire le chemin absolu du fichier IIDM (relatif au dossier du config)
+                iidm_file_path = config_dir / iidm_file
+
+                if not iidm_file_path.exists():
+                    return (
+                        ResponseBuilder()
+                        .with_id(request.id)
+                        .with_status(404)
+                        .with_error(f"IIDM file not found: {iidm_file_path}")
+                        .build()
+                        .to_dict()
+                    )
+
+                # Charger automatiquement le réseau
+                load_request = Request(
+                    "load_network", 
+                    {"file_path": str(iidm_file_path)}, 
+                    f"{request.id}_load_network"
+                )
+                load_result = await self.handle_load_network(load_request)
+
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(200)
+                    .with_result(
+                        {
+                            "success": True,
+                            "message": "Configuration loaded and network loaded successfully",
+                            "config_path": config_path,
+                            "job_file": str(job_file_path),
+                            "iidm_file": str(iidm_file_path),
+                            "config": config,
+                            "network_load_result": load_result["result"] if load_result["status"] == 200 else None,
+                            "network_load_error": load_result.get("error") if load_result["status"] != 200 else None
+                        }
+                    )
+                    .build()
+                    .to_dict()
+                )
+
+            except ET.ParseError as e:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error(f"Failed to parse XML job file: {str(e)}")
+                    .build()
+                    .to_dict()
+                )
+
+        except Exception as e:
+            self.log_to_stderr(f"Error in load_config: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+        )
 
     async def handle_set_database(self, request: Request) -> Dict[str, Any]:
         """Configure le chemin de la base de données"""
@@ -576,20 +741,15 @@ class Server:
                     ):
                         continue
 
-                    # Traiter les requêtes adressées à ce client
-                    if topic == self.client_id:
+                    # CORRECTION: Traiter aussi les requêtes sur le topic powsybl.request
+                    if topic == self.client_id or topic == "powsybl.request":
                         self.log_to_stderr(
-                            f"Processing request: {message_data.get('method')}"
+                            f"Processing request: {message_data.get('method')} from topic: {topic}"
                         )
                         response = await self.handle_request(message_data)
 
-                        # Envoyer la réponse au client qui a fait la requête
-                        reply_to = message_data.get("powsybl.response")
-                        if reply_to:
-                            await self.send_message(reply_to, response)
-                        else:
-                            # Fallback: envoyer en broadcast
-                            await self.send_message("powsybl.response", response)
+                        # CORRECTION: Toujours envoyer la réponse sur powsybl.response
+                        await self.send_message("powsybl.response", response)
 
                 # Petite pause pour éviter de consommer trop de CPU
                 await asyncio.sleep(0.001)

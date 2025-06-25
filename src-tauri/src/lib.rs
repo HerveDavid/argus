@@ -98,6 +98,9 @@ pub fn run() {
             settings::sidecars::commands::shutdown_sidecar,
             // Project
             project::commands::load_project,
+            project::commands::init_database_project,
+            project::commands::query_project,
+            project::commands::create_new_project,
             // project::commands::clean_project,
             // project::commands::is_loaded,
             // project::commands::get_project,
