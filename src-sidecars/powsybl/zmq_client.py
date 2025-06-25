@@ -15,22 +15,21 @@ from src.shared.request import Request
 from src.shared.response import ResponseBuilder
 from src.utils.logger import get_logger, LoggerConfig
 
+# IMPORTANT: Tous les logs vont sur stderr, seul le JSON va sur stdout
 logger = get_logger(__name__)
 
 
-class Server:
-    def __init__(
-        self, client_id: str = None, pub_port: int = 10241, sub_port: int = 10242
-    ):
+class ZMQRobustServer:
+    def __init__(self, client_id: str = None, pub_port: int = 10241, sub_port: int = 10242):
         self.client_id = client_id or f"server_{uuid.uuid4().hex[:8]}"
         self.pub_port = pub_port
         self.sub_port = sub_port
-
+        
         # ZMQ setup
         self.context = zmq.asyncio.Context()
         self.publisher = None
         self.subscriber = None
-
+        
         # Server state
         self.network_path: str = None
         self.db_path: str = None
@@ -54,24 +53,24 @@ class Server:
             self.publisher = self.context.socket(zmq.PUB)
             # connect() is NOT async - remove await
             self.publisher.connect(f"tcp://localhost:{self.sub_port}")
-
+            
             # Socket Subscriber - se connecte au port PUB du broker
             self.subscriber = self.context.socket(zmq.SUB)
             # connect() is NOT async - remove await
             self.subscriber.connect(f"tcp://localhost:{self.pub_port}")
-
+            
             # S'abonner aux messages pour ce client et aux broadcasts
             # setsockopt_string() is NOT async - remove await
             self.subscriber.setsockopt_string(zmq.SUBSCRIBE, f"{self.client_id}:")
             self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "broadcast:")
-
+            
             # Attendre un peu pour que les connexions s'établissent
             await asyncio.sleep(0.1)
-
+            
             self.log_to_stderr(f"ZMQ client '{self.client_id}' connected to broker")
             self.log_to_stderr(f"  - Publishing to: tcp://localhost:{self.sub_port}")
             self.log_to_stderr(f"  - Subscribing from: tcp://localhost:{self.pub_port}")
-
+            
         except Exception as e:
             self.log_to_stderr(f"Error setting up ZMQ: {e}")
             raise
@@ -109,18 +108,18 @@ class Server:
                 raw_message = await self.subscriber.recv_string(zmq.NOBLOCK)
             except zmq.Again:
                 return None
-
+                
             # Séparer le topic du message
             if ":" not in raw_message:
                 self.log_to_stderr(f"Invalid message format: {raw_message}")
                 return None
-
+                
             topic, message_str = raw_message.split(":", 1)
             message = json.loads(message_str)
-
+            
             self.log_to_stderr(f"Received message from topic '{topic}'")
             return topic, message
-
+            
         except json.JSONDecodeError as e:
             self.log_to_stderr(f"Error decoding JSON message: {e}")
             return None
@@ -130,7 +129,7 @@ class Server:
 
     def log_to_stderr(self, message: str):
         """Log sur stderr pour ne pas polluer stdout"""
-        print(f"[POWSYBL-{self.client_id}] {message}", file=sys.stderr, flush=True)
+        print(f"[ZMQ-SERVER-{self.client_id}] {message}", file=sys.stderr, flush=True)
 
     async def handle_ping(self, request: Request) -> Dict[str, Any]:
         """Handler pour tester la connexion"""
@@ -138,14 +137,12 @@ class Server:
             ResponseBuilder()
             .with_id(request.id)
             .with_status(200)
-            .with_result(
-                {
-                    "success": True,
-                    "message": "pong",
-                    "server_ready": True,
-                    "client_id": self.client_id,
-                }
-            )
+            .with_result({
+                "success": True, 
+                "message": "pong", 
+                "server_ready": True,
+                "client_id": self.client_id
+            })
             .build()
             .to_dict()
         )
@@ -157,13 +154,11 @@ class Server:
             ResponseBuilder()
             .with_id(request.id)
             .with_status(200)
-            .with_result(
-                {
-                    "success": True,
-                    "message": "Server shutting down",
-                    "client_id": self.client_id,
-                }
-            )
+            .with_result({
+                "success": True, 
+                "message": "Server shutting down",
+                "client_id": self.client_id
+            })
             .build()
             .to_dict()
         )
@@ -556,33 +551,28 @@ class Server:
     async def run(self):
         """Boucle principale du serveur ZMQ"""
         self.running = True
-
+        
         try:
             await self.setup_zmq()
             await self.announce_startup()
-
+            
             self.log_to_stderr("ZMQ server started, waiting for messages...")
-
+            
             while self.running:
                 # Vérifier les messages ZMQ
                 result = await self.receive_message()
                 if result:
                     topic, message_data = result
-
+                    
                     # Ignorer nos propres messages broadcast
-                    if (
-                        topic == "broadcast"
-                        and message_data.get("client_id") == self.client_id
-                    ):
+                    if topic == "broadcast" and message_data.get("client_id") == self.client_id:
                         continue
-
+                    
                     # Traiter les requêtes adressées à ce client
                     if topic == self.client_id:
-                        self.log_to_stderr(
-                            f"Processing request: {message_data.get('method')}"
-                        )
+                        self.log_to_stderr(f"Processing request: {message_data.get('method')}")
                         response = await self.handle_request(message_data)
-
+                        
                         # Envoyer la réponse au client qui a fait la requête
                         reply_to = message_data.get("reply_to")
                         if reply_to:
@@ -590,10 +580,10 @@ class Server:
                         else:
                             # Fallback: envoyer en broadcast
                             await self.send_message("broadcast", response)
-
+                
                 # Petite pause pour éviter de consommer trop de CPU
                 await asyncio.sleep(0.001)
-
+                
         except Exception as e:
             self.log_to_stderr(f"Error in main loop: {e}")
         finally:
@@ -603,11 +593,10 @@ class Server:
 
     def setup_signal_handlers(self):
         """Configure les gestionnaires de signaux pour un arrêt propre"""
-
         def signal_handler(signum, frame):
             self.log_to_stderr(f"Received signal {signum}, shutting down...")
             self.running = False
-
+        
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
 
@@ -615,13 +604,14 @@ class Server:
 async def main():
     """Point d'entrée principal"""
     try:
+        # Setup logging - IMPORTANT: logs vont sur stderr
         LoggerConfig.setup_logging(
             level="INFO",
-            log_file=None,
+            log_file=None,  # Pas de fichier, logs sur stderr seulement
         )
 
+        # Rediriger tous les logs vers stderr
         import logging
-
         root_logger = logging.getLogger()
         for handler in root_logger.handlers:
             handler.stream = sys.stderr
@@ -632,17 +622,17 @@ async def main():
         sub_port = int(sys.argv[3]) if len(sys.argv) > 3 else 10242
 
         # Créer et démarrer le serveur
-        server = Server(client_id=client_id, pub_port=pub_port, sub_port=sub_port)
+        server = ZMQRobustServer(client_id=client_id, pub_port=pub_port, sub_port=sub_port)
         server.setup_signal_handlers()
-
+        
         await server.run()
 
     except Exception as e:
         # Erreur fatale sur stderr
-        print(f"[POWSYBL] Fatal error: {e}", file=sys.stderr, flush=True)
+        print(f"[ZMQ-SERVER] Fatal error: {e}", file=sys.stderr, flush=True)
         sys.exit(1)
     finally:
-        print("[POWSYBL] Server stopped", file=sys.stderr, flush=True)
+        print("[ZMQ-SERVER] Server stopped", file=sys.stderr, flush=True)
 
 
 if __name__ == "__main__":

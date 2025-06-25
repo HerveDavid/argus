@@ -2,7 +2,7 @@ pypowsybl
 pandas
 duckdb
 toml
-zmq
+pyzmq
 pytest
 pytest-asyncio
 pytest-cov
