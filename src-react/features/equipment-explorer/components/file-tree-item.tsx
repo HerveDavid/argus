@@ -4,6 +4,7 @@ import {
   ChevronDown,
   File,
   FolderOpen,
+  MapPin,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -63,16 +64,18 @@ export const FileTreeItem = ({
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* <Badge variant="secondary" className="text-xs">
+                  {sub.tso && (
+                    <Badge variant="secondary" className="text-xs">
                       {sub.tso}
                     </Badge>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      {sub.country}
-                    </div> */}
+                  )}
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" />
+                    {sub.country}
+                  </div>
                   <span className="text-xs text-muted-foreground">
-                    {sub.voltage_levels?.length || 0} Voltage Levels
-                    {(sub.voltage_levels?.length || 0) > 1 ? ' x' : ''}
+                    {sub.voltage_levels?.length || 0} Voltage Level
+                    {(sub.voltage_levels?.length || 0) > 1 ? 's' : ''}
                   </span>
                 </div>
               </div>

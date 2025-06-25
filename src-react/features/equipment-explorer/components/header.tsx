@@ -38,7 +38,8 @@ export const Header: React.FC<HeaderProps> = ({
 
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <span>
-          {data?.total || 0} substation(s)
+          {data?.total || 0} substation
+          {(data?.total || 0) > 1 ? 's' : ''}
           {searchTerm && ` for "${searchTerm}"`}
         </span>
         <Button

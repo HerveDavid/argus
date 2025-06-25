@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { ChevronRight, Search, Loader2, ChevronLeft } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { ChevronRight, Loader2, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -89,12 +88,12 @@ export const EquipmentExplorer = () => {
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2 text-primary" />
             <span className="text-muted-foreground">
-              Chargement des postes...
+              Loading substations...
             </span>
           </div>
         ) : treeData.length === 0 ? (
           <div className="p-8 text-center text-muted-foreground">
-            Aucun poste trouvé
+            No substation finded
           </div>
         ) : (
           <div className="space-y-1">
@@ -116,7 +115,7 @@ export const EquipmentExplorer = () => {
         <div className="flex-shrink-0 p-4">
           <div className="flex items-center justify-between">
             <div className="text-sm text-muted-foreground">
-              Page {data.page} sur {data.totalPages}
+              Page {data.page} on {data.totalPages}
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -126,7 +125,7 @@ export const EquipmentExplorer = () => {
                 disabled={currentPage <= 1}
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Précédent
+                Previous
               </Button>
 
               <Button
@@ -135,7 +134,7 @@ export const EquipmentExplorer = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= data.totalPages}
               >
-                Suivant
+                Next
                 <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
