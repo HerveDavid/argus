@@ -37,11 +37,12 @@ export const useEquipment = (
           whereClause = `WHERE ${conditions.join(' AND ')}`;
         }
 
-        // Requête pour obtenir le nombre total
+        // Requête pour obtenir le nombre total (avec les mêmes filtres)
         const countQuery = `
           SELECT COUNT(*) as total 
           FROM substations s 
-          ${whereClause}
+          WHERE s.fictitious = FALSE
+          ${whereClause ? `AND (${whereClause.replace('WHERE ', '')})` : ''}
         `;
         
         const countResult = yield* projectClient.queryProject(countQuery);
@@ -50,61 +51,84 @@ export const useEquipment = (
         // Requête principale avec les données des substations et leurs niveaux de tension
         const mainQuery = `
           SELECT 
-            s.id,
-            s.name,
+            s.id as substation_id,
+            s.name as substation_name,
             s.tso,
             s.geo_tags,
             s.country,
             s.fictitious,
-            vl.id as vl_id,
-            vl.name as vl_name,
-            vl.nominal_v,
-            vl.high_voltage_limit,
-            vl.low_voltage_limit,
-            vl.fictitious as vl_fictitious,
-            vl.topology_kind
+            LIST(
+              STRUCT_PACK(
+                id := vl.id,
+                name := vl.name,
+                nominal_voltage := vl.nominal_v,
+                high_limit := vl.high_voltage_limit,
+                low_limit := vl.low_voltage_limit,
+                topology := vl.topology_kind,
+                fictitious := vl.fictitious
+              )
+            ) as voltage_levels
           FROM substations s
           LEFT JOIN voltage_levels vl ON s.id = vl.substation_id
-          ${whereClause}
-          ORDER BY s.name, COALESCE(vl.nominal_v, 0) DESC
+          WHERE s.fictitious = FALSE 
+            AND (vl.fictitious = FALSE OR vl.fictitious IS NULL)
+            ${whereClause ? `AND (${whereClause.replace('WHERE ', '')})` : ''}
+          GROUP BY s.id, s.name, s.tso, s.geo_tags, s.country, s.fictitious
+          ORDER BY s.name
           LIMIT ${params.pageSize} OFFSET ${offset}
         `;
 
         const result = yield* projectClient.queryProject(mainQuery);
         
-        // Transformation des données pour grouper les voltage levels par substation
-        const substationsMap = new Map<string, Substation>();
-        
-        result.data.forEach((row: any) => {
-          if (!substationsMap.has(row.id)) {
-            substationsMap.set(row.id, {
-              id: row.id,
-              name: row.name,
-              tso: row.tso,
-              geo_tags: row.geo_tags,
-              country: row.country,
-              fictitious: row.fictitious,
-              voltage_levels: []
-            });
-          }
+        // Transformation des données - gestion du type struct[] de DuckDB
+        const substations: Substation[] = result.data.map((row: any) => {
+          // Gestion du type struct[] de DuckDB
+          let voltageLevels: any[] = [];
           
-          const substation = substationsMap.get(row.id)!;
-          
-          if (row.vl_id) {
-            substation.voltage_levels.push({
-              id: row.vl_id,
-              name: row.vl_name,
-              substation_id: row.id,
-              nominal_v: row.nominal_v,
-              high_voltage_limit: row.high_voltage_limit,
-              low_voltage_limit: row.low_voltage_limit,
-              fictitious: row.vl_fictitious,
-              topology_kind: row.topology_kind
-            });
+          if (row.voltage_levels) {
+            if (Array.isArray(row.voltage_levels)) {
+              // Déjà un tableau
+              voltageLevels = row.voltage_levels;
+            } else if (typeof row.voltage_levels === 'object') {
+              // Peut être un objet avec des propriétés numériques (DuckDB struct[])
+              voltageLevels = Object.values(row.voltage_levels).filter(v => v !== null && v !== undefined);
+            } else if (typeof row.voltage_levels === 'string') {
+              // Chaîne JSON
+              try {
+                voltageLevels = JSON.parse(row.voltage_levels);
+              } catch {
+                voltageLevels = [];
+              }
+            }
           }
-        });
 
-        const substations = Array.from(substationsMap.values());
+          // Assurer que c'est un tableau et filtrer les éléments valides
+          if (!Array.isArray(voltageLevels)) {
+            voltageLevels = [];
+          }
+
+          return {
+            id: row.substation_id,
+            name: row.substation_name,
+            tso: row.tso,
+            geo_tags: row.geo_tags,
+            country: row.country,
+            fictitious: row.fictitious,
+            voltage_levels: voltageLevels
+              .filter((vl: any) => vl && typeof vl === 'object' && vl.id) 
+              .map((vl: any) => ({
+                id: vl.id,
+                name: vl.name || '',
+                substation_id: row.substation_id,
+                nominal_v: vl.nominal_voltage,
+                high_voltage_limit: vl.high_limit,
+                low_voltage_limit: vl.low_limit,
+                fictitious: vl.fictitious || false,
+                topology_kind: vl.topology || 'unknown'
+              }))
+              .sort((a: any, b: any) => (b.nominal_v || 0) - (a.nominal_v || 0))
+          };
+        });
         const totalPages = Math.ceil(total / params.pageSize);
 
         return {

@@ -1,245 +1,583 @@
 import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { 
+  Folder,
+  ChevronRight,
+  ChevronDown,
+  File,
+  FolderOpen,
   Search, 
-  Filter, 
-  ChevronLeft, 
-  ChevronRight, 
-  MapPin, 
-  Zap,
-  Building,
-  Globe
+  Loader2,
+  MapPin,
+  Zap
 } from 'lucide-react';
-import { useEquipment } from '../hooks/use-equipment';
-import { useEquipmentFilters } from '../hooks/use-equipment-filter';
-import { SubstationQueryParams } from '../types/equipment.type';
+
+// Types basés sur votre code
+interface VoltageLevel {
+  id: string;
+  name: string;
+  substation_id: string;
+  nominal_v: number;
+  high_voltage_limit: number;
+  low_voltage_limit: number;
+  fictitious: boolean;
+  topology_kind: string;
+}
+
+interface Substation {
+  id: string;
+  name: string;
+  tso: string;
+  geo_tags: string;
+  country: string;
+  fictitious: boolean;
+  voltage_levels: VoltageLevel[];
+}
+
+interface SubstationQueryParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+  country?: string;
+  tso?: string;
+}
+
+interface SubstationQueryResponse {
+  substations: Substation[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// Mock de la fonction useEquipment pour la démo
+const mockUseEquipment = (params: SubstationQueryParams) => {
+  return useQuery({
+    queryKey: ['substations', params],
+    queryFn: async (): Promise<SubstationQueryResponse> => {
+      // Simulation d'un délai réseau
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Données mockées pour la démo
+      const mockSubstations: Substation[] = [
+        {
+          id: 'SUB_001',
+          name: 'Substation Central',
+          tso: 'RTE',
+          geo_tags: '48.8566,2.3522',
+          country: 'FR',
+          fictitious: false,
+          voltage_levels: [
+            {
+              id: 'VL_001_400',
+              name: 'HT 400kV',
+              substation_id: 'SUB_001',
+              nominal_v: 400000,
+              high_voltage_limit: 420000,
+              low_voltage_limit: 380000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            },
+            {
+              id: 'VL_001_225',
+              name: 'MT 225kV',
+              substation_id: 'SUB_001',
+              nominal_v: 225000,
+              high_voltage_limit: 245000,
+              low_voltage_limit: 205000,
+              fictitious: false,
+              topology_kind: 'NODE_BREAKER'
+            }
+          ]
+        },
+        {
+          id: 'SUB_002',
+          name: 'Substation Nord',
+          tso: 'ELIA',
+          geo_tags: '50.8503,4.3517',
+          country: 'BE',
+          fictitious: false,
+          voltage_levels: [
+            {
+              id: 'VL_002_150',
+              name: 'MT 150kV',
+              substation_id: 'SUB_002',
+              nominal_v: 150000,
+              high_voltage_limit: 165000,
+              low_voltage_limit: 135000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            },
+            {
+              id: 'VL_002_63',
+              name: 'MT 63kV',
+              substation_id: 'SUB_002',
+              nominal_v: 63000,
+              high_voltage_limit: 66000,
+              low_voltage_limit: 60000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            }
+          ]
+        },
+        {
+          id: 'SUB_003',
+          name: 'Substation Est',
+          tso: 'RTE',
+          geo_tags: '48.5734,7.7521',
+          country: 'FR',
+          fictitious: false,
+          voltage_levels: [
+            {
+              id: 'VL_003_400',
+              name: 'THT 400kV',
+              substation_id: 'SUB_003',
+              nominal_v: 400000,
+              high_voltage_limit: 420000,
+              low_voltage_limit: 380000,
+              fictitious: false,
+              topology_kind: 'NODE_BREAKER'
+            },
+            {
+              id: 'VL_003_90',
+              name: 'MT 90kV',
+              substation_id: 'SUB_003',
+              nominal_v: 90000,
+              high_voltage_limit: 95000,
+              low_voltage_limit: 85000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            },
+            {
+              id: 'VL_003_20',
+              name: 'BT 20kV',
+              substation_id: 'SUB_003',
+              nominal_v: 20000,
+              high_voltage_limit: 22000,
+              low_voltage_limit: 18000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            }
+          ]
+        },
+        {
+          id: 'SUB_004',
+          name: 'Substation Ouest',
+          tso: 'RTE',
+          geo_tags: '47.2184,-1.5536',
+          country: 'FR',
+          fictitious: false,
+          voltage_levels: [
+            {
+              id: 'VL_004_63',
+              name: 'MT 63kV',
+              substation_id: 'SUB_004',
+              nominal_v: 63000,
+              high_voltage_limit: 66000,
+              low_voltage_limit: 60000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            }
+          ]
+        },
+        {
+          id: 'SUB_005',
+          name: 'Substation Sud',
+          tso: 'RTE',
+          geo_tags: '43.6047,1.4442',
+          country: 'FR',
+          fictitious: false,
+          voltage_levels: [
+            {
+              id: 'VL_005_400',
+              name: 'THT 400kV',
+              substation_id: 'SUB_005',
+              nominal_v: 400000,
+              high_voltage_limit: 420000,
+              low_voltage_limit: 380000,
+              fictitious: false,
+              topology_kind: 'NODE_BREAKER'
+            },
+            {
+              id: 'VL_005_225',
+              name: 'HT 225kV',
+              substation_id: 'SUB_005',
+              nominal_v: 225000,
+              high_voltage_limit: 245000,
+              low_voltage_limit: 205000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            },
+            {
+              id: 'VL_005_90',
+              name: 'MT 90kV',
+              substation_id: 'SUB_005',
+              nominal_v: 90000,
+              high_voltage_limit: 95000,
+              low_voltage_limit: 85000,
+              fictitious: false,
+              topology_kind: 'BUS_BREAKER'
+            }
+          ]
+        }
+      ];
+
+      // Filtrage basé sur la recherche
+      let filteredSubstations = mockSubstations;
+      if (params.search) {
+        const searchLower = params.search.toLowerCase();
+        filteredSubstations = mockSubstations.filter(sub => 
+          sub.id.toLowerCase().includes(searchLower) ||
+          sub.name.toLowerCase().includes(searchLower) ||
+          sub.country.toLowerCase().includes(searchLower) ||
+          sub.tso.toLowerCase().includes(searchLower) ||
+          sub.voltage_levels.some(vl => 
+            vl.id.toLowerCase().includes(searchLower) ||
+            vl.topology_kind.toLowerCase().includes(searchLower)
+          )
+        );
+      }
+
+      // Pagination
+      const total = filteredSubstations.length;
+      const startIndex = (params.page - 1) * params.pageSize;
+      const endIndex = startIndex + params.pageSize;
+      const paginatedSubstations = filteredSubstations.slice(startIndex, endIndex);
+
+      return {
+        substations: paginatedSubstations,
+        total,
+        page: params.page,
+        pageSize: params.pageSize,
+        totalPages: Math.ceil(total / params.pageSize)
+      };
+    }
+  });
+};
+
+const formatVoltage = (voltage: number) => {
+  if (voltage >= 1000000) {
+    return `${(voltage / 1000000).toFixed(0)}MV`;
+  } else if (voltage >= 1000) {
+    return `${(voltage / 1000).toFixed(0)}kV`;
+  }
+  return `${voltage}V`;
+};
+
+const getVoltageLevelColor = (voltage: number) => {
+  if (voltage >= 400000) return 'text-red-600';
+  if (voltage >= 200000) return 'text-orange-600';
+  if (voltage >= 100000) return 'text-yellow-600';
+  if (voltage >= 50000) return 'text-green-600';
+  return 'text-blue-600';
+};
+
+const getTopologyIcon = (topology: string) => {
+  switch (topology) {
+    case 'NODE_BREAKER':
+      return '🔗';
+    case 'BUS_BREAKER':
+      return '🔌';
+    default:
+      return '⚡';
+  }
+};
+
+interface FileTreeItemProps {
+  item: {
+    id: string;
+    name: string;
+    type: 'substation' | 'voltage_level';
+    substation?: Substation;
+    voltageLevel?: VoltageLevel;
+    children?: any[];
+  };
+  level?: number;
+  expanded?: boolean;
+  onToggle?: () => void;
+}
+
+const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeItemProps) => {
+  const handleToggle = () => {
+    if (item.type === 'substation' && onToggle) {
+      onToggle();
+    }
+  };
+
+  if (item.type === 'substation' && item.substation) {
+    const sub = item.substation;
+    return (
+      <div>
+        <div
+          className="flex items-center py-2 px-3 cursor-pointer hover:bg-gray-50 rounded-sm border-b border-gray-100"
+          style={{ paddingLeft: `${level * 12 + 8}px` }}
+          onClick={handleToggle}
+        >
+          {expanded ? (
+            <ChevronDown className="w-4 h-4 mr-2 text-gray-600" />
+          ) : (
+            <ChevronRight className="w-4 h-4 mr-2 text-gray-600" />
+          )}
+          {expanded ? (
+            <FolderOpen className="w-5 h-5 mr-3 text-blue-500" />
+          ) : (
+            <Folder className="w-5 h-5 mr-3 text-blue-500" />
+          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm font-medium text-gray-900">{sub.id}</span>
+                <span className="text-sm text-gray-600">{sub.name || 'Sans nom'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">
+                  {sub.tso}
+                </span>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <MapPin className="h-3 w-3" />
+                  {sub.country}
+                </div>
+                <span className="text-xs text-gray-400">
+                  {sub.voltage_levels?.length || 0} niveau{(sub.voltage_levels?.length || 0) > 1 ? 'x' : ''}
+                </span>
+              </div>
+            </div>
+            {sub.geo_tags && (
+              <div className="text-xs text-gray-400 font-mono mt-1">
+                📍 {sub.geo_tags}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {expanded && item.children && (
+          <div className="bg-gray-50">
+            {item.children.map((child: any, index: number) => (
+              <FileTreeItem key={index} item={child} level={level + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (item.type === 'voltage_level' && item.voltageLevel) {
+    const vl = item.voltageLevel;
+    return (
+      <div
+        className="flex items-center py-2 px-3 hover:bg-gray-100 rounded-sm"
+        style={{ paddingLeft: `${level * 12 + 20}px` }}
+      >
+        <div className="w-4 h-4 mr-2" />
+        <File className="w-4 h-4 mr-3 text-gray-400" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-sm text-gray-700">{vl.id}</span>
+              <span className="text-sm text-gray-600">{vl.name || 'Sans nom'}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}>
+                {formatVoltage(vl.nominal_v)}
+              </span>
+              <span className="text-xs text-gray-500">
+                {getTopologyIcon(vl.topology_kind)} {vl.topology_kind}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+            <span>Min: {formatVoltage(vl.low_voltage_limit)}</span>
+            <span>Max: {formatVoltage(vl.high_voltage_limit)}</span>
+            {vl.fictitious && <span className="text-orange-500">⚠️ Fictif</span>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
 
 export const EquipmentExplorer = () => {
-  const [params, setParams] = useState<SubstationQueryParams>({
-    page: 1,
-    pageSize: 20,
-    search: '',
-    country: '',
-    tso: ''
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [expandedSubstations, setExpandedSubstations] = useState<Set<string>>(new Set());
+  const pageSize = 10;
 
-  const [showFilters, setShowFilters] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
-
-  const { data, isLoading, error } = useEquipment(params);
-  const { data: filters } = useEquipmentFilters();
-
-  const handleSearch = () => {
-    setParams(prev => ({ ...prev, search: searchInput, page: 1 }));
+  const queryParams: SubstationQueryParams = {
+    page: currentPage,
+    pageSize,
+    search: searchTerm || undefined
   };
 
-  const handleFilterChange = (key: keyof SubstationQueryParams, value: string) => {
-    setParams(prev => ({ ...prev, [key]: value, page: 1 }));
+  const { data, isLoading, error } = mockUseEquipment(queryParams);
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
   };
 
-  const handlePageChange = (newPage: number) => {
-    setParams(prev => ({ ...prev, page: newPage }));
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const formatVoltage = (voltage: number | null | undefined) => {
-    if (voltage === null || voltage === undefined || isNaN(voltage)) {
-      return 'N/A';
+  const toggleSubstation = (substationId: string) => {
+    const newExpanded = new Set(expandedSubstations);
+    if (newExpanded.has(substationId)) {
+      newExpanded.delete(substationId);
+    } else {
+      newExpanded.add(substationId);
     }
-    if (voltage >= 1000) {
-      return `${(voltage / 1000).toFixed(0)} kV`;
-    }
-    return `${voltage.toFixed(0)} V`;
+    setExpandedSubstations(newExpanded);
   };
+
+  const treeData = data?.substations?.map(substation => ({
+    id: substation.id,
+    name: substation.name,
+    type: 'substation' as const,
+    substation,
+    children: substation.voltage_levels
+      ?.sort((a, b) => (b.nominal_v || 0) - (a.nominal_v || 0))
+      .map(vl => ({
+        id: vl.id,
+        name: vl.name,
+        type: 'voltage_level' as const,
+        voltageLevel: vl
+      }))
+  })) || [];
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center text-red-600">
-          <h3 className="text-lg font-semibold mb-2">Error loading equipment</h3>
-          <p>{error.message}</p>
+      <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg border">
+        <div className="p-6">
+          <div className="text-center text-red-600">
+            Erreur lors du chargement des données
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="w-full max-w-6xl mx-auto bg-white rounded-lg shadow-lg border">
       {/* Header */}
-      <div className="border-b border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Equipment Explorer</h2>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            <Filter className="w-4 h-4" />
-            Filters
-          </button>
+      <div className="border-b p-6">
+        <h2 className="text-2xl font-bold flex items-center gap-2 mb-4">
+          <Zap className="h-6 w-6 text-blue-600" />
+          Explorateur d'Équipements - Postes électriques
+        </h2>
+        
+        {/* Barre de recherche */}
+        <div className="relative">
+          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Rechercher par ID, nom, pays, TSO ou niveau de tension..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
-
-        {/* Search */}
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search substations..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <button
-            onClick={handleSearch}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Search
-          </button>
-        </div>
-
-        {/* Filters */}
-        {showFilters && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-md">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-                <select
-                  value={params.country || ''}
-                  onChange={(e) => handleFilterChange('country', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All countries</option>
-                  {filters?.countries.map((country) => (
-                    <option key={country} value={country}>{country}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">TSO</label>
-                <select
-                  value={params.tso || ''}
-                  onChange={(e) => handleFilterChange('tso', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">All TSOs</option>
-                  {filters?.tsos.map((tso) => (
-                    <option key={tso} value={tso}>{tso}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto">
+      
+      <div className="p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin mr-2 text-blue-600" />
+            <span>Chargement des postes...</span>
           </div>
         ) : (
-          <div className="p-4">
-            {/* Results info */}
-            <div className="mb-4 text-sm text-gray-600">
-              Showing {data?.substations.length || 0} of {data?.total || 0} substations
+          <>
+            {/* Statistiques */}
+            <div className="mb-4 text-sm text-gray-600 flex items-center justify-between">
+              <span>
+                {data?.total || 0} poste(s) trouvé(s)
+                {searchTerm && ` pour "${searchTerm}"`}
+              </span>
+              <button
+                onClick={() => {
+                  if (expandedSubstations.size === treeData.length) {
+                    setExpandedSubstations(new Set());
+                  } else {
+                    setExpandedSubstations(new Set(treeData.map(item => item.id)));
+                  }
+                }}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                {expandedSubstations.size === treeData.length ? 'Tout replier' : 'Tout déplier'}
+              </button>
             </div>
 
-            {/* Substations list */}
-            <div className="space-y-4">
-              {data?.substations.map((substation) => (
-                <div key={substation.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  {/* Substation header */}
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{substation.name}</h3>
-                      <p className="text-sm text-gray-500">ID: {substation.id}</p>
-                    </div>
-                    {substation.fictitious && (
-                      <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
-                        Fictitious
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Substation info */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Globe className="w-4 h-4" />
-                      <span>{substation.country || 'N/A'}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Building className="w-4 h-4" />
-                      <span>{substation.tso || 'N/A'}</span>
-                    </div>
-                    {substation.geo_tags && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <MapPin className="w-4 h-4" />
-                        <span>{substation.geo_tags}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Voltage levels */}
-                  {substation.voltage_levels.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                        <Zap className="w-4 h-4" />
-                        Voltage Levels ({substation.voltage_levels.length})
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {substation.voltage_levels.map((vl) => (
-                          <div key={vl.id} className="bg-gray-50 rounded-md p-3">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="font-medium text-blue-600">
-                                {formatVoltage(vl.nominal_v)}
-                              </span>
-                              {vl.fictitious && (
-                                <span className="px-1 py-0.5 bg-orange-100 text-orange-800 text-xs rounded">
-                                  Fict.
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-600 mb-1">{vl.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {vl.topology_kind} | {formatVoltage(vl.low_voltage_limit)} - {formatVoltage(vl.high_voltage_limit)}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+            {/* Tree View */}
+            <div className="border rounded-lg bg-white">
+              {treeData.length === 0 ? (
+                <div className="p-8 text-center text-gray-500">
+                  Aucun poste trouvé
                 </div>
-              ))}
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {treeData.map((item) => (
+                    <FileTreeItem
+                      key={item.id}
+                      item={item}
+                      level={0}
+                      expanded={expandedSubstations.has(item.id)}
+                      onToggle={() => toggleSubstation(item.id)}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Pagination */}
             {data && data.totalPages > 1 && (
-              <div className="mt-6 flex items-center justify-between">
+              <div className="flex items-center justify-between mt-6">
                 <div className="text-sm text-gray-600">
-                  Page {data.page} of {data.totalPages}
+                  Page {data.page} sur {data.totalPages}
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => handlePageChange(data.page - 1)}
-                    disabled={data.page === 1}
-                    className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Précédent
                   </button>
+                  
+                  {/* Numéros de page */}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
+                      const pageNum = i + 1;
+                      const isCurrentPage = pageNum === currentPage;
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-10 h-10 text-sm font-medium rounded-md border ${
+                            isCurrentPage
+                              ? 'bg-blue-600 text-white border-blue-600'
+                              : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
                   <button
-                    onClick={() => handlePageChange(data.page + 1)}
-                    disabled={data.page === data.totalPages}
-                    className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= data.totalPages}
+                    className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
+                    Suivant
+                    <ChevronRight className="h-4 w-4 ml-1" />
                   </button>
                 </div>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
