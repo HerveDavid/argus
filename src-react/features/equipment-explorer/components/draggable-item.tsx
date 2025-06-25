@@ -9,7 +9,7 @@ interface DraggableItemProps {
   children: React.ReactNode;
 }
 
-const DraggableItem: React.FC<DraggableItemProps> = ({
+export const DraggableItem: React.FC<DraggableItemProps> = ({
   substation,
   children,
 }) => {
@@ -46,5 +46,3 @@ const DraggableItem: React.FC<DraggableItemProps> = ({
     </span>
   );
 };
-
-export default DraggableItem;
