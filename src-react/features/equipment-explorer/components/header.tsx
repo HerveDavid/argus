@@ -2,7 +2,7 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-import { SubstationQueryResponse } from '../hooks/use-equipment';
+import { SubstationQueryResponse } from '../types/equipment-query.type';
 import React from 'react';
 import { TreeData } from '../types/tree-data.type';
 

@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { ChevronRight, Loader2, ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 import { useEquipment } from '../hooks/use-equipment';
-import { SubstationQueryParams } from '../types/equipment.type';
+import { SubstationQueryParams } from '../types/equipment-query.type';
 import { FileTreeItem } from './file-tree-item';
 import { Header } from './header';
+import { Footer } from './footer';
 
 export const EquipmentExplorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -112,34 +112,11 @@ export const EquipmentExplorer = () => {
 
       {/* Pagination fixe en bas */}
       {data && data.totalPages > 1 && (
-        <div className="flex-shrink-0 p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              Page {data.page} on {data.totalPages}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1}
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= data.totalPages}
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        <Footer
+          data={data}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+        />
       )}
     </div>
   );

@@ -2,48 +2,12 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { Effect } from 'effect';
 import { ProjectClient } from '@/services/common/project-client';
 import { useRuntime } from '@/services/runtime/use-runtime';
-
-// Types
-interface VoltageLevel {
-  id: string;
-  name: string;
-  substation_id: string;
-  nominal_v: number;
-  high_voltage_limit: number;
-  low_voltage_limit: number;
-  fictitious: boolean;
-  topology_kind: string;
-}
-
-interface Substation {
-  id: string;
-  name: string;
-  tso: string;
-  geo_tags: string;
-  country: string;
-  fictitious: boolean;
-  voltage_levels: VoltageLevel[];
-}
-
-interface SubstationQueryParams {
-  page: number;
-  pageSize: number;
-  search?: string;
-  country?: string;
-  tso?: string;
-}
-
-export interface SubstationQueryResponse {
-  substations: Substation[];
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-}
+import { SubstationQueryParams, SubstationQueryResponse } from '../types/equipment-query.type';
+import { Substation } from '@/types/substation';
 
 export const useEquipment = (
   params: SubstationQueryParams,
-  options?: UseQueryOptions<SubstationQueryResponse>
+  options?: UseQueryOptions<SubstationQueryResponse>,
 ) => {
   const runtime = useRuntime();
 
@@ -52,10 +16,10 @@ export const useEquipment = (
     queryFn: async (): Promise<SubstationQueryResponse> => {
       const program = Effect.gen(function* () {
         const projectClient = yield* ProjectClient;
-        
+
         // Construction des conditions de filtrage
         const conditions: string[] = [];
-        
+
         if (params.search) {
           // Échapper les caractères spéciaux pour ILIKE
           const escapedSearch = params.search.replace(/'/g, "''");
@@ -73,18 +37,20 @@ export const useEquipment = (
              ))
           `);
         }
-        
+
         if (params.country) {
-          conditions.push(`s.country = '${params.country.replace(/'/g, "''")}'`);
+          conditions.push(
+            `s.country = '${params.country.replace(/'/g, "''")}'`,
+          );
         }
-        
+
         if (params.tso) {
           conditions.push(`s.tso = '${params.tso.replace(/'/g, "''")}'`);
         }
 
         // Clause WHERE de base (toujours exclure les substations fictives)
         let whereClause = 'WHERE s.fictitious = FALSE';
-        
+
         if (conditions.length > 0) {
           whereClause += ` AND (${conditions.join(' AND ')})`;
         }
@@ -95,7 +61,7 @@ export const useEquipment = (
           FROM substations s 
           ${whereClause}
         `;
-        
+
         console.log('Count Query:', countQuery);
         const countResult = yield* projectClient.queryProject(countQuery);
         const total = countResult.data[0]?.total || 0;
@@ -138,16 +104,16 @@ export const useEquipment = (
 
         console.log('Main Query:', mainQuery);
         const result = yield* projectClient.queryProject(mainQuery);
-        
+
         // Transformation des données - gestion du type STRUCT[] de DuckDB
         const substations: Substation[] = result.data.map((row: any) => {
           console.log('Raw row data:', row);
           console.log('Raw voltage_levels:', row.voltage_levels);
           console.log('Type of voltage_levels:', typeof row.voltage_levels);
-          
+
           // Gestion du type STRUCT[] de DuckDB pour voltage_levels
           let voltageLevels: any[] = [];
-          
+
           if (row.voltage_levels) {
             if (Array.isArray(row.voltage_levels)) {
               // Déjà un tableau
@@ -162,16 +128,16 @@ export const useEquipment = (
                   .replace(/NULL/g, 'null')
                   .replace(/True/g, 'true')
                   .replace(/False/g, 'false');
-                
+
                 console.log('Original string:', row.voltage_levels);
                 console.log('Converted JSON string:', jsonString);
-                
+
                 voltageLevels = JSON.parse(jsonString);
                 console.log('voltage_levels parsed from JSON:', voltageLevels);
               } catch (e) {
                 console.log('Failed to parse JSON:', e);
                 console.log('Trying alternative parsing...');
-                
+
                 // Si le parsing JSON échoue, essayons une approche alternative
                 // Chercher les objets dans la chaîne
                 try {
@@ -183,11 +149,13 @@ export const useEquipment = (
                       const obj: any = {};
                       const keyValueRegex = /'([^']+)':\s*([^,}]+)/g;
                       let keyValueMatch;
-                      
-                      while ((keyValueMatch = keyValueRegex.exec(match)) !== null) {
+
+                      while (
+                        (keyValueMatch = keyValueRegex.exec(match)) !== null
+                      ) {
                         const key = keyValueMatch[1];
                         let value = keyValueMatch[2].trim();
-                        
+
                         // Nettoyer la valeur
                         if (value === 'NULL') {
                           value = null;
@@ -195,15 +163,18 @@ export const useEquipment = (
                           value = true;
                         } else if (value === 'false' || value === 'False') {
                           value = false;
-                        } else if (value.startsWith("'") && value.endsWith("'")) {
+                        } else if (
+                          value.startsWith("'") &&
+                          value.endsWith("'")
+                        ) {
                           value = value.slice(1, -1); // Enlever les guillemets
                         } else if (!isNaN(Number(value))) {
                           value = Number(value);
                         }
-                        
+
                         obj[key] = value;
                       }
-                      
+
                       return obj;
                     });
                     console.log('Manual parsing result:', voltageLevels);
@@ -215,8 +186,13 @@ export const useEquipment = (
               }
             } else if (typeof row.voltage_levels === 'object') {
               // Peut être un objet avec des propriétés numériques (DuckDB STRUCT[])
-              voltageLevels = Object.values(row.voltage_levels).filter(v => v !== null && v !== undefined);
-              console.log('voltage_levels converted from object:', voltageLevels);
+              voltageLevels = Object.values(row.voltage_levels).filter(
+                (v) => v !== null && v !== undefined,
+              );
+              console.log(
+                'voltage_levels converted from object:',
+                voltageLevels,
+              );
             }
           }
 
@@ -243,7 +219,7 @@ export const useEquipment = (
                 high_voltage_limit: vl.high_voltage_limit || 0,
                 low_voltage_limit: vl.low_voltage_limit || 0,
                 fictitious: vl.fictitious || false,
-                topology_kind: vl.topology_kind || 'unknown'
+                topology_kind: vl.topology_kind || 'unknown',
               };
               console.log('Mapped voltage level:', mapped);
               return mapped;
@@ -258,7 +234,7 @@ export const useEquipment = (
             geo_tags: row.geo_tags || '',
             country: row.country || '',
             fictitious: row.fictitious || false,
-            voltage_levels: mappedVoltageLevels
+            voltage_levels: mappedVoltageLevels,
           };
 
           console.log('Final substation:', substation);
@@ -272,7 +248,7 @@ export const useEquipment = (
           total,
           page: params.page,
           pageSize: params.pageSize,
-          totalPages
+          totalPages,
         };
       });
 
@@ -283,7 +259,7 @@ export const useEquipment = (
     cacheTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
     retry: 2,
-    ...options
+    ...options,
   });
 };
 
@@ -296,7 +272,7 @@ export const useAvailableCountries = () => {
     queryFn: async (): Promise<string[]> => {
       const program = Effect.gen(function* () {
         const projectClient = yield* ProjectClient;
-        
+
         const query = `
           SELECT DISTINCT country
           FROM substations 
@@ -305,7 +281,7 @@ export const useAvailableCountries = () => {
             AND fictitious = FALSE
           ORDER BY country
         `;
-        
+
         const result = yield* projectClient.queryProject(query);
         return result.data.map((row: any) => row.country);
       });
@@ -313,7 +289,6 @@ export const useAvailableCountries = () => {
       return runtime.runPromise(program);
     },
     staleTime: 15 * 60 * 1000, // 15 minutes (les pays changent rarement)
-    cacheTime: 30 * 60 * 1000, // 30 minutes
   });
 };
 
@@ -326,7 +301,7 @@ export const useAvailableTSOs = () => {
     queryFn: async (): Promise<string[]> => {
       const program = Effect.gen(function* () {
         const projectClient = yield* ProjectClient;
-        
+
         const query = `
           SELECT DISTINCT tso
           FROM substations 
@@ -335,7 +310,7 @@ export const useAvailableTSOs = () => {
             AND fictitious = FALSE
           ORDER BY tso
         `;
-        
+
         const result = yield* projectClient.queryProject(query);
         return result.data.map((row: any) => row.tso);
       });
@@ -343,7 +318,6 @@ export const useAvailableTSOs = () => {
       return runtime.runPromise(program);
     },
     staleTime: 15 * 60 * 1000, // 15 minutes
-    cacheTime: 30 * 60 * 1000, // 30 minutes
   });
 };
 
@@ -356,7 +330,7 @@ export const useEquipmentStats = () => {
     queryFn: async () => {
       const program = Effect.gen(function* () {
         const projectClient = yield* ProjectClient;
-        
+
         const query = `
           SELECT 
             COUNT(DISTINCT s.id) as total_substations,
@@ -371,7 +345,7 @@ export const useEquipmentStats = () => {
             AND vl.fictitious = FALSE
           WHERE s.fictitious = FALSE
         `;
-        
+
         const result = yield* projectClient.queryProject(query);
         return result.data[0] || {};
       });
@@ -379,6 +353,5 @@ export const useEquipmentStats = () => {
       return runtime.runPromise(program);
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
-    cacheTime: 20 * 60 * 1000, // 20 minutes
   });
 };
