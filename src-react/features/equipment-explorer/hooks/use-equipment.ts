@@ -33,7 +33,7 @@ interface SubstationQueryParams {
   tso?: string;
 }
 
-interface SubstationQueryResponse {
+export interface SubstationQueryResponse {
   substations: Substation[];
   total: number;
   page: number;
