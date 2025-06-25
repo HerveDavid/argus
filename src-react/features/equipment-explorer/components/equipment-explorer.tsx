@@ -9,7 +9,8 @@ import {
   Search, 
   Loader2,
   MapPin,
-  Zap
+  Zap,
+  ChevronLeft
 } from 'lucide-react';
 
 // Types basés sur votre code
@@ -50,210 +51,8 @@ interface SubstationQueryResponse {
   totalPages: number;
 }
 
-// Mock de la fonction useEquipment pour la démo
-const mockUseEquipment = (params: SubstationQueryParams) => {
-  return useQuery({
-    queryKey: ['substations', params],
-    queryFn: async (): Promise<SubstationQueryResponse> => {
-      // Simulation d'un délai réseau
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Données mockées pour la démo
-      const mockSubstations: Substation[] = [
-        {
-          id: 'SUB_001',
-          name: 'Substation Central',
-          tso: 'RTE',
-          geo_tags: '48.8566,2.3522',
-          country: 'FR',
-          fictitious: false,
-          voltage_levels: [
-            {
-              id: 'VL_001_400',
-              name: 'HT 400kV',
-              substation_id: 'SUB_001',
-              nominal_v: 400000,
-              high_voltage_limit: 420000,
-              low_voltage_limit: 380000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            },
-            {
-              id: 'VL_001_225',
-              name: 'MT 225kV',
-              substation_id: 'SUB_001',
-              nominal_v: 225000,
-              high_voltage_limit: 245000,
-              low_voltage_limit: 205000,
-              fictitious: false,
-              topology_kind: 'NODE_BREAKER'
-            }
-          ]
-        },
-        {
-          id: 'SUB_002',
-          name: 'Substation Nord',
-          tso: 'ELIA',
-          geo_tags: '50.8503,4.3517',
-          country: 'BE',
-          fictitious: false,
-          voltage_levels: [
-            {
-              id: 'VL_002_150',
-              name: 'MT 150kV',
-              substation_id: 'SUB_002',
-              nominal_v: 150000,
-              high_voltage_limit: 165000,
-              low_voltage_limit: 135000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            },
-            {
-              id: 'VL_002_63',
-              name: 'MT 63kV',
-              substation_id: 'SUB_002',
-              nominal_v: 63000,
-              high_voltage_limit: 66000,
-              low_voltage_limit: 60000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            }
-          ]
-        },
-        {
-          id: 'SUB_003',
-          name: 'Substation Est',
-          tso: 'RTE',
-          geo_tags: '48.5734,7.7521',
-          country: 'FR',
-          fictitious: false,
-          voltage_levels: [
-            {
-              id: 'VL_003_400',
-              name: 'THT 400kV',
-              substation_id: 'SUB_003',
-              nominal_v: 400000,
-              high_voltage_limit: 420000,
-              low_voltage_limit: 380000,
-              fictitious: false,
-              topology_kind: 'NODE_BREAKER'
-            },
-            {
-              id: 'VL_003_90',
-              name: 'MT 90kV',
-              substation_id: 'SUB_003',
-              nominal_v: 90000,
-              high_voltage_limit: 95000,
-              low_voltage_limit: 85000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            },
-            {
-              id: 'VL_003_20',
-              name: 'BT 20kV',
-              substation_id: 'SUB_003',
-              nominal_v: 20000,
-              high_voltage_limit: 22000,
-              low_voltage_limit: 18000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            }
-          ]
-        },
-        {
-          id: 'SUB_004',
-          name: 'Substation Ouest',
-          tso: 'RTE',
-          geo_tags: '47.2184,-1.5536',
-          country: 'FR',
-          fictitious: false,
-          voltage_levels: [
-            {
-              id: 'VL_004_63',
-              name: 'MT 63kV',
-              substation_id: 'SUB_004',
-              nominal_v: 63000,
-              high_voltage_limit: 66000,
-              low_voltage_limit: 60000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            }
-          ]
-        },
-        {
-          id: 'SUB_005',
-          name: 'Substation Sud',
-          tso: 'RTE',
-          geo_tags: '43.6047,1.4442',
-          country: 'FR',
-          fictitious: false,
-          voltage_levels: [
-            {
-              id: 'VL_005_400',
-              name: 'THT 400kV',
-              substation_id: 'SUB_005',
-              nominal_v: 400000,
-              high_voltage_limit: 420000,
-              low_voltage_limit: 380000,
-              fictitious: false,
-              topology_kind: 'NODE_BREAKER'
-            },
-            {
-              id: 'VL_005_225',
-              name: 'HT 225kV',
-              substation_id: 'SUB_005',
-              nominal_v: 225000,
-              high_voltage_limit: 245000,
-              low_voltage_limit: 205000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            },
-            {
-              id: 'VL_005_90',
-              name: 'MT 90kV',
-              substation_id: 'SUB_005',
-              nominal_v: 90000,
-              high_voltage_limit: 95000,
-              low_voltage_limit: 85000,
-              fictitious: false,
-              topology_kind: 'BUS_BREAKER'
-            }
-          ]
-        }
-      ];
-
-      // Filtrage basé sur la recherche
-      let filteredSubstations = mockSubstations;
-      if (params.search) {
-        const searchLower = params.search.toLowerCase();
-        filteredSubstations = mockSubstations.filter(sub => 
-          sub.id.toLowerCase().includes(searchLower) ||
-          sub.name.toLowerCase().includes(searchLower) ||
-          sub.country.toLowerCase().includes(searchLower) ||
-          sub.tso.toLowerCase().includes(searchLower) ||
-          sub.voltage_levels.some(vl => 
-            vl.id.toLowerCase().includes(searchLower) ||
-            vl.topology_kind.toLowerCase().includes(searchLower)
-          )
-        );
-      }
-
-      // Pagination
-      const total = filteredSubstations.length;
-      const startIndex = (params.page - 1) * params.pageSize;
-      const endIndex = startIndex + params.pageSize;
-      const paginatedSubstations = filteredSubstations.slice(startIndex, endIndex);
-
-      return {
-        substations: paginatedSubstations,
-        total,
-        page: params.page,
-        pageSize: params.pageSize,
-        totalPages: Math.ceil(total / params.pageSize)
-      };
-    }
-  });
-};
+// Import du hook réel
+import { useEquipment } from '../hooks/use-equipment';
 
 const formatVoltage = (voltage: number) => {
   if (voltage >= 1000000) {
@@ -410,7 +209,7 @@ export const EquipmentExplorer = () => {
     search: searchTerm || undefined
   };
 
-  const { data, isLoading, error } = mockUseEquipment(queryParams);
+  const { data, isLoading, error } = useEquipment(queryParams);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
