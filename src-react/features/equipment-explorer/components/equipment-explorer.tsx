@@ -1,44 +1,23 @@
 import { useState } from 'react';
-import { 
+import {
   Folder,
   ChevronRight,
   ChevronDown,
   File,
   FolderOpen,
-  Search, 
+  Search,
   Loader2,
   MapPin,
-  Zap,
-  ChevronLeft
+  ChevronLeft,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useEquipment } from '../hooks/use-equipment';
-
-// Types basés sur votre code
-interface VoltageLevel {
-  id: string;
-  name: string;
-  substation_id: string;
-  nominal_v: number;
-  high_voltage_limit: number;
-  low_voltage_limit: number;
-  fictitious: boolean;
-  topology_kind: string;
-}
-
-interface Substation {
-  id: string;
-  name: string;
-  tso: string;
-  geo_tags: string;
-  country: string;
-  fictitious: boolean;
-  voltage_levels: VoltageLevel[];
-}
+import DraggableItem from './draggable-item';
+import { Substation, VoltageLevel } from '@/types/substation';
 
 interface SubstationQueryParams {
   page: number;
@@ -90,7 +69,12 @@ interface FileTreeItemProps {
   onToggle?: () => void;
 }
 
-const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeItemProps) => {
+const FileTreeItem = ({
+  item,
+  level = 0,
+  expanded = false,
+  onToggle,
+}: FileTreeItemProps) => {
   const handleToggle = () => {
     if (item.type === 'substation' && onToggle) {
       onToggle();
@@ -119,8 +103,12 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm font-medium text-foreground">{sub.id}</span>
-                <span className="text-sm text-muted-foreground">{sub.name || 'Sans nom'}</span>
+                <span className="font-mono text-sm font-medium text-foreground">
+                  {sub.id}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {sub.name || 'Sans nom'}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
@@ -131,7 +119,8 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
                   {sub.country}
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {sub.voltage_levels?.length || 0} niveau{(sub.voltage_levels?.length || 0) > 1 ? 'x' : ''}
+                  {sub.voltage_levels?.length || 0} niveau
+                  {(sub.voltage_levels?.length || 0) > 1 ? 'x' : ''}
                 </span>
               </div>
             </div>
@@ -142,7 +131,7 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
             )}
           </div>
         </div>
-        
+
         {expanded && item.children && (
           <div className="bg-muted/30">
             {item.children.map((child: any, index: number) => (
@@ -167,10 +156,14 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span className="font-mono text-sm text-foreground">{vl.id}</span>
-              <span className="text-sm text-muted-foreground">{vl.name || 'Sans nom'}</span>
+              <span className="text-sm text-muted-foreground">
+                {vl.name || 'Sans nom'}
+              </span>
             </div>
             <div className="flex items-center gap-3">
-              <span className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}>
+              <span
+                className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}
+              >
                 {formatVoltage(vl.nominal_v)}
               </span>
               <span className="text-xs text-muted-foreground">
@@ -198,13 +191,15 @@ const FileTreeItem = ({ item, level = 0, expanded = false, onToggle }: FileTreeI
 export const EquipmentExplorer = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedSubstations, setExpandedSubstations] = useState<Set<string>>(new Set());
+  const [expandedSubstations, setExpandedSubstations] = useState<Set<string>>(
+    new Set(),
+  );
   const pageSize = 10;
 
   const queryParams: SubstationQueryParams = {
     page: currentPage,
     pageSize,
-    search: searchTerm || undefined
+    search: searchTerm || undefined,
   };
 
   const { data, isLoading, error } = useEquipment(queryParams);
@@ -228,20 +223,21 @@ export const EquipmentExplorer = () => {
     setExpandedSubstations(newExpanded);
   };
 
-  const treeData = data?.substations?.map(substation => ({
-    id: substation.id,
-    name: substation.name,
-    type: 'substation' as const,
-    substation,
-    children: substation.voltage_levels
-      ?.sort((a, b) => (b.nominal_v || 0) - (a.nominal_v || 0))
-      .map(vl => ({
-        id: vl.id,
-        name: vl.name,
-        type: 'voltage_level' as const,
-        voltageLevel: vl
-      }))
-  })) || [];
+  const treeData =
+    data?.substations?.map((substation) => ({
+      id: substation.id,
+      name: substation.name,
+      type: 'substation' as const,
+      substation,
+      children: substation.voltage_levels
+        ?.sort((a, b) => (b.nominal_v || 0) - (a.nominal_v || 0))
+        .map((vl) => ({
+          id: vl.id,
+          name: vl.name,
+          type: 'voltage_level' as const,
+          voltageLevel: vl,
+        })),
+    })) || [];
 
   if (error) {
     return (
@@ -256,13 +252,8 @@ export const EquipmentExplorer = () => {
   }
 
   return (
-    <Card className="w-full max-w-6xl mx-auto">
+    <Card className="w-full max-w-6xl mx-auto border-none shadow-none">
       <CardHeader className="space-y-4">
-        <CardTitle className="flex items-center gap-2 text-2xl">
-          <Zap className="h-6 w-6 text-primary" />
-          Explorateur d'Équipements - Postes électriques
-        </CardTitle>
-        
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input
@@ -274,12 +265,14 @@ export const EquipmentExplorer = () => {
           />
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2 text-primary" />
-            <span className="text-muted-foreground">Chargement des postes...</span>
+            <span className="text-muted-foreground">
+              Chargement des postes...
+            </span>
           </div>
         ) : (
           <>
@@ -295,16 +288,20 @@ export const EquipmentExplorer = () => {
                   if (expandedSubstations.size === treeData.length) {
                     setExpandedSubstations(new Set());
                   } else {
-                    setExpandedSubstations(new Set(treeData.map(item => item.id)));
+                    setExpandedSubstations(
+                      new Set(treeData.map((item) => item.id)),
+                    );
                   }
                 }}
                 className="h-auto p-0 text-xs"
               >
-                {expandedSubstations.size === treeData.length ? 'Tout replier' : 'Tout déplier'}
+                {expandedSubstations.size === treeData.length
+                  ? 'Tout replier'
+                  : 'Tout déplier'}
               </Button>
             </div>
 
-            <Card className="border-border">
+            <Card className="border-none">
               {treeData.length === 0 ? (
                 <CardContent className="p-8 text-center text-muted-foreground">
                   Aucun poste trouvé
@@ -312,13 +309,15 @@ export const EquipmentExplorer = () => {
               ) : (
                 <div className="divide-y divide-border">
                   {treeData.map((item) => (
-                    <FileTreeItem
-                      key={item.id}
-                      item={item}
-                      level={0}
-                      expanded={expandedSubstations.has(item.id)}
-                      onToggle={() => toggleSubstation(item.id)}
-                    />
+                    <DraggableItem substation={item.substation} key={item.id}>
+                      <FileTreeItem
+                        key={item.id}
+                        item={item}
+                        level={0}
+                        expanded={expandedSubstations.has(item.id)}
+                        onToggle={() => toggleSubstation(item.id)}
+                      />
+                    </DraggableItem>
                   ))}
                 </div>
               )}
@@ -341,25 +340,28 @@ export const EquipmentExplorer = () => {
                       <ChevronLeft className="h-4 w-4 mr-1" />
                       Précédent
                     </Button>
-                    
+
                     <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                        const pageNum = i + 1;
-                        const isCurrentPage = pageNum === currentPage;
-                        return (
-                          <Button
-                            key={pageNum}
-                            variant={isCurrentPage ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handlePageChange(pageNum)}
-                            className="w-10 h-10 p-0"
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
+                      {Array.from(
+                        { length: Math.min(5, data.totalPages) },
+                        (_, i) => {
+                          const pageNum = i + 1;
+                          const isCurrentPage = pageNum === currentPage;
+                          return (
+                            <Button
+                              key={pageNum}
+                              variant={isCurrentPage ? 'default' : 'outline'}
+                              size="sm"
+                              onClick={() => handlePageChange(pageNum)}
+                              className="w-10 h-10 p-0"
+                            >
+                              {pageNum}
+                            </Button>
+                          );
+                        },
+                      )}
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
