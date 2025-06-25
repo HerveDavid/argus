@@ -93,7 +93,7 @@ class Server:
         """Envoie un message via ZMQ"""
         try:
             message_str = json.dumps(message)
-            full_message = f"powsybl.response {message_str}"
+            full_message = f"{topic} {message_str}"
             # send_string() IS async when using zmq.asyncio
             await self.publisher.send_string(full_message)
             self.log_to_stderr(f"Sent message to topic '{topic}'")
@@ -551,7 +551,7 @@ class Server:
             "message": "Server ready",
             "available_methods": list(self.handlers.keys()),
         }
-        await self.send_message("broadcast", startup_message)
+        await self.send_message("powsybl.response", startup_message)
 
     async def run(self):
         """Boucle principale du serveur ZMQ"""
@@ -571,7 +571,7 @@ class Server:
 
                     # Ignorer nos propres messages broadcast
                     if (
-                        topic == "broadcast"
+                        topic == "powsybl.response"
                         and message_data.get("client_id") == self.client_id
                     ):
                         continue
@@ -584,12 +584,12 @@ class Server:
                         response = await self.handle_request(message_data)
 
                         # Envoyer la réponse au client qui a fait la requête
-                        reply_to = message_data.get("reply_to")
+                        reply_to = message_data.get("powsybl.response")
                         if reply_to:
                             await self.send_message(reply_to, response)
                         else:
                             # Fallback: envoyer en broadcast
-                            await self.send_message("broadcast", response)
+                            await self.send_message("powsybl.response", response)
 
                 # Petite pause pour éviter de consommer trop de CPU
                 await asyncio.sleep(0.001)

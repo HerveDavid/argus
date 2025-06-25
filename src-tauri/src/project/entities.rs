@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 pub struct Project {
     pub name: String,
     pub path: String,
+    #[serde(rename = "configPath")]
+    pub config_path: String,
     #[serde(rename = "lastAccessed")]
     pub last_accessed: DateTime<Utc>,
 }
