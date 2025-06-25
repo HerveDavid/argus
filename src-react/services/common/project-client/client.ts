@@ -1,12 +1,21 @@
 import { invoke } from '@tauri-apps/api/core';
 import { Effect } from 'effect';
 
-import { Project } from '@/types/project';
+import { CreateProjectParams, Project, QueryResponse } from '@/types/project';
 
 import { ProjectError } from './error';
 
 interface ProjectService {
   readonly loadProject: () => Effect.Effect<Project, ProjectError>;
+  readonly initDatabaseProject: (
+    dbPath?: string,
+  ) => Effect.Effect<string, ProjectError>;
+  readonly queryProject: (
+    query: string,
+  ) => Effect.Effect<QueryResponse, ProjectError>;
+  readonly createNewProject: (
+    params: CreateProjectParams,
+  ) => Effect.Effect<Project, ProjectError>;
 }
 
 export class ProjectClient extends Effect.Service<ProjectClient>()(
@@ -22,6 +31,54 @@ export class ProjectClient extends Effect.Service<ProjectClient>()(
               new ProjectError({
                 message:
                   error instanceof Error ? error.message : 'Unknown error',
+              }),
+          }),
+
+        initDatabaseProject: (
+          dbPath?: string,
+        ): Effect.Effect<string, ProjectError> =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<string>('init_database_project', { db_path: dbPath }),
+            catch: (error) =>
+              new ProjectError({
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : 'Failed to initialize database',
+              }),
+          }),
+
+        queryProject: (
+          query: string,
+        ): Effect.Effect<QueryResponse, ProjectError> =>
+          Effect.tryPromise({
+            try: () => invoke<QueryResponse>('query_project', { query }),
+            catch: (error) =>
+              new ProjectError({
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : 'Failed to execute query',
+              }),
+          }),
+
+        createNewProject: (
+          params: CreateProjectParams,
+        ): Effect.Effect<Project, ProjectError> =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<Project>('create_new_project', {
+                name: params.name,
+                path: params.path,
+                config_path: params.configPath,
+              }),
+            catch: (error) =>
+              new ProjectError({
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : 'Failed to create project',
               }),
           }),
       } satisfies ProjectService;
