@@ -1,18 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { setup, assign, fromPromise } from 'xstate';
 
-import { SldMetadata } from '@/types/sld-metadata';
-
-export interface SldDiagramData {
-  svg: string;
-  metadata: SldMetadata;
-}
+import { SldDiagram } from '@/types/sld-diagram';
 
 export interface SldContext {
   lineId: string | null;
-  diagramData: SldDiagramData | null;
+  diagramData: SldDiagram | null;
   error: string | null;
-  cache: Map<string, SldDiagramData>;
+  cache: Map<string, SldDiagram>;
 }
 
 // Types pour les événements utilisateur
@@ -26,10 +21,10 @@ export type SldEvent =
 const loadDiagramActor = fromPromise(
   async ({ input }: { input: { lineId: string } }) => {
     try {
-      const result = await invoke<{ svg: string; metadata: SldMetadata }>(
-        'get_single_line_diagram_with_metadata',
-        { line_id: input.lineId },
-      );
+      const result = await invoke<SldDiagram>('get_single_line_diagram', {
+        element_id: input.lineId,
+      });
+      console.log(result)
       return result;
     } catch (error) {
       throw new Error(`Erreur lors du chargement du diagramme: ${error}`);

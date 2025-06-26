@@ -739,15 +739,32 @@ class Server:
 
             status_code, result = await self.network_controller.get_single_line_diagram(element_id, response_format)
             
-            return (
-                ResponseBuilder()
-                .with_id(request.id)
-                .with_status(status_code)
-                .with_result(result if status_code == 200 else None)
-                .with_error(result.get("error") if status_code != 200 else None)
-                .build()
-                .to_dict()
-            )
+            if status_code == 200:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(status_code)
+                    .with_result(result)
+                    .build()
+                    .to_dict()
+                )
+            else:
+                error_message = None
+                if isinstance(result, dict) and "error" in result:
+                    error_message = result["error"]
+                elif isinstance(result, str):
+                    error_message = result
+                else:
+                    error_message = f"Unknown error occurred, status: {status_code}"
+            
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(status_code)
+                    .with_error(error_message)
+                    .build()
+                    .to_dict()
+                )
 
         except Exception as e:
             self.log_to_stderr(f"Error in get_single_line_diagram: {e}")

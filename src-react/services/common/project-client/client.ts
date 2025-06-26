@@ -4,6 +4,7 @@ import { Effect } from 'effect';
 import { CreateProjectParams, Project, QueryResponse } from '@/types/project';
 
 import { ProjectError } from './error';
+import { SldDiagram } from '@/types/sld-diagram';
 
 interface ProjectService {
   readonly loadProject: () => Effect.Effect<Project, ProjectError>;
@@ -16,6 +17,9 @@ interface ProjectService {
   readonly createNewProject: (
     params: CreateProjectParams,
   ) => Effect.Effect<Project, ProjectError>;
+  readonly getSingleLineDiagram: (
+    element_id: string,
+  ) => Effect.Effect<SldDiagram, ProjectError>;
 }
 
 export class ProjectClient extends Effect.Service<ProjectClient>()(
@@ -79,6 +83,23 @@ export class ProjectClient extends Effect.Service<ProjectClient>()(
                   error instanceof Error
                     ? error.message
                     : 'Failed to create project',
+              }),
+          }),
+
+        getSingleLineDiagram: (
+          element_id: string,
+        ): Effect.Effect<SldDiagram, ProjectError> =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<SldDiagram>('get_single_line_diagram', {
+                line_id: element_id,
+              }),
+            catch: (error) =>
+              new ProjectError({
+                message:
+                  error instanceof Error
+                    ? error.message
+                    : 'Failed to get single line diagram',
               }),
           }),
       } satisfies ProjectService;

@@ -1,6 +1,6 @@
 import { SldMetadata } from './sld-metadata';
 
-export interface SldDiagramResult {
-  svgBlob: Blob;
+export interface SldDiagram {
+  svg: string;
   metadata: SldMetadata;
 }

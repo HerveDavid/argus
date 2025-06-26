@@ -174,12 +174,12 @@ pub async fn create_new_project(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_single_line_diagram(
     project_state: State<'_, tokio::sync::Mutex<ProjectState>>,
-    line_id: String,
+    element_id: String,
 ) -> Result<DiagramResult> {
     let mut project_state_guard = project_state.lock().await;
 
     let params = json!({
-        "element_id": line_id,
+        "element_id": element_id,
         "format": "json"
     });
 
@@ -195,9 +195,7 @@ pub async fn get_single_line_diagram(
     let svg = response
         .get("svg")
         .and_then(|s| s.as_str())
-        .ok_or_else(|| {
-            Error::JsonParseError("Missing or invalid 'svg' field".to_string())
-        })?
+        .ok_or_else(|| Error::JsonParseError("Missing or invalid 'svg' field".to_string()))?
         .to_string();
 
     let metadata_value = response
