@@ -1,7 +1,5 @@
 import { IDockviewPanelProps } from 'dockview';
 
-import { Substation } from '@/types/substation';
-
 import { SldView } from '../sld-view';
 
 export const CentralPanelLayouts: Record<
@@ -11,7 +9,7 @@ export const CentralPanelLayouts: Record<
   default: ({ params: { title } }: IDockviewPanelProps<{ title: string }>) => {
     return <>Default {title}</>;
   },
-  sld: (props: IDockviewPanelProps<{ substation: Substation }>) => {
+  sld: (props: IDockviewPanelProps<{ id: string }>) => {
     return <SldView {...props} />;
   },
 };

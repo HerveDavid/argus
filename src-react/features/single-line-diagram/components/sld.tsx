@@ -53,9 +53,7 @@ const useSvgRenderer = (diagramData: SldDiagram | null, isLoaded: boolean) => {
     svg.selectAll('*').remove();
 
     try {
-      // Vérification supplémentaire que svg est bien un Blob
     
-
       // Parse le SVG depuis le Blob
       const svgText = await diagramData.svg;
       

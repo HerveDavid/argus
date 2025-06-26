@@ -73,7 +73,7 @@ export const FileTreeItem = ({
     const sub = item.substation;
     return (
       <div className="space-y-1">
-        <DraggableItem substation={sub}>
+        <DraggableItem id={sub.id}>
           <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
             <div
               className="p-3"
@@ -139,38 +139,40 @@ export const FileTreeItem = ({
   if (item.type === 'voltage_level' && item.voltageLevel) {
     const vl = item.voltageLevel;
     return (
-      <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
-        <div className="p-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <File className="w-4 h-4 text-muted-foreground" />
-              <span className="font-medium text-sm">{vl.id}</span>
-              <span className="text-sm text-muted-foreground truncate">
-                {vl.name}
-              </span>
+      <DraggableItem id={vl.id}>
+        <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
+          <div className="p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <File className="w-4 h-4 text-muted-foreground" />
+                <span className="font-medium text-sm">{vl.id}</span>
+                <span className="text-sm text-muted-foreground truncate">
+                  {vl.name}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span
+                  className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}
+                >
+                  {formatVoltage(vl.nominal_v)}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {getTopologyIcon(vl.topology_kind)}
+                </span>
+                {vl.fictitious && (
+                  <Badge variant="destructive" className="text-xs">
+                    ⚠️
+                  </Badge>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`font-bold text-sm ${getVoltageLevelColor(vl.nominal_v)}`}
-              >
-                {formatVoltage(vl.nominal_v)}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {getTopologyIcon(vl.topology_kind)}
-              </span>
-              {vl.fictitious && (
-                <Badge variant="destructive" className="text-xs">
-                  ⚠️
-                </Badge>
-              )}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 ml-6">
+              <span>Min: {formatVoltage(vl.low_voltage_limit)}</span>
+              <span>Max: {formatVoltage(vl.high_voltage_limit)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 ml-6">
-            <span>Min: {formatVoltage(vl.low_voltage_limit)}</span>
-            <span>Max: {formatVoltage(vl.high_voltage_limit)}</span>
-          </div>
-        </div>
-      </Card>
+        </Card>
+      </DraggableItem>
     );
   }
 

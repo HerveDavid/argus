@@ -1,16 +1,15 @@
 import React from 'react';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
-import { Substation } from '@/types/substation';
 import { useDoubleClick } from '@/hooks/use-double-click';
 
 interface DraggableItemProps {
-  substation: Substation;
+  id: string;
   children: React.ReactNode;
 }
 
 export const DraggableItem: React.FC<DraggableItemProps> = ({
-  substation,
+  id,
   children,
 }) => {
   const { setTitle } = useWindowHeaderStore();
@@ -18,18 +17,18 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
 
   const handleDragStart = (e: React.DragEvent<HTMLSpanElement>) => {
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('application/json', JSON.stringify(substation));
-    e.dataTransfer.setData('text/plain', substation.id);
-    setTitle(substation.id);
+    e.dataTransfer.setData('application/json', JSON.stringify(id));
+    e.dataTransfer.setData('text/plain', id);
+    setTitle(id);
   };
 
   const handleDoubleClickAction = () => {
-    const title = substation.id;
+    const title = id;
     addPanel({
-      id: title,
+      id,
       tabComponent: 'default',
       component: 'sld',
-      params: { substation },
+      params: { id },
     });
     setTitle(title);
   };

@@ -12,7 +12,6 @@ import '../styles/central-panel.css';
 import '../styles/dockview-theme.css';
 
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { Substation } from '@/types/substation';
 
 import { isDraggedItem } from '../utils';
 
@@ -52,24 +51,24 @@ export const CentralPanel: React.FC<CentralPanelProps> = ({ layouts }) => {
       return;
     }
 
-    let substation: Substation;
+    let id: string;
     try {
-      substation = JSON.parse(dragData);
+      id = JSON.parse(dragData);
     } catch (error) {
       console.error('Error parsing drag data:', error);
       return;
     }
 
-    if (!isDraggedItem(substation)) {
-      console.warn('Invalid drag data structure:', substation);
+    if (!isDraggedItem(id)) {
+      console.warn('Invalid drag data structure:', id);
       return;
     }
 
     const panel = {
-      id: substation.id,
+      id,
       component: 'sld',
       tabComponent: 'default',
-      params: { substation },
+      params: { id },
       position: {
         direction: positionToDirection(event.position),
         referenceGroup: event.group,

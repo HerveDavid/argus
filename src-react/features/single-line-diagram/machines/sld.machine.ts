@@ -24,7 +24,6 @@ const loadDiagramActor = fromPromise(
       const result = await invoke<SldDiagram>('get_single_line_diagram', {
         element_id: input.lineId,
       });
-      console.log(result)
       return result;
     } catch (error) {
       throw new Error(`Erreur lors du chargement du diagramme: ${error}`);
