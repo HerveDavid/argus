@@ -74,76 +74,90 @@
 }
 
 .dark {
-     /* SLD Voltage Level Colors - Mode sombre */
-  --sld-disconnected: hsl(0 0% 60%);
-  --sld-vl300to500-0: hsl(0 100% 60%);
-  --sld-vl300to500-1: hsl(51 100% 35%);
-  --sld-vl300to500-2: hsl(293 100% 95%);
-  --sld-vl300to500-3: hsl(40 100% 40%);
-  --sld-vl300to500-4: hsl(310 100% 86%);
-  --sld-vl300to500-5: hsl(31 100% 45%);
-  --sld-vl300to500-6: hsl(327 100% 77%);
-  --sld-vl300to500-7: hsl(20 100% 50%);
-  --sld-vl300to500-8: hsl(343 100% 69%);
-  --sld-vl300to500-9: hsl(10 100% 55%);
-  --sld-vl180to300-0: hsl(120 62% 44%);
-  --sld-vl180to300-1: hsl(171 70% 27%);
-  --sld-vl180to300-2: hsl(52 37% 90%);
-  --sld-vl180to300-3: hsl(161 69% 30%);
-  --sld-vl180to300-4: hsl(69 35% 78%);
-  --sld-vl180to300-5: hsl(150 67% 34%);
-  --sld-vl180to300-6: hsl(86 34% 67%);
-  --sld-vl180to300-7: hsl(140 65% 37%);
-  --sld-vl180to300-8: hsl(103 39% 55%);
-  --sld-vl180to300-9: hsl(130 64% 40%);
-  --sld-vl120to180-0: hsl(180 100% 44%);
-  --sld-vl120to180-1: hsl(231 100% 27%);
-  --sld-vl120to180-2: hsl(113 52% 90%);
-  --sld-vl120to180-3: hsl(221 100% 31%);
-  --sld-vl120to180-4: hsl(130 53% 79%);
-  --sld-vl120to180-5: hsl(211 100% 34%);
-  --sld-vl120to180-6: hsl(146 52% 67%);
-  --sld-vl120to180-7: hsl(201 100% 37%);
-  --sld-vl120to180-8: hsl(163 62% 56%);
-  --sld-vl120to180-9: hsl(190 100% 41%);
-  --sld-vl70to120-0: hsl(25 100% 50%);
-  --sld-vl70to120-1: hsl(76 100% 30%);
-  --sld-vl70to120-2: hsl(318 66% 92%);
-  --sld-vl70to120-3: hsl(66 100% 34%);
-  --sld-vl70to120-4: hsl(335 66% 81%);
-  --sld-vl70to120-5: hsl(56 100% 38%);
-  --sld-vl70to120-6: hsl(352 66% 71%);
-  --sld-vl70to120-7: hsl(45 100% 42%);
-  --sld-vl70to120-8: hsl(8 66% 60%);
-  --sld-vl70to120-9: hsl(35 100% 46%);
-  --sld-vl50to70-0: hsl(277 87% 63%);
-  --sld-vl50to70-1: hsl(328 88% 36%);
-  --sld-vl50to70-2: hsl(210 97% 95%);
-  --sld-vl50to70-3: hsl(318 85% 42%);
-  --sld-vl50to70-4: hsl(227 98% 87%);
-  --sld-vl50to70-5: hsl(307 83% 47%);
-  --sld-vl50to70-6: hsl(244 95% 79%);
-  --sld-vl50to70-7: hsl(297 81% 52%);
-  --sld-vl50to70-8: hsl(260 91% 71%);
-  --sld-vl50to70-9: hsl(287 79% 58%);
-  --sld-vl30to50-0: hsl(353 100% 85%);
-  --sld-vl30to50-1: hsl(45 32% 48%);
-  --sld-vl30to50-2: hsl(286 100% 95%);
-  --sld-vl30to50-3: hsl(34 32% 55%);
-  --sld-vl30to50-4: hsl(304 100% 95%);
-  --sld-vl30to50-5: hsl(23 36% 63%);
-  --sld-vl30to50-6: hsl(320 100% 94%);
-  --sld-vl30to50-7: hsl(13 50% 70%);
-  --sld-vl30to50-8: hsl(337 100% 90%);
-  --sld-vl30to50-9: hsl(3 68% 78%);
-  --sld-vl0to30-0: hsl(62 63% 52%);
-  --sld-vl0to30-1: hsl(112 72% 31%);
-  --sld-vl0to30-2: hsl(355 53% 92%);
-  --sld-vl0to30-3: hsl(102 70% 35%);
-  --sld-vl0to30-4: hsl(11 52% 82%);
-  --sld-vl0to30-5: hsl(92 69% 39%);
-  --sld-vl0to30-6: hsl(27 49% 72%);
-  --sld-vl0to30-7: hsl(82 67% 43%);
-  --sld-vl0to30-8: hsl(44 47% 62%);
-  --sld-vl0to30-9: hsl(71 64% 47%);
+  /* SLD Voltage Level Colors - Mode sombre adouci */
+  --sld-disconnected: hsl(0 0% 50%);
+  
+  /* 300-500kV - Rouge adouci */
+  --sld-vl300to500-0: hsl(0 70% 45%);
+  --sld-vl300to500-1: hsl(51 70% 30%);
+  --sld-vl300to500-2: hsl(293 40% 70%);
+  --sld-vl300to500-3: hsl(40 70% 35%);
+  --sld-vl300to500-4: hsl(310 40% 65%);
+  --sld-vl300to500-5: hsl(31 70% 40%);
+  --sld-vl300to500-6: hsl(327 40% 60%);
+  --sld-vl300to500-7: hsl(20 70% 45%);
+  --sld-vl300to500-8: hsl(343 40% 55%);
+  --sld-vl300to500-9: hsl(10 70% 50%);
+  
+  /* 180-300kV - Vert adouci */
+  --sld-vl180to300-0: hsl(120 50% 40%);
+  --sld-vl180to300-1: hsl(171 50% 25%);
+  --sld-vl180to300-2: hsl(52 30% 70%);
+  --sld-vl180to300-3: hsl(161 50% 28%);
+  --sld-vl180to300-4: hsl(69 30% 60%);
+  --sld-vl180to300-5: hsl(150 50% 32%);
+  --sld-vl180to300-6: hsl(86 30% 55%);
+  --sld-vl180to300-7: hsl(140 50% 35%);
+  --sld-vl180to300-8: hsl(103 30% 50%);
+  --sld-vl180to300-9: hsl(130 50% 38%);
+  
+  /* 120-180kV - Cyan/Turquoise adouci */
+  --sld-vl120to180-0: hsl(180 60% 40%);
+  --sld-vl120to180-1: hsl(231 60% 25%);
+  --sld-vl120to180-2: hsl(113 40% 70%);
+  --sld-vl120to180-3: hsl(221 60% 28%);
+  --sld-vl120to180-4: hsl(130 40% 65%);
+  --sld-vl120to180-5: hsl(211 60% 30%);
+  --sld-vl120to180-6: hsl(146 40% 55%);
+  --sld-vl120to180-7: hsl(201 60% 33%);
+  --sld-vl120to180-8: hsl(163 40% 50%);
+  --sld-vl120to180-9: hsl(190 60% 38%);
+  
+  /* 70-120kV - Orange adouci */
+  --sld-vl70to120-0: hsl(25 70% 45%);
+  --sld-vl70to120-1: hsl(76 70% 28%);
+  --sld-vl70to120-2: hsl(318 40% 70%);
+  --sld-vl70to120-3: hsl(66 70% 30%);
+  --sld-vl70to120-4: hsl(335 40% 65%);
+  --sld-vl70to120-5: hsl(56 70% 35%);
+  --sld-vl70to120-6: hsl(352 40% 60%);
+  --sld-vl70to120-7: hsl(45 70% 38%);
+  --sld-vl70to120-8: hsl(8 40% 55%);
+  --sld-vl70to120-9: hsl(35 70% 42%);
+  
+  /* 50-70kV - Violet adouci */
+  --sld-vl50to70-0: hsl(277 60% 50%);
+  --sld-vl50to70-1: hsl(328 60% 32%);
+  --sld-vl50to70-2: hsl(210 50% 75%);
+  --sld-vl50to70-3: hsl(318 60% 38%);
+  --sld-vl50to70-4: hsl(227 50% 70%);
+  --sld-vl50to70-5: hsl(307 60% 42%);
+  --sld-vl50to70-6: hsl(244 50% 65%);
+  --sld-vl50to70-7: hsl(297 60% 48%);
+  --sld-vl50to70-8: hsl(260 50% 60%);
+  --sld-vl50to70-9: hsl(287 60% 52%);
+  
+  /* 30-50kV - Rose adouci */
+  --sld-vl30to50-0: hsl(353 60% 65%);
+  --sld-vl30to50-1: hsl(45 25% 45%);
+  --sld-vl30to50-2: hsl(286 40% 75%);
+  --sld-vl30to50-3: hsl(34 25% 50%);
+  --sld-vl30to50-4: hsl(304 40% 70%);
+  --sld-vl30to50-5: hsl(23 30% 55%);
+  --sld-vl30to50-6: hsl(320 40% 70%);
+  --sld-vl30to50-7: hsl(13 40% 60%);
+  --sld-vl30to50-8: hsl(337 40% 70%);
+  --sld-vl30to50-9: hsl(3 50% 65%);
+  
+  /* 0-30kV - Jaune-vert adouci */
+  --sld-vl0to30-0: hsl(62 50% 45%);
+  --sld-vl0to30-1: hsl(112 50% 28%);
+  --sld-vl0to30-2: hsl(355 40% 75%);
+  --sld-vl0to30-3: hsl(102 50% 32%);
+  --sld-vl0to30-4: hsl(11 40% 65%);
+  --sld-vl0to30-5: hsl(92 50% 36%);
+  --sld-vl0to30-6: hsl(27 40% 60%);
+  --sld-vl0to30-7: hsl(82 50% 40%);
+  --sld-vl0to30-8: hsl(44 40% 55%);
+  --sld-vl0to30-9: hsl(71 50% 42%);
 }

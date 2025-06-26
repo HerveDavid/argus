@@ -15,7 +15,7 @@ export const DiagramFooter: React.FC<{
   };
 
   return (
-    <div className="flex justify-between items-center w-full text-sm text-muted-foreground">
+    <div className="flex justify-between items-center w-full text-xs text-muted-foreground">
       <MetadataDisplay diagramData={diagramData}/>
       <span>Status: {getStatus()}</span>
     </div>
