@@ -1,10 +1,11 @@
+use crate::entities::sld_metadata::SldMetadata;
 use crate::settings::database::state::DatabaseState;
 
-use super::entities::{Project, QueryResponse};
-use super::error::Result;
+use super::entities::{DiagramResult, Project, QueryResponse};
+use super::error::{Error, Result};
 use super::state::ProjectState;
 
-use serde_json::{json};
+use serde_json::json;
 use std::time::Duration;
 use tauri::State;
 
@@ -22,18 +23,18 @@ pub async fn load_project(
             .load_current_project(&db.pool)
             .await?
     };
-    
+
     println!("Loaded project: {:?}", &project);
-    
+
     // Envoyer la requête load_config au serveur Python via ZMQ
     let mut project_state_guard = project_state.lock().await;
-    
+
     let params = json!({
         "config_path": project.config_path
     });
-    
+
     let timeout = Duration::from_secs(30);
-    
+
     match project_state_guard
         .database
         .send_request("load_config", Some(params), timeout)
@@ -41,11 +42,11 @@ pub async fn load_project(
     {
         Ok(response) => {
             println!("Python load_config response: {:?}", response);
-            
+
             if let Some(network_info) = response.get("network_load_result") {
                 println!("Network loaded successfully: {:?}", network_info);
             }
-            
+
             if let Some(error) = response.get("network_load_error") {
                 println!("Warning - Network load error: {:?}", error);
             }
@@ -54,7 +55,7 @@ pub async fn load_project(
             println!("Warning - Failed to load config via Python: {:?}", e);
         }
     }
-    
+
     Ok(project)
 }
 
@@ -64,32 +65,32 @@ pub async fn init_database_project(
     db_path: Option<String>,
 ) -> Result<String> {
     let mut project_state_guard = project_state.lock().await;
-    
+
     // Utiliser le chemin fourni ou un chemin par défaut
     let database_path = db_path.unwrap_or_else(|| "network.db".to_string());
-    
+
     let timeout = Duration::from_secs(30);
-    
+
     // 1. Configurer le chemin de la base de données
     let set_db_params = json!({
         "db_path": database_path
     });
-    
+
     project_state_guard
         .database
         .send_request("set_database", Some(set_db_params), timeout)
         .await?;
-    
+
     println!("Database path configured: {}", database_path);
-    
+
     // 2. Réinitialiser/créer la base de données avec toutes les tables
     let reset_response = project_state_guard
         .database
         .send_request("reset_database", None, Duration::from_secs(60))
         .await?;
-    
+
     println!("Database initialized successfully: {:?}", reset_response);
-    
+
     Ok(database_path)
 }
 
@@ -150,7 +151,7 @@ pub async fn create_new_project(
 ) -> Result<Project> {
     let db = setting_state.lock().await;
     let project_state_guard = project_state.lock().await;
-    
+
     // Créer le nouveau projet
     let new_project = Project {
         name,
@@ -158,14 +159,53 @@ pub async fn create_new_project(
         config_path,
         last_accessed: chrono::Utc::now(),
     };
-    
+
     // Sauvegarder dans la base de données locale en tant que projet courant
     project_state_guard
         .repository
         .set_current_project(&db.pool, &new_project)
         .await?;
-    
+
     println!("Created new project: {:?}", &new_project);
-    
+
     Ok(new_project)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_single_line_diagram(
+    project_state: State<'_, tokio::sync::Mutex<ProjectState>>,
+    line_id: String,
+) -> Result<DiagramResult> {
+    let mut project_state_guard = project_state.lock().await;
+
+    let params = json!({
+        "element_id": line_id,
+        "format": "json"
+    });
+
+    log::debug!("get_single_line_diagram called, with args: {}", &params);
+
+    let timeout = Duration::from_secs(30);
+
+    let response = project_state_guard
+        .database
+        .send_request("get_single_line_diagram", Some(params), timeout)
+        .await?;
+
+    let svg = response
+        .get("svg")
+        .and_then(|s| s.as_str())
+        .ok_or_else(|| {
+            Error::JsonParseError("Missing or invalid 'svg' field".to_string())
+        })?
+        .to_string();
+
+    let metadata_value = response
+        .get("metadata")
+        .ok_or_else(|| Error::JsonParseError("Missing 'metadata' field".to_string()))?;
+
+    let metadata: SldMetadata = serde_json::from_value(metadata_value.clone())
+        .map_err(|e| Error::JsonParseError(format!("Failed to parse metadata: {}", e)))?;
+
+    Ok(DiagramResult { svg, metadata })
 }

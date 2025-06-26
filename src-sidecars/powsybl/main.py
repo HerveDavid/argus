@@ -13,6 +13,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 from src.app.controllers.repository_controller import RepositoryController
+from src.app.controllers.network_controller import NetworkController
 from src.shared.request import Request
 from src.shared.response import ResponseBuilder
 from src.utils.logger import get_logger, LoggerConfig
@@ -37,6 +38,7 @@ class Server:
         self.network_path: str = None
         self.db_path: str = None
         self.repository_controller: RepositoryController = None
+        self.network_controller: NetworkController = None
         self.running = False
 
         self.handlers = {
@@ -48,6 +50,7 @@ class Server:
             "load_all": self.handle_load_all,
             "ping": self.handle_ping,
             "shutdown": self.handle_shutdown,
+            "get_single_line_diagram": self.handle_get_single_line_diagram,
         }
 
     async def setup_zmq(self):
@@ -214,6 +217,7 @@ class Server:
             try:
                 network = pp.network.load(file_path)
                 self.network_path = file_path
+                self.network_controller = NetworkController(file_path)
                 self.log_to_stderr(f"Network loaded successfully: {file_path}")
 
                 # Infos basiques sur le réseau
@@ -702,6 +706,54 @@ class Server:
             return (
                 ResponseBuilder()
                 .with_id(request_data.get("id", "unknown"))
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
+
+    async def handle_get_single_line_diagram(self, request: Request) -> Dict[str, Any]:
+        try:
+            if not self.network_controller:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("No network loaded. Use load_network first.")
+                    .build()
+                    .to_dict()
+                )
+
+            element_id = request.params.get("element_id")
+            response_format = request.params.get("format", "json")
+            
+            if not element_id:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("element_id parameter is required")
+                    .build()
+                    .to_dict()
+                )
+
+            status_code, result = await self.network_controller.get_single_line_diagram(element_id, response_format)
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(status_code)
+                .with_result(result if status_code == 200 else None)
+                .with_error(result.get("error") if status_code != 200 else None)
+                .build()
+                .to_dict()
+            )
+
+        except Exception as e:
+            self.log_to_stderr(f"Error in get_single_line_diagram: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
                 .with_status(500)
                 .with_error(str(e))
                 .build()

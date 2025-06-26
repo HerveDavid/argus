@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
+use crate::entities::sld_metadata::SldMetadata;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Project {
     pub name: String,
@@ -51,4 +53,10 @@ pub struct NetworkInfo {
     pub lines_count: usize,
     pub generators_count: usize,
     pub loads_count: usize,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct DiagramResult {
+    pub svg: String,
+    pub metadata: SldMetadata,
 }
