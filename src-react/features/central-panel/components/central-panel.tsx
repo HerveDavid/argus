@@ -59,10 +59,10 @@ export const CentralPanel: React.FC<CentralPanelProps> = ({ layouts }) => {
       return;
     }
 
-    if (!isDraggedItem(id)) {
-      console.warn('Invalid drag data structure:', id);
-      return;
-    }
+    // if (!isDraggedItem(id)) {
+    //   console.warn('Invalid drag data structure:', id);
+    //   return;
+    // }
 
     const panel = {
       id,

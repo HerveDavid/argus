@@ -52,17 +52,14 @@ export const FileTreeItem = ({
   };
 
   const openSubstation = () => {
-    if (item.type == 'substation') {
-      const substation = item.substation!;
-      const title = substation.id;
-      addPanel({
-        id: title,
-        tabComponent: 'default',
-        component: 'sld',
-        params: { substation },
-      });
-      setTitle(title);
-    }
+    const id = item.id;
+    addPanel({
+      id,
+      tabComponent: 'default',
+      component: 'sld',
+      params: { id },
+    });
+    setTitle(id);
   };
 
   const { onClick, onDoubleClick } = useDoubleClick({

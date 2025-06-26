@@ -13,6 +13,5 @@ export const DiagramContent: React.FC<{
         style={{ minHeight: '400px' }}
       />
     </div>
-    <MetadataDisplay diagramData={diagramData} />
   </div>
 );
