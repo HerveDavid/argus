@@ -1,9 +1,46 @@
 import { useActor } from '@xstate/react';
 
 import { sldMachine } from '../machines/sld.machine';
+import { StoreRuntime, useStoreRuntime } from '@/hooks/use-store-runtime';
+import { LiveManagedRuntime } from '@/config/live-layer';
+import { SldDiagram } from '@/types/sld-diagram';
+
+interface SldStore extends StoreRuntime {
+  // État actuel
+  state: "error" | "idle" | "loaded" | "loading" | "waitingForRuntime";
+  context: any;
+  
+  // États calculés
+  isLoading: boolean;
+  isLoaded: boolean;
+  isError: boolean;
+  isIdle: boolean;
+  isWaitingForRuntime?: boolean;
+  
+  // Données
+  diagramData: SldDiagram | null;
+  error: string | null;
+  lineId: string | null;
+  cacheSize: number;
+  
+  // Actions
+  loadDiagram: (lineId: string) => void;
+  clearDiagram: () => void;
+  clearCache: () => void;
+  retry: () => void;
+  
+  // Helpers
+  isInCache: (lineId: string) => boolean;
+  getCachedIds: () => string[];
+  
+  // Runtime (hérité de StoreRuntime mais redéfini pour clarté)
+  runtime: LiveManagedRuntime | null;
+  setRuntime: (runtime: LiveManagedRuntime) => void;
+}
+
 
 // Hook React pour utiliser le store avec useActor (recommandé pour XState v5)
-export const useSldStore = () => {
+const useSldStoreInner = (): SldStore => {
   const [state, send] = useActor(sldMachine);
 
   return {
@@ -28,5 +65,10 @@ export const useSldStore = () => {
     // Helpers
     isInCache: (lineId: string) => state.context.cache.has(lineId),
     getCachedIds: () => Array.from(state.context.cache.keys()),
+    // Runtime
+    runtime: state.context.runtime,
+    setRuntime: (runtime: LiveManagedRuntime) => send({ type: 'SET_RUNTIME', runtime }),
   };
 };
+
+export const useSldStore = () => useStoreRuntime<SldStore>(useSldStoreInner)

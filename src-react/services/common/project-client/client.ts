@@ -92,7 +92,7 @@ export class ProjectClient extends Effect.Service<ProjectClient>()(
           Effect.tryPromise({
             try: () =>
               invoke<SldDiagram>('get_single_line_diagram', {
-                line_id: element_id,
+                element_id,
               }),
             catch: (error) =>
               new ProjectError({

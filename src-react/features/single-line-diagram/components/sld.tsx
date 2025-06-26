@@ -52,7 +52,7 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({ id }) => {
   return (
     <div className="h-full">
       <Card className="h-full flex flex-col border-0 rounded-none p-2 gap-2">
-        <CardHeader className='gap-0'>
+        <CardHeader className="gap-0">
           <CardTitle>
             <div className="flex text-sm items-center justify-between">
               <h1>{id}</h1>
@@ -65,7 +65,7 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({ id }) => {
           {renderContent()}
         </CardContent>
 
-        <CardFooter className='p-0'>
+        <CardFooter className="p-0">
           <DiagramFooter
             isLoading={isLoading}
             isLoaded={isLoaded}

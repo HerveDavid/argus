@@ -1,5 +1,5 @@
 :root {
-      /* SLD Voltage Level Colors */
+  /* SLD Voltage Level Colors */
   --sld-disconnected: #808080;
   --sld-vl300to500-0: #FF0000;
   --sld-vl300to500-1: #7F6C00;

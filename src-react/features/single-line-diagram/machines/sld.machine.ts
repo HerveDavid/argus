@@ -1,6 +1,7 @@
-import { invoke } from '@tauri-apps/api/core';
 import { setup, assign, fromPromise } from 'xstate';
-
+import { Effect } from 'effect';
+import { ProjectClient } from '@/services/common/project-client';
+import { LiveManagedRuntime } from '@/config/live-layer';
 import { SldDiagram } from '@/types/sld-diagram';
 
 export interface SldContext {
@@ -8,6 +9,7 @@ export interface SldContext {
   diagramData: SldDiagram | null;
   error: string | null;
   cache: Map<string, SldDiagram>;
+  runtime: LiveManagedRuntime | null;
 }
 
 // Types pour les événements utilisateur
@@ -15,19 +17,31 @@ export type SldEvent =
   | { type: 'LOAD_DIAGRAM'; lineId: string }
   | { type: 'CLEAR_DIAGRAM' }
   | { type: 'CLEAR_CACHE' }
-  | { type: 'RETRY' };
+  | { type: 'RETRY' }
+  | { type: 'SET_RUNTIME'; runtime: LiveManagedRuntime };
 
-// Actor pour charger le diagramme depuis Tauri
+// Actor pour charger le diagramme en utilisant Effect
 const loadDiagramActor = fromPromise(
-  async ({ input }: { input: { lineId: string } }) => {
-    try {
-      const result = await invoke<SldDiagram>('get_single_line_diagram', {
-        element_id: input.lineId,
-      });
-      return result;
-    } catch (error) {
-      throw new Error(`Erreur lors du chargement du diagramme: ${error}`);
-    }
+  async ({
+    input,
+  }: {
+    input: { lineId: string; runtime: LiveManagedRuntime };
+  }) => {
+    const { lineId, runtime } = input;
+
+    // Créer le programme Effect
+    const program = Effect.gen(function* () {
+      const projectClient = yield* ProjectClient;
+      return yield* projectClient.getSingleLineDiagram(lineId);
+    });
+
+    // Exécuter le programme Effect avec le runtime
+    return runtime.runPromise(program)
+    // const result = await Effect.runPromise(
+    //   program.pipe(Effect.provide(runtime.layer)),
+    // );
+
+    // return result;
   },
 );
 
@@ -49,8 +63,19 @@ export const sldMachine = setup({
       if (event.type !== 'LOAD_DIAGRAM') return false;
       return context.lineId === event.lineId;
     },
+    hasRuntime: ({ context }) => {
+      return context.runtime !== null;
+    },
   },
   actions: {
+    setRuntime: assign(({ context, event }) => {
+      if (event.type !== 'SET_RUNTIME') return context;
+      return {
+        ...context,
+        runtime: event.runtime,
+      };
+    }),
+
     loadFromCache: assign(({ context, event }) => {
       if (event.type !== 'LOAD_DIAGRAM') return context;
 
@@ -86,7 +111,6 @@ export const sldMachine = setup({
     })),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwDYQCIEsCGUBO2AtgHSYQpgDEAMgPICC6A+ugJL0DiASvQLIDaABgC6iUAAcA9rEwAXTJIB2YkAA9EAVgDsATmIAOHYIBsgnQCYNAZnO2tAGhABPROa37igr14CMWwYY6VvoAviGOqBg4+ESk5FR0jCzs3Hz8PqJIIFIy8koq6gg6PhrEPmZWGtY6-j7mji4ItqWCVnU+OgAs1ubG+pZhEWhYuAQkZBQ0DMxsnDwC5pkS0nIKylmFxaXlQVVWNYJ1DYg2Pp5B-lpWnRd1gyCRIzHj8ZQAwtQAovRcTG-0bwAEp8hEtsis8utQIVjBpjAZzPpylpjF0aldjggfEjiBcND5gnVDAEtPdHtExsQUJJsBBMIooJQIEowKRFAA3SQAa1Z1NpTzGoJUOVW+Q2iBKOg8JnMnVq+g0QX0VkxGkOBkqwTa2i03R0ZOGFNifLpDMoYDweEkeGI4hQ2FkADNrSQTQKiEKsiLIQUJT5-cQ4bKFcZbEqNJjOnLcTpY8YrDYrFptFYDVFRsaaRBIFMkrNUgIRMKIWtfViLB5zNcE9p9FdyvpI1ozkqzEYtOZBIiUWn3a6sznEjMUvN0mDvaXxeXBKUq50E3LjJ0kcYfJik6U63D-X5FZZQuEHoaM-3aYPpsk5mlFsXcpPoRLFdLQ3LDgqlSrnJougYasTlcuCo+L2RqntmEDvF8PyXgWnrLHeYoPli-ilEGnShuYFjYkumI4jcsbJmqGjmD4xjJiBJ5UgOEEfN8vz-ECIJFl6JaIWorheNszYAWGJhwpibh6EibRVoJ-SYRRzzEBaVp4JQXCfAAKlwACacHgghULsU087ENWuoWKYiKYquZwiYuy4lD43SSZSMnWrmw5XoW46sVphSylYenzgZvRdo2X4IMmWgGAZ1idKRhKpoe5KUfZclDjBo4ZLeorua4un6TcfnGYFxirgYdToVUnZuAqtmxPFkF0UlaTMfBaVlp53lJtlRkBY0VhdrifQdoZGGdDOFUkFVtHQQxwLqRObGFJ05ieN4i1LWueX5cQc21B2Vj5fo85hIeiiSNm8BZLFzypT6U4ALSlLGd33Q9n6NFd8LeFW5RtjO1zmMNcQUBd97aaiXn4VKOhLgmnnrgm633YIupaMF5ExceUkmvSUAAzNEpdWZiLlJUCq6AEqo4r0srg+Dljbb9JqQFj6VNK0ehkdilQooi8PGKqbjrcEARIsiFikij6ZSfFDNlu4xCs-oSJdABqLc4FKIhcuOhEQSZXNvtIRAA */
   id: 'sldDiagram',
   initial: 'idle',
   context: {
@@ -94,10 +118,14 @@ export const sldMachine = setup({
     diagramData: null,
     error: null,
     cache: new Map(),
+    runtime: null,
   },
   states: {
     idle: {
       on: {
+        SET_RUNTIME: {
+          actions: 'setRuntime',
+        },
         LOAD_DIAGRAM: [
           {
             guard: 'isSameDiagram',
@@ -109,7 +137,12 @@ export const sldMachine = setup({
             actions: 'loadFromCache',
           },
           {
+            guard: 'hasRuntime',
             target: 'loading',
+            actions: 'setLineId',
+          },
+          {
+            target: 'waitingForRuntime',
             actions: 'setLineId',
           },
         ],
@@ -118,11 +151,37 @@ export const sldMachine = setup({
         },
       },
     },
+    waitingForRuntime: {
+      on: {
+        SET_RUNTIME: {
+          target: 'loading',
+          actions: 'setRuntime',
+        },
+        LOAD_DIAGRAM: [
+          {
+            guard: 'isDiagramCached',
+            target: 'loaded',
+            actions: 'loadFromCache',
+          },
+          {
+            target: 'waitingForRuntime',
+            actions: 'setLineId',
+          },
+        ],
+        CLEAR_DIAGRAM: {
+          target: 'idle',
+          actions: 'clearDiagram',
+        },
+      },
+    },
     loading: {
       invoke: {
         id: 'loadDiagram',
         src: 'loadDiagram',
-        input: ({ context }) => ({ lineId: context.lineId! }),
+        input: ({ context }) => ({
+          lineId: context.lineId!,
+          runtime: context.runtime!,
+        }),
         onDone: {
           target: 'loaded',
           actions: assign(({ context, event }) => {
@@ -153,6 +212,9 @@ export const sldMachine = setup({
     },
     loaded: {
       on: {
+        SET_RUNTIME: {
+          actions: 'setRuntime',
+        },
         LOAD_DIAGRAM: [
           {
             guard: 'isSameDiagram',
@@ -164,7 +226,12 @@ export const sldMachine = setup({
             actions: 'loadFromCache',
           },
           {
+            guard: 'hasRuntime',
             target: 'loading',
+            actions: 'setLineId',
+          },
+          {
+            target: 'waitingForRuntime',
             actions: 'setLineId',
           },
         ],
@@ -179,9 +246,18 @@ export const sldMachine = setup({
     },
     error: {
       on: {
-        RETRY: {
-          target: 'loading',
+        SET_RUNTIME: {
+          actions: 'setRuntime',
         },
+        RETRY: [
+          {
+            guard: 'hasRuntime',
+            target: 'loading',
+          },
+          {
+            target: 'waitingForRuntime',
+          },
+        ],
         LOAD_DIAGRAM: [
           {
             guard: 'isDiagramCached',
@@ -189,7 +265,12 @@ export const sldMachine = setup({
             actions: 'loadFromCache',
           },
           {
+            guard: 'hasRuntime',
             target: 'loading',
+            actions: 'setLineId',
+          },
+          {
+            target: 'waitingForRuntime',
             actions: 'setLineId',
           },
         ],
