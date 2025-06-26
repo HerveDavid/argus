@@ -1,6 +1,5 @@
 import { IDockviewPanelProps } from 'dockview';
 import React from 'react';
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,7 +15,6 @@ import {
 } from '@/components/ui/resizable';
 import { Sld } from '@/features/single-line-diagram';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
-
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
 
 export interface SldViewProps {
@@ -45,8 +43,8 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
 
   return (
     <div className="flex flex-col h-full" onClick={handleSldClick}>
-      <header className="border-b bg-sidebar h-8">
-        <Breadcrumb className="mx-2 py-2 text-xs">
+      <header className="border-b bg-sidebar h-5 flex items-center">
+        <Breadcrumb className="mx-2 text-xs">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink>Home</BreadcrumbLink>
@@ -62,7 +60,6 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-
       {isRightOpen ? (
         <ResizablePanelGroup
           direction="horizontal"

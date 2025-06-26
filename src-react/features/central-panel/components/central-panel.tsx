@@ -13,8 +13,6 @@ import '../styles/dockview-theme.css';
 
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-import { isDraggedItem } from '../utils';
-
 import { customTailwindTheme } from './dockview-theme';
 import { LeftHeaderActions } from './left-header-actions';
 import { RightHeaderActions } from './right-header-actions';

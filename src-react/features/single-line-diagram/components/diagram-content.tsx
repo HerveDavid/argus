@@ -1,12 +1,8 @@
-import { SldDiagram } from '@/types/sld-diagram';
-import { MetadataDisplay } from './metadata-display';
-
 export const DiagramContent: React.FC<{
-  diagramData: SldDiagram;
   svgRef: React.RefObject<SVGSVGElement>;
-}> = ({ diagramData, svgRef }) => (
+}> = ({ svgRef }) => (
   <div className="h-full flex flex-col">
-    <div className="flex-1 overflow-hidden bg-muted/25 border-1 rounded">
+    <div className="flex-1 overflow-hidden bg-muted/25 border-0 rounded">
       <svg
         ref={svgRef}
         className="w-full h-full"

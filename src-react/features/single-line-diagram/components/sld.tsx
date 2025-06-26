@@ -44,28 +44,28 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({ id }) => {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState error={error} onRetry={retry} />;
     if (isLoaded && diagramData && diagramData.svg) {
-      return <DiagramContent diagramData={diagramData} svgRef={svgRef} />;
+      return <DiagramContent svgRef={svgRef} />;
     }
     return <EmptyState />;
   };
 
   return (
     <div className="h-full">
-      <Card className="h-full flex flex-col border-0 rounded-none">
-        <CardHeader>
+      <Card className="h-full flex flex-col border-0 rounded-none p-2 gap-2">
+        <CardHeader className='gap-0'>
           <CardTitle>
-            <div className="flex items-center justify-between">
+            <div className="flex text-sm items-center justify-between">
               <h1>{id}</h1>
             </div>
           </CardTitle>
           <CardAction />
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-hidden">
+        <CardContent className="flex-1 overflow-hidden p-0">
           {renderContent()}
         </CardContent>
 
-        <CardFooter>
+        <CardFooter className='p-0'>
           <DiagramFooter
             isLoading={isLoading}
             isLoaded={isLoaded}
