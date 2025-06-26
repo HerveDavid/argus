@@ -45,7 +45,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
 
   return (
     <div className="flex flex-col h-full" onClick={handleSldClick}>
-      <header className="shadow-sm border-b bg-sidebar h-8">
+      <header className="border-b bg-sidebar h-8">
         <Breadcrumb className="mx-2 py-2 text-xs">
           <BreadcrumbList>
             <BreadcrumbItem>

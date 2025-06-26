@@ -14,7 +14,7 @@ export const EquipmentExplorer = () => {
   const [expandedSubstations, setExpandedSubstations] = useState<Set<string>>(
     new Set(),
   );
-  const pageSize = 15;
+  const pageSize = 12;
 
   const queryParams: SubstationQueryParams = {
     page: currentPage,

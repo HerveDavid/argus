@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 SLD_PARAMETERS = {
     "use_name": True,
     "center_name": True,
-    "diagonal_label": True,
+    "diagonal_label": False,
     "nodes_infos": True,
     "tooltip_enabled": True,
     "topological_coloring": True,
