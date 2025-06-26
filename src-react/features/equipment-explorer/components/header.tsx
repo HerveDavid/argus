@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search ID, name, country, TSO or voltage levels..."
+          placeholder="Search ID, name, TSO or voltage levels..."
           value={searchTerm}
           onChange={(e) => handleSearch(e.target.value)}
           className="pl-10"

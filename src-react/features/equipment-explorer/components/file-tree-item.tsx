@@ -20,6 +20,7 @@ import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { DraggableItem } from './draggable-item';
 import { formatVoltage, getVoltageLevelColor, getTopologyIcon } from '../utils';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { useDoubleClick } from '@/hooks/use-double-click';
 
 export interface FileTreeItemProps {
   item: {
@@ -64,6 +65,10 @@ export const FileTreeItem = ({
     }
   };
 
+  const { onClick, onDoubleClick } = useDoubleClick({
+    onSingleClick: handleToggle,
+  });
+
   if (item.type === 'substation' && item.substation) {
     const sub = item.substation;
     return (
@@ -72,8 +77,8 @@ export const FileTreeItem = ({
           <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
             <div
               className="p-3"
-              onClick={handleToggle}
-              onDoubleClick={() => {}}
+              onClick={onClick}
+              onDoubleClick={onDoubleClick}
             >
               <div className="flex items-center justify-between">
                 <div className="flex flex-1 truncate items-center gap-2">
@@ -88,9 +93,6 @@ export const FileTreeItem = ({
                     <Folder className="w-4 h-4 text-primary" />
                   )}
                   <span className="font-medium truncate text-sm">{sub.id}</span>
-                  <span className="text-sm text-muted-foreground truncate">
-                    {sub.name}
-                  </span>
                 </div>
                 <div className="flex flex-1 truncate items-center gap-2">
                   {sub.tso && (

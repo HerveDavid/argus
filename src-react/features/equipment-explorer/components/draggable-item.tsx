@@ -1,8 +1,8 @@
 import React from 'react';
-
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { useWindowHeaderStore } from '@/stores/window-header.store';
 import { Substation } from '@/types/substation';
+import { useDoubleClick } from '@/hooks/use-double-click';
 
 interface DraggableItemProps {
   substation: Substation;
@@ -23,7 +23,7 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
     setTitle(substation.id);
   };
 
-  const handleClick = () => {
+  const handleDoubleClickAction = () => {
     const title = substation.id;
     addPanel({
       id: title,
@@ -34,12 +34,17 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
     setTitle(title);
   };
 
+  const { onClick, onDoubleClick } = useDoubleClick({
+    onDoubleClick: handleDoubleClickAction,
+  });
+
   return (
     <span
       draggable={true}
       className="cursor-pointer"
       onDragStart={handleDragStart}
-      onDoubleClick={handleClick}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
       tabIndex={1}
     >
       {children}
