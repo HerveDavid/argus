@@ -1,21 +1,27 @@
-import { useState } from 'react';
+// components/equipment-explorer.tsx
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-
 import { useEquipment } from '../hooks/use-equipment';
 import { SubstationQueryParams } from '../types/equipment-query.type';
 import { FileTreeItem } from './file-tree-item';
 import { Header } from './header';
 import { Footer } from './footer';
+import { useEquipmentStore } from '../stores/equipement.store';
 
 export const EquipmentExplorer = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [expandedSubstations, setExpandedSubstations] = useState<Set<string>>(
-    new Set(),
-  );
-  const pageSize = 12;
+  // Récupération de l'état et des actions depuis le store Zustand
+  const {
+    searchTerm,
+    currentPage,
+    expandedSubstations,
+    pageSize,
+    handleSearch,
+    handlePageChange,
+    toggleSubstation,
+    setExpandedSubstations,
+  } = useEquipmentStore();
 
+  // Paramètres de requête basés sur l'état du store
   const queryParams: SubstationQueryParams = {
     page: currentPage,
     pageSize,
@@ -24,25 +30,7 @@ export const EquipmentExplorer = () => {
 
   const { data, isLoading, error } = useEquipment(queryParams);
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const toggleSubstation = (substationId: string) => {
-    const newExpanded = new Set(expandedSubstations);
-    if (newExpanded.has(substationId)) {
-      newExpanded.delete(substationId);
-    } else {
-      newExpanded.add(substationId);
-    }
-    setExpandedSubstations(newExpanded);
-  };
-
+  // Transformation des données pour l'affichage en arbre
   const treeData =
     data?.substations?.map((substation) => ({
       id: substation.id,

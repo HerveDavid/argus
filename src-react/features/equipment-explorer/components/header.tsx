@@ -12,7 +12,7 @@ interface HeaderProps {
   data: SubstationQueryResponse;
   treeData: TreeData[];
   expandedSubstations: Set<String>;
-  setExpandedSubstations: (value: React.SetStateAction<Set<string>>) => void;
+  setExpandedSubstations: (expanded: Set<string>) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
