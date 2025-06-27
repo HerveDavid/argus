@@ -128,7 +128,18 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
             <>
               <ResizableHandle className="z-20" />
               <ResizablePanel order={2} defaultSize={toolsSize} minSize={20}>
-                <Tools />
+                <ResizablePanelGroup
+                  className="flex flex-1 flex-col"
+                  direction="horizontal"
+                >
+                  <ResizablePanel>
+                    <Tools />
+                  </ResizablePanel>
+                  <ResizableHandle />
+                  <ResizablePanel>
+                    <Tools />
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </ResizablePanel>
             </>
           )}

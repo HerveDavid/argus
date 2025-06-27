@@ -29,10 +29,10 @@ export const RightIconTools = () => {
             title={item.label}
           >
             {isActive && (
-              <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r"></div>
+              <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-primary rounded-l"></div>
             )}
             <Icon className="size-4" />
-            <div className="absolute left-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            <div className="absolute right-full ml-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
               {item.label}
             </div>
           </button>
