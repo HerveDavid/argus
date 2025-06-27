@@ -6,6 +6,7 @@ import {
   leftSidebarPanels,
   leftSidebarTools,
   rightSidebarPanels,
+  rightSidebarTools,
 } from '@/config/layouts';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
@@ -188,12 +189,26 @@ const useLeftSidebarStoreInner = createSidebarStore({
 export const useLeftSidebarStore = () =>
   useStoreRuntime<SidebarStore>(useLeftSidebarStoreInner);
 
+const useLeftToolsStoreInner = createSidebarStore({
+  name: 'left-tools-store',
+  panels: leftSidebarTools,
+});
+export const useLeftToolsStore = () =>
+  useStoreRuntime<SidebarStore>(useLeftToolsStoreInner);
+
 const useRightSidebarStoreInner = createSidebarStore({
   name: 'right-sidebar-store',
   panels: rightSidebarPanels,
 });
 export const useRightSidebarStore = () =>
   useStoreRuntime<SidebarStore>(useRightSidebarStoreInner);
+
+const useRightToolsStoreInner = createSidebarStore({
+  name: 'right-tools-store',
+  panels: rightSidebarTools,
+});
+export const useRightToolsStore = () =>
+  useStoreRuntime<SidebarStore>(useRightToolsStoreInner);
 
 const useToolsStoreInner = createSidebarStore({
   name: 'tools-store',

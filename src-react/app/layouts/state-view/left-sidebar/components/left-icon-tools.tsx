@@ -1,10 +1,10 @@
 import { leftSidebarTools } from '@/config/layouts';
 
-import { useToolsStore } from '../../stores/state-view.store';
+import { useLeftToolsStore } from '../../stores/state-view.store';
 
 export const LeftIconTools = () => {
   const { activeItem, setActiveItem, isOpen, openPanel, closePanel } =
-    useToolsStore();
+    useLeftToolsStore();
 
   const handleIconPanelClick = (itemId: string) => {
     setActiveItem(itemId);

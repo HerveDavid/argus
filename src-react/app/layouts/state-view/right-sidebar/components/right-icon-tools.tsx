@@ -1,10 +1,10 @@
 import { rightSidebarTools } from '@/config/layouts';
 
-import { useToolsStore } from '../../stores/state-view.store';
+import { useRightToolsStore } from '../../stores/state-view.store';
 
 export const RightIconTools = () => {
   const { activeItem, setActiveItem, isOpen, openPanel, closePanel } =
-    useToolsStore();
+    useRightToolsStore();
 
   const handleIconPanelClick = (itemId: string) => {
     setActiveItem(itemId);

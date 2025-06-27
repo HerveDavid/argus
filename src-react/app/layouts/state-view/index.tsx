@@ -14,8 +14,11 @@ import {
   useToolsStore,
   useLeftSidebarStore,
   useRightSidebarStore,
+  useLeftToolsStore,
+  useRightToolsStore,
 } from './stores/state-view.store';
-import { Tools } from './tools';
+import { LeftTools } from './left-tools';
+import { RightTools } from './right-tools';
 
 export const StateView: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -26,10 +29,22 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
     setSize: setLeftSize,
   } = useLeftSidebarStore();
   const {
+    isOpen: isLeftToolsOpen,
+    size: leftToolsSize,
+    setSize: setLeftToolsSize,
+  } = useLeftToolsStore();
+
+  const {
     isOpen: isRightOpen,
     size: rightSize,
     setSize: setRightSize,
   } = useRightSidebarStore();
+  const {
+    isOpen: isRightToolsOpen,
+    size: rightToolsSize,
+    setSize: setRightToolsSize,
+  } = useRightToolsStore();
+
   const {
     isOpen: isToolsOpen,
     size: toolsSize,
@@ -55,6 +70,27 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const handleHorizontalToolsPanelsResize = (sizes: number[]) => {
+    let leftToolsIndex = -1;
+    let rightToolsIndex = -1;
+
+    if (isLeftToolsOpen && isRightToolsOpen) {
+      leftToolsIndex = 0;
+      rightToolsIndex = 2;
+    } else if (isLeftToolsOpen) {
+      leftToolsIndex = 0;
+    } else if (isRightToolsOpen) {
+      rightToolsIndex = isLeftToolsOpen ? 2 : 0;
+    }
+
+    if (leftToolsIndex !== -1 && sizes[leftToolsIndex] !== undefined) {
+      setLeftToolsSize(sizes[leftToolsIndex]);
+    }
+    if (rightToolsIndex !== -1 && sizes[rightToolsIndex] !== undefined) {
+      setRightToolsSize(sizes[rightToolsIndex]);
+    }
+  };
+
   const handleVerticalPanelsResize = (sizes: number[]) => {
     if (isToolsOpen && sizes.length >= 2) {
       setToolsSize(sizes[1]);
@@ -73,6 +109,9 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
       resizeObserver.disconnect();
     };
   }, []);
+
+  // Calculer si au moins un des tools panels est ouvert
+  const hasToolsOpen = isLeftToolsOpen || isRightToolsOpen;
 
   return (
     <div className="h-screen w-full bg-background text-foreground flex flex-col overflow-hidden">
@@ -124,21 +163,40 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
               )}
             </ResizablePanelGroup>
           </ResizablePanel>
-          {isToolsOpen && (
+          {hasToolsOpen && (
             <>
               <ResizableHandle className="z-20" />
               <ResizablePanel order={2} defaultSize={toolsSize} minSize={20}>
                 <ResizablePanelGroup
-                  className="flex flex-1 flex-col"
+                  className="flex flex-1 flex-row"
                   direction="horizontal"
+                  onLayout={handleHorizontalToolsPanelsResize}
                 >
-                  <ResizablePanel>
-                    <Tools />
-                  </ResizablePanel>
-                  <ResizableHandle />
-                  <ResizablePanel>
-                    <Tools />
-                  </ResizablePanel>
+                  {isLeftToolsOpen && (
+                    <ResizablePanel
+                      id="left-tools"
+                      order={1}
+                      defaultSize={leftToolsSize}
+                      minSize={15}
+                      maxSize={isRightToolsOpen ? 85 : 100}
+                    >
+                      <LeftTools />
+                    </ResizablePanel>
+                  )}
+                  {isLeftToolsOpen && isRightToolsOpen && (
+                    <ResizableHandle className="z-20" />
+                  )}
+                  {isRightToolsOpen && (
+                    <ResizablePanel
+                      id="right-tools"
+                      order={isLeftToolsOpen ? 3 : 1}
+                      defaultSize={rightToolsSize}
+                      minSize={15}
+                      maxSize={isLeftToolsOpen ? 85 : 100}
+                    >
+                      <RightTools />
+                    </ResizablePanel>
+                  )}
                 </ResizablePanelGroup>
               </ResizablePanel>
             </>

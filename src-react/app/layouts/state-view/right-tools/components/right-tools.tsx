@@ -2,10 +2,10 @@ import { Minus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 
-import { useToolsStore } from '../../stores/state-view.store';
+import { useRightToolsStore } from '../../stores/state-view.store';
 
 export const RightTools = () => {
-  const { activeItem, closePanel } = useToolsStore();
+  const { activeItem, closePanel } = useRightToolsStore();
   const ContentComponent = activeItem.content;
 
   return (
