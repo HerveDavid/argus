@@ -2,7 +2,10 @@ import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { Effect } from 'effect';
 import { ProjectClient } from '@/services/common/project-client';
 import { useRuntime } from '@/services/runtime/use-runtime';
-import { SubstationQueryParams, SubstationQueryResponse } from '../types/equipment-query.type';
+import {
+  SubstationQueryParams,
+  SubstationQueryResponse,
+} from '../types/equipment-query.type';
 import { Substation } from '@/types/substation';
 
 export const useEquipment = (
@@ -154,25 +157,20 @@ export const useEquipment = (
                         (keyValueMatch = keyValueRegex.exec(match)) !== null
                       ) {
                         const key = keyValueMatch[1];
-                        let value = keyValueMatch[2].trim();
+                        const rawValue = keyValueMatch[2].trim();
 
-                        // Nettoyer la valeur
-                        if (value === 'NULL') {
-                          value = null;
-                        } else if (value === 'true' || value === 'True') {
-                          value = true;
-                        } else if (value === 'false' || value === 'False') {
-                          value = false;
-                        } else if (
-                          value.startsWith("'") &&
-                          value.endsWith("'")
-                        ) {
-                          value = value.slice(1, -1); // Enlever les guillemets
-                        } else if (!isNaN(Number(value))) {
-                          value = Number(value);
-                        }
+                        // Fonction helper pour parser avec le bon type
+                        const parseValue = (val: string): any => {
+                          if (val === 'NULL') return null;
+                          if (val === 'true' || val === 'True') return true;
+                          if (val === 'false' || val === 'False') return false;
+                          if (val.startsWith("'") && val.endsWith("'"))
+                            return val.slice(1, -1);
+                          if (!isNaN(Number(val))) return Number(val);
+                          return val;
+                        };
 
-                        obj[key] = value;
+                        obj[key] = parseValue(rawValue);
                       }
 
                       return obj;
@@ -256,7 +254,7 @@ export const useEquipment = (
     },
     // Options par défaut
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
     retry: 2,
     ...options,
