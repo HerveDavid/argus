@@ -27,5 +27,4 @@ export const leftSidebarPanels: SidebarItem[] = [
 
 export const leftSidebarTools: SidebarItem[] = [
   { id: 'terminal', icon: TerminalIcon, label: 'Terminal', content: Terminal },
-  { id: 'log', icon: LogsIcon, label: 'Log', content: EventsLog },
 ] as const;

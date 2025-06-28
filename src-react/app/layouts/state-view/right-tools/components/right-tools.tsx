@@ -15,7 +15,7 @@ export const RightTools = () => {
           {activeItem.id}
         </div>
 
-        <Button variant="ghost" className="size-0.5 px-1" onClick={closePanel}>
+        <Button variant="ghost" className="size-0.5 px-1" onClick={closePanel} title='Close'>
           <Minus />
         </Button>
       </div>

@@ -73,14 +73,13 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
       if (sizes[2] !== undefined) {
         setRightToolsSize(sizes[2]);
       }
-    } else if (isLeftToolsOpen) {
+    } else if (isLeftToolsOpen && !isRightToolsOpen) {
       if (sizes[0] !== undefined) {
         setLeftToolsSize(sizes[0]);
       }
-    } else if (isRightToolsOpen) {
-      const rightIndex = isLeftToolsOpen ? 2 : 0;
-      if (sizes[rightIndex] !== undefined) {
-        setRightToolsSize(sizes[rightIndex]);
+    } else if (!isLeftToolsOpen && isRightToolsOpen) {
+      if (sizes[0] !== undefined) {
+        setRightToolsSize(sizes[0]);
       }
     }
   };
@@ -157,24 +156,26 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                   onLayout={handleToolsPanelsResize}
                 >
                   {isLeftToolsOpen && (
-                    <>
-                      <ResizablePanel
-                        id="left-tools"
-                        order={1}
-                        defaultSize={leftToolsSize}
-                        minSize={15}
-                      >
-                        <LeftTools />
-                      </ResizablePanel>
-                      {isRightToolsOpen && <ResizableHandle className="z-20" />}
-                    </>
+                    <ResizablePanel
+                      id="left-tools"
+                      order={1}
+                      defaultSize={leftToolsSize}
+                      minSize={15}
+                      maxSize={85}
+                    >
+                      <LeftTools />
+                    </ResizablePanel>
+                  )}
+                  {isLeftToolsOpen && isRightToolsOpen && (
+                    <ResizableHandle className="z-20" />
                   )}
                   {isRightToolsOpen && (
                     <ResizablePanel
                       id="right-tools"
-                      order={isLeftToolsOpen ? 2 : 1}
+                      order={isLeftToolsOpen ? 3 : 1}
                       defaultSize={rightToolsSize}
                       minSize={15}
+                      maxSize={85}
                     >
                       <RightTools />
                     </ResizablePanel>

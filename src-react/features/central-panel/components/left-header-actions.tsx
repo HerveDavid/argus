@@ -8,8 +8,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-export const LeftHeaderActions = (_props: IDockviewHeaderActionsProps) => {
+export const LeftHeaderActions = (props: IDockviewHeaderActionsProps) => {
+  const { removeGroup } = useCentralPanelStore();
+
+  const handleCloseAll = () => {
+    const group = props.group;
+    removeGroup(group);
+  };
+
   return (
     <div className="h-full flex items-center px-2">
       <DropdownMenu>
@@ -17,7 +25,9 @@ export const LeftHeaderActions = (_props: IDockviewHeaderActionsProps) => {
           <EllipsisVertical className="size-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Close All</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleCloseAll}>
+            Close All
+          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Lock Groups</DropdownMenuItem>
           <DropdownMenuSeparator />

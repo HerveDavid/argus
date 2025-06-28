@@ -15,7 +15,7 @@ export const LeftSidebarPanel = () => {
         <h3 className="font-medium text-xs uppercase tracking-wide text-sidebar-foreground">
           {activeItem.label}
         </h3>
-        <Button variant="ghost" className="size-1" onClick={closePanel}>
+        <Button variant="ghost" className="size-1" onClick={closePanel} title='Close'>
           <Minus />
         </Button>
       </div>
