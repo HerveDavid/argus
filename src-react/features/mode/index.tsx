@@ -1,7 +1,7 @@
 export const Mode = () => {
-    return (
-        <div>
-            <p className="text-xs text-muted-foreground">NOR</p>
-        </div>
-    )
-}
+  return (
+    <div>
+      <span className="text-xs text-muted-foreground">NOR</span>
+    </div>
+  );
+};

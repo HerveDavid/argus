@@ -5,7 +5,7 @@ export const Equipement = () => {
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{title}</p>
+      <span className="text-xs text-muted-foreground">{title}</span>
     </div>
   );
 };

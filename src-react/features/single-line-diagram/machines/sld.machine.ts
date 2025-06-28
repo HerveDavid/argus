@@ -10,6 +10,8 @@ export interface SldContext {
   error: string | null;
   cache: Map<string, SldDiagram>;
   runtime: LiveManagedRuntime | null;
+  lastUpdate: Date | null;
+  isAutoRefreshEnabled: boolean;
 }
 
 // Types pour les événements utilisateur
@@ -18,7 +20,11 @@ export type SldEvent =
   | { type: 'CLEAR_DIAGRAM' }
   | { type: 'CLEAR_CACHE' }
   | { type: 'RETRY' }
-  | { type: 'SET_RUNTIME'; runtime: LiveManagedRuntime };
+  | { type: 'SET_RUNTIME'; runtime: LiveManagedRuntime }
+  | { type: 'ENABLE_AUTO_REFRESH' }
+  | { type: 'DISABLE_AUTO_REFRESH' }
+  | { type: 'AUTO_REFRESH_TICK' }
+  | { type: 'MANUAL_REFRESH' };
 
 // Actor pour charger le diagramme en utilisant Effect
 const loadDiagramActor = fromPromise(
@@ -60,6 +66,12 @@ export const sldMachine = setup({
     hasRuntime: ({ context }) => {
       return context.runtime !== null;
     },
+    hasCurrentLineId: ({ context }) => {
+      return context.lineId !== null;
+    },
+    isAutoRefreshEnabled: ({ context }) => {
+      return context.isAutoRefreshEnabled;
+    },
   },
   actions: {
     setRuntime: assign(({ context, event }) => {
@@ -69,6 +81,16 @@ export const sldMachine = setup({
         runtime: event.runtime,
       };
     }),
+
+    enableAutoRefresh: assign(({ context }) => ({
+      ...context,
+      isAutoRefreshEnabled: true,
+    })),
+
+    disableAutoRefresh: assign(({ context }) => ({
+      ...context,
+      isAutoRefreshEnabled: false,
+    })),
 
     loadFromCache: assign(({ context, event }) => {
       if (event.type !== 'LOAD_DIAGRAM') return context;
@@ -92,11 +114,18 @@ export const sldMachine = setup({
       };
     }),
 
+    updateLastUpdateTime: assign(({ context }) => ({
+      ...context,
+      lastUpdate: new Date(),
+    })),
+
     clearDiagram: assign(({ context }) => ({
       ...context,
       lineId: null,
       diagramData: null,
       error: null,
+      lastUpdate: null,
+      isAutoRefreshEnabled: false,
     })),
 
     clearCache: assign(({ context }) => ({
@@ -113,6 +142,8 @@ export const sldMachine = setup({
     error: null,
     cache: new Map(),
     runtime: null,
+    lastUpdate: null,
+    isAutoRefreshEnabled: false,
   },
   states: {
     idle: {
@@ -178,21 +209,24 @@ export const sldMachine = setup({
         }),
         onDone: {
           target: 'loaded',
-          actions: assign(({ context, event }) => {
-            const diagramData = event.output;
-            const newCache = new Map(context.cache);
+          actions: [
+            assign(({ context, event }) => {
+              const diagramData = event.output;
+              const newCache = new Map(context.cache);
 
-            if (context.lineId) {
-              newCache.set(context.lineId, diagramData);
-            }
+              if (context.lineId) {
+                newCache.set(context.lineId, diagramData);
+              }
 
-            return {
-              ...context,
-              diagramData,
-              cache: newCache,
-              error: null,
-            };
-          }),
+              return {
+                ...context,
+                diagramData,
+                cache: newCache,
+                error: null,
+              };
+            }),
+            'updateLastUpdateTime',
+          ],
         },
         onError: {
           target: 'error',
@@ -205,10 +239,34 @@ export const sldMachine = setup({
       },
     },
     loaded: {
+      // Auto-refresh timer de 5 secondes
+      after: {
+        5000: [
+          {
+            guard: 'isAutoRefreshEnabled',
+            target: 'refreshing',
+          },
+        ],
+      },
       on: {
         SET_RUNTIME: {
           actions: 'setRuntime',
         },
+        ENABLE_AUTO_REFRESH: {
+          actions: 'enableAutoRefresh',
+        },
+        DISABLE_AUTO_REFRESH: {
+          actions: 'disableAutoRefresh',
+        },
+        MANUAL_REFRESH: [
+          {
+            guard: 'hasRuntime',
+            target: 'refreshing',
+          },
+          {
+            target: 'waitingForRuntime',
+          },
+        ],
         LOAD_DIAGRAM: [
           {
             guard: 'isSameDiagram',
@@ -222,11 +280,11 @@ export const sldMachine = setup({
           {
             guard: 'hasRuntime',
             target: 'loading',
-            actions: 'setLineId',
+            actions: ['setLineId', 'disableAutoRefresh'],
           },
           {
             target: 'waitingForRuntime',
-            actions: 'setLineId',
+            actions: ['setLineId', 'disableAutoRefresh'],
           },
         ],
         CLEAR_DIAGRAM: {
@@ -235,6 +293,44 @@ export const sldMachine = setup({
         },
         CLEAR_CACHE: {
           actions: 'clearCache',
+        },
+      },
+    },
+    refreshing: {
+      invoke: {
+        id: 'refreshDiagram',
+        src: 'loadDiagram',
+        input: ({ context }) => ({
+          lineId: context.lineId!,
+          runtime: context.runtime!,
+        }),
+        onDone: {
+          target: 'loaded',
+          actions: [
+            assign(({ context, event }) => {
+              const diagramData = event.output;
+              const newCache = new Map(context.cache);
+
+              if (context.lineId) {
+                newCache.set(context.lineId, diagramData);
+              }
+
+              return {
+                ...context,
+                diagramData,
+                cache: newCache,
+                error: null,
+              };
+            }),
+            'updateLastUpdateTime',
+          ],
+        },
+        onError: {
+          target: 'loaded', // Retourne à loaded même en cas d'erreur de refresh
+          actions: assign(({ context, event }) => ({
+            ...context,
+            error: `Erreur de refresh: ${String(event.error) || 'Erreur inconnue'}`,
+          })),
         },
       },
     },
