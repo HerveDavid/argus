@@ -1,14 +1,12 @@
-import React from 'react';
-import { useContextMenu } from '../hooks/use-context-menu';
-import ContextMenu from './context-menu'; // Assurez-vous que le chemin d'import est correct
+import React, { useState } from 'react';
+import { SVGContextMenu } from './svg-context-menu';
 
 export const DiagramContent: React.FC<{
   svgRef: React.RefObject<SVGSVGElement>;
 }> = ({ svgRef }) => {
-  const { contextMenu, handleContextMenu, closeContextMenu, setContextMenu } =
-    useContextMenu(svgRef);
+  const [targetElement, setTargetElement] = useState<SVGElement | null>(null);
 
-  // Fonction pour gérer le toggle des disjoncteurs (optionnel - adaptez selon vos besoins)
+  // Fonction pour gérer le toggle des disjoncteurs
   const toggleBreaker = (breakerId: string, isClosed: boolean) => {
     if (!svgRef.current) return;
 
@@ -29,45 +27,43 @@ export const DiagramContent: React.FC<{
       breakerElement.classList.remove('sld-open');
       breakerElement.classList.add('sld-closed');
     }
+  };
 
-    // Fermer le menu contextuel
-    setContextMenu((prev) => ({ ...prev, visible: false }));
+  // Gestionnaire pour capturer l'élément ciblé
+  const handleContextMenuTrigger = (e: React.MouseEvent<SVGSVGElement>) => {
+    const target = e.target as SVGElement;
+
+    // Trouve l'élément parent avec un ID si nécessaire
+    let element: SVGElement | null = target;
+    if (element && !element.id) {
+      // Cherche un parent avec un ID (vous pouvez adapter cette logique)
+      let parent = element.parentElement;
+      while (parent && parent instanceof SVGElement && !parent.id) {
+        parent = parent.parentElement;
+      }
+      if (parent instanceof SVGElement && parent.id) {
+        element = parent;
+      }
+    }
+
+    setTargetElement(element);
   };
 
   return (
-    <div
-      className="h-full flex flex-col relative"
-      onClick={(e) => {
-        if (contextMenu.visible) {
-          const target = e.target as Node;
-          const menuElement = document.querySelector('.context-menu');
-          const isClickInsideMenu = menuElement && menuElement.contains(target);
-
-          if (!isClickInsideMenu) {
-            closeContextMenu();
-          }
-        }
-      }}
-    >
+    <div className="h-full flex flex-col relative">
       <div className="flex-1 overflow-hidden bg-background border-0 rounded">
-        <svg
-          ref={svgRef}
-          className="w-full h-full"
-          style={{ minHeight: '400px' }}
-          onContextMenu={(e) => handleContextMenu(e.nativeEvent)}
-        />
-      </div>
-
-      {/* Rendu conditionnel du ContextMenu */}
-      {contextMenu.visible && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          targetElement={contextMenu.targetElement}
-          onClose={closeContextMenu}
+        <SVGContextMenu
+          targetElement={targetElement}
           onToggleBreaker={toggleBreaker}
-        />
-      )}
+        >
+          <svg
+            ref={svgRef}
+            className="w-full h-full cursor-default"
+            style={{ minHeight: '400px' }}
+            onContextMenu={handleContextMenuTrigger}
+          />
+        </SVGContextMenu>
+      </div>
     </div>
   );
 };
