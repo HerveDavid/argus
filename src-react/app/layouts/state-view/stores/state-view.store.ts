@@ -142,7 +142,7 @@ const loadState = async (
       }
     }
   } catch (error) {
-    console.warn(`Erreur lors du chargement de ${config.name}:`, error);
+    console.warn(`Error in loading config ${config.name}:`, error);
   }
 };
 
@@ -175,10 +175,10 @@ const getSidebarStore = (name: string): any => {
       return useLeftSidebarStoreInner;
     case 'right-sidebar-store':
       return useRightSidebarStoreInner;
-    case 'tools-store':
-      return useToolsStoreInner;
-    default:
-      return null;
+    case 'left-tools-store':
+      return useLeftToolsStoreInner;
+    case 'right-tools-store':
+      return useRightToolsStoreInner;
   }
 };
 
@@ -209,10 +209,3 @@ const useRightToolsStoreInner = createSidebarStore({
 });
 export const useRightToolsStore = () =>
   useStoreRuntime<SidebarStore>(useRightToolsStoreInner);
-
-const useToolsStoreInner = createSidebarStore({
-  name: 'tools-store',
-  panels: leftSidebarTools,
-});
-export const useToolsStore = () =>
-  useStoreRuntime<SidebarStore>(useToolsStoreInner);
