@@ -7,9 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, Play, Pause } from 'lucide-react';
 import { useSldStore } from '../stores/sld.store';
 import { useSvgRenderer } from '../hooks/use-svg-renderer';
 import { LoadingState } from './loading-state';
@@ -25,7 +22,7 @@ export interface SingleLineDiagramProps {
 
 export const Sld: React.FC<SingleLineDiagramProps> = ({
   id,
-  enableAutoRefreshByDefault = true,
+  enableAutoRefreshByDefault = false,
 }) => {
   const {
     isLoading,
@@ -41,7 +38,6 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
     enableAutoRefresh,
     disableAutoRefresh,
     manualRefresh,
-    getTimeSinceLastUpdate,
   } = useSldStore();
 
   const { svgRef } = useSvgRenderer(diagramData, isLoaded);
@@ -78,54 +74,11 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
     manualRefresh();
   };
 
-  const renderRefreshControls = () => {
-    if (!isLoaded) return null;
-
-    return (
-      <div className="flex items-center gap-2">
-        {/* Bouton refresh manuel */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleManualRefresh}
-          disabled={isRefreshing}
-          className="h-8 px-2"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-        </Button>
-
-        {/* Toggle auto-refresh */}
-        <Button
-          variant={isAutoRefreshEnabled ? 'default' : 'outline'}
-          size="sm"
-          onClick={handleToggleAutoRefresh}
-          className="h-8 px-2"
-        >
-          {isAutoRefreshEnabled ? (
-            <Pause className="h-4 w-4" />
-          ) : (
-            <Play className="h-4 w-4" />
-          )}
-        </Button>
-
-        {/* Badge statut auto-refresh */}
-        <Badge
-          variant={isAutoRefreshEnabled ? 'default' : 'secondary'}
-          className="text-xs"
-        >
-          {isAutoRefreshEnabled ? 'Auto' : 'Manuel'}
-        </Badge>
-      </div>
-    );
-  };
-
   const renderContent = () => {
     if (isLoading) return <LoadingState />;
     if (isError) return <ErrorState error={error} onRetry={retry} />;
     if (isLoaded && diagramData && diagramData.svg) {
-      return <DiagramContent svgRef={svgRef} />;
+      return <DiagramContent svgRef={svgRef} diagramData={diagramData}/>;
     }
     return <EmptyState />;
   };
@@ -137,7 +90,6 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
           <CardTitle>
             <div className="flex text-sm items-center justify-between">
               <h1>{id}</h1>
-              {renderRefreshControls()}
             </div>
           </CardTitle>
           <CardAction />
@@ -155,6 +107,10 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
               isError={isError}
               lastUpdate={lastUpdate}
               diagramData={diagramData}
+              isRefreshing={isRefreshing}
+              isAutoRefreshEnabled={isAutoRefreshEnabled}
+              onManualRefresh={handleManualRefresh}
+              onToggleAutoRefresh={handleToggleAutoRefresh}
             />
           </div>
         </CardFooter>

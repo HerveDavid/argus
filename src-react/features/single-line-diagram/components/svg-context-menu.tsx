@@ -322,7 +322,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
                     }}
                     className="hover:bg-opacity-10"
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--accent)';
+                      e.currentTarget.style.backgroundColor = 'var(--muted)';
                       e.currentTarget.style.color = 'var(--accent-foreground)';
                     }}
                     onMouseLeave={(e) => {
