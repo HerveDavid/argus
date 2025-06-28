@@ -123,7 +123,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           boxShadow: 'var(--shadow-lg)',
         }}
       >
-        {/* Header avec info élément */}
+        {/* Header with element info */}
         <div
           className="px-2 py-2 border-b"
           style={{ borderColor: 'var(--border)' }}
@@ -169,7 +169,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
             </div>
           )}
 
-          {/* Texte pour les labels */}
+          {/* Text for labels */}
           {elementInfo.isLabel && elementInfo.text && (
             <div
               className="text-sm italic truncate"
@@ -180,7 +180,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           )}
         </div>
 
-        {/* Actions pour disjoncteur */}
+        {/* Breaker actions */}
         {elementInfo.isBreaker && (
           <>
             <ContextMenuItem
@@ -201,12 +201,12 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
               {elementInfo.isClosed ? (
                 <>
                   <Power className="mr-2 h-4 w-4" />
-                  Ouvrir le disjoncteur
+                  Open breaker
                 </>
               ) : (
                 <>
                   <PowerOff className="mr-2 h-4 w-4" />
-                  Fermer le disjoncteur
+                  Close breaker
                 </>
               )}
             </ContextMenuItem>
@@ -216,7 +216,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           </>
         )}
 
-        {/* Actions de copie */}
+        {/* Copy actions */}
         <ContextMenuItem
           onClick={handleCopyElementInfo}
           style={{
@@ -233,7 +233,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           }}
         >
           <Copy className="mr-2 h-4 w-4" />
-          Copier l'élément entier
+          Copy entire element
         </ContextMenuItem>
 
         {elementInfo.id && (
@@ -253,7 +253,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
             }}
           >
             <Hash className="mr-2 h-4 w-4" />
-            Copier l'ID
+            Copy ID
           </ContextMenuItem>
         )}
 
@@ -274,11 +274,11 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
             }}
           >
             <FileText className="mr-2 h-4 w-4" />
-            Copier le texte
+            Copy text
           </ContextMenuItem>
         )}
 
-        {/* Sous-menu pour les attributs */}
+        {/* Attributes submenu */}
         {attributes.length > 0 && (
           <>
             <ContextMenuSeparator
@@ -300,7 +300,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
                 }}
               >
                 <Zap className="mr-2 h-4 w-4" />
-                Attributs ({attributes.length})
+                Attributes ({attributes.length})
               </ContextMenuSubTrigger>
               <ContextMenuSubContent
                 className="w-72"

@@ -35,13 +35,7 @@ const loadDiagramActor = fromPromise(
       return yield* projectClient.getSingleLineDiagram(lineId);
     });
 
-    // Exécuter le programme Effect avec le runtime
-    return runtime.runPromise(program)
-    // const result = await Effect.runPromise(
-    //   program.pipe(Effect.provide(runtime.layer)),
-    // );
-
-    // return result;
+    return runtime.runPromise(program);
   },
 );
 
