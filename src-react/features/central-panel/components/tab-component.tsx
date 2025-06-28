@@ -8,10 +8,10 @@ import {
   ContextMenuSeparator,
 } from '@/components/ui/context-menu';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { useSelectedItemStore } from '@/stores/window-header.store';
 
 const Default = (props: IDockviewPanelProps<{ title: string }>) => {
-  const { setTitle } = useWindowHeaderStore();
+  const { setTitle } = useSelectedItemStore();
   const { removePanel, removeGroup } = useCentralPanelStore();
   const othersDisabled = props.api.group.panels.length <= 1;
 

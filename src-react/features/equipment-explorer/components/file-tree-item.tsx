@@ -19,7 +19,7 @@ import { useCentralPanelStore } from '@/stores/central-panel.store';
 
 import { DraggableItem } from './draggable-item';
 import { formatVoltage, getVoltageLevelColor, getTopologyIcon } from '../utils';
-import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { useSelectedItemStore } from '@/stores/window-header.store';
 import { useDoubleClick } from '@/hooks/use-double-click';
 
 export interface FileTreeItemProps {
@@ -42,7 +42,7 @@ export const FileTreeItem = ({
   expanded = false,
   onToggle,
 }: FileTreeItemProps) => {
-  const { setTitle } = useWindowHeaderStore();
+  const { setTitle } = useSelectedItemStore();
   const { addPanel } = useCentralPanelStore();
 
   const handleToggle = () => {

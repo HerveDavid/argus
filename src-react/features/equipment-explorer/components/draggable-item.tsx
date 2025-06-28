@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { useSelectedItemStore } from '@/stores/window-header.store';
 import { useDoubleClick } from '@/hooks/use-double-click';
 
 interface DraggableItemProps {
@@ -12,7 +12,7 @@ export const DraggableItem: React.FC<DraggableItemProps> = ({
   id,
   children,
 }) => {
-  const { setTitle } = useWindowHeaderStore();
+  const { setTitle } = useSelectedItemStore();
   const { addPanel } = useCentralPanelStore();
 
   const handleDragStart = (e: React.DragEvent<HTMLSpanElement>) => {

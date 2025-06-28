@@ -14,7 +14,7 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
 import { Sld } from '@/features/single-line-diagram';
-import { useWindowHeaderStore } from '@/stores/window-header.store';
+import { useSelectedItemStore } from '@/stores/window-header.store';
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
 
 export interface SldViewProps {
@@ -29,7 +29,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
     size: rightSize,
     setSize: setRightSize,
   } = useRightSidebarStore(id);
-  const { setTitle } = useWindowHeaderStore();
+  const { setTitle } = useSelectedItemStore();
 
   const handleHorizontalPanelsResize = (sizes: number[]) => {
     if (sizes[1] !== undefined) {

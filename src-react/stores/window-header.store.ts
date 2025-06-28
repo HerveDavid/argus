@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
-interface WindowHeaderStore {
+interface SelectedItemStore {
   title: string;
   setTitle: (title: string) => void;
 }
 
-export const useWindowHeaderStore = create<WindowHeaderStore>()(
+export const useSelectedItemStore = create<SelectedItemStore>()(
   devtools(
     subscribeWithSelector((set) => ({
       title: '',
       setTitle: (title) => set({ title }),
     })),
-    { name: 'window-header-store' },
+    { name: 'selected-item-store' },
   ),
 );
