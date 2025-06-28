@@ -67,7 +67,7 @@ export function EventsLog() {
 
   return (
     <div>
-      <div className="space-x-2 flex items-center">
+      <div className="space-x-2 flex items-center mb-2">
         <Button onClick={startClick} disabled={isStarted}>
           Start
         </Button>

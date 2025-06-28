@@ -26,7 +26,7 @@ export const RightHeaderActions = (props: IDockviewHeaderActionsProps) => {
         size="sm"
         onClick={handleDetachPanel}
         className="size-5 p-0 hover:bg-accent text-muted-foreground"
-        title={'Detach group'}
+        title="Detach group"
       >
         <ScreenShare className="size-4" />
       </Button>
@@ -41,17 +41,13 @@ export const RightHeaderActions = (props: IDockviewHeaderActionsProps) => {
             <Maximize className="size-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-none w-[75vw] h-[75vh] max-h-[75vh] sm:max-w-none">
-          <DialogHeader>
+        <DialogContent className="max-w-none w-[95vw] h-[80vh] max-h-[80vh] p-0 gap-0">
+          <DialogHeader className="sr-only">
             <DialogTitle>{props.activePanel?.id}</DialogTitle>
-            <div className="">
-              {props.activePanel?.id && (
-                <div className="">
-                  <Sld id={props.activePanel.id} />
-                </div>
-              )}
-            </div>
           </DialogHeader>
+          <div className="h-full w-full overflow-hidden">
+            {props.activePanel?.id && <Sld id={props.activePanel.id} />}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

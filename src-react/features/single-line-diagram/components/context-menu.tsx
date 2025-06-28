@@ -1,296 +1,158 @@
-import React, {
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useEffect,
-} from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-// Types
-interface ContextMenuState {
-  visible: boolean;
+interface ContextMenuProps {
   x: number;
   y: number;
   targetElement: SVGElement | null;
-}
-
-interface ElementInfo {
-  tagName: string;
-  id: string;
-  classes: string[];
-  attributes: { name: string; value: string }[];
-  text: string;
-  isBreaker: boolean;
-  isDisconnector: boolean;
-  isLoad: boolean;
-  isWire: boolean;
-  isLabel: boolean;
-  isClosed: boolean;
-  isOpen: boolean;
-  isDisconnected: boolean;
-}
-
-// Utilitaires
-const findParentWithId = (element: SVGElement): SVGElement | null => {
-  let current = element;
-  while (current && current.parentElement) {
-    if (current.id && current.id.trim() !== '') {
-      return current;
-    }
-    current = current.parentElement as unknown as SVGElement;
-  }
-  return null;
-};
-
-const getElementInfo = (element: SVGElement | null): ElementInfo => {
-  if (!element) {
-    return {
-      tagName: '',
-      id: '',
-      classes: [],
-      attributes: [],
-      text: '',
-      isBreaker: false,
-      isDisconnector: false,
-      isLoad: false,
-      isWire: false,
-      isLabel: false,
-      isClosed: false,
-      isOpen: false,
-      isDisconnected: false,
-    };
-  }
-
-  const classList =
-    element
-      .getAttribute('class')
-      ?.split(' ')
-      .filter((c) => c.trim()) || [];
-  const attributes: { name: string; value: string }[] = [];
-
-  for (let i = 0; i < element.attributes.length; i++) {
-    const attr = element.attributes[i];
-    attributes.push({ name: attr.name, value: attr.value });
-  }
-
-  return {
-    tagName: element.tagName,
-    id: element.id || '',
-    classes: classList,
-    attributes,
-    text: element.textContent || '',
-    isBreaker: classList.includes('sld-breaker'),
-    isDisconnector: classList.includes('sld-disconnector'),
-    isLoad: classList.includes('sld-load'),
-    isWire: classList.includes('sld-wire'),
-    isLabel: classList.includes('sld-label'),
-    isClosed: classList.includes('sld-closed'),
-    isOpen: classList.includes('sld-open'),
-    isDisconnected: classList.includes('sld-disconnected'),
-  };
-};
-
-// Hook pour le menu contextuel
-export const useContextMenu = (svgContainerRef: React.RefObject<HTMLDivElement>) => {
-  const [contextMenu, setContextMenu] = useState<ContextMenuState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    targetElement: null,
-  });
-
-  const lastCallTimeRef = useRef<number>(0);
-  const throttleDelayMs = 100;
-
-  const handleContextMenu = useCallback(
-    (
-      e: Event,
-      isLabelClick = false,
-      labelElement: SVGElement | null = null,
-    ) => {
-      e.preventDefault();
-
-      const now = Date.now();
-      if (now - lastCallTimeRef.current < throttleDelayMs) {
-        return;
-      }
-      lastCallTimeRef.current = now;
-
-      const mouseEvent = e as MouseEvent;
-      const containerRect = svgContainerRef.current?.getBoundingClientRect();
-
-      if (containerRect) {
-        const relativeX = mouseEvent.clientX - containerRect.left;
-        const relativeY = mouseEvent.clientY - containerRect.top;
-
-        const targetElement = isLabelClick
-          ? labelElement
-          : (e.target as SVGElement | null);
-        let element: SVGElement | null = targetElement;
-
-        if (!isLabelClick && element) {
-          const foundParent = findParentWithId(element);
-          element = foundParent as SVGElement | null;
-        }
-
-        setContextMenu({
-          visible: true,
-          x: relativeX,
-          y: relativeY,
-          targetElement: element || targetElement,
-        });
-      }
-    },
-    [svgContainerRef],
-  );
-
-  const closeContextMenu = useCallback(() => {
-    setContextMenu((prev) => ({ ...prev, visible: false }));
-  }, []);
-
-  return { contextMenu, handleContextMenu, closeContextMenu, setContextMenu };
-};
-
-// Composant Menu Contextuel
-interface ContextMenuProps {
-  contextMenu: ContextMenuState;
   onClose: () => void;
-  onToggleSwitch?: (elementId: string, currentState: boolean) => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+  onToggleBreaker?: (breakerId: string, isClosed: boolean) => void;
 }
 
 const ContextMenu: React.FC<ContextMenuProps> = ({
-  contextMenu,
+  x,
+  y,
+  targetElement,
   onClose,
-  onToggleSwitch,
-  containerRef,
+  onToggleBreaker,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
-  const elementInfo = useMemo(
-    () => getElementInfo(contextMenu.targetElement),
-    [contextMenu.targetElement],
-  );
+  const [attributes, setAttributes] = useState<
+    { name: string; value: string }[]
+  >([]);
+  const [elementInfo, setElementInfo] = useState<{
+    tagName: string;
+    id: string;
+    classes: string[];
+    isLabel: boolean;
+    text: string;
+    isBreaker: boolean;
+    isClosed: boolean;
+  }>({
+    tagName: '',
+    id: '',
+    classes: [],
+    isLabel: false,
+    text: '',
+    isBreaker: false,
+    isClosed: false,
+  });
 
   useEffect(() => {
+    // Get all attributes and info of the target element
+    if (targetElement) {
+      // Get attributes
+      const attrs: { name: string; value: string }[] = [];
+      for (let i = 0; i < targetElement.attributes.length; i++) {
+        const attr = targetElement.attributes[i];
+        attrs.push({ name: attr.name, value: attr.value });
+      }
+      setAttributes(attrs);
+
+      // Get element info
+      const tagName = targetElement.tagName;
+      const id = targetElement.id || '';
+      const classList = targetElement.getAttribute('class')?.split(' ') || [];
+      const isLabel = classList.includes('sld-label');
+      const isBreaker = classList.includes('sld-breaker');
+      const isClosed = classList.includes('sld-closed');
+      const text = targetElement.textContent || '';
+
+      setElementInfo({
+        tagName,
+        id,
+        classes: classList,
+        isLabel,
+        text,
+        isBreaker,
+        isClosed,
+      });
+    }
+
+    // Close menu when clicking outside
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         onClose();
       }
     };
 
-    if (contextMenu.visible) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () =>
-        document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [contextMenu.visible, onClose]);
-
-  const handleCopyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      console.log('Copié dans le presse-papiers:', text);
-    });
-  };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [targetElement, onClose]);
 
   const handleCopyAttribute = (name: string, value: string) => {
-    handleCopyToClipboard(`${name}="${value}"`);
+    navigator.clipboard.writeText(`${name}="${value}"`);
   };
 
-  const handleCopyElement = () => {
-    if (!contextMenu.targetElement) return;
+  const handleCopyElementInfo = () => {
+    if (!targetElement) return;
 
-    const element = contextMenu.targetElement;
-    const tagName = element.tagName;
+    const tagName = targetElement.tagName;
     let attributesText = '';
 
-    elementInfo.attributes.forEach((attr) => {
+    attributes.forEach((attr) => {
       attributesText += ` ${attr.name}="${attr.value}"`;
     });
 
-    handleCopyToClipboard(`<${tagName}${attributesText} />`);
+    navigator.clipboard.writeText(`<${tagName}${attributesText} />`);
   };
 
-  const handleToggleElement = () => {
-    if (!contextMenu.targetElement || !onToggleSwitch) return;
-
-    if (elementInfo.isBreaker || elementInfo.isDisconnector) {
-      onToggleSwitch(elementInfo.id, elementInfo.isClosed);
+  const handleCopyId = () => {
+    if (elementInfo.id) {
+      navigator.clipboard.writeText(elementInfo.id);
     }
   };
 
-  const getStatusColor = () => {
-    if (elementInfo.isDisconnected) return 'text-gray-500';
-    if (elementInfo.isClosed) return 'text-green-600';
-    if (elementInfo.isOpen) return 'text-red-600';
-    return 'text-blue-600';
+  const handleCopyText = () => {
+    if (elementInfo.text) {
+      navigator.clipboard.writeText(elementInfo.text);
+    }
   };
 
-  const getStatusText = () => {
-    if (elementInfo.isDisconnected) return 'Déconnecté';
-    if (elementInfo.isClosed) return 'Fermé';
-    if (elementInfo.isOpen) return 'Ouvert';
-    return 'Connecté';
+  const handleToggleBreaker = () => {
+    if (elementInfo.isBreaker && targetElement && onToggleBreaker) {
+      onToggleBreaker(elementInfo.id, elementInfo.isClosed);
+    }
   };
-
-  if (!contextMenu.visible) return null;
-
-  // Calcul de la position pour éviter que le menu sorte de l'écran
-  const containerRect = containerRef.current?.getBoundingClientRect();
-  const menuWidth = 350;
-  const menuHeight = 400;
-
-  let adjustedX = contextMenu.x;
-  let adjustedY = contextMenu.y;
-
-  if (containerRect) {
-    if (contextMenu.x + menuWidth > containerRect.width) {
-      adjustedX = contextMenu.x - menuWidth;
-    }
-    if (contextMenu.y + menuHeight > containerRect.height) {
-      adjustedY = contextMenu.y - menuHeight;
-    }
-  }
 
   return (
     <div
       ref={menuRef}
-      className="absolute bg-white shadow-lg rounded-lg border border-gray-200 py-2 z-50 text-sm"
+      className="absolute bg-secondary shadow-lg rounded-md border border-gray-200 py-2 z-50"
       style={{
-        left: adjustedX,
-        top: adjustedY,
-        maxWidth: `${menuWidth}px`,
-        maxHeight: `${menuHeight}px`,
+        left: x,
+        top: y,
+        maxWidth: '350px',
+        maxHeight: '500px',
+        // Éviter que le menu ne sorte de l'écran
+        transform: `translate(${x > window.innerWidth - 350 ? '-100%' : '0'}, ${
+          y > window.innerHeight - 300 ? '-100%' : '0'
+        })`,
       }}
     >
-      {/* En-tête avec type d'élément et état */}
-      <div className="px-4 py-3 border-b border-gray-100">
+      {/* Header with element type and id if available */}
+      <div className="px-4 py-2 font-semibold text-sm border-b border-gray-100 flex flex-col">
         <div className="flex justify-between items-center">
-          <span className="font-semibold text-blue-600">
-            {elementInfo.tagName}
-          </span>
-          <span className={`text-xs font-medium ${getStatusColor()}`}>
-            {getStatusText()}
-          </span>
+          <span className="text-blue-600">{elementInfo.tagName}</span>
+          {elementInfo.id && (
+            <span
+              className="text-gray-500 text-xs ml-2 hover:text-blue-500 cursor-pointer"
+              onClick={handleCopyId}
+              title="Cliquer pour copier l'ID"
+            >
+              #{elementInfo.id}
+            </span>
+          )}
         </div>
 
-        {elementInfo.id && (
-          <div
-            className="text-xs text-gray-500 mt-1 cursor-pointer hover:text-blue-500 truncate"
-            onClick={() => handleCopyToClipboard(elementInfo.id)}
-            title="Cliquer pour copier l'ID"
-          >
-            #{elementInfo.id}
-          </div>
-        )}
-
-        {/* Classes CSS */}
+        {/* Display classes in a badge style */}
         {elementInfo.classes.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
+          <div className="flex flex-wrap gap-1 mt-1">
             {elementInfo.classes.map((cls, idx) => (
               <span
                 key={idx}
-                className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs cursor-pointer hover:bg-gray-200"
-                onClick={() => handleCopyToClipboard(cls)}
-                title="Cliquer pour copier"
+                className="px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
               >
                 {cls}
               </span>
@@ -298,79 +160,79 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           </div>
         )}
 
-        {/* Texte pour les labels */}
+        {/* Show text content for labels */}
         {elementInfo.isLabel && elementInfo.text && (
           <div
-            className="mt-2 text-sm italic text-gray-700 cursor-pointer hover:text-blue-500 truncate"
+            className="mt-1.5 text-sm italic truncate cursor-pointer hover:text-blue-500"
             title="Cliquer pour copier le texte"
-            onClick={() => handleCopyToClipboard(elementInfo.text)}
+            onClick={handleCopyText}
           >
             "{elementInfo.text}"
           </div>
         )}
       </div>
 
-      {/* Actions spécifiques */}
-      <div className="py-1">
-        {(elementInfo.isBreaker || elementInfo.isDisconnector) && (
-          <div
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-            onClick={handleToggleElement}
-          >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-              />
-            </svg>
-            {elementInfo.isClosed ? 'Ouvrir' : 'Fermer'}{' '}
-            {elementInfo.isBreaker ? 'le disjoncteur' : 'le sectionneur'}
+      {/* Attributes section */}
+      {attributes.length > 0 ? (
+        <div className="max-h-60 overflow-y-auto">
+          <div className="px-4 py-1 text-xs text-gray-500 font-semibold">
+            ATTRIBUTS:
           </div>
-        )}
-      </div>
-
-      {/* Attributs */}
-      <div className="border-t border-gray-100">
-        <div className="px-4 py-2 text-xs text-gray-500 font-semibold">
-          ATTRIBUTS ({elementInfo.attributes.length})
-        </div>
-        <div className="max-h-40 overflow-y-auto">
-          {elementInfo.attributes.map((attr, index) => (
+          {attributes.map((attr, index) => (
             <div
               key={index}
-              className="px-4 py-1 hover:bg-gray-100 cursor-pointer flex justify-between items-center"
+              className="px-4 py-1 hover:bg-gray-100 cursor-pointer text-sm flex justify-between items-center"
               onClick={() => handleCopyAttribute(attr.name, attr.value)}
               title="Cliquer pour copier"
             >
-              <span className="font-medium text-purple-700 text-xs">
-                {attr.name}:
-              </span>
-              <span className="text-gray-600 text-xs truncate max-w-48 ml-2">
+              <span className="font-medium text-purple-700">{attr.name}:</span>
+              <span className="ml-2 text-gray-600 truncate max-w-xs">
                 {attr.value}
               </span>
             </div>
           ))}
         </div>
-      </div>
+      ) : (
+        <div className="px-4 py-1 text-sm text-gray-500">Aucun attribut</div>
+      )}
 
-      {/* Actions de copie */}
-      <div className="border-t border-gray-100 pt-1">
+      {/* Actions section */}
+      <div className="border-t border-gray-100 mt-1 pt-1">
+        {elementInfo.isBreaker && (
+          <div
+            className="px-4 py-1.5 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
+            onClick={handleToggleBreaker}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
+            </svg>
+            {elementInfo.isClosed
+              ? 'Ouvrir le disjoncteur'
+              : 'Fermer le disjoncteur'}
+          </div>
+        )}
+
         <div
-          className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-          onClick={handleCopyElement}
+          className="px-4 py-1.5 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
+          onClick={handleCopyElementInfo}
         >
           <svg
-            className="w-4 h-4 mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-2"
             fill="none"
-            stroke="currentColor"
             viewBox="0 0 24 24"
+            stroke="currentColor"
           >
             <path
               strokeLinecap="round"
@@ -379,19 +241,20 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
               d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
             />
           </svg>
-          Copier l'élément
+          Copier l'élément entier
         </div>
 
         {elementInfo.id && (
           <div
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-            onClick={() => handleCopyToClipboard(elementInfo.id)}
+            className="px-4 py-1.5 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
+            onClick={handleCopyId}
           >
             <svg
-              className="w-4 h-4 mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
               fill="none"
-              stroke="currentColor"
               viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
                 strokeLinecap="round"
@@ -404,16 +267,17 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
           </div>
         )}
 
-        {elementInfo.text && (
+        {elementInfo.isLabel && elementInfo.text && (
           <div
-            className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
-            onClick={() => handleCopyToClipboard(elementInfo.text)}
+            className="px-4 py-1.5 hover:bg-gray-100 cursor-pointer text-sm flex items-center"
+            onClick={handleCopyText}
           >
             <svg
-              className="w-4 h-4 mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 mr-2"
               fill="none"
-              stroke="currentColor"
               viewBox="0 0 24 24"
+              stroke="currentColor"
             >
               <path
                 strokeLinecap="round"
@@ -429,3 +293,5 @@ const ContextMenu: React.FC<ContextMenuProps> = ({
     </div>
   );
 };
+
+export default ContextMenu;
