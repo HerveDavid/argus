@@ -176,7 +176,7 @@ export const DiagramFooter: React.FC<DiagramFooterProps> = ({
     <div className="flex justify-between items-center w-full h-5">
       <MetadataDisplay diagramData={diagramData} />
 
-      {/* {isLoaded && (
+      {isLoaded && (
         <RefreshStatusCard
           lastUpdate={lastUpdate}
           isRefreshing={isRefreshing}
@@ -185,7 +185,7 @@ export const DiagramFooter: React.FC<DiagramFooterProps> = ({
           onToggleAutoRefresh={onToggleAutoRefresh}
           status={getStatus()}
         />
-      )} */}
+      )}
     </div>
   );
 };
