@@ -1,46 +1,54 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { CardAction, CardTitle } from '@/components/ui/card';
+import { useSldContext } from '../providers/sld.provider';
+import { CombinedButton } from './combined-button';
 
 export interface DiagramHeaderProps {
-  isRefreshing: boolean;
-  isError: boolean;
-  isAutoRefreshEnabled: boolean;
-  hasDataRef: React.MutableRefObject<boolean>;
   id: string;
+  hasDataRef: React.MutableRefObject<boolean>;
 }
 
-export const DiagramHeader: React.FC<DiagramHeaderProps> = ({
-  isRefreshing,
-  isError,
-  isAutoRefreshEnabled,
-  hasDataRef,
-  id,
-}) => {
+export const DiagramHeader: React.FC<DiagramHeaderProps> = ({ id }) => {
+  const {
+    isRefreshing,
+    isAutoRefreshEnabled,
+    isLoading,
+    enableAutoRefresh,
+    disableAutoRefresh,
+    manualRefresh,
+  } = useSldContext();
+
+  const handleToggleAutoRefresh = useCallback(() => {
+    if (isAutoRefreshEnabled) {
+      disableAutoRefresh();
+    } else {
+      enableAutoRefresh();
+    }
+  }, [isAutoRefreshEnabled, disableAutoRefresh, enableAutoRefresh]);
+
+  const handleManualRefresh = useCallback(() => {
+    if (!isRefreshing && !isLoading) {
+      manualRefresh();
+    }
+  }, [isRefreshing, isLoading, manualRefresh]);
+
   return (
-    <div>
-      <CardTitle>
-        <div className="flex text-xs items-center">
-          <div className="flex items-center gap-2">
-            {isRefreshing && (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-            )}
-            {isError && hasDataRef.current && (
-              <div
-                className="w-2 h-2 bg-yellow-500 rounded-full"
-                title="Refresh Error"
-              />
-            )}
-            {isAutoRefreshEnabled && (
-              <div
-                className="w-2 h-2 bg-green-500 rounded-full"
-                title="Auto-refresh"
-              />
-            )}
-            <h1>{id}</h1>
-          </div>
+    <header className="flex items-center justify-between" role="banner">
+      <CardTitle className="flex items-center ml-4">
+        <div className="flex items-center gap-2">
+          <h1 className="text-sm font-medium truncate">{id}</h1>
         </div>
       </CardTitle>
-      <CardAction />
-    </div>
+
+      <CardAction>
+        <CombinedButton
+          isAutoRefreshEnabled={isAutoRefreshEnabled}
+          isRefreshing={isRefreshing}
+          isLoading={isLoading}
+          onToggleAutoRefresh={handleToggleAutoRefresh}
+          onManualRefresh={handleManualRefresh}
+        />
+      </CardAction>
+    </header>
   );
 };

@@ -14,8 +14,7 @@ export interface SldContext {
   isAutoRefreshEnabled: boolean;
 }
 
-// Types pour les événements utilisateur
-export type SldEvent =
+export type LoaderEvent =
   | { type: 'LOAD_DIAGRAM'; lineId: string }
   | { type: 'CLEAR_DIAGRAM' }
   | { type: 'CLEAR_CACHE' }
@@ -26,7 +25,6 @@ export type SldEvent =
   | { type: 'AUTO_REFRESH_TICK' }
   | { type: 'MANUAL_REFRESH' };
 
-// Actor pour charger le diagramme en utilisant Effect
 const loadDiagramActor = fromPromise(
   async ({
     input,
@@ -34,8 +32,6 @@ const loadDiagramActor = fromPromise(
     input: { lineId: string; runtime: LiveManagedRuntime };
   }) => {
     const { lineId, runtime } = input;
-
-    // Créer le programme Effect
     const program = Effect.gen(function* () {
       const projectClient = yield* ProjectClient;
       return yield* projectClient.getSingleLineDiagram(lineId);
@@ -45,11 +41,10 @@ const loadDiagramActor = fromPromise(
   },
 );
 
-// Configuration de la machine XState
-export const sldMachine = setup({
+export const loaderMachine = setup({
   types: {
     context: {} as SldContext,
-    events: {} as SldEvent,
+    events: {} as LoaderEvent,
   },
   actors: {
     loadDiagram: loadDiagramActor,

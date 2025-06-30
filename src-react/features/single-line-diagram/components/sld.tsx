@@ -5,7 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
-import { useSldStore } from '../stores/sld.store';
+import { SldProvider, useSldContext } from '../providers/sld.provider';
 import { LoadingState } from './loading-state';
 import { ErrorState } from './error-state';
 import { DiagramContent } from './diagram-content';
@@ -18,7 +18,7 @@ export interface SingleLineDiagramProps {
   enableAutoRefreshByDefault?: boolean;
 }
 
-export const Sld: React.FC<SingleLineDiagramProps> = ({
+const SldInner: React.FC<SingleLineDiagramProps> = ({
   id,
   enableAutoRefreshByDefault = false,
 }) => {
@@ -29,52 +29,51 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
     isRefreshing,
     diagramData,
     error,
-    lastUpdate,
     isAutoRefreshEnabled,
-    loadDiagram,
     retry,
     enableAutoRefresh,
-    disableAutoRefresh,
-    manualRefresh,
-  } = useSldStore();
+    isReady,
+    currentId,
+  } = useSldContext();
 
   const svgRef = useRef<SVGSVGElement>(null);
-
-  const hasInitializedRef = useRef(false);
-  const currentIdRef = useRef<string | null>(null);
+  const autoRefreshInitializedRef = useRef(false);
   const hasDataRef = useRef(false);
 
+  // Gestion de l'auto-refresh par défaut
   useEffect(() => {
-    if (id && currentIdRef.current !== id) {
-      currentIdRef.current = id;
-      loadDiagram(id);
-    }
-  }, [id, loadDiagram]);
-
-  useEffect(() => {
-    if (!hasInitializedRef.current && enableAutoRefreshByDefault && isLoaded) {
-      hasInitializedRef.current = true;
+    if (
+      enableAutoRefreshByDefault &&
+      isLoaded &&
+      !autoRefreshInitializedRef.current &&
+      !isAutoRefreshEnabled
+    ) {
       enableAutoRefresh();
+      autoRefreshInitializedRef.current = true;
     }
-  }, [enableAutoRefreshByDefault, isLoaded, enableAutoRefresh]);
+  }, [
+    enableAutoRefreshByDefault,
+    isLoaded,
+    isAutoRefreshEnabled,
+    enableAutoRefresh,
+  ]);
 
+  // Suivi des données du diagramme
   useEffect(() => {
-    if (diagramData?.svg && !hasDataRef.current) {
+    if (diagramData?.svg) {
       hasDataRef.current = true;
+    } else {
+      hasDataRef.current = false;
     }
   }, [diagramData?.svg]);
 
-  const handleToggleAutoRefresh = () => {
-    if (isAutoRefreshEnabled) {
-      disableAutoRefresh();
-    } else {
-      enableAutoRefresh();
+  // Réinitialiser les refs quand l'ID change
+  useEffect(() => {
+    if (currentId !== id) {
+      autoRefreshInitializedRef.current = false;
+      hasDataRef.current = false;
     }
-  };
-
-  const handleManualRefresh = () => {
-    manualRefresh();
-  };
+  }, [currentId, id]);
 
   const shouldShowDiagram = () => {
     return (
@@ -83,12 +82,14 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
   };
 
   const shouldShowLoadingOverlay = () => {
-    return (
-      (isLoading && !hasDataRef.current) || (isRefreshing && hasDataRef.current)
-    );
+    return isRefreshing && hasDataRef.current;
   };
 
   const renderContent = () => {
+    if (!isReady) {
+      return <LoadingState />;
+    }
+
     if (isError && !hasDataRef.current) {
       return <ErrorState error={error} onRetry={retry} />;
     }
@@ -103,7 +104,7 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
               <div className="flex flex-col items-center gap-2">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 <span className="text-sm text-muted-foreground">
-                  {isLoading ? 'Loading...' : 'Refresh...'}
+                  Refreshing...
                 </span>
               </div>
             </div>
@@ -123,36 +124,26 @@ export const Sld: React.FC<SingleLineDiagramProps> = ({
   return (
     <div className="h-full">
       <Card className="h-full flex flex-col border-0 rounded-none p-2 gap-2">
-        <CardHeader className="gap-0">
-          <DiagramHeader
-            isRefreshing={isRefreshing}
-            isError={isError}
-            isAutoRefreshEnabled={isAutoRefreshEnabled}
-            hasDataRef={hasDataRef}
-            id={id}
-          />
+        <CardHeader className="p-0 gap-0">
+          <DiagramHeader id={id} hasDataRef={hasDataRef} />
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-hidden p-0">
+        <CardContent className="flex-1 overflow-hidden p-0 m-0">
           {renderContent()}
         </CardContent>
 
         <CardFooter className="p-0">
-          <div className="flex items-center justify-between w-full">
-            <DiagramFooter
-              isLoading={isLoading && !hasDataRef.current}
-              isLoaded={isLoaded || hasDataRef.current}
-              isError={isError}
-              lastUpdate={lastUpdate}
-              diagramData={diagramData}
-              isRefreshing={isRefreshing}
-              isAutoRefreshEnabled={isAutoRefreshEnabled}
-              onManualRefresh={handleManualRefresh}
-              onToggleAutoRefresh={handleToggleAutoRefresh}
-            />
-          </div>
+          <DiagramFooter />
         </CardFooter>
       </Card>
     </div>
+  );
+};
+
+export const Sld: React.FC<SingleLineDiagramProps> = (props) => {
+  return (
+    <SldProvider id={props.id}>
+      <SldInner {...props} />
+    </SldProvider>
   );
 };

@@ -1,6 +1,13 @@
 import { useState, useCallback, useMemo, useRef, RefObject } from 'react';
-import { ContextMenuState } from '../types';
 import { findParentWithId } from '../utils';
+
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  targetElement: SVGElement | null;
+}
+
 
 export const useContextMenu = (svgRef: RefObject<SVGSVGElement>) => {
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({
