@@ -25,29 +25,65 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
       yield* Effect.logInfo(`Project loaded successfully: ${project.name}`);
       yield* Effect.logInfo(`Project path: ${project.path}`);
 
-      // 2. Initialiser automatiquement la base de données
+      // 2. Gérer la base de données de manière conditionnelle
       const dbPath = `${project.path}/.argus/network.db`;
-      yield* Effect.logInfo(`Initializing database at: ${dbPath}`);
 
-      const createdDbPath = yield* projectClient.initDatabaseProject(dbPath);
-      yield* Effect.logInfo(
-        `Database initialized successfully: ${createdDbPath}`,
-      );
+      // Tenter de faire une requête simple pour tester si la DB existe et fonctionne
+      const dbResult = yield* projectClient
+        .queryProject('SELECT 1 as test')
+        .pipe(
+          Effect.match({
+            onSuccess: (result) => ({ exists: true, needsInit: false, result }),
+            onFailure: (error) => ({ exists: false, needsInit: true, error }),
+          }),
+        );
 
-      // 3. Optionnel: Tester la base avec une requête simple
-      const busCount = yield* projectClient.queryProject(
-        'SELECT COUNT(*) as count FROM buses',
-      );
-      yield* Effect.logInfo(
-        `Network contains ${busCount.data[0]?.count || 0} buses`,
-      );
+      let finalDbPath = dbPath;
+
+      if (dbResult.needsInit) {
+        yield* Effect.logInfo(
+          `Database not functional, initializing at: ${dbPath}`,
+        );
+        finalDbPath = yield* projectClient.initDatabaseProject(dbPath);
+        yield* Effect.logInfo(
+          `Database initialized successfully: ${finalDbPath}`,
+        );
+      } else {
+        yield* Effect.logInfo('Database already exists and is functional');
+      }
+
+      // 3. Tester la base avec une requête sur les buses
+      const busCountResult = yield* projectClient
+        .queryProject('SELECT COUNT(*) as count FROM buses')
+        .pipe(
+          Effect.match({
+            onSuccess: (busCount) => ({
+              success: true,
+              count: busCount.data[0]?.count || 0,
+            }),
+            onFailure: (error) => ({
+              success: false,
+              count: 0,
+              error,
+            }),
+          }),
+        );
+
+      if (busCountResult.success) {
+        yield* Effect.logInfo(`Network contains ${busCountResult.count} buses`);
+      } else {
+        yield* Effect.logWarning(
+          'Could not query buses table, database might be empty or tables not created yet',
+        );
+      }
 
       yield* Effect.logInfo('Application startup completed successfully');
 
       return {
         project,
-        dbPath: createdDbPath,
-        busCount: busCount.data[0]?.count || 0,
+        dbPath: finalDbPath,
+        busCount: busCountResult.count,
+        dbWasInitialized: dbResult.needsInit,
       };
     });
 
@@ -65,6 +101,11 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
       )
       .then((result) => {
         console.log('Startup completed:', result);
+        if (result.dbWasInitialized) {
+          console.log('Database was initialized from scratch');
+        } else {
+          console.log('Database was already present and functional');
+        }
         setIsLoading(false);
       })
       .catch((error) => {
@@ -81,7 +122,7 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-lg">
-            Loading project and initializing database...
+            Loading project and checking database...
           </p>
         </div>
       </div>

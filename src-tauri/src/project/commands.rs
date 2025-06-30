@@ -26,34 +26,44 @@ pub async fn load_project(
 
     println!("Loaded project: {:?}", &project);
 
-    // Envoyer la requête load_config au serveur Python via ZMQ
-    let mut project_state_guard = project_state.lock().await;
+    // Vérifier si network.db existe déjà dans le répertoire du projet
+    let network_db_path = std::path::Path::new(&project.path).join("network.db");
+    let db_exists = network_db_path.exists();
 
-    let params = json!({
-        "config_path": project.config_path
-    });
+    println!("Network DB exists: {}", db_exists);
 
-    let timeout = Duration::from_secs(30);
+    if !db_exists {
+        // Envoyer la requête load_config au serveur Python via ZMQ seulement si la DB n'existe pas
+        let mut project_state_guard = project_state.lock().await;
 
-    match project_state_guard
-        .database
-        .send_request("load_config", Some(params), timeout)
-        .await
-    {
-        Ok(response) => {
-            println!("Python load_config response: {:?}", response);
+        let params = json!({
+            "config_path": project.config_path
+        });
 
-            if let Some(network_info) = response.get("network_load_result") {
-                println!("Network loaded successfully: {:?}", network_info);
+        let timeout = Duration::from_secs(30);
+
+        match project_state_guard
+            .database
+            .send_request("load_config", Some(params), timeout)
+            .await
+        {
+            Ok(response) => {
+                println!("Python load_config response: {:?}", response);
+
+                if let Some(network_info) = response.get("network_load_result") {
+                    println!("Network loaded successfully: {:?}", network_info);
+                }
+
+                if let Some(error) = response.get("network_load_error") {
+                    println!("Warning - Network load error: {:?}", error);
+                }
             }
-
-            if let Some(error) = response.get("network_load_error") {
-                println!("Warning - Network load error: {:?}", error);
+            Err(e) => {
+                println!("Warning - Failed to load config via Python: {:?}", e);
             }
         }
-        Err(e) => {
-            println!("Warning - Failed to load config via Python: {:?}", e);
-        }
+    } else {
+        println!("Network DB already exists, skipping load_config");
     }
 
     Ok(project)
