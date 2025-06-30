@@ -8,19 +8,13 @@ import {
   ContextMenuSeparator,
 } from '@/components/ui/context-menu';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { useSelectedItemStore } from '@/stores/window-header.store';
 
 const Default = (props: IDockviewPanelProps<{ title: string }>) => {
-  const { setTitle } = useSelectedItemStore();
   const { removePanel, removeGroup } = useCentralPanelStore();
   const othersDisabled = props.api.group.panels.length <= 1;
 
   const handleClose = () => {
     removePanel(props.api.id);
-  };
-
-  const handleTabClick = () => {
-    setTitle(props.params.title);
   };
 
   const handleCloseOthers = () => {
@@ -39,7 +33,6 @@ const Default = (props: IDockviewPanelProps<{ title: string }>) => {
   return (
     <div
       className="flex justify-between items-center mx-2 h-[calc(100%+1px)]"
-      onMouseDown={handleTabClick}
     >
       <ContextMenu>
         <ContextMenuTrigger>{props.api.title}</ContextMenuTrigger>

@@ -60,7 +60,7 @@ export const RightMenu = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="size-5 p-2 rounded-full bg-muted/80"
+        className="size-5 p-2 rounded-full"
         onClick={handleMinimize}
         title="Minimize"
       >
@@ -69,7 +69,7 @@ export const RightMenu = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="size-5 p-2 rounded-full bg-muted/80"
+        className="size-5 p-2 rounded-full"
         onClick={handleMaximize}
         title={isMaximized ? 'Restore' : 'Maximize'}
       >
@@ -78,7 +78,7 @@ export const RightMenu = () => {
       <Button
         variant="ghost"
         size="sm"
-        className="size-5 p-2 rounded-full bg-muted/80"
+        className="size-5 p-2 rounded-full"
         onClick={handleClose}
         title="Close"
       >

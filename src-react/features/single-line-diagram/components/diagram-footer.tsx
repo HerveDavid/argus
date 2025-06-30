@@ -96,9 +96,9 @@ const RefreshStatusCard: React.FC<{
               </>
             )}
 
-            <Badge variant={getStatusVariant(status)} className="text-xs">
+            {/* <Badge variant={getStatusVariant(status)} className="text-xs">
               {status}
-            </Badge>
+            </Badge> */}
           </div>
 
           {/* Section contrôles de refresh */}

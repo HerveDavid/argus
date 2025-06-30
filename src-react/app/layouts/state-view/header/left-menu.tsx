@@ -10,8 +10,31 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { ProjectWidget } from '@/features/projects';
+import { useEffect, useState } from 'react';
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 
 export const LeftMenu = () => {
+  const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
+
+  useEffect(() => {
+    const initWindow = async () => {
+      const window = getCurrentWindow() as WebviewWindow;
+      setAppWindow(window);
+    };
+    initWindow();
+  }, []);
+
+  const handleClose = async () => {
+    if (appWindow) {
+      try {
+        await appWindow.close();
+      } catch (_error) {
+        // Handle error silently
+      }
+    }
+  };
+
   return (
     <div className="flex">
       <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
@@ -32,7 +55,7 @@ export const LeftMenu = () => {
             <MenubarSeparator />
             <MenubarItem>Settings</MenubarItem>
             <MenubarSeparator />
-            <MenubarItem>Exit</MenubarItem>
+            <MenubarItem onClick={handleClose}>Exit</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
 

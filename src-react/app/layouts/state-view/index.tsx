@@ -158,6 +158,7 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                   {isLeftToolsOpen && (
                     <ResizablePanel
                       id="left-tools"
+                      className={isRightToolsOpen ? 'border-r' : ''}
                       order={1}
                       defaultSize={leftToolsSize}
                       minSize={15}
