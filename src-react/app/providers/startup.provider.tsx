@@ -89,16 +89,7 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Exécuter le programme de startup avec gestion d'erreurs
     runtime
-      .runPromise(
-        startupProgram.pipe(
-          Effect.catchAll((error) =>
-            Effect.gen(function* () {
-              yield* Effect.logError(`Startup failed: ${error.message}`);
-              return Effect.fail(error);
-            }),
-          ),
-        ),
-      )
+      .runPromise(startupProgram)
       .then((result) => {
         console.log('Startup completed:', result);
         if (result.dbWasInitialized) {
