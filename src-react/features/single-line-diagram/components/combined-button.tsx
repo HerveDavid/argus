@@ -33,8 +33,8 @@ export const CombinedButton: React.FC<CombinedButtonProps> = ({
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           isRefreshDisabled && 'opacity-50 cursor-not-allowed',
         )}
-        title="Actualiser"
-        aria-label="Actualiser"
+        title="Refresh"
+        aria-label="Refresh"
       >
         <RefreshCw
           className={cn(
@@ -53,7 +53,7 @@ export const CombinedButton: React.FC<CombinedButtonProps> = ({
           'h-8 px-3 rounded-none text-xs font-medium transition-colors',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           isAutoRefreshEnabled
-            ? 'text-primary-foreground'
+            ? 'text-muted-foreground'
             : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
         )}
         title={isAutoRefreshEnabled ? 'Auto' : 'Manuel'}
