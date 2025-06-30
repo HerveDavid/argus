@@ -71,7 +71,7 @@ export const FileTreeItem = ({
     return (
       <div className="space-y-1">
         <DraggableItem id={sub.id}>
-          <Card className="p-0 m-2 shadow-xs hover:bg-secondary">
+          <Card className="p-0 m-2 shadow-xs hover:bg-secondary group">
             <div
               className="p-3"
               onClick={onClick}
@@ -105,7 +105,7 @@ export const FileTreeItem = ({
                     {(sub.voltage_levels?.length || 0) > 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="flex">
+                <div className="flex opacity-0 group-hover:opacity-100 transition-opacity duration-75">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="hover:bg-accent rounded-sm hover:text-accent-foreground text-muted-foreground">
                       <EllipsisVertical className="size-4 text-muted-foreground" />

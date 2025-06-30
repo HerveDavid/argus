@@ -1,12 +1,6 @@
-import {
-  Folder,
-  Terminal as TerminalIcon,
-  LogsIcon,
-  ClockIcon,
-} from 'lucide-react';
+import { Folder, Terminal as TerminalIcon, ClockIcon } from 'lucide-react';
 
 import { EquipmentExplorer } from '@/features/equipment-explorer';
-import { EventsLog } from '@/features/events-log';
 import Terminal from '@/features/terminal';
 import { SidebarItem } from '@/types/sidebar-item';
 
@@ -20,7 +14,7 @@ export const leftSidebarPanels: SidebarItem[] = [
   {
     id: 'equipment-explorer2',
     icon: ClockIcon,
-    label: 'Franck',
+    label: 'Test 2',
     content: Terminal,
   },
 ] as const;

@@ -235,9 +235,9 @@ export const loaderMachine = setup({
       },
     },
     loaded: {
-      // Auto-refresh timer de 5 secondes
+      // Auto-refresh timer de 1 minutes
       after: {
-        5000: [
+        60000: [
           {
             guard: 'isAutoRefreshEnabled',
             target: 'refreshing',

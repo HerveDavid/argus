@@ -11,7 +11,7 @@ interface LastUpdateDisplayProps {
 }
 
 const TIME_CONSTANTS = {
-  UPDATE_INTERVAL: 1000, // 1 seconde
+  UPDATE_INTERVAL: 5000, // 5 seconds
   SECONDS_IN_MINUTE: 60,
   SECONDS_IN_HOUR: 3600,
 } as const;
@@ -78,21 +78,16 @@ const LastUpdateDisplay: React.FC<LastUpdateDisplayProps> = ({
   );
 };
 
-
-
 const RefreshStatusCard: React.FC = () => {
-  const {
-    lastUpdate,
-  } = useSldContext();
+  const { lastUpdate } = useSldContext();
 
   const currentTime = useCurrentTime();
 
-
   return (
     <Card className="border-none shadow-none bg-transparent">
-      <CardContent className="p-3">
+      <CardContent className="">
         <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <LastUpdateDisplay
               lastUpdate={lastUpdate}
               currentTime={currentTime}
@@ -121,8 +116,8 @@ export const DiagramFooter: React.FC = () => {
       className="flex justify-between items-center w-full h-5"
       role="contentinfo"
     >
-      <MetadataSection />
       {isLoaded && <RefreshStatusCard />}
+      <MetadataSection />
     </footer>
   );
 };
