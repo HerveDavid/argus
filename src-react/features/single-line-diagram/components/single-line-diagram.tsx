@@ -139,7 +139,7 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
   );
 };
 
-export const Sld: React.FC<SingleLineDiagramProps> = (props) => {
+export const SingleLineDiagram: React.FC<SingleLineDiagramProps> = (props) => {
   return (
     <SldProvider id={props.id}>
       <SldInner {...props} />

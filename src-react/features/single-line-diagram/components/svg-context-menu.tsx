@@ -10,17 +10,26 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Hash, FileText, Power, PowerOff, Zap } from 'lucide-react';
+import { Copy, Hash, FileText, Power, PowerOff, Zap, Info } from 'lucide-react';
+import {
+  SWITCH_COMPONENT_TYPES,
+  FEEDER_COMPONENT_TYPES,
+  BUSBAR_SECTION_TYPES,
+  SldMetadata,
+  Node,
+} from '@/types/sld-metadata'; // Importez vos types
 
 interface SVGContextMenuProps {
   children: React.ReactNode;
   targetElement: SVGElement | null;
+  metadata?: SldMetadata; // Ajoutez les métadonnées
   onToggleBreaker?: (breakerId: string, isClosed: boolean) => void;
 }
 
 export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
   children,
   targetElement,
+  metadata,
   onToggleBreaker,
 }) => {
   const [attributes, setAttributes] = useState<
@@ -34,6 +43,9 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     text: string;
     isBreaker: boolean;
     isClosed: boolean;
+    componentType: string | null;
+    equipmentId: string | null;
+    nodeInfo: Node | null;
   }>({
     tagName: '',
     id: '',
@@ -42,7 +54,74 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     text: '',
     isBreaker: false,
     isClosed: false,
+    componentType: null,
+    equipmentId: null,
+    nodeInfo: null,
   });
+
+  // Fonction pour déterminer le type de composant à partir des classes CSS
+  const getComponentTypeFromClasses = (classList: string[]): string | null => {
+    // Recherche dans les classes CSS
+    for (const cls of classList) {
+      if (cls.startsWith('sld-')) {
+        const potentialType = cls.replace('sld-', '').toUpperCase();
+
+        // Vérifiez contre les types connus
+        if (SWITCH_COMPONENT_TYPES.has(potentialType)) {
+          return potentialType;
+        }
+        if (FEEDER_COMPONENT_TYPES.has(potentialType)) {
+          return potentialType;
+        }
+        if (BUSBAR_SECTION_TYPES.has(potentialType)) {
+          return potentialType;
+        }
+
+        // Types spéciaux
+        if (potentialType === 'LABEL') return 'LABEL';
+        if (potentialType === 'WIRE' || potentialType === 'LINE') return 'WIRE';
+        if (potentialType === 'BUS') return 'BUS';
+        if (potentialType === 'VOLTAGE_LEVEL') return 'VOLTAGE_LEVEL';
+      }
+    }
+    return null;
+  };
+
+  // Fonction pour trouver les informations du nœud dans les métadonnées
+  const findNodeInfo = (
+    elementId: string,
+    metadata?: SldMetadata,
+  ): Node | null => {
+    if (!metadata || !elementId) return null;
+
+    return (
+      metadata.nodes.find(
+        (node) => node.id === elementId || node.equipmentId === elementId,
+      ) || null
+    );
+  };
+
+  // Fonction pour extraire l'equipment ID à partir de l'ID de l'élément
+  const extractEquipmentId = (
+    elementId: string,
+    classList: string[],
+  ): string | null => {
+    // Parfois l'equipment ID est directement l'ID de l'élément
+    if (elementId && !elementId.includes('_')) {
+      return elementId;
+    }
+
+    // Parfois il faut extraire à partir d'un pattern comme "EQUIPMENT_ID_suffix"
+    if (elementId && elementId.includes('_')) {
+      const parts = elementId.split('_');
+      if (parts.length > 1) {
+        return parts[0];
+      }
+    }
+
+    // Chercher dans les attributs data-* ou d'autres patterns
+    return null;
+  };
 
   useEffect(() => {
     if (targetElement) {
@@ -57,11 +136,22 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
       // Get element info
       const tagName = targetElement.tagName;
       const id = targetElement.id || '';
-      const classList = targetElement.getAttribute('class')?.split(' ') || [];
+      const classList =
+        targetElement.getAttribute('class')?.split(' ').filter(Boolean) || [];
       const isLabel = classList.includes('sld-label');
       const isBreaker = classList.includes('sld-breaker');
       const isClosed = classList.includes('sld-closed');
       const text = targetElement.textContent || '';
+
+      // Déterminer le type de composant
+      const componentType = getComponentTypeFromClasses(classList);
+
+      // Extraire l'equipment ID
+      const equipmentId = extractEquipmentId(id, classList);
+
+      // Trouver les informations du nœud dans les métadonnées
+      const nodeInfo =
+        findNodeInfo(id, metadata) || findNodeInfo(equipmentId || '', metadata);
 
       setElementInfo({
         tagName,
@@ -71,9 +161,12 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
         text,
         isBreaker,
         isClosed,
+        componentType: nodeInfo?.componentType || componentType,
+        equipmentId: nodeInfo?.equipmentId || equipmentId,
+        nodeInfo,
       });
     }
-  }, [targetElement]);
+  }, [targetElement, metadata]);
 
   const handleCopyAttribute = (name: string, value: string) => {
     navigator.clipboard.writeText(`${name}="${value}"`);
@@ -104,10 +197,34 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     }
   };
 
+  const handleCopyType = () => {
+    if (elementInfo.componentType) {
+      navigator.clipboard.writeText(elementInfo.componentType);
+    }
+  };
+
+  const handleCopyEquipmentId = () => {
+    if (elementInfo.equipmentId) {
+      navigator.clipboard.writeText(elementInfo.equipmentId);
+    }
+  };
+
   const handleToggleBreaker = () => {
     if (elementInfo.isBreaker && targetElement && onToggleBreaker) {
       onToggleBreaker(elementInfo.id, elementInfo.isClosed);
     }
+  };
+
+  const getTypeColor = (type: string | null): string => {
+    if (!type) return 'var(--muted-foreground)';
+
+    if (SWITCH_COMPONENT_TYPES.has(type)) return '#3b82f6'; // blue
+    if (FEEDER_COMPONENT_TYPES.has(type)) return '#10b981'; // green
+    if (BUSBAR_SECTION_TYPES.has(type)) return '#f59e0b'; // yellow
+    if (type === 'WIRE' || type === 'LINE') return '#6b7280'; // gray
+    if (type === 'BUS') return '#8b5cf6'; // purple
+
+    return 'var(--muted-foreground)';
   };
 
   return (
@@ -149,6 +266,42 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
               </Badge>
             )}
           </div>
+
+          {/* Component Type */}
+          {elementInfo.componentType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-medium">Type:</span>
+              <Badge
+                variant="outline"
+                className="text-xs font-mono"
+                style={{
+                  borderColor: getTypeColor(elementInfo.componentType),
+                  color: getTypeColor(elementInfo.componentType),
+                  backgroundColor: 'var(--background)',
+                }}
+              >
+                {elementInfo.componentType}
+              </Badge>
+            </div>
+          )}
+
+          {/* Equipment ID */}
+          {elementInfo.equipmentId &&
+            elementInfo.equipmentId !== elementInfo.id && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-medium">Equipment:</span>
+                <Badge
+                  variant="secondary"
+                  className="text-xs font-mono"
+                  style={{
+                    backgroundColor: 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                  }}
+                >
+                  {elementInfo.equipmentId}
+                </Badge>
+              </div>
+            )}
 
           {/* Classes */}
           {elementInfo.classes.length > 0 && (
@@ -235,6 +388,48 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           <Copy className="mr-2 h-4 w-4" />
           Copy entire element
         </ContextMenuItem>
+
+        {elementInfo.componentType && (
+          <ContextMenuItem
+            onClick={handleCopyType}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+          >
+            <Info className="mr-2 h-4 w-4" />
+            Copy type
+          </ContextMenuItem>
+        )}
+
+        {elementInfo.equipmentId && (
+          <ContextMenuItem
+            onClick={handleCopyEquipmentId}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+          >
+            <Hash className="mr-2 h-4 w-4" />
+            Copy equipment ID
+          </ContextMenuItem>
+        )}
 
         {elementInfo.id && (
           <ContextMenuItem

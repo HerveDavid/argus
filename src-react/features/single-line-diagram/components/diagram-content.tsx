@@ -11,7 +11,6 @@ import {
 
 export const DiagramContent = () => {
   const { svgRef, diagramData } = useSldContext();
-
   const { setupZoom, restoreTransform } = useSvgZoom();
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
@@ -24,7 +23,6 @@ export const DiagramContent = () => {
 
     if (!isInitialized) {
       initializeSvg(diagramData.svg).then(() => {
-        // Setup du zoom après l'initialisation
         const svg = d3.select(svgRef.current!);
         setupZoom(svg);
       });
@@ -53,6 +51,7 @@ export const DiagramContent = () => {
         <SVGContextMenu
           targetElement={targetElement}
           onToggleBreaker={toggleBreaker}
+          metadata={diagramData?.metadata}
         >
           <svg
             ref={svgRef}
