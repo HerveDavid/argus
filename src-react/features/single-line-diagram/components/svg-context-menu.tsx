@@ -10,7 +10,16 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Hash, FileText, Power, PowerOff, Zap, Info } from 'lucide-react';
+import {
+  Copy,
+  Hash,
+  FileText,
+  Power,
+  PowerOff,
+  Zap,
+  Info,
+  ArrowRight,
+} from 'lucide-react';
 import {
   SWITCH_COMPONENT_TYPES,
   FEEDER_COMPONENT_TYPES,
@@ -24,6 +33,7 @@ interface SVGContextMenuProps {
   targetElement: SVGElement | null;
   metadata?: SldMetadata; // Ajoutez les métadonnées
   onToggleBreaker?: (breakerId: string, isClosed: boolean) => void;
+  onGoToVoltageLevel?: (nextVId: string) => void; // Nouvelle callback pour la navigation
 }
 
 export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
@@ -31,6 +41,7 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
   targetElement,
   metadata,
   onToggleBreaker,
+  onGoToVoltageLevel,
 }) => {
   const [attributes, setAttributes] = useState<
     { name: string; value: string }[]
@@ -46,6 +57,8 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     componentType: string | null;
     equipmentId: string | null;
     nodeInfo: Node | null;
+    isLine: boolean;
+    nextVId: string | null;
   }>({
     tagName: '',
     id: '',
@@ -57,6 +70,8 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     componentType: null,
     equipmentId: null,
     nodeInfo: null,
+    isLine: false,
+    nextVId: null,
   });
 
   // Fonction pour déterminer le type de composant à partir des classes CSS
@@ -153,6 +168,11 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
       const nodeInfo =
         findNodeInfo(id, metadata) || findNodeInfo(equipmentId || '', metadata);
 
+      // Vérifier si c'est une ligne et récupérer le nextVId
+      const isLine =
+        nodeInfo?.componentType === 'LINE' || componentType === 'LINE';
+      const nextVId = nodeInfo?.nextVId || null;
+
       setElementInfo({
         tagName,
         id,
@@ -164,6 +184,8 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
         componentType: nodeInfo?.componentType || componentType,
         equipmentId: nodeInfo?.equipmentId || equipmentId,
         nodeInfo,
+        isLine,
+        nextVId,
       });
     }
   }, [targetElement, metadata]);
@@ -209,9 +231,21 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
     }
   };
 
+  const handleCopyNextVId = () => {
+    if (elementInfo.nextVId) {
+      navigator.clipboard.writeText(elementInfo.nextVId);
+    }
+  };
+
   const handleToggleBreaker = () => {
     if (elementInfo.isBreaker && targetElement && onToggleBreaker) {
       onToggleBreaker(elementInfo.id, elementInfo.isClosed);
+    }
+  };
+
+  const handleGoToVoltageLevel = () => {
+    if (elementInfo.isLine && elementInfo.nextVId && onGoToVoltageLevel) {
+      onGoToVoltageLevel(elementInfo.nextVId);
     }
   };
 
@@ -303,6 +337,24 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
               </div>
             )}
 
+          {/* Next Voltage Level pour les lignes */}
+          {elementInfo.isLine && elementInfo.nextVId && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-medium">Next Level:</span>
+              <Badge
+                variant="outline"
+                className="text-xs font-mono"
+                style={{
+                  borderColor: '#10b981',
+                  color: '#10b981',
+                  backgroundColor: 'var(--background)',
+                }}
+              >
+                {elementInfo.nextVId}
+              </Badge>
+            </div>
+          )}
+
           {/* Classes */}
           {elementInfo.classes.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
@@ -332,6 +384,33 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
             </div>
           )}
         </div>
+
+        {/* Line navigation actions */}
+        {elementInfo.isLine && elementInfo.nextVId && (
+          <>
+            <ContextMenuItem
+              onClick={handleGoToVoltageLevel}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--foreground)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent)';
+                e.currentTarget.style.color = 'var(--accent-foreground)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--foreground)';
+              }}
+            >
+              <ArrowRight className="mr-2 h-4 w-4" />
+              Go to {elementInfo.nextVId}
+            </ContextMenuItem>
+            <ContextMenuSeparator
+              style={{ backgroundColor: 'var(--border)' }}
+            />
+          </>
+        )}
 
         {/* Breaker actions */}
         {elementInfo.isBreaker && (
@@ -449,6 +528,27 @@ export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
           >
             <Hash className="mr-2 h-4 w-4" />
             Copy ID
+          </ContextMenuItem>
+        )}
+
+        {elementInfo.isLine && elementInfo.nextVId && (
+          <ContextMenuItem
+            onClick={handleCopyNextVId}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+          >
+            <ArrowRight className="mr-2 h-4 w-4" />
+            Copy next voltage level
           </ContextMenuItem>
         )}
 

@@ -8,9 +8,10 @@ import {
   useBreakerToggle,
   useContextMenu,
 } from '../features/diagram-visualization';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 
 export const DiagramContent = () => {
-  const { svgRef, diagramData } = useSldContext();
+  const { svgRef, diagramData, currentId } = useSldContext();
   const { setupZoom, restoreTransform } = useSvgZoom();
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
@@ -45,6 +46,16 @@ export const DiagramContent = () => {
     setupZoom,
   ]);
 
+  const { addPanel } = useCentralPanelStore();
+  const goto = (id: string) => {
+    addPanel({
+      id,
+      tabComponent: 'default',
+      component: 'sld',
+      params: { id },
+    });
+  };
+
   return (
     <div className="h-full flex flex-col relative">
       <div className="flex-1 overflow-hidden bg-background border-0 rounded">
@@ -52,6 +63,7 @@ export const DiagramContent = () => {
           targetElement={targetElement}
           onToggleBreaker={toggleBreaker}
           metadata={diagramData?.metadata}
+          onGoToVoltageLevel={goto}
         >
           <svg
             ref={svgRef}
