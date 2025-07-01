@@ -1,12 +1,11 @@
 import { useActor } from '@xstate/react';
-import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { LiveManagedRuntime } from '@/config/live-layer';
+import { reloaderMachine } from '../machines/reloader.machine';
+import { DiagramReloaderStore } from '../types/diagram-reloader.type';
+import { useStoreRuntime } from '@/hooks/use-store-runtime';
 
-import { SldStore } from '../types';
-import { loaderMachine } from '../machines/loader.machine';
-
-const useSldStoreInner = (): SldStore => {
-  const [state, send] = useActor(loaderMachine);
+const useDiagramReloaderInner = () => {
+  const [state, send] = useActor(reloaderMachine);
 
   const getTimeSinceLastUpdate = (): number | null => {
     if (!state.context.lastUpdate) return null;
@@ -28,7 +27,6 @@ const useSldStoreInner = (): SldStore => {
       | 'waitingForRuntime'
       | 'refreshing',
     context: state.context,
-
     // Computed States
     isLoading: state.matches('loading'),
     isLoaded: state.matches('loaded'),
@@ -36,7 +34,6 @@ const useSldStoreInner = (): SldStore => {
     isIdle: state.matches('idle'),
     isWaitingForRuntime: state.matches('waitingForRuntime'),
     isRefreshing: state.matches('refreshing'),
-
     // Data
     diagramData: state.context.diagramData,
     error: state.context.error,
@@ -44,24 +41,20 @@ const useSldStoreInner = (): SldStore => {
     cacheSize: state.context.cache.size,
     lastUpdate: state.context.lastUpdate,
     isAutoRefreshEnabled: state.context.isAutoRefreshEnabled,
-
     // Load Actions
     loadDiagram: (lineId: string) => send({ type: 'LOAD_DIAGRAM', lineId }),
     clearDiagram: () => send({ type: 'CLEAR_DIAGRAM' }),
     clearCache: () => send({ type: 'CLEAR_CACHE' }),
     retry: () => send({ type: 'RETRY' }),
-
     // Refresh Actions
     enableAutoRefresh: () => send({ type: 'ENABLE_AUTO_REFRESH' }),
     disableAutoRefresh: () => send({ type: 'DISABLE_AUTO_REFRESH' }),
     manualRefresh: () => send({ type: 'MANUAL_REFRESH' }),
-
     // Helpers
     isInCache: (lineId: string) => state.context.cache.has(lineId),
     getCachedIds: () => Array.from(state.context.cache.keys()),
     getTimeSinceLastUpdate,
     getFormattedLastUpdate,
-
     // Effect Runtime
     runtime: state.context.runtime,
     setRuntime: (runtime: LiveManagedRuntime) =>
@@ -69,4 +62,5 @@ const useSldStoreInner = (): SldStore => {
   };
 };
 
-export const useSldStore = () => useStoreRuntime<SldStore>(useSldStoreInner);
+export const useDiagramReloader = () =>
+  useStoreRuntime<DiagramReloaderStore>(useDiagramReloaderInner);

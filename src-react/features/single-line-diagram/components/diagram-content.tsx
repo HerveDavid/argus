@@ -1,39 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import * as d3 from 'd3';
-import { SVGContextMenu } from './svg-context-menu';
 import { SldDiagram } from '@/types/sld-diagram';
 import { SldMetadata, Node, Wire, FeederInfo } from '@/types/sld-metadata';
+import { SVGContextMenu } from './svg-context-menu';
+import { ElementData } from '../types';
 
 interface DiagramContentProps {
   svgRef: React.RefObject<SVGSVGElement>;
   diagramData?: SldDiagram | null;
-}
-
-interface ElementData {
-  id: string;
-  type:
-    | 'breaker'
-    | 'disconnector'
-    | 'wire'
-    | 'feeder'
-    | 'busbar'
-    | 'node'
-    | 'other';
-  element: Element;
-  // Attributs SVG
-  transform?: string;
-  fill?: string;
-  stroke?: string;
-  className?: string;
-  d?: string; // pour paths
-  // Métadonnées enrichies
-  equipmentId?: string;
-  isOpen?: boolean;
-  direction?: string;
-  powerActive?: number;
-  powerReactive?: number;
-  // Priorité d'animation
-  priority: number;
 }
 
 export const DiagramContent: React.FC<DiagramContentProps> = ({
