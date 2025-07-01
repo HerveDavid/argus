@@ -235,7 +235,7 @@ export const reloaderMachine = setup({
       },
     },
     loaded: {
-      // Auto-refresh timer de 1 minutes
+      // Auto-refresh timer for 1 minutes
       after: {
         60000: [
           {
@@ -248,9 +248,17 @@ export const reloaderMachine = setup({
         SET_RUNTIME: {
           actions: 'setRuntime',
         },
-        ENABLE_AUTO_REFRESH: {
-          actions: 'enableAutoRefresh',
-        },
+        ENABLE_AUTO_REFRESH: [
+          {
+            guard: ({ context }) =>
+              context.runtime !== null && context.lineId !== null,
+            target: 'refreshing',
+            actions: 'enableAutoRefresh',
+          },
+          {
+            actions: 'enableAutoRefresh',
+          },
+        ],
         DISABLE_AUTO_REFRESH: {
           actions: 'disableAutoRefresh',
         },

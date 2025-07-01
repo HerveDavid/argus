@@ -2,15 +2,17 @@ import { useEffect } from 'react';
 import * as d3 from 'd3';
 import { SVGContextMenu } from './svg-context-menu';
 import { useSldContext } from '../providers/sld.provider';
-import { useSvgZoom } from '../features/diagram-visualization/hooks/use-svg-zoom';
-import { useSvgManager } from '../features/diagram-visualization/hooks/use-svg-manager';
-import { useBreakerToggle } from '../features/diagram-visualization/hooks/use-breaker-toogle';
-import { useContextMenu } from '../features/diagram-visualization/hooks/use-context-menu';
+import {
+  useSvgZoom,
+  useSvgManager,
+  useBreakerToggle,
+  useContextMenu,
+} from '../features/diagram-visualization';
 
 export const DiagramContent = () => {
   const { svgRef, diagramData } = useSldContext();
 
-  const { setupZoom, restoreTransform, cleanup } = useSvgZoom();
+  const { setupZoom, restoreTransform } = useSvgZoom();
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
   const { toggleBreaker } = useBreakerToggle(svgRef);
