@@ -1,20 +1,8 @@
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useRef,
-} from 'react';
-import { SldStore } from '../types';
+import React, { createContext, ReactNode, useContext } from 'react';
 import { useDiagramReloader } from '../features/diagram-reloader';
 
-const SldContext = createContext<
-  | (Omit<SldStore, 'runtime' | 'setRuntime'> & {
-      isReady: boolean;
-      currentId: string;
-    })
-  | null
->(null);
+type SldContextType = ReturnType<typeof useDiagramReloader>;
+const SldContext = createContext<SldContextType | null>(null);
 
 export const useSldContext = () => {
   const context = useContext(SldContext);
@@ -30,46 +18,16 @@ interface SldProviderProps {
 }
 
 export const SldProvider: React.FC<SldProviderProps> = ({ children, id }) => {
-  const previousIdRef = useRef<string | null>(null);
-  const hasInitializedRef = useRef(false);
-  const store = useDiagramReloader();
+  // Le hook gère maintenant toute la logique d'initialisation et de changement d'ID
+  const storeReloader = useDiagramReloader({
+    id,
+    autoLoad: true,
+  });
 
-  // Gestion de l'initialisation et du changement d'ID
-  useEffect(() => {
-    const isIdChanged = previousIdRef.current !== id;
-    const isReady = store.isReady;
-    const shouldLoad =
-      id && isReady && (isIdChanged || !hasInitializedRef.current);
-
-    if (shouldLoad) {
-      // Nettoyer le diagramme précédent si l'ID a changé
-      if (isIdChanged && previousIdRef.current !== null) {
-        store.clearDiagram();
-      }
-
-      // Charger le nouveau diagramme
-      store.loadDiagram(id);
-
-      // Marquer comme initialisé et sauvegarder l'ID actuel
-      hasInitializedRef.current = true;
-      previousIdRef.current = id;
-    }
-  }, [id, store.isReady, store.loadDiagram, store.clearDiagram]);
-
-  // Réinitialiser les refs si l'ID change
-  useEffect(() => {
-    if (previousIdRef.current !== null && previousIdRef.current !== id) {
-      hasInitializedRef.current = false;
-    }
-  }, [id]);
-
-  // Ajouter l'ID actuel au store pour que les composants enfants puissent y accéder
-  const enhancedStore = {
-    ...store,
+  const store = {
+    ...storeReloader,
     currentId: id,
   };
 
-  return (
-    <SldContext.Provider value={enhancedStore}>{children}</SldContext.Provider>
-  );
+  return <SldContext.Provider value={store}>{children}</SldContext.Provider>;
 };

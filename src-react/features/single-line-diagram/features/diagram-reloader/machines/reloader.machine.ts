@@ -237,7 +237,7 @@ export const reloaderMachine = setup({
     loaded: {
       // Auto-refresh timer de 1 minutes
       after: {
-        5000: [
+        60000: [
           {
             guard: 'isAutoRefreshEnabled',
             target: 'refreshing',
