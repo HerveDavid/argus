@@ -36,7 +36,6 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
     currentId,
   } = useSldContext();
 
-  const svgRef = useRef<SVGSVGElement>(null);
   const autoRefreshInitializedRef = useRef(false);
   const hasDataRef = useRef(false);
 
@@ -97,7 +96,7 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
     if (shouldShowDiagram()) {
       return (
         <div className="relative h-full">
-          <DiagramContent svgRef={svgRef} diagramData={diagramData} />
+          <DiagramContent />
 
           {shouldShowLoadingOverlay() && (
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10">

@@ -1,7 +1,10 @@
-import React, { createContext, ReactNode, useContext } from 'react';
+import React, { createContext, ReactNode, useContext, useRef } from 'react';
 import { useDiagramReloader } from '../features/diagram-reloader';
 
-type SldContextType = ReturnType<typeof useDiagramReloader>;
+type SldContextType = ReturnType<typeof useDiagramReloader> & {
+  currentId: string;
+  svgRef: React.RefObject<SVGSVGElement>;
+};
 const SldContext = createContext<SldContextType | null>(null);
 
 export const useSldContext = () => {
@@ -18,15 +21,17 @@ interface SldProviderProps {
 }
 
 export const SldProvider: React.FC<SldProviderProps> = ({ children, id }) => {
-  // Le hook gère maintenant toute la logique d'initialisation et de changement d'ID
   const storeReloader = useDiagramReloader({
     id,
     autoLoad: true,
   });
 
+  const svgRef = useRef<SVGSVGElement>(null);
+
   const store = {
     ...storeReloader,
     currentId: id,
+    svgRef,
   };
 
   return <SldContext.Provider value={store}>{children}</SldContext.Provider>;
