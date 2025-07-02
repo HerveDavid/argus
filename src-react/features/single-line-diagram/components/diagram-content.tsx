@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import * as d3 from 'd3';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { SVGContextMenu } from './svg-context-menu';
 import { useSldContext } from '../providers/sld.provider';
 import {
@@ -8,15 +9,32 @@ import {
   useBreakerToggle,
   useContextMenu,
 } from '../features/diagram-visualization';
-import { useCentralPanelStore } from '@/stores/central-panel.store';
+import { useDiagramNavigation } from '../features/diagram-navigation';
 
 export const DiagramContent = () => {
-  const { svgRef, diagramData, currentId } = useSldContext();
+  const { svgRef, diagramData } = useSldContext();
   const { setupZoom, restoreTransform } = useSvgZoom();
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
   const { toggleBreaker } = useBreakerToggle(svgRef);
   const { targetElement, handleContextMenuTrigger } = useContextMenu();
+  const { addPanel } = useCentralPanelStore();
+
+  const goto = (id: string) => {
+    addPanel({
+      id,
+      tabComponent: 'default',
+      component: 'sld',
+      params: { id },
+    });
+  };
+
+  // Nouveau hook pour la navigation des labels
+  const { styleNavigableLabels } = useDiagramNavigation({
+    svgRef,
+    metadata: diagramData?.metadata,
+    onGoToVoltageLevel: goto,
+  });
 
   // Gestion des mises à jour SVG
   useEffect(() => {
@@ -26,14 +44,17 @@ export const DiagramContent = () => {
       initializeSvg(diagramData.svg).then(() => {
         const svg = d3.select(svgRef.current!);
         setupZoom(svg);
+        // Styliser les labels après l'initialisation
+        setTimeout(() => styleNavigableLabels(), 200);
       });
     } else {
       const svg = d3.select(svgRef.current);
       const zoomGroup = ensureZoomGroup(svg);
-
-      updateSvg(diagramData.svg, diagramData.metadata, () =>
-        restoreTransform(zoomGroup),
-      );
+      updateSvg(diagramData.svg, diagramData.metadata, () => {
+        restoreTransform(zoomGroup);
+        // Styliser les labels après la mise à jour
+        setTimeout(() => styleNavigableLabels(), 200);
+      });
     }
   }, [
     diagramData?.svg,
@@ -44,17 +65,8 @@ export const DiagramContent = () => {
     ensureZoomGroup,
     restoreTransform,
     setupZoom,
+    styleNavigableLabels,
   ]);
-
-  const { addPanel } = useCentralPanelStore();
-  const goto = (id: string) => {
-    addPanel({
-      id,
-      tabComponent: 'default',
-      component: 'sld',
-      params: { id },
-    });
-  };
 
   return (
     <div className="h-full flex flex-col relative">
