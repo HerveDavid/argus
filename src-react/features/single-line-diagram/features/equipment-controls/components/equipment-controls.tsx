@@ -19,21 +19,29 @@ import {
   Zap,
   Info,
   ArrowRight,
+  Activity,
+  TrendingUp,
 } from 'lucide-react';
 import {
   SWITCH_COMPONENT_TYPES,
   FEEDER_COMPONENT_TYPES,
   BUSBAR_SECTION_TYPES,
+  FEEDER_ACTIVE_POWER_TYPES,
+  FEEDER_CURRENT_TYPES,
+  FEEDER_REACTIVE_POWER_TYPES,
+  FEEDER_VOLTAGE_TYPES,
+  FEEDER_ANGLE_TYPES,
   SldMetadata,
   Node,
-} from '@/types/sld-metadata'; // Importez vos types
+  MeasurementType,
+} from '@/types/sld-metadata';
 
 interface EquipmentControlsProps {
   children: React.ReactNode;
   targetElement: SVGElement | null;
-  metadata?: SldMetadata; // Ajoutez les métadonnées
+  metadata?: SldMetadata;
   onToggleBreaker?: (breakerId: string, isClosed: boolean) => void;
-  onGoToVoltageLevel?: (nextVId: string) => void; // Nouvelle callback pour la navigation
+  onGoToVoltageLevel?: (nextVId: string) => void;
 }
 
 export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
@@ -59,6 +67,11 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     nodeInfo: Node | null;
     isLine: boolean;
     nextVId: string | null;
+    // Nouvelles propriétés pour les mesures
+    isMeasurement: boolean;
+    measurementType: MeasurementType | null;
+    measurementValue: string | null;
+    parentEquipmentId: string | null;
   }>({
     tagName: '',
     id: '',
@@ -72,14 +85,66 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     nodeInfo: null,
     isLine: false,
     nextVId: null,
+    isMeasurement: false,
+    measurementType: null,
+    measurementValue: null,
+    parentEquipmentId: null,
   });
+
+  // Fonction pour déterminer le type de mesure à partir des classes CSS
+  const getMeasurementTypeFromClasses = (
+    classList: string[],
+  ): MeasurementType | null => {
+    for (const cls of classList) {
+      if (cls.startsWith('sld-')) {
+        const potentialType = cls
+          .replace('sld-', '')
+          .toUpperCase()
+          .replace('-', '_');
+
+        if (
+          FEEDER_ACTIVE_POWER_TYPES.has(potentialType) ||
+          potentialType === 'ACTIVE_POWER'
+        ) {
+          return 'ACTIVE_POWER';
+        }
+        if (
+          FEEDER_CURRENT_TYPES.has(potentialType) ||
+          potentialType === 'CURRENT'
+        ) {
+          return 'CURRENT';
+        }
+        if (
+          FEEDER_REACTIVE_POWER_TYPES.has(potentialType) ||
+          potentialType === 'REACTIVE_POWER'
+        ) {
+          return 'REACTIVE_POWER';
+        }
+        if (
+          FEEDER_VOLTAGE_TYPES.has(potentialType) ||
+          potentialType === 'VOLTAGE'
+        ) {
+          return 'VOLTAGE';
+        }
+        if (
+          FEEDER_ANGLE_TYPES.has(potentialType) ||
+          potentialType === 'ANGLE'
+        ) {
+          return 'ANGLE';
+        }
+      }
+    }
+    return null;
+  };
 
   // Fonction pour déterminer le type de composant à partir des classes CSS
   const getComponentTypeFromClasses = (classList: string[]): string | null => {
-    // Recherche dans les classes CSS
     for (const cls of classList) {
       if (cls.startsWith('sld-')) {
-        const potentialType = cls.replace('sld-', '').toUpperCase();
+        const potentialType = cls
+          .replace('sld-', '')
+          .toUpperCase()
+          .replace('-', '_');
 
         // Vérifiez contre les types connus
         if (SWITCH_COMPONENT_TYPES.has(potentialType)) {
@@ -97,6 +162,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
         if (potentialType === 'WIRE' || potentialType === 'LINE') return 'WIRE';
         if (potentialType === 'BUS') return 'BUS';
         if (potentialType === 'VOLTAGE_LEVEL') return 'VOLTAGE_LEVEL';
+        if (potentialType === 'FEEDER') return 'FEEDER';
       }
     }
     return null;
@@ -134,7 +200,22 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
       }
     }
 
-    // Chercher dans les attributs data-* ou d'autres patterns
+    return null;
+  };
+
+  // Fonction pour extraire l'ID de l'équipement parent pour les mesures
+  const extractParentEquipmentId = (
+    elementId: string,
+    classList: string[],
+  ): string | null => {
+    // Pour les mesures, l'ID peut être du type "EQUIPMENT_ID_MEASUREMENT_TYPE"
+    if (elementId && elementId.includes('_')) {
+      const parts = elementId.split('_');
+      if (parts.length >= 2) {
+        // Retourne la première partie comme équipement parent
+        return parts[0];
+      }
+    }
     return null;
   };
 
@@ -158,20 +239,34 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
       const isClosed = classList.includes('sld-closed');
       const text = targetElement.textContent || '';
 
+      // Vérifier si c'est une mesure
+      const measurementType = getMeasurementTypeFromClasses(classList);
+      const isMeasurement = measurementType !== null;
+
       // Déterminer le type de composant
       const componentType = getComponentTypeFromClasses(classList);
 
       // Extraire l'equipment ID
       const equipmentId = extractEquipmentId(id, classList);
 
+      // Pour les mesures, extraire l'ID de l'équipement parent
+      const parentEquipmentId = isMeasurement
+        ? extractParentEquipmentId(id, classList)
+        : null;
+
       // Trouver les informations du nœud dans les métadonnées
       const nodeInfo =
-        findNodeInfo(id, metadata) || findNodeInfo(equipmentId || '', metadata);
+        findNodeInfo(id, metadata) ||
+        findNodeInfo(equipmentId || '', metadata) ||
+        findNodeInfo(parentEquipmentId || '', metadata);
 
       // Vérifier si c'est une ligne et récupérer le nextVId
       const isLine =
         nodeInfo?.componentType === 'LINE' || componentType === 'LINE';
       const nextVId = nodeInfo?.nextVId || null;
+
+      // Extraire la valeur de la mesure si c'est un élément de mesure
+      const measurementValue = isMeasurement ? text : null;
 
       setElementInfo({
         tagName,
@@ -186,6 +281,10 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
         nodeInfo,
         isLine,
         nextVId,
+        isMeasurement,
+        measurementType,
+        measurementValue,
+        parentEquipmentId,
       });
     }
   }, [targetElement, metadata]);
@@ -225,9 +324,27 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     }
   };
 
+  const handleCopyMeasurementType = () => {
+    if (elementInfo.measurementType) {
+      navigator.clipboard.writeText(elementInfo.measurementType);
+    }
+  };
+
+  const handleCopyMeasurementValue = () => {
+    if (elementInfo.measurementValue) {
+      navigator.clipboard.writeText(elementInfo.measurementValue);
+    }
+  };
+
   const handleCopyEquipmentId = () => {
     if (elementInfo.equipmentId) {
       navigator.clipboard.writeText(elementInfo.equipmentId);
+    }
+  };
+
+  const handleCopyParentEquipmentId = () => {
+    if (elementInfo.parentEquipmentId) {
+      navigator.clipboard.writeText(elementInfo.parentEquipmentId);
     }
   };
 
@@ -259,6 +376,39 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     if (type === 'BUS') return '#8b5cf6'; // purple
 
     return 'var(--muted-foreground)';
+  };
+
+  const getMeasurementTypeColor = (type: MeasurementType | null): string => {
+    if (!type) return 'var(--muted-foreground)';
+
+    switch (type) {
+      case 'ACTIVE_POWER':
+        return '#dc2626'; // red
+      case 'REACTIVE_POWER':
+        return '#ca8a04'; // yellow-600
+      case 'CURRENT':
+        return '#2563eb'; // blue-600
+      case 'VOLTAGE':
+        return '#059669'; // emerald-600
+      case 'ANGLE':
+        return '#7c3aed'; // violet-600
+      default:
+        return 'var(--muted-foreground)';
+    }
+  };
+
+  const getMeasurementIcon = (type: MeasurementType | null) => {
+    switch (type) {
+      case 'ACTIVE_POWER':
+      case 'REACTIVE_POWER':
+        return TrendingUp;
+      case 'CURRENT':
+      case 'VOLTAGE':
+      case 'ANGLE':
+        return Activity;
+      default:
+        return Info;
+    }
   };
 
   return (
@@ -301,8 +451,45 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
             )}
           </div>
 
+          {/* Measurement Type */}
+          {elementInfo.isMeasurement && elementInfo.measurementType && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-medium">Measurement:</span>
+              <Badge
+                variant="outline"
+                className="text-xs font-mono"
+                style={{
+                  borderColor: getMeasurementTypeColor(
+                    elementInfo.measurementType,
+                  ),
+                  color: getMeasurementTypeColor(elementInfo.measurementType),
+                  backgroundColor: 'var(--background)',
+                }}
+              >
+                {elementInfo.measurementType}
+              </Badge>
+            </div>
+          )}
+
+          {/* Measurement Value */}
+          {elementInfo.isMeasurement && elementInfo.measurementValue && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-medium">Value:</span>
+              <Badge
+                variant="secondary"
+                className="text-xs font-mono"
+                style={{
+                  backgroundColor: 'var(--secondary)',
+                  color: 'var(--secondary-foreground)',
+                }}
+              >
+                {elementInfo.measurementValue}
+              </Badge>
+            </div>
+          )}
+
           {/* Component Type */}
-          {elementInfo.componentType && (
+          {elementInfo.componentType && !elementInfo.isMeasurement && (
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-medium">Type:</span>
               <Badge
@@ -333,6 +520,26 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
                   }}
                 >
                   {elementInfo.equipmentId}
+                </Badge>
+              </div>
+            )}
+
+          {/* Parent Equipment ID pour les mesures */}
+          {elementInfo.isMeasurement &&
+            elementInfo.parentEquipmentId &&
+            elementInfo.parentEquipmentId !== elementInfo.equipmentId && (
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs font-medium">Parent Equipment:</span>
+                <Badge
+                  variant="outline"
+                  className="text-xs font-mono"
+                  style={{
+                    borderColor: '#6b7280',
+                    color: '#6b7280',
+                    backgroundColor: 'var(--background)',
+                  }}
+                >
+                  {elementInfo.parentEquipmentId}
                 </Badge>
               </div>
             )}
@@ -468,7 +675,56 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
           Copy entire element
         </ContextMenuItem>
 
-        {elementInfo.componentType && (
+        {/* Copy measurement type */}
+        {elementInfo.isMeasurement && elementInfo.measurementType && (
+          <ContextMenuItem
+            onClick={handleCopyMeasurementType}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+          >
+            {(() => {
+              const IconComponent = getMeasurementIcon(
+                elementInfo.measurementType,
+              );
+              return <IconComponent className="mr-2 h-4 w-4" />;
+            })()}
+            Copy measurement type
+          </ContextMenuItem>
+        )}
+
+        {/* Copy measurement value */}
+        {elementInfo.isMeasurement && elementInfo.measurementValue && (
+          <ContextMenuItem
+            onClick={handleCopyMeasurementValue}
+            style={{
+              backgroundColor: 'transparent',
+              color: 'var(--foreground)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--accent)';
+              e.currentTarget.style.color = 'var(--accent-foreground)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--foreground)';
+            }}
+          >
+            <Hash className="mr-2 h-4 w-4" />
+            Copy measurement value
+          </ContextMenuItem>
+        )}
+
+        {elementInfo.componentType && !elementInfo.isMeasurement && (
           <ContextMenuItem
             onClick={handleCopyType}
             style={{
@@ -509,6 +765,30 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
             Copy equipment ID
           </ContextMenuItem>
         )}
+
+        {/* Copy parent equipment ID pour les mesures */}
+        {elementInfo.isMeasurement &&
+          elementInfo.parentEquipmentId &&
+          elementInfo.parentEquipmentId !== elementInfo.equipmentId && (
+            <ContextMenuItem
+              onClick={handleCopyParentEquipmentId}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--foreground)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--accent)';
+                e.currentTarget.style.color = 'var(--accent-foreground)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--foreground)';
+              }}
+            >
+              <Hash className="mr-2 h-4 w-4" />
+              Copy parent equipment ID
+            </ContextMenuItem>
+          )}
 
         {elementInfo.id && (
           <ContextMenuItem

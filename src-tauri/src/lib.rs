@@ -1,5 +1,6 @@
 mod commands;
 mod entities;
+mod nats;
 mod powsybl;
 mod project;
 mod settings;
@@ -49,8 +50,6 @@ pub fn run() {
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
 
-                println!("-----------------------------------------------");
-
                 let project_db = project::state::ProjectState::new(&app.handle())
                     .await
                     .expect("Failed to initialize project db");
@@ -60,6 +59,11 @@ pub fn run() {
                     .await
                     .expect("Failed to initialize powsybl");
                 app.manage(sybl);
+
+                let nats_state = nats::state::NatsState::new()
+                    .await
+                    .expect("Failed to initialize nats");
+                app.manage(nats_state);
 
                 println!("-----------------------------------------------");
             });
@@ -102,34 +106,11 @@ pub fn run() {
             project::commands::query_project,
             project::commands::create_new_project,
             project::commands::get_single_line_diagram,
-            // project::commands::clean_project,
-            // project::commands::is_loaded,
-            // project::commands::get_project,
-            // project::commands::initialize_database,
-            // project::commands::execute_query,
-            // project::commands::query_database,
-            // project::commands::get_network_info,
-            // project::commands::get_database_stats,
-            // project::commands::create_table,
-            // project::commands::check_database_connection,
-            // project::commands::disconnect_database,
-            // project::commands::get_database_paths,
-            // project::commands::get_substations_from_db,
-            // project::commands::search_substations_in_db,
-            // Powsybl
-            // powsybl::commands::substations::get_substations,
-            // powsybl::commands::substations::load_substations,
-            // powsybl::commands::substations::get_paginated_substations,
-            // powsybl::commands::substations::get_substation_by_id,
-            // powsybl::commands::substations::search_substations,
-            // powsybl::commands::substations::upload_iidm_file,
-            // powsybl::commands::substations::get_network_json,
-            // powsybl::commands::substations::get_current_network_info,
-            // powsybl::commands::substations::get_network_voltage_levels,
-            // powsybl::commands::substations::get_voltage_levels_for_substation,
-            // powsybl::commands::sld::get_single_line_diagram_with_metadata,
-            // powsybl::commands::sld::get_single_line_diagram,
-            // powsybl::commands::sld::get_single_line_diagram_metadata,
+            // Nats
+            nats::commands::set_nats_address,
+            nats::commands::connect_nats,
+            nats::commands::disconnect_nats,
+            nats::commands::get_nats_connection_status,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

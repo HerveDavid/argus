@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
 import * as d3 from 'd3';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { EquipmentControls, useEquipmentControls } from '../features/equipment-controls';
+import {
+  EquipmentControls,
+  useEquipmentControls,
+} from '../features/equipment-controls';
 import { useSldContext } from '../providers/sld.provider';
 import {
   useSvgZoom,
@@ -9,14 +12,18 @@ import {
   useBreakerToggle,
 } from '../features/diagram-visualization';
 import { useDiagramNavigation } from '../features/diagram-navigation';
+import { useDiagramFeeders } from '../features/diagram-feeders';
 
 export const DiagramContent = () => {
   const { svgRef, diagramData } = useSldContext();
   const { setupZoom, restoreTransform } = useSvgZoom();
+
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
   const { toggleBreaker } = useBreakerToggle(svgRef);
   const { targetElement, handleContextMenuTrigger } = useEquipmentControls();
+  useDiagramFeeders({ svgRef, metadata: diagramData?.metadata });
+
   const { addPanel } = useCentralPanelStore();
 
   const goto = (id: string) => {

@@ -58,6 +58,19 @@ export interface FeederInfo {
   componentType: string;
   equipmentId: string;
   side?: string;
+  // Ajout des nouvelles propriétés pour les mesures
+  activePower?: number;
+  current?: number;
+}
+
+// Nouveau type pour les informations de mesure des feeders
+export interface FeederMeasurement {
+  equipmentId: string;
+  activePower?: number;
+  reactivePower?: number;
+  current?: number;
+  voltage?: number;
+  angle?: number;
 }
 
 // Node representation
@@ -72,6 +85,8 @@ export interface Node {
   vlabel: boolean;
   nextVId?: string;
   rotationAngle?: number;
+  // Ajout des informations de mesure pour les nœuds
+  measurements?: FeederMeasurement;
 }
 
 // Connection representation
@@ -171,7 +186,7 @@ export type OnToggleSldHoverCallbackType = (
   equipmentType: string,
 ) => void;
 
-// Constants
+// Constants pour les types de composants
 export const SWITCH_COMPONENT_TYPES = new Set([
   'BREAKER',
   'DISCONNECTOR',
@@ -200,9 +215,76 @@ export const FEEDER_COMPONENT_TYPES = new Set([
 
 export const BUSBAR_SECTION_TYPES = new Set(['BUSBAR_SECTION']);
 
+// Nouveaux sets pour les types de mesures des feeders
+export const FEEDER_MEASUREMENT_TYPES = new Set([
+  'ACTIVE_POWER',
+  'REACTIVE_POWER',
+  'CURRENT',
+  'VOLTAGE',
+  'ANGLE',
+]);
+
+// Types spécifiques pour les classes CSS des mesures
+export const FEEDER_ACTIVE_POWER_TYPES = new Set([
+  'ACTIVE_POWER',
+  'P', // Notation courte pour Active Power
+]);
+
+export const FEEDER_CURRENT_TYPES = new Set([
+  'CURRENT',
+  'I', // Notation courte pour Current
+]);
+
+export const FEEDER_REACTIVE_POWER_TYPES = new Set([
+  'REACTIVE_POWER',
+  'Q', // Notation courte pour Reactive Power
+]);
+
+export const FEEDER_VOLTAGE_TYPES = new Set([
+  'VOLTAGE',
+  'U', // Notation courte pour Voltage
+  'V', // Alternative pour Voltage
+]);
+
+export const FEEDER_ANGLE_TYPES = new Set(['ANGLE', 'PHASE_ANGLE']);
+
+// Constantes pour les niveaux de zoom
 export const MAX_ZOOM_LEVEL = 10;
 export const MIN_ZOOM_LEVEL_SUB = 0.1;
 export const MIN_ZOOM_LEVEL_VL = 0.5;
+
+// Types pour identifier les éléments SVG selon leurs classes CSS
+export type SldElementType =
+  | 'FEEDER'
+  | 'SWITCH'
+  | 'BUSBAR'
+  | 'WIRE'
+  | 'BUS'
+  | 'LABEL'
+  | 'VOLTAGE_LEVEL'
+  | 'ACTIVE_POWER'
+  | 'CURRENT'
+  | 'REACTIVE_POWER'
+  | 'VOLTAGE'
+  | 'ANGLE';
+
+// Type pour les mesures spécifiques
+export type MeasurementType =
+  | 'ACTIVE_POWER'
+  | 'REACTIVE_POWER'
+  | 'CURRENT'
+  | 'VOLTAGE'
+  | 'ANGLE';
+
+// Interface pour les éléments avec mesures
+export interface ElementWithMeasurements {
+  id: string;
+  elementType: SldElementType;
+  measurementType?: MeasurementType;
+  value?: number;
+  unit?: string;
+  parentEquipmentId?: string;
+}
 
 // Main SLD Metadata interface
 export interface SldMetadata {
@@ -215,4 +297,6 @@ export interface SldMetadata {
   nodes: Node[];
   svgParams: SvgParams;
   wires: Wire[];
+  // Ajout des mesures des feeders
+  measurements?: FeederMeasurement[];
 }

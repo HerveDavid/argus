@@ -1,17 +1,8 @@
 export const formatVoltage = (voltage: number) => {
-  if (voltage >= 1000000) {
-    return `${(voltage / 1000000).toFixed(0)}MV`;
-  } else if (voltage >= 1000) {
-    return `${(voltage / 1000).toFixed(0)}kV`;
-  }
-  return `${voltage}V`;
+  return `${voltage}kV`;
 };
 
-export const getVoltageLevelColor = (voltage: number) => {
-  if (voltage >= 400000) return 'text-destructive';
-  if (voltage >= 200000) return 'text-warning';
-  if (voltage >= 100000) return 'text-info';
-  if (voltage >= 50000) return 'text-success';
+export const getVoltageLevelColor = (_voltage: number) => {
   return 'text-primary';
 };
 
