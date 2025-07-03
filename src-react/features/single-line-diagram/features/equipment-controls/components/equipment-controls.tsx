@@ -28,7 +28,7 @@ import {
   Node,
 } from '@/types/sld-metadata'; // Importez vos types
 
-interface SVGContextMenuProps {
+interface EquipmentControlsProps {
   children: React.ReactNode;
   targetElement: SVGElement | null;
   metadata?: SldMetadata; // Ajoutez les métadonnées
@@ -36,7 +36,7 @@ interface SVGContextMenuProps {
   onGoToVoltageLevel?: (nextVId: string) => void; // Nouvelle callback pour la navigation
 }
 
-export const SVGContextMenu: React.FC<SVGContextMenuProps> = ({
+export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   children,
   targetElement,
   metadata,

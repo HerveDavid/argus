@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 
-export const useContextMenu = () => {
+export const useEquipmentControls = () => {
   const [targetElement, setTargetElement] = useState<SVGElement | null>(null);
 
   const handleContextMenuTrigger = useCallback(

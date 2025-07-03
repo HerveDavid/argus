@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
 import * as d3 from 'd3';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
-import { SVGContextMenu } from './svg-context-menu';
+import { EquipmentControls, useEquipmentControls } from '../features/equipment-controls';
 import { useSldContext } from '../providers/sld.provider';
 import {
   useSvgZoom,
   useSvgManager,
   useBreakerToggle,
-  useContextMenu,
 } from '../features/diagram-visualization';
 import { useDiagramNavigation } from '../features/diagram-navigation';
 
@@ -17,7 +16,7 @@ export const DiagramContent = () => {
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
   const { toggleBreaker } = useBreakerToggle(svgRef);
-  const { targetElement, handleContextMenuTrigger } = useContextMenu();
+  const { targetElement, handleContextMenuTrigger } = useEquipmentControls();
   const { addPanel } = useCentralPanelStore();
 
   const goto = (id: string) => {
@@ -66,7 +65,7 @@ export const DiagramContent = () => {
   return (
     <div className="h-full flex flex-col relative">
       <div className="flex-1 overflow-hidden bg-background border-0 rounded">
-        <SVGContextMenu
+        <EquipmentControls
           targetElement={targetElement}
           onToggleBreaker={toggleBreaker}
           metadata={diagramData?.metadata}
@@ -78,7 +77,7 @@ export const DiagramContent = () => {
             style={{ minHeight: '400px' }}
             onContextMenu={handleContextMenuTrigger}
           />
-        </SVGContextMenu>
+        </EquipmentControls>
       </div>
     </div>
   );
