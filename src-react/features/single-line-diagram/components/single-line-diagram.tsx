@@ -5,6 +5,7 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+
 import { SldProvider, useSldContext } from '../providers/sld.provider';
 import { LoadingState } from './loading-state';
 import { ErrorState } from './error-state';
@@ -39,7 +40,6 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
   const autoRefreshInitializedRef = useRef(false);
   const hasDataRef = useRef(false);
 
-  // Gestion de l'auto-refresh par défaut
   useEffect(() => {
     if (
       enableAutoRefreshByDefault &&
@@ -57,7 +57,6 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
     enableAutoRefresh,
   ]);
 
-  // Suivi des données du diagramme
   useEffect(() => {
     if (diagramData?.svg) {
       hasDataRef.current = true;
@@ -66,7 +65,6 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
     }
   }, [diagramData?.svg]);
 
-  // Réinitialiser les refs quand l'ID change
   useEffect(() => {
     if (currentId !== id) {
       autoRefreshInitializedRef.current = false;

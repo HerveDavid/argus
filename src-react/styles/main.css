@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@import './bases/shadcn.css';
+@import './bases/variables.css';
+@import './components/single-line-diagram.css';

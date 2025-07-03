@@ -9,7 +9,7 @@ import { TreeData } from '../types/tree-data.type';
 interface HeaderProps {
   searchTerm: string;
   handleSearch: (value: string) => void;
-  data: SubstationQueryResponse;
+  data: SubstationQueryResponse | undefined;
   treeData: TreeData[];
   expandedSubstations: Set<String>;
   setExpandedSubstations: (expanded: Set<string>) => void;

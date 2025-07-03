@@ -30,7 +30,7 @@ export const DiagramContent = () => {
   };
 
   // Nouveau hook pour la navigation des labels
-  const { styleNavigableLabels } = useDiagramNavigation({
+  useDiagramNavigation({
     svgRef,
     metadata: diagramData?.metadata,
     onGoToVoltageLevel: goto,
@@ -44,16 +44,12 @@ export const DiagramContent = () => {
       initializeSvg(diagramData.svg).then(() => {
         const svg = d3.select(svgRef.current!);
         setupZoom(svg);
-        // Styliser les labels après l'initialisation
-        setTimeout(() => styleNavigableLabels(), 200);
       });
     } else {
       const svg = d3.select(svgRef.current);
       const zoomGroup = ensureZoomGroup(svg);
       updateSvg(diagramData.svg, diagramData.metadata, () => {
         restoreTransform(zoomGroup);
-        // Styliser les labels après la mise à jour
-        setTimeout(() => styleNavigableLabels(), 200);
       });
     }
   }, [
@@ -65,7 +61,6 @@ export const DiagramContent = () => {
     ensureZoomGroup,
     restoreTransform,
     setupZoom,
-    styleNavigableLabels,
   ]);
 
   return (
