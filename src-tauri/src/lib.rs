@@ -114,6 +114,15 @@ pub fn run() {
             nats::commands::connect_nats,
             nats::commands::disconnect_nats,
             nats::commands::get_nats_connection_status,
+            // Feeders
+            feeders::commands::start_feeder,
+            feeders::commands::close_feeder,
+            feeders::commands::pause_feeder,
+            feeders::commands::resume_feeder,
+            feeders::commands::list_active_feeders,
+            feeders::commands::get_feeder_count,
+            feeders::commands::get_feeder_status,
+            feeders::commands::get_feeders_statistics,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

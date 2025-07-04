@@ -5,22 +5,18 @@ use thiserror::Error;
 pub enum Error {
     #[error("Error from nats connection: {0}")]
     ConnectError(#[from] async_nats::ConnectError),
-
     #[error("Invalid address: {0}")]
     InvalidAddress(String),
-
+    #[error("Client is not initialized")]
+    ClientNotInitialized,
     #[error("Already connected: {0}")]
     AlreadyConnected(String),
-
     #[error("Not connected: {0}")]
     NotConnected(String),
-
     #[error("Channel error: {0}")]
     ChannelError(String),
-
     #[error("Serialization error: {0}")]
     SerializationError(String),
-
     #[error("Timeout error: {0}")]
     TimeoutError(String),
 }
