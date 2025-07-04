@@ -15,11 +15,11 @@ pub enum Error {
     #[error("Task join error: {0}")]
     TaskJoinError(#[from] tokio::task::JoinError),
 
-    #[error("Feeder '{0}' not found")]
-    FeederNotFound(String),
+    #[error("Task '{0}' not found")]
+    TaskNotFound(String),
 
-    #[error("Feeder '{0}' already exists")]
-    FeederAlreadyExists(String),
+    #[error("Task '{0}' already exists")]
+    TaskAlreadyExists(String),
 
     #[error("Task cancellation error: {0}")]
     CancellationError(String),
@@ -32,9 +32,6 @@ pub enum Error {
 
     #[error("Invalid topic name: {0}")]
     InvalidTopic(String),
-
-    #[error(transparent)]
-    FeederError(#[from] crate::tasks::error::Error),
 }
 
 impl Serialize for Error {

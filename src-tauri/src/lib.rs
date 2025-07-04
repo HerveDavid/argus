@@ -1,7 +1,8 @@
 mod commands;
 mod entities;
-mod feeders;
+mod tasks;
 mod nats;
+mod feeders;
 mod project;
 mod settings;
 mod utils;
@@ -58,10 +59,10 @@ pub fn run() {
                     .expect("Failed to initialize project db");
                 app.manage(project_db);
 
-                let feeders = feeders::state::FeedersState::new()
+                let tasks = tasks::state::TasksState::new()
                     .await
-                    .expect("Failed to initialize feeders");
-                app.manage(feeders);
+                    .expect("Failed to initialize tasks");
+                app.manage(tasks);
 
                 let nats_state = nats::state::NatsState::new()
                     .await
@@ -115,14 +116,16 @@ pub fn run() {
             nats::commands::disconnect_nats,
             nats::commands::get_nats_connection_status,
             // Feeders
-            feeders::commands::start_feeder,
-            feeders::commands::close_feeder,
-            feeders::commands::pause_feeder,
-            feeders::commands::resume_feeder,
-            feeders::commands::list_active_feeders,
-            feeders::commands::get_feeder_count,
-            feeders::commands::get_feeder_status,
-            feeders::commands::get_feeders_statistics,
+            tasks::commands::start_task,
+            tasks::commands::close_task,
+            tasks::commands::pause_task,
+            tasks::commands::resume_task,
+            tasks::commands::list_active_tasks,
+            tasks::commands::get_task_count,
+            tasks::commands::get_task_status,
+            tasks::commands::get_tasks_statistics,
+            // Orchestrator
+            feeders::commands::add_nats_feeder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
