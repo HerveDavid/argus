@@ -1,7 +1,7 @@
 mod commands;
 mod entities;
 mod nats;
-mod powsybl;
+mod feeders;
 mod project;
 mod settings;
 mod utils;
@@ -55,10 +55,10 @@ pub fn run() {
                     .expect("Failed to initialize project db");
                 app.manage(project_db);
 
-                let sybl = powsybl::state::PowsyblState::new()
+                let feeders = feeders::state::FeedersState::new()
                     .await
-                    .expect("Failed to initialize powsybl");
-                app.manage(sybl);
+                    .expect("Failed to initialize feeders");
+                app.manage(feeders);
 
                 let nats_state = nats::state::NatsState::new()
                     .await

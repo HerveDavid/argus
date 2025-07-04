@@ -2,17 +2,17 @@ import { useEffect } from 'react';
 import * as d3 from 'd3';
 import { SldMetadata, Node } from '@/types/sld-metadata';
 
-interface DiagramNavigationProps {
+interface LineGoToProps {
   svgRef: React.RefObject<SVGSVGElement>;
   metadata?: SldMetadata;
   onGoToVoltageLevel?: (nextVId: string) => void;
 }
 
-export const useDiagramNavigation = ({
+export const useLineGoTo = ({
   svgRef,
   metadata,
   onGoToVoltageLevel,
-}: DiagramNavigationProps) => {
+}: LineGoToProps) => {
   // Fonction pour déterminer le type de composant à partir des classes CSS
   const getComponentTypeFromClasses = (classList: string[]): string | null => {
     for (const cls of classList) {

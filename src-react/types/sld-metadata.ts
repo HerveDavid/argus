@@ -297,6 +297,5 @@ export interface SldMetadata {
   nodes: Node[];
   svgParams: SvgParams;
   wires: Wire[];
-  // Ajout des mesures des feeders
   measurements?: FeederMeasurement[];
 }

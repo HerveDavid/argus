@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 import * as d3 from 'd3';
 
-export const useSvgZoom = () => {
+export const useSvgNavigation = () => {
   const zoomBehaviorRef = useRef<d3.ZoomBehavior<
     SVGSVGElement,
     unknown
