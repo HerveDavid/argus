@@ -4,7 +4,7 @@ use thiserror::Error;
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Error from zmq: {0}")]
-    ZmqError(#[from] zeromq::ZmqError)
+    ZmqError(#[from] zeromq::ZmqError),
 }
 
 impl Serialize for Error {

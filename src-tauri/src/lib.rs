@@ -1,7 +1,7 @@
 mod commands;
 mod entities;
-mod nats;
 mod feeders;
+mod nats;
 mod project;
 mod settings;
 mod utils;
@@ -16,6 +16,9 @@ pub fn run() {
     std::env::set_var("RUST_LOG", "info,sqlx=off");
 
     tauri::Builder::default()
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_log::Builder::new()

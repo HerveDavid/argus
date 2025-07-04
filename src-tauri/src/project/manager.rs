@@ -147,7 +147,6 @@ impl DatabaseManager {
         // Wait with timeout
         match timeout(timeout_duration, rx).await {
             Ok(Ok(response)) => {
-
                 if let Some(error) = response.get("error") {
                     let error_msg = error.as_str().unwrap_or("Erreur inconnue");
                     log::error!("Erreur dans la réponse: {}", error_msg);

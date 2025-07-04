@@ -4,7 +4,7 @@ use tokio::sync::Mutex;
 
 use crate::settings::sidecars::state::SidecarsState;
 
-use super::error::{Result};
+use super::error::Result;
 
 #[tauri::command]
 pub async fn start_sidecar(state: State<'_, Mutex<SidecarsState>>, sidecar: String) -> Result<()> {

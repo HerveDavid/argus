@@ -111,5 +111,3 @@ pub async fn get_nats_connection_status(
     };
     Ok(status)
 }
-
-

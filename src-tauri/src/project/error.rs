@@ -1,6 +1,6 @@
 use serde::Serialize;
-use thiserror::Error;
 use std::path::PathBuf;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -15,7 +15,7 @@ pub enum Error {
 
     #[error("Serialization error: {0}")]
     Serialization(#[from] serde_json::Error),
-    
+
     #[error("No current project found")]
     ProjectNotFound,
 
@@ -24,7 +24,7 @@ pub enum Error {
 
     #[error("Failed to create project '{name}': {source}")]
     ProjectCreationFailed { name: String, source: Box<Error> },
-    
+
     #[error("Database connection not established for project '{name}'")]
     ConnectionNotEstablished { name: String },
 
@@ -56,7 +56,6 @@ pub enum Error {
 
     #[error("API error: {0}")]
     ApiError(String),
-
 }
 
 impl Serialize for Error {
