@@ -13,6 +13,7 @@ import { DiagramContent } from './diagram-content';
 import { EmptyState } from './empty-state';
 import { DiagramFooter } from './diagram-footer';
 import { DiagramHeader } from './diagram-header';
+import { useTaskStore } from '@/hooks/use-task';
 
 export interface SingleLineDiagramProps {
   id: string;

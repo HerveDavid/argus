@@ -18,6 +18,8 @@ import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { StartupProvider } from './providers/startup.provider';
 import { NatsClient } from '@/services/common/nats-client';
+import { TaskClient } from '@/services/common/task-client';
+import { FeederClient } from '@/services/common/feeder-client';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -48,13 +50,13 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           ChannelClient.Default,
           SettingsClient.Default,
           ProjectClient.Default,
+          TaskClient.Default,
+          FeederClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),
         ).pipe(
           Layer.provide(Logger.pretty),
           Layer.provideMerge(
-            NatsClient.Default.pipe(
-              Layer.provide(SettingsClient.Default),
-            ),
+            NatsClient.Default.pipe(Layer.provide(SettingsClient.Default)),
           ),
         ),
       ),

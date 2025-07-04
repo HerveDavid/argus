@@ -12,10 +12,15 @@ export const RightTools = () => {
     <div className="flex flex-col bg-sidebar h-full">
       <div className="flex bg-background border-y justify-between shadow">
         <div className="font-medium text-xs uppercase tracking-wide text-sidebar-foreground ml-2">
-          {activeItem.id}
+          {activeItem.label}
         </div>
 
-        <Button variant="ghost" className="size-0.5 px-1" onClick={closePanel} title='Close'>
+        <Button
+          variant="ghost"
+          className="size-0.5 px-1"
+          onClick={closePanel}
+          title="Close"
+        >
           <Minus />
         </Button>
       </div>

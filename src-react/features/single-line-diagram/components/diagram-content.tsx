@@ -15,9 +15,11 @@ import {
   useDiagramFeeders,
   useUpdateFeeders,
 } from '../features/diagram-feeders';
+import { useFeederStore } from '@/hooks/use-feeder';
+import { useTaskStore } from '@/hooks/use-task';
 
 export const DiagramContent = () => {
-  const { svgRef, diagramData } = useSldContext();
+  const { svgRef, diagramData, currentId } = useSldContext();
   const { setupZoom, restoreTransform } = useSvgNavigation();
   const { isInitialized, initializeSvg, updateSvg, ensureZoomGroup } =
     useSvgManager(svgRef);
@@ -36,6 +38,9 @@ export const DiagramContent = () => {
     getAllFeeders,
     updateAllFeeders,
   } = useUpdateFeeders({ svgRef });
+
+  const { addNatsFeeder } = useFeederStore();
+  const { startTask } = useTaskStore();
 
   const { addPanel } = useCentralPanelStore();
   const feedersInitialized = useRef(false);
@@ -148,6 +153,10 @@ export const DiagramContent = () => {
     getAllFeeders,
     updateAllFeeders,
   ]);
+
+  useEffect(() => {
+    addNatsFeeder(currentId, console.log).then(() => startTask(currentId));
+  }, []);
 
   return (
     <div className="h-full flex flex-col relative">
