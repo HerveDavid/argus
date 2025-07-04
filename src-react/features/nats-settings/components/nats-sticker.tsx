@@ -32,14 +32,40 @@ export const NatsSticker = () => {
     setAddress,
     getStatus,
     connectToSavedAddress,
+    getSavedAddress,
     clearError,
   } = useNatsStore();
 
   const [editAddress, setEditAddress] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoadingSavedAddress, setIsLoadingSavedAddress] = useState(false);
 
+  // Récupérer l'adresse sauvegardée au démarrage
   useEffect(() => {
-    if (address) {
+    const loadSavedAddress = async () => {
+      setIsLoadingSavedAddress(true);
+      try {
+        const savedAddress = await getSavedAddress();
+        if (savedAddress) {
+          setEditAddress(savedAddress);
+          // Optionnel : définir aussi l'adresse dans le store si elle n'est pas déjà définie
+          if (!address) {
+            await setAddress(savedAddress);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load saved address:', error);
+      } finally {
+        setIsLoadingSavedAddress(false);
+      }
+    };
+
+    loadSavedAddress();
+  }, [getSavedAddress, setAddress, address]);
+
+  // Synchroniser avec l'adresse actuelle du store
+  useEffect(() => {
+    if (address && address !== editAddress) {
       setEditAddress(address);
     }
   }, [address]);
@@ -84,7 +110,12 @@ export const NatsSticker = () => {
   };
 
   const getStatusIcon = () => {
-    if (isConnecting || isDisconnecting || isLoadingStatus) {
+    if (
+      isConnecting ||
+      isDisconnecting ||
+      isLoadingStatus ||
+      isLoadingSavedAddress
+    ) {
       return <Loader2 className="h-4 w-4 animate-spin" />;
     }
     if (status?.connected) {
@@ -101,7 +132,7 @@ export const NatsSticker = () => {
       <HoverCardTrigger asChild>
         <div className="flex items-center gap-2 cursor-pointer text-xs font-light text-muted-foreground hover:text-foreground transition-colors">
           <span className={`w-2 h-2 rounded-full ${getStatusColor()}`} />
-          <span>Orchestrator</span>
+          <span>Nats</span>
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
@@ -110,7 +141,7 @@ export const NatsSticker = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Server className="h-5 w-5" />
-              <h3 className="font-semibold">Orchestrator Connection</h3>
+              <h3 className="font-semibold">Nats</h3>
             </div>
             <div className="flex items-center gap-2">
               {getStatusIcon()}
@@ -192,9 +223,17 @@ export const NatsSticker = () => {
 
           {/* Address Configuration */}
           <div className="space-y-2">
-            <label htmlFor="nats-address" className="block text-sm font-medium">
-              Orchestrator Address
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="nats-address"
+                className="block text-sm font-medium"
+              >
+                Nats Address
+              </label>
+              {isLoadingSavedAddress && (
+                <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+              )}
+            </div>
             <div className="flex gap-2">
               <input
                 id="nats-address"
@@ -202,12 +241,12 @@ export const NatsSticker = () => {
                 placeholder="nats://localhost:4222"
                 value={editAddress}
                 onChange={(e) => setEditAddress(e.target.value)}
-                disabled={isSettingAddress}
+                disabled={isSettingAddress || isLoadingSavedAddress}
                 className="flex-1 px-3 py-2 border border-input rounded-md text-sm bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring disabled:opacity-50"
               />
               <button
                 onClick={() => setIsEditing(!isEditing)}
-                disabled={isSettingAddress}
+                disabled={isSettingAddress || isLoadingSavedAddress}
                 className="px-3 py-2 border border-input rounded-md hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
               >
                 <Settings className="h-4 w-4" />
@@ -216,7 +255,11 @@ export const NatsSticker = () => {
             {isEditing && (
               <button
                 onClick={handleSaveAddress}
-                disabled={isSettingAddress || !editAddress.trim()}
+                disabled={
+                  isSettingAddress ||
+                  !editAddress.trim() ||
+                  isLoadingSavedAddress
+                }
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
               >
                 {isSettingAddress ? (
@@ -254,7 +297,9 @@ export const NatsSticker = () => {
             ) : (
               <button
                 onClick={handleConnect}
-                disabled={isConnecting || !editAddress.trim()}
+                disabled={
+                  isConnecting || !editAddress.trim() || isLoadingSavedAddress
+                }
                 className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
               >
                 {isConnecting ? (
@@ -268,7 +313,7 @@ export const NatsSticker = () => {
 
             <button
               onClick={handleConnectToSaved}
-              disabled={isConnecting || !address}
+              disabled={isConnecting || !address || isLoadingSavedAddress}
               className="flex items-center justify-center gap-2 px-4 py-2 border border-input rounded-md hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
             >
               {isConnecting ? (

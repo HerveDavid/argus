@@ -36,6 +36,7 @@ interface NatsStore {
   getStatus: () => Promise<void>;
   loadSavedAddress: () => Promise<void>;
   connectToSavedAddress: () => Promise<void>;
+  getSavedAddress: () => Promise<string | null>; // Nouvelle méthode ajoutée
   clearError: () => void;
 
   // Nouvelles méthodes
@@ -236,6 +237,28 @@ const useNatsStoreInner = create<NatsStore>()(
             isLoadingSavedAddress: false,
             error: error as NatsError,
           });
+        }
+      },
+
+      // Nouvelle méthode getSavedAddress
+      getSavedAddress: async (): Promise<string | null> => {
+        const { runtime } = get();
+        if (!runtime) return null;
+
+        try {
+          const getSavedAddressEffect = Effect.gen(function* () {
+            const natsClient = yield* NatsClient;
+            return yield* natsClient.getSavedAddress();
+          });
+
+          const savedAddress: string | null = await runtime.runPromise(
+            getSavedAddressEffect,
+          );
+
+          return savedAddress;
+        } catch (error) {
+          console.error('Failed to get saved address:', error);
+          return null;
         }
       },
 

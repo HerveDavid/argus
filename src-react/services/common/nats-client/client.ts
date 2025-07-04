@@ -48,16 +48,22 @@ export class NatsClient extends Effect.Service<NatsClient>()(
           address: string,
         ): Effect.Effect<NatsAddressResponse, NatsError> =>
           Effect.gen(function* () {
+            yield* Effect.log(`Setting NATS address: ${address}`);
+
             const response = yield* Effect.tryPromise({
               try: () =>
                 invoke<NatsAddressResponse>('set_nats_address', { address }),
-              catch: (error) =>
-                new NatsAddressError({
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsAddressError({
                   address,
-                  cause:
-                    error instanceof Error ? error.message : 'Unknown error',
-                }),
+                  cause: errorMsg,
+                });
+              },
             });
+
+            yield* Effect.log(`Successfully set NATS address`);
 
             yield* settingsClient
               .setStringSetting(NATS_ADDRESS_SETTING_KEY, address)
@@ -71,47 +77,69 @@ export class NatsClient extends Effect.Service<NatsClient>()(
                 ),
               );
 
+            yield* Effect.log(`Address saved to settings`);
             return response;
           }),
 
         connect: (): Effect.Effect<NatsConnectionResponse, NatsError> =>
-          Effect.tryPromise({
-            try: () => invoke<NatsConnectionResponse>('connect_nats'),
-            catch: (error) =>
-              new NatsConnectionError({
-                cause:
-                  error instanceof Error
-                    ? error.message
-                    : 'Failed to connect to NATS',
-              }),
+          Effect.gen(function* () {
+            yield* Effect.log(`Attempting NATS connection`);
+
+            const response = yield* Effect.tryPromise({
+              try: () => invoke<NatsConnectionResponse>('connect_nats'),
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsConnectionError({
+                  cause: errorMsg,
+                });
+              },
+            });
+
+            yield* Effect.log(`NATS connection successful`);
+            return response;
           }),
 
         disconnect: (): Effect.Effect<NatsDisconnectionResponse, NatsError> =>
-          Effect.tryPromise({
-            try: () => invoke<NatsDisconnectionResponse>('disconnect_nats'),
-            catch: (error) =>
-              new NatsDisconnectionError({
-                cause:
-                  error instanceof Error
-                    ? error.message
-                    : 'Failed to disconnect from NATS',
-              }),
+          Effect.gen(function* () {
+            yield* Effect.log(`Disconnecting from NATS`);
+
+            const response = yield* Effect.tryPromise({
+              try: () => invoke<NatsDisconnectionResponse>('disconnect_nats'),
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsDisconnectionError({
+                  cause: errorMsg,
+                });
+              },
+            });
+
+            yield* Effect.log(`NATS disconnection successful`);
+            return response;
           }),
 
         getConnectionStatus: (): Effect.Effect<
           NatsConnectionStatus,
           NatsError
         > =>
-          Effect.tryPromise({
-            try: () =>
-              invoke<NatsConnectionStatus>('get_nats_connection_status'),
-            catch: (error) =>
-              new NatsStatusError({
-                cause:
-                  error instanceof Error
-                    ? error.message
-                    : 'Failed to get connection status',
-              }),
+          Effect.gen(function* () {
+            yield* Effect.log(`Getting NATS connection status`);
+
+            const response = yield* Effect.tryPromise({
+              try: () =>
+                invoke<NatsConnectionStatus>('get_nats_connection_status'),
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsStatusError({
+                  cause: errorMsg,
+                });
+              },
+            });
+
+            yield* Effect.log(`NATS status retrieved successfully`);
+            return response;
           }),
 
         getSavedAddress: (): Effect.Effect<string | null, NatsError> =>
@@ -124,6 +152,8 @@ export class NatsClient extends Effect.Service<NatsClient>()(
           NatsError
         > =>
           Effect.gen(function* () {
+            yield* Effect.log(`Connecting to saved NATS address`);
+
             // Récupérer l'adresse sauvegardée
             const savedAddress = yield* settingsClient
               .getStringSetting(NATS_ADDRESS_SETTING_KEY)
@@ -144,29 +174,38 @@ export class NatsClient extends Effect.Service<NatsClient>()(
                 ),
               );
 
+            yield* Effect.log(`Found saved address: ${savedAddress}`);
+
+            // Définir l'adresse
             yield* Effect.tryPromise({
               try: () =>
                 invoke<NatsAddressResponse>('set_nats_address', {
                   address: savedAddress,
                 }),
-              catch: (error) =>
-                new NatsAddressError({
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsAddressError({
                   address: savedAddress,
-                  cause:
-                    error instanceof Error ? error.message : 'Unknown error',
-                }),
+                  cause: errorMsg,
+                });
+              },
             });
 
-            return yield* Effect.tryPromise({
+            // Se connecter
+            const response = yield* Effect.tryPromise({
               try: () => invoke<NatsConnectionResponse>('connect_nats'),
-              catch: (error) =>
-                new NatsConnectionError({
-                  cause:
-                    error instanceof Error
-                      ? error.message
-                      : 'Failed to connect to NATS',
-                }),
+              catch: (error) => {
+                const errorMsg =
+                  error instanceof Error ? error.message : String(error);
+                return new NatsConnectionError({
+                  cause: errorMsg,
+                });
+              },
             });
+
+            yield* Effect.log(`Successfully connected to saved address`);
+            return response;
           }),
       } satisfies NatsService;
     }),
