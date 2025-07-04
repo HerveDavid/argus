@@ -87,20 +87,33 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
       };
     });
 
+    // Programme pour logging des résultats avec Effect.log
+    const logResults = (result: any) =>
+      Effect.gen(function* () {
+        yield* Effect.log('Startup completed:', result);
+        if (result.dbWasInitialized) {
+          yield* Effect.log('Database was initialized from scratch');
+        } else {
+          yield* Effect.log('Database was already present and functional');
+        }
+      });
+
+    const logError = (error: any) =>
+      Effect.gen(function* () {
+        yield* Effect.logError('Startup failed:', error);
+      });
+
     // Exécuter le programme de startup avec gestion d'erreurs
     runtime
       .runPromise(startupProgram)
       .then((result) => {
-        console.log('Startup completed:', result);
-        if (result.dbWasInitialized) {
-          console.log('Database was initialized from scratch');
-        } else {
-          console.log('Database was already present and functional');
-        }
+        // Exécuter le logging via Effect
+        runtime.runPromise(logResults(result));
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error('Startup failed:', error);
+        // Exécuter le logging d'erreur via Effect
+        runtime.runPromise(logError(error));
         setError(error.message || 'Application startup failed');
         setIsLoading(false);
       });

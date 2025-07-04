@@ -65,7 +65,6 @@ export const useEquipment = (
           ${whereClause}
         `;
 
-        console.log('Count Query:', countQuery);
         const countResult = yield* projectClient.queryProject(countQuery);
         const total = countResult.data[0]?.total || 0;
 
@@ -105,139 +104,121 @@ export const useEquipment = (
           LIMIT ${params.pageSize} OFFSET ${offset}
         `;
 
-        console.log('Main Query:', mainQuery);
         const result = yield* projectClient.queryProject(mainQuery);
 
         // Transformation des données - gestion du type STRUCT[] de DuckDB
-        const substations: Substation[] = result.data.map((row: any) => {
-          console.log('Raw row data:', row);
-          console.log('Raw voltage_levels:', row.voltage_levels);
-          console.log('Type of voltage_levels:', typeof row.voltage_levels);
+        const substations: Substation[] = yield* Effect.all(
+          result.data.map((row: any) =>
+            Effect.gen(function* () {
+              // Gestion du type STRUCT[] de DuckDB pour voltage_levels
+              let voltageLevels: any[] = [];
 
-          // Gestion du type STRUCT[] de DuckDB pour voltage_levels
-          let voltageLevels: any[] = [];
+              if (row.voltage_levels) {
+                if (Array.isArray(row.voltage_levels)) {
+                  // Déjà un tableau
+                  voltageLevels = row.voltage_levels;
+                } else if (typeof row.voltage_levels === 'string') {
+                  // DuckDB retourne souvent les STRUCT[] comme string avec guillemets simples
+                  try {
+                    // Convertir les guillemets simples en guillemets doubles pour JSON.parse
+                    const jsonString = row.voltage_levels
+                      .replace(/'/g, '"')
+                      .replace(/NULL/g, 'null')
+                      .replace(/True/g, 'true')
+                      .replace(/False/g, 'false');
 
-          if (row.voltage_levels) {
-            if (Array.isArray(row.voltage_levels)) {
-              // Déjà un tableau
-              voltageLevels = row.voltage_levels;
-              console.log('voltage_levels is array:', voltageLevels);
-            } else if (typeof row.voltage_levels === 'string') {
-              // DuckDB retourne souvent les STRUCT[] comme string avec guillemets simples
-              try {
-                // Convertir les guillemets simples en guillemets doubles pour JSON.parse
-                const jsonString = row.voltage_levels
-                  .replace(/'/g, '"')
-                  .replace(/NULL/g, 'null')
-                  .replace(/True/g, 'true')
-                  .replace(/False/g, 'false');
+                    voltageLevels = JSON.parse(jsonString);
+                  } catch (e) {
+                    // Si le parsing JSON échoue, essayons une approche alternative
+                    // Chercher les objets dans la chaîne
+                    try {
+                      const regex = /\{[^}]+\}/g;
+                      const matches = row.voltage_levels.match(regex);
+                      if (matches) {
+                        voltageLevels = matches.map((match: string) => {
+                          // Parser manuellement chaque objet
+                          const obj: any = {};
+                          const keyValueRegex = /'([^']+)':\s*([^,}]+)/g;
+                          let keyValueMatch;
 
-                console.log('Original string:', row.voltage_levels);
-                console.log('Converted JSON string:', jsonString);
+                          while (
+                            (keyValueMatch = keyValueRegex.exec(match)) !== null
+                          ) {
+                            const key = keyValueMatch[1];
+                            const rawValue = keyValueMatch[2].trim();
 
-                voltageLevels = JSON.parse(jsonString);
-                console.log('voltage_levels parsed from JSON:', voltageLevels);
-              } catch (e) {
-                console.log('Failed to parse JSON:', e);
-                console.log('Trying alternative parsing...');
+                            // Fonction helper pour parser avec le bon type
+                            const parseValue = (val: string): any => {
+                              if (val === 'NULL') return null;
+                              if (val === 'true' || val === 'True') return true;
+                              if (val === 'false' || val === 'False')
+                                return false;
+                              if (val.startsWith("'") && val.endsWith("'"))
+                                return val.slice(1, -1);
+                              if (!isNaN(Number(val))) return Number(val);
+                              return val;
+                            };
 
-                // Si le parsing JSON échoue, essayons une approche alternative
-                // Chercher les objets dans la chaîne
-                try {
-                  const regex = /\{[^}]+\}/g;
-                  const matches = row.voltage_levels.match(regex);
-                  if (matches) {
-                    voltageLevels = matches.map((match: string) => {
-                      // Parser manuellement chaque objet
-                      const obj: any = {};
-                      const keyValueRegex = /'([^']+)':\s*([^,}]+)/g;
-                      let keyValueMatch;
+                            obj[key] = parseValue(rawValue);
+                          }
 
-                      while (
-                        (keyValueMatch = keyValueRegex.exec(match)) !== null
-                      ) {
-                        const key = keyValueMatch[1];
-                        const rawValue = keyValueMatch[2].trim();
-
-                        // Fonction helper pour parser avec le bon type
-                        const parseValue = (val: string): any => {
-                          if (val === 'NULL') return null;
-                          if (val === 'true' || val === 'True') return true;
-                          if (val === 'false' || val === 'False') return false;
-                          if (val.startsWith("'") && val.endsWith("'"))
-                            return val.slice(1, -1);
-                          if (!isNaN(Number(val))) return Number(val);
-                          return val;
-                        };
-
-                        obj[key] = parseValue(rawValue);
+                          return obj;
+                        });
                       }
-
-                      return obj;
-                    });
-                    console.log('Manual parsing result:', voltageLevels);
+                    } catch (e2) {
+                      voltageLevels = [];
+                    }
                   }
-                } catch (e2) {
-                  console.log('Manual parsing also failed:', e2);
-                  voltageLevels = [];
+                } else if (typeof row.voltage_levels === 'object') {
+                  // Peut être un objet avec des propriétés numériques (DuckDB STRUCT[])
+                  voltageLevels = Object.values(row.voltage_levels).filter(
+                    (v) => v !== null && v !== undefined,
+                  );
                 }
               }
-            } else if (typeof row.voltage_levels === 'object') {
-              // Peut être un objet avec des propriétés numériques (DuckDB STRUCT[])
-              voltageLevels = Object.values(row.voltage_levels).filter(
-                (v) => v !== null && v !== undefined,
-              );
-              console.log(
-                'voltage_levels converted from object:',
-                voltageLevels,
-              );
-            }
-          }
 
-          // Assurer que c'est un tableau et filtrer les éléments valides
-          if (!Array.isArray(voltageLevels)) {
-            console.log('voltage_levels is not array, setting to empty');
-            voltageLevels = [];
-          }
+              // Assurer que c'est un tableau et filtrer les éléments valides
+              if (!Array.isArray(voltageLevels)) {
+                voltageLevels = [];
+              }
 
-          console.log('Final voltageLevels before mapping:', voltageLevels);
+              const mappedVoltageLevels = voltageLevels
+                .filter((vl: any) => {
+                  const isValid = vl && typeof vl === 'object' && vl.id;
+                  return isValid;
+                })
+                .map((vl: any) => {
+                  const mapped = {
+                    id: vl.id,
+                    name: vl.name || '',
+                    substation_id: vl.substation_id || row.substation_id,
+                    nominal_v: vl.nominal_v || 0,
+                    high_voltage_limit: vl.high_voltage_limit || 0,
+                    low_voltage_limit: vl.low_voltage_limit || 0,
+                    fictitious: vl.fictitious || false,
+                    topology_kind: vl.topology_kind || 'unknown',
+                  };
+                  return mapped;
+                })
+                // Tri par tension décroissante (déjà fait en SQL mais on s'assure)
+                .sort(
+                  (a: any, b: any) => (b.nominal_v || 0) - (a.nominal_v || 0),
+                );
 
-          const mappedVoltageLevels = voltageLevels
-            .filter((vl: any) => {
-              const isValid = vl && typeof vl === 'object' && vl.id;
-              console.log('Voltage level item:', vl, 'isValid:', isValid);
-              return isValid;
-            })
-            .map((vl: any) => {
-              const mapped = {
-                id: vl.id,
-                name: vl.name || '',
-                substation_id: vl.substation_id || row.substation_id,
-                nominal_v: vl.nominal_v || 0,
-                high_voltage_limit: vl.high_voltage_limit || 0,
-                low_voltage_limit: vl.low_voltage_limit || 0,
-                fictitious: vl.fictitious || false,
-                topology_kind: vl.topology_kind || 'unknown',
+              const substation = {
+                id: row.substation_id,
+                name: row.substation_name || '',
+                tso: row.tso || '',
+                geo_tags: row.geo_tags || '',
+                country: row.country || '',
+                fictitious: row.fictitious || false,
+                voltage_levels: mappedVoltageLevels,
               };
-              console.log('Mapped voltage level:', mapped);
-              return mapped;
-            })
-            // Tri par tension décroissante (déjà fait en SQL mais on s'assure)
-            .sort((a: any, b: any) => (b.nominal_v || 0) - (a.nominal_v || 0));
 
-          const substation = {
-            id: row.substation_id,
-            name: row.substation_name || '',
-            tso: row.tso || '',
-            geo_tags: row.geo_tags || '',
-            country: row.country || '',
-            fictitious: row.fictitious || false,
-            voltage_levels: mappedVoltageLevels,
-          };
-
-          console.log('Final substation:', substation);
-          return substation;
-        });
+              return substation;
+            }),
+          ),
+        );
 
         const totalPages = Math.ceil(total / params.pageSize);
 

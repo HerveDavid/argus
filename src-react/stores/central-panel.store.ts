@@ -131,11 +131,17 @@ const saveLayout = async (api: DockviewApi, runtime: LiveManagedRuntime) => {
         KEY_CENTRAL_PANEL_SETTING,
         api.toJSON(),
       );
+      yield* Effect.log('Layout saved');
     });
     await runtime.runPromise(setEffect);
-    console.log('Layout saved');
   } catch (error) {
-    console.error('Erreur lors de la sauvegarde du panneau central:', error);
+    const errorEffect = Effect.gen(function* () {
+      yield* Effect.logError(
+        'Error when saving layout:',
+        error,
+      );
+    });
+    await runtime.runPromise(errorEffect);
   }
 };
 

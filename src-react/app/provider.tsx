@@ -17,6 +17,7 @@ import { SettingsClient } from '@/services/common/settings-client';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { StartupProvider } from './providers/startup.provider';
+import { NatsClient } from '@/services/common/nats-client';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -48,7 +49,14 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           SettingsClient.Default,
           ProjectClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),
-        ).pipe(Layer.provide(Logger.pretty)),
+        ).pipe(
+          Layer.provide(Logger.pretty),
+          Layer.provideMerge(
+            NatsClient.Default.pipe(
+              Layer.provide(SettingsClient.Default),
+            ),
+          ),
+        ),
       ),
     [queryClient],
   );
