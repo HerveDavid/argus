@@ -40,7 +40,7 @@ export const DiagramContent = () => {
   } = useUpdateFeeders({ svgRef });
 
   const { addNatsFeeder } = useFeederStore();
-  const { startTask } = useTaskStore();
+  const { startTask, closeTask } = useTaskStore();
 
   const { addPanel } = useCentralPanelStore();
   const feedersInitialized = useRef(false);
@@ -155,7 +155,11 @@ export const DiagramContent = () => {
   ]);
 
   useEffect(() => {
-    addNatsFeeder(currentId, console.log).then(() => startTask(currentId));
+    addNatsFeeder(currentId, () => {}).then(() => startTask(currentId));
+
+    return () => {
+      closeTask(currentId);
+    };
   }, []);
 
   return (

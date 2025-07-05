@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -53,4 +55,14 @@ pub struct FeedersStatistics {
     pub active_feeders: usize,
     pub paused_feeders: usize,
     pub running_feeders: usize,
+}
+
+pub type OrchestratorMessage = HashMap<String, f64>;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct FeederEvent {
+    pub feeder_id: String,
+    pub topic: String,
+    pub timestamp: u64,
+    pub data: OrchestratorMessage,
 }

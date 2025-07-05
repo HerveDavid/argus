@@ -14,6 +14,8 @@ from pathlib import Path
 
 from src.app.controllers.repository_controller import RepositoryController
 from src.app.controllers.network_controller import NetworkController
+from src.features.dynawo.controller import DynawoController
+
 from src.shared.request import Request
 from src.shared.response import ResponseBuilder
 from src.utils.logger import get_logger, LoggerConfig
@@ -37,8 +39,13 @@ class Server:
         # Server state
         self.network_path: str = None
         self.db_path: str = None
-        self.repository_controller: RepositoryController = None
+        self.scada_outputs_data = None
+        self.game_master_outputs_data = None
+
         self.network_controller: NetworkController = None
+        self.repository_controller: RepositoryController = None
+        self.dynawo_controller: DynawoController = None
+
         self.running = False
 
         self.handlers = {
@@ -51,6 +58,12 @@ class Server:
             "ping": self.handle_ping,
             "shutdown": self.handle_shutdown,
             "get_single_line_diagram": self.handle_get_single_line_diagram,
+            "initialize_dynawo": self.handle_initialize_dynawo,
+            "get_dynawo_summary": self.handle_get_dynawo_summary,
+            "get_dynawo_game_master": self.handle_get_dynawo_game_master,
+            "get_dynawo_scada": self.handle_get_dynawo_scada,
+            "get_dynawo_by_topic": self.handle_get_dynawo_by_topic,
+
         }
 
     async def setup_zmq(self):
@@ -91,6 +104,8 @@ class Server:
                 self.subscriber.close()
             if self.context:
                 self.context.term()
+            if self.dynawo_controller:
+                self.dynawo_controller.close()
             self.log_to_stderr("ZMQ resources cleaned up")
         except Exception as e:
             self.log_to_stderr(f"Error cleaning up ZMQ: {e}")
@@ -338,6 +353,51 @@ class Server:
                     .to_dict()
                 )
 
+            # **NOUVEAU CODE AJOUTÉ** : Récupérer les fichiers dynawo outputs
+            dynawo_scada_outputs_file = config.get("input_files", {}).get("dynawo_scada_outputs_file")
+            dynawo_game_master_outputs_file = config.get("input_files", {}).get("dynawo_game_master_outputs_file")
+            
+            scada_outputs_data = None
+            scada_outputs_path = None
+            game_master_outputs_data = None
+            game_master_outputs_path = None
+            
+            # Charger le fichier SCADA outputs
+            if dynawo_scada_outputs_file:
+                # Construire le chemin absolu du fichier SCADA outputs (relatif au dossier du config)
+                scada_outputs_path = config_dir / dynawo_scada_outputs_file
+                
+                if scada_outputs_path.exists():
+                    try:
+                        with open(scada_outputs_path, 'r', encoding='utf-8') as f:
+                            scada_outputs_data = json.load(f)
+                        self.log_to_stderr(f"SCADA outputs file loaded successfully: {scada_outputs_path}")
+                    except Exception as e:
+                        self.log_to_stderr(f"Warning: Failed to load SCADA outputs file: {str(e)}")
+                        # Ne pas faire échouer toute la fonction, juste logguer l'erreur
+                else:
+                    self.log_to_stderr(f"Warning: SCADA outputs file not found: {scada_outputs_path}")
+            else:
+                self.log_to_stderr("No dynawo_scada_outputs_file specified in config")
+            
+            # Charger le fichier Game Master outputs
+            if dynawo_game_master_outputs_file:
+                # Construire le chemin absolu du fichier Game Master outputs (relatif au dossier du config)
+                game_master_outputs_path = config_dir / dynawo_game_master_outputs_file
+                
+                if game_master_outputs_path.exists():
+                    try:
+                        with open(game_master_outputs_path, 'r', encoding='utf-8') as f:
+                            game_master_outputs_data = json.load(f)
+                        self.log_to_stderr(f"Game Master outputs file loaded successfully: {game_master_outputs_path}")
+                    except Exception as e:
+                        self.log_to_stderr(f"Warning: Failed to load Game Master outputs file: {str(e)}")
+                        # Ne pas faire échouer toute la fonction, juste logguer l'erreur
+                else:
+                    self.log_to_stderr(f"Warning: Game Master outputs file not found: {game_master_outputs_path}")
+            else:
+                self.log_to_stderr("No dynawo_game_master_outputs_file specified in config")
+
             # Parser le fichier XML jobs
             try:
                 tree = ET.parse(job_file_path)
@@ -394,6 +454,27 @@ class Server:
                 )
                 load_result = await self.handle_load_network(load_request)
 
+                # **NOUVEAU CODE AJOUTÉ** : Stocker les données dans l'instance du serveur
+                if scada_outputs_data:
+                    self.scada_outputs_data = scada_outputs_data
+                    self.log_to_stderr("SCADA outputs data stored in server instance")
+                
+                if game_master_outputs_data:
+                    self.game_master_outputs_data = game_master_outputs_data
+                    self.log_to_stderr("Game Master outputs data stored in server instance")
+
+                if scada_outputs_data or game_master_outputs_data:
+                    try:
+                        self.dynawo_controller = DynawoController(
+                            db_path=self.db_path or "network.db",  # Utiliser db_path ou un défaut
+                            game_master_data=game_master_outputs_data,
+                            scada_data=scada_outputs_data
+                        )
+                        self.dynawo_controller.initialize_tables()
+                        self.log_to_stderr("DynawoController initialized successfully")
+                    except Exception as e:
+                        self.log_to_stderr(f"Warning: Failed to initialize DynawoController: {e}")
+
                 return (
                     ResponseBuilder()
                     .with_id(request.id)
@@ -405,7 +486,13 @@ class Server:
                             "config_path": config_path,
                             "job_file": str(job_file_path),
                             "iidm_file": str(iidm_file_path),
+                            "dynawo_scada_outputs_file": str(scada_outputs_path) if scada_outputs_path else None,
+                            "dynawo_game_master_outputs_file": str(game_master_outputs_path) if game_master_outputs_path else None,
+                            "scada_outputs_loaded": scada_outputs_data is not None,
+                            "game_master_outputs_loaded": game_master_outputs_data is not None,
                             "config": config,
+                            "scada_outputs_data": scada_outputs_data,  # Inclure les données SCADA dans la réponse
+                            "game_master_outputs_data": game_master_outputs_data,  # Inclure les données Game Master dans la réponse
                             "network_load_result": load_result["result"] if load_result["status"] == 200 else None,
                             "network_load_error": load_result.get("error") if load_result["status"] != 200 else None
                         }
@@ -433,8 +520,8 @@ class Server:
                 .with_error(str(e))
                 .build()
                 .to_dict()
-        )
-
+            )
+    
     async def handle_set_database(self, request: Request) -> Dict[str, Any]:
         """Configure le chemin de la base de données"""
         try:
@@ -839,6 +926,225 @@ class Server:
 
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
+        
+    async def handle_initialize_dynawo(self, request: Request) -> Dict[str, Any]:
+        """Initialise le contrôleur Dynawo avec des données ou fichiers"""
+        try:
+            db_path = request.params.get("db_path", "dynawo.db")
+            game_master_file = request.params.get("game_master_file")
+            scada_file = request.params.get("scada_file")
+            
+            # Utiliser les données en mémoire ou charger depuis les fichiers
+            game_master_data = self.game_master_outputs_data
+            scada_data = self.scada_outputs_data
+            
+            self.dynawo_controller = DynawoController(
+                db_path=db_path,
+                game_master_data=game_master_data,
+                scada_data=scada_data,
+                game_master_file_path=game_master_file,
+                scada_file_path=scada_file
+            )
+            
+            self.dynawo_controller.initialize_tables()
+            summary = self.dynawo_controller.get_summary()
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(200)
+                .with_result({
+                    "success": True,
+                    "message": "DynawoController initialized successfully",
+                    "summary": summary
+                })
+                .build()
+                .to_dict()
+            )
+            
+        except Exception as e:
+            self.log_to_stderr(f"Error in initialize_dynawo: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
+
+    async def handle_get_dynawo_summary(self, request: Request) -> Dict[str, Any]:
+        """Retourne un résumé des données Dynawo"""
+        try:
+            if not self.dynawo_controller:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("DynawoController not initialized. Use initialize_dynawo first.")
+                    .build()
+                    .to_dict()
+                )
+            
+            summary = self.dynawo_controller.get_summary()
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(200)
+                .with_result({
+                    "success": True,
+                    "summary": summary
+                })
+                .build()
+                .to_dict()
+            )
+            
+        except Exception as e:
+            self.log_to_stderr(f"Error in get_dynawo_summary: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
+
+    async def handle_get_dynawo_game_master(self, request: Request) -> Dict[str, Any]:
+        """Récupère les données Game Master avec filtres optionnels"""
+        try:
+            if not self.dynawo_controller:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("DynawoController not initialized. Use initialize_dynawo first.")
+                    .build()
+                    .to_dict()
+                )
+            
+            filters = request.params.get("filters", {})
+            limit = request.params.get("limit")
+            
+            data = self.dynawo_controller.get_game_master_outputs(filters, limit)
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(200)
+                .with_result({
+                    "success": True,
+                    "data": data,
+                    "count": len(data)
+                })
+                .build()
+                .to_dict()
+            )
+            
+        except Exception as e:
+            self.log_to_stderr(f"Error in get_dynawo_game_master: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
+
+    async def handle_get_dynawo_scada(self, request: Request) -> Dict[str, Any]:
+        """Récupère les données SCADA avec filtres optionnels"""
+        try:
+            if not self.dynawo_controller:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("DynawoController not initialized. Use initialize_dynawo first.")
+                    .build()
+                    .to_dict()
+                )
+            
+            filters = request.params.get("filters", {})
+            limit = request.params.get("limit")
+            
+            data = self.dynawo_controller.get_scada_outputs(filters, limit)
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(200)
+                .with_result({
+                    "success": True,
+                    "data": data,
+                    "count": len(data)
+                })
+                .build()
+                .to_dict()
+            )
+            
+        except Exception as e:
+            self.log_to_stderr(f"Error in get_dynawo_scada: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
+
+    async def handle_get_dynawo_by_topic(self, request: Request) -> Dict[str, Any]:
+        """Récupère toutes les données Dynawo pour un topic donné"""
+        try:
+            if not self.dynawo_controller:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("DynawoController not initialized. Use initialize_dynawo first.")
+                    .build()
+                    .to_dict()
+                )
+            
+            topic = request.params.get("topic")
+            if not topic:
+                return (
+                    ResponseBuilder()
+                    .with_id(request.id)
+                    .with_status(400)
+                    .with_error("topic parameter is required")
+                    .build()
+                    .to_dict()
+                )
+            
+            data = self.dynawo_controller.get_outputs_by_topic(topic)
+            
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(200)
+                .with_result({
+                    "success": True,
+                    "topic": topic,
+                    "data": data,
+                    "total_count": len(data["game_master"]) + len(data["scada"])
+                })
+                .build()
+                .to_dict()
+            )
+            
+        except Exception as e:
+            self.log_to_stderr(f"Error in get_dynawo_by_topic: {e}")
+            return (
+                ResponseBuilder()
+                .with_id(request.id)
+                .with_status(500)
+                .with_error(str(e))
+                .build()
+                .to_dict()
+            )
 
 
 async def main():

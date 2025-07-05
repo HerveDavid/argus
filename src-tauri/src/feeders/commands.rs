@@ -4,15 +4,32 @@ use std::sync::Arc;
 use super::entities::{FeederActionResponse, FeederStatus};
 use super::error::{Error, Result};
 
+use crate::feeders::entities::{FeederEvent, OrchestratorMessage};
 use crate::nats::state::NatsState;
 use crate::tasks::state::TasksState;
 use crate::utils::tasks::CancellableTask;
 
 use futures::StreamExt;
 use log::{debug, info, warn};
-use serde_json::json;
+use serde_json::Value;
 use tauri::ipc::Channel;
 use tauri::State;
+
+fn serialize_payload(payload: &str, feeder_id: &str, topic: &str) -> Result<Value> {
+    let game_master_data: OrchestratorMessage = serde_json::from_str(payload)?;
+
+    let feeder_event = FeederEvent {
+        feeder_id: feeder_id.to_string(),
+        topic: topic.to_string(),
+        timestamp: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis() as u64,
+        data: game_master_data,
+    };
+
+    serde_json::to_value(&feeder_event).map_err(|e| Error::SerializationError(e))
+}
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn add_nats_feeder(
@@ -74,12 +91,17 @@ pub async fn add_nats_feeder(
                         if let Ok(payload) = std::str::from_utf8(&msg.payload) {
                             debug!("Feeder '{}' received: {}", id, payload);
 
-                            let event = json!({
-                                payload: payload
-                            });
-
-                            if let Err(e) = channel.send(event) {
-                                log::warn!("Failed to send event to channel '{}': {:?}", id, e);
+                            match serialize_payload(payload, &id, &topic) {
+                                Ok(event_json) => {
+                                    if let Err(e) = channel.send(event_json) {
+                                        warn!("Failed to send event to channel '{}': {:?}", id, e);
+                                    } else {
+                                        debug!("Successfully sent event for feeder '{}'", id);
+                                    }
+                                }
+                                Err(e) => {
+                                    warn!("Failed to serialize payload for feeder '{}': {}", id, e);
+                                }
                             }
 
                         }
