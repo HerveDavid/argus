@@ -117,7 +117,7 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                     id="left-sidebar"
                     order={1}
                     defaultSize={leftSize}
-                    minSize={15}
+                    minSize={20}
                     maxSize={50}
                   >
                     <LeftSidebarPanel />
@@ -137,7 +137,7 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                     id="right-sidebar"
                     order={3}
                     defaultSize={rightSize}
-                    minSize={15}
+                    minSize={20}
                     maxSize={50}
                   >
                     <RightSidebarPanel />
@@ -161,7 +161,7 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                       className={isRightToolsOpen ? 'border-r' : ''}
                       order={1}
                       defaultSize={leftToolsSize}
-                      minSize={15}
+                      minSize={20}
                       maxSize={85}
                     >
                       <LeftTools />
@@ -175,7 +175,7 @@ export const StateView: React.FC<{ children: React.ReactNode }> = ({
                       id="right-tools"
                       order={isLeftToolsOpen ? 3 : 1}
                       defaultSize={rightToolsSize}
-                      minSize={15}
+                      minSize={20}
                       maxSize={85}
                     >
                       <RightTools />

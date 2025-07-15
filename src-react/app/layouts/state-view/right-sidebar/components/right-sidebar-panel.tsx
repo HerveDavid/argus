@@ -9,7 +9,7 @@ export const RightSidebarPanel = () => {
   const ContentComponent = activeItem.content;
 
   return (
-    <div className="h-full bg-sidebar border-l overflow-auto">
+    <div className="h-full bg-sidebar border-l flex flex-col">
       <div className="flex items-center justify-between border-b py-1 px-2 bg-background shadow flex-shrink-0">
         <h3 className="font-medium text-xs uppercase tracking-wide text-sidebar-foreground">
           {activeItem.label}
@@ -23,7 +23,7 @@ export const RightSidebarPanel = () => {
           <Minus />
         </Button>
       </div>
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 min-h-0">
         <ContentComponent />
       </div>
     </div>
