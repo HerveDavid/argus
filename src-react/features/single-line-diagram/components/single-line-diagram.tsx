@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+
 import {
   Card,
   CardContent,
@@ -7,15 +8,15 @@ import {
 } from '@/components/ui/card';
 
 import { SldProvider, useSldContext } from '../providers/sld.provider';
-import { LoadingState } from './loading-state';
-import { ErrorState } from './error-state';
+
 import { DiagramContent } from './diagram-content';
-import { EmptyState } from './empty-state';
 import { DiagramFooter } from './diagram-footer';
 import { DiagramHeader } from './diagram-header';
-import { useTaskStore } from '@/hooks/use-task';
+import { EmptyState } from './empty-state';
+import { ErrorState } from './error-state';
+import { LoadingState } from './loading-state';
 
-export interface SingleLineDiagramProps {
+interface SingleLineDiagramProps {
   id: string;
   enableAutoRefreshByDefault?: boolean;
 }
@@ -59,11 +60,7 @@ const SldInner: React.FC<SingleLineDiagramProps> = ({
   ]);
 
   useEffect(() => {
-    if (diagramData?.svg) {
-      hasDataRef.current = true;
-    } else {
-      hasDataRef.current = false;
-    }
+    hasDataRef.current = !!diagramData?.svg;
   }, [diagramData?.svg]);
 
   useEffect(() => {

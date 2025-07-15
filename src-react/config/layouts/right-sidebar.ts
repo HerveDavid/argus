@@ -1,4 +1,4 @@
-import { ChartGantt, ClockIcon, Layers, LogsIcon } from 'lucide-react';
+import { ChartGantt, ClockIcon, GitFork, Layers, LogsIcon } from 'lucide-react';
 
 import { EventsLog } from '@/features/events-log';
 import { GrafcetEditor } from '@/features/grafcet-editor';
@@ -9,8 +9,13 @@ import { SidebarItem } from '@/types/sidebar-item';
 
 export const rightSidebarPanels: SidebarItem[] = [
   { id: 'widgets', icon: Layers, label: 'Widgets', content: Widgets },
+  {
+    id: 'sequencer',
+    icon: GitFork,
+    label: 'Sequencer',
+    content: GrafcetEditor,
+  },
   { id: 'historic', icon: ClockIcon, label: 'Historic', content: History },
-  { id: 'grafcet', icon: ClockIcon, label: 'Grafcet', content: GrafcetEditor },
 ] as const;
 
 export const rightSidebarTools: SidebarItem[] = [

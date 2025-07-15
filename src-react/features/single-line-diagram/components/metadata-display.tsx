@@ -1,10 +1,12 @@
-import { SldDiagram } from '@/types/sld-diagram';
+import { Info } from 'lucide-react';
+import React from 'react';
+
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from '@/components/ui/hover-card';
-import { Info } from 'lucide-react';
+import { SldDiagram } from '@/types/sld-diagram';
 
 export const MetadataDisplay: React.FC<{ diagramData: SldDiagram | null }> = ({
   diagramData,
