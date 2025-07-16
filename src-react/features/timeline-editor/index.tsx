@@ -1,87 +1,148 @@
-import { Play, Pause, RotateCcw, Plus, Edit2, Trash2, Save, X, Calendar, Clock, Users } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Play, Pause, RotateCcw, Plus, Edit2, Trash2, Users, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export function TimelineEditor() {
+// Import react-calendar-timeline
+import Timeline, {
+  TimelineHeaders,
+  SidebarHeader,
+  DateHeader,
+  TimelineMarkers,
+  TodayMarker,
+  CustomMarker,
+  CursorMarker
+} from 'react-calendar-timeline';
+import moment from 'moment';
+
+// Import des styles CSS requis
+import './style.css';
+
+export const TimelineEditor = () => {
   // Configuration du temps
-  const startTime = new Date('2024-01-01T08:00:00').getTime();
-  const endTime = new Date('2024-01-01T20:00:00').getTime();
-  const [currentTime, setCurrentTime] = useState(startTime);
+  const startTime = moment('2024-01-01 08:00:00');
+  const endTime = moment('2024-01-01 20:00:00');
+  const [currentTime, setCurrentTime] = useState(startTime.valueOf());
   const [isPlaying, setIsPlaying] = useState(false);
   const [playSpeed, setPlaySpeed] = useState(1);
 
+  // Temps visible de la timeline
+  const [visibleTimeStart, setVisibleTimeStart] = useState(startTime.valueOf());
+  const [visibleTimeEnd, setVisibleTimeEnd] = useState(endTime.valueOf());
+
   // État de l'éditeur
   const [editMode, setEditMode] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedItems, setSelectedItems] = useState([]);
   const [showAddItemModal, setShowAddItemModal] = useState(false);
   const [showAddGroupModal, setShowAddGroupModal] = useState(false);
-  const [draggedItem, setDraggedItem] = useState(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
-  // Données
+  // Données des groupes
   const [groups, setGroups] = useState([
-    { id: 'dev', title: 'Équipe Dev', color: '#10B981' },
-    { id: 'design', title: 'Équipe Design', color: '#8B5CF6' },
-    { id: 'qa', title: 'Équipe QA', color: '#F59E0B' },
-    { id: 'product', title: 'Product Manager', color: '#EF4444' },
+    { id: 1, title: 'Équipe Dev', rightTitle: 'Développement' },
+    { id: 2, title: 'Équipe Design', rightTitle: 'Design UI/UX' },
+    { id: 3, title: 'Équipe QA', rightTitle: 'Tests & Qualité' },
+    { id: 4, title: 'Product Manager', rightTitle: 'Gestion Produit' },
   ]);
 
+  // Données des items
   const [items, setItems] = useState([
     {
-      id: 'task1',
-      group: 'dev',
+      id: 1,
+      group: 1,
       title: 'Développement API',
-      start_time: new Date('2024-01-01T09:00:00').getTime(),
-      end_time: new Date('2024-01-01T15:00:00').getTime(),
-      color: '#10B981',
-      description: 'Développement de l\'API REST pour le projet'
+      start_time: moment('2024-01-01 09:00:00'),
+      end_time: moment('2024-01-01 15:00:00'),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: '#10B981',
+          color: 'white',
+          border: '1px solid #059669',
+          borderRadius: '4px'
+        }
+      }
     },
     {
-      id: 'task2',
-      group: 'design',
+      id: 2,
+      group: 2,
       title: 'Maquettes UI',
-      start_time: new Date('2024-01-01T08:30:00').getTime(),
-      end_time: new Date('2024-01-01T12:00:00').getTime(),
-      color: '#8B5CF6',
-      description: 'Création des maquettes d\'interface utilisateur'
+      start_time: moment('2024-01-01 08:30:00'),
+      end_time: moment('2024-01-01 12:00:00'),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: '#8B5CF6',
+          color: 'white',
+          border: '1px solid #7C3AED',
+          borderRadius: '4px'
+        }
+      }
     },
     {
-      id: 'task3',
-      group: 'dev',
+      id: 3,
+      group: 1,
       title: 'Integration Frontend',
-      start_time: new Date('2024-01-01T13:00:00').getTime(),
-      end_time: new Date('2024-01-01T17:30:00').getTime(),
-      color: '#3B82F6',
-      description: 'Intégration du frontend avec l\'API'
+      start_time: moment('2024-01-01 13:00:00'),
+      end_time: moment('2024-01-01 17:30:00'),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: '#3B82F6',
+          color: 'white',
+          border: '1px solid #2563EB',
+          borderRadius: '4px'
+        }
+      }
     },
     {
-      id: 'task4',
-      group: 'qa',
+      id: 4,
+      group: 3,
       title: 'Tests Unitaires',
-      start_time: new Date('2024-01-01T14:00:00').getTime(),
-      end_time: new Date('2024-01-01T18:00:00').getTime(),
-      color: '#F59E0B',
-      description: 'Écriture et exécution des tests unitaires'
+      start_time: moment('2024-01-01 14:00:00'),
+      end_time: moment('2024-01-01 18:00:00'),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: '#F59E0B',
+          color: 'white',
+          border: '1px solid #D97706',
+          borderRadius: '4px'
+        }
+      }
     },
     {
-      id: 'task5',
-      group: 'product',
+      id: 5,
+      group: 4,
       title: 'Review & Validation',
-      start_time: new Date('2024-01-01T16:00:00').getTime(),
-      end_time: new Date('2024-01-01T19:00:00').getTime(),
-      color: '#EF4444',
-      description: 'Révision et validation du produit'
+      start_time: moment('2024-01-01 16:00:00'),
+      end_time: moment('2024-01-01 19:00:00'),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: '#EF4444',
+          color: 'white',
+          border: '1px solid #DC2626',
+          borderRadius: '4px'
+        }
+      }
     },
   ]);
 
@@ -97,7 +158,7 @@ export function TimelineEditor() {
 
   const [newGroup, setNewGroup] = useState({
     title: '',
-    color: '#6B7280'
+    rightTitle: ''
   });
 
   // Logique de lecture temporelle
@@ -106,10 +167,10 @@ export function TimelineEditor() {
     if (isPlaying) {
       interval = setInterval(() => {
         setCurrentTime((prevTime) => {
-          const newTime = prevTime + 1000 * 60 * 5 * playSpeed;
-          if (newTime >= endTime) {
+          const newTime = prevTime + 1000 * 60 * 5 * playSpeed; // 5 minutes par step
+          if (newTime >= endTime.valueOf()) {
             setIsPlaying(false);
-            return endTime;
+            return endTime.valueOf();
           }
           return newTime;
         });
@@ -118,60 +179,70 @@ export function TimelineEditor() {
     return () => clearInterval(interval);
   }, [isPlaying, playSpeed, endTime]);
 
-  // Fonctions utilitaires
-  const formatTime = (timestamp) => {
-    return new Date(timestamp).toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatDateTime = (timestamp) => {
-    return new Date(timestamp).toLocaleString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      day: '2-digit',
-      month: '2-digit'
-    });
-  };
-
-  const getProgress = () => {
-    return ((currentTime - startTime) / (endTime - startTime)) * 100;
-  };
-
-  const getCurrentTasks = () => {
-    return items.filter(
-      (item) => currentTime >= item.start_time && currentTime <= item.end_time
-    );
-  };
-
-  const getCompletedTasks = () => {
-    return items.filter((item) => currentTime > item.end_time);
-  };
-
-  const timeToPixel = (time) => {
-    const totalDuration = endTime - startTime;
-    const timeOffset = time - startTime;
-    return (timeOffset / totalDuration) * 800;
-  };
-
-  const pixelToTime = (pixel) => {
-    const totalDuration = endTime - startTime;
-    return startTime + (pixel / 800) * totalDuration;
-  };
-
   // Gestionnaires d'événements
   const handlePlay = () => setIsPlaying(!isPlaying);
 
   const handleReset = () => {
-    setCurrentTime(startTime);
+    setCurrentTime(startTime.valueOf());
     setIsPlaying(false);
   };
 
-  const handleTimeSliderChange = (value) => {
-    const percentage = value[0];
-    const newTime = startTime + (endTime - startTime) * (percentage / 100);
-    setCurrentTime(newTime);
+  const handleTimeChange = (visibleTimeStart, visibleTimeEnd, updateScrollCanvas) => {
+    setVisibleTimeStart(visibleTimeStart);
+    setVisibleTimeEnd(visibleTimeEnd);
+    updateScrollCanvas(visibleTimeStart, visibleTimeEnd);
+  };
+
+  const handleItemMove = (itemId, dragTime, newGroupOrder) => {
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+
+    const duration = item.end_time.valueOf() - item.start_time.valueOf();
+    const newStartTime = moment(dragTime);
+    const newEndTime = moment(dragTime + duration);
+
+    setItems(items.map(i =>
+      i.id === itemId
+        ? {
+          ...i,
+          start_time: newStartTime,
+          end_time: newEndTime,
+          group: groups[newGroupOrder].id
+        }
+        : i
+    ));
+  };
+
+  const handleItemResize = (itemId, time, edge) => {
+    setItems(items.map(item => {
+      if (item.id === itemId) {
+        return edge === 'left'
+          ? { ...item, start_time: moment(time) }
+          : { ...item, end_time: moment(time) };
+      }
+      return item;
+    }));
+  };
+
+  const handleItemSelect = (itemId, e, time) => {
+    setSelectedItems([itemId]);
+  };
+
+  const handleItemClick = (itemId, e, time) => {
+    console.log('Item clicked:', itemId, 'at time:', moment(time).format('HH:mm'));
+  };
+
+  const handleCanvasClick = (groupId, time, e) => {
+    if (editMode) {
+      // Ouvrir le modal d'ajout avec le groupe et le temps pré-remplis
+      setNewItem({
+        ...newItem,
+        group: groupId,
+        start_time: moment(time).format('YYYY-MM-DDTHH:mm'),
+        end_time: moment(time).add(1, 'hour').format('YYYY-MM-DDTHH:mm')
+      });
+      setShowAddItemModal(true);
+    }
   };
 
   const handleAddItem = () => {
@@ -180,13 +251,22 @@ export function TimelineEditor() {
     }
 
     const item = {
-      id: Date.now().toString(),
+      id: Date.now(),
       title: newItem.title,
-      group: newItem.group,
-      start_time: new Date(newItem.start_time).getTime(),
-      end_time: new Date(newItem.end_time).getTime(),
-      color: newItem.color,
-      description: newItem.description
+      group: parseInt(newItem.group),
+      start_time: moment(newItem.start_time),
+      end_time: moment(newItem.end_time),
+      canMove: true,
+      canResize: true,
+      canChangeGroup: true,
+      itemProps: {
+        style: {
+          background: newItem.color,
+          color: 'white',
+          border: `1px solid ${newItem.color}`,
+          borderRadius: '4px'
+        }
+      }
     };
 
     setItems([...items, item]);
@@ -195,78 +275,104 @@ export function TimelineEditor() {
   };
 
   const handleAddGroup = () => {
-    if (!newGroup.title) {
-      return;
-    }
+    if (!newGroup.title) return;
 
     const group = {
-      id: Date.now().toString(),
+      id: Date.now(),
       title: newGroup.title,
-      color: newGroup.color
+      rightTitle: newGroup.rightTitle || newGroup.title
     };
 
     setGroups([...groups, group]);
-    setNewGroup({ title: '', color: '#6B7280' });
+    setNewGroup({ title: '', rightTitle: '' });
     setShowAddGroupModal(false);
   };
 
   const handleDeleteItem = (itemId) => {
     setItems(items.filter(item => item.id !== itemId));
-    setSelectedItem(null);
+    setSelectedItems(selectedItems.filter(id => id !== itemId));
   };
 
   const handleDeleteGroup = (groupId) => {
     const hasItems = items.some(item => item.group === groupId);
     if (hasItems) {
+      alert('Impossible de supprimer un groupe qui contient des tâches');
       return;
     }
     setGroups(groups.filter(group => group.id !== groupId));
-    setSelectedGroup(null);
   };
 
-  const handleItemDragStart = (e, item) => {
-    setDraggedItem(item);
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+  // Renderer personnalisé pour les items
+  const itemRenderer = ({ item, itemContext, getItemProps, getResizeProps }) => {
+    const { left: leftResizeProps, right: rightResizeProps } = getResizeProps();
+    const isSelected = selectedItems.includes(item.id);
+    const isActive = currentTime >= item.start_time.valueOf() && currentTime <= item.end_time.valueOf();
+    const isCompleted = currentTime > item.end_time.valueOf();
+
+    return (
+      <div
+        {...getItemProps({
+          style: {
+            ...item.itemProps.style,
+            opacity: isCompleted ? 0.6 : 1,
+            boxShadow: isActive ? '0 0 0 2px #fbbf24' : isSelected ? '0 0 0 2px #3b82f6' : 'none',
+            cursor: editMode ? 'move' : 'pointer'
+          }
+        })}
+      >
+        {editMode && itemContext.useResizeHandle && <div {...leftResizeProps} />}
+
+        <div className="px-2 py-1 text-xs">
+          <div className="font-medium truncate">{itemContext.title}</div>
+          <div className="text-xs opacity-75">
+            {item.start_time.format('HH:mm')} - {item.end_time.format('HH:mm')}
+          </div>
+        </div>
+
+        {editMode && itemContext.useResizeHandle && <div {...rightResizeProps} />}
+      </div>
+    );
   };
 
-  const handleItemDragOver = (e) => {
-    e.preventDefault();
+  // Renderer personnalisé pour les groupes
+  const groupRenderer = ({ group }) => {
+    return (
+      <div className="flex items-center justify-between h-full px-2">
+        <div className="flex items-center space-x-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500" />
+          <span className="font-medium text-sm">{group.title}</span>
+        </div>
+        {editMode && (
+          <div className="flex space-x-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDeleteGroup(group.id)}
+              className="h-6 w-6 p-0"
+            >
+              <Trash2 size={12} />
+            </Button>
+          </div>
+        )}
+      </div>
+    );
   };
 
-  const handleItemDrop = (e, targetGroup) => {
-    e.preventDefault();
-    if (!draggedItem) return;
+  const getCurrentTasks = () => {
+    return items.filter(
+      (item) => currentTime >= item.start_time.valueOf() && currentTime <= item.end_time.valueOf()
+    );
+  };
 
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left - dragOffset.x;
-    const newStartTime = pixelToTime(x);
-    const duration = draggedItem.end_time - draggedItem.start_time;
-
-    const updatedItems = items.map(item => {
-      if (item.id === draggedItem.id) {
-        return {
-          ...item,
-          group: targetGroup,
-          start_time: newStartTime,
-          end_time: newStartTime + duration
-        };
-      }
-      return item;
-    });
-
-    setItems(updatedItems);
-    setDraggedItem(null);
+  const getProgress = () => {
+    return ((currentTime - startTime.valueOf()) / (endTime.valueOf() - startTime.valueOf())) * 100;
   };
 
   return (
-    <div className="max-w-full mx-auto min-h-screen">
+    <div className="max-w-full mx-auto min-h-screen bg-background">
       {/* Barre d'outils */}
-      <Card className="mb-2 border-none shadow-none">
-        <CardContent className="p-2">
+      <Card className="mb-4 border-none shadow-none">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               <Button onClick={handlePlay} className="gap-2">
@@ -328,13 +434,13 @@ export function TimelineEditor() {
 
                     <div>
                       <Label htmlFor="task-group">Groupe *</Label>
-                      <Select value={newItem.group} onValueChange={(value) => setNewItem({...newItem, group: value})}>
+                      <Select value={newItem.group.toString()} onValueChange={(value) => setNewItem({...newItem, group: value})}>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un groupe" />
                         </SelectTrigger>
                         <SelectContent>
                           {groups.map(group => (
-                            <SelectItem key={group.id} value={group.id}>
+                            <SelectItem key={group.id} value={group.id.toString()}>
                               {group.title}
                             </SelectItem>
                           ))}
@@ -361,16 +467,6 @@ export function TimelineEditor() {
                           onChange={(e) => setNewItem({...newItem, end_time: e.target.value})}
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="task-description">Description</Label>
-                      <Textarea
-                        id="task-description"
-                        value={newItem.description}
-                        onChange={(e) => setNewItem({...newItem, description: e.target.value})}
-                        placeholder="Description de la tâche"
-                      />
                     </div>
 
                     <div>
@@ -418,12 +514,12 @@ export function TimelineEditor() {
                     </div>
 
                     <div>
-                      <Label htmlFor="group-color">Couleur</Label>
+                      <Label htmlFor="group-right-title">Titre droite</Label>
                       <Input
-                        id="group-color"
-                        type="color"
-                        value={newGroup.color}
-                        onChange={(e) => setNewGroup({...newGroup, color: e.target.value})}
+                        id="group-right-title"
+                        value={newGroup.rightTitle}
+                        onChange={(e) => setNewGroup({...newGroup, rightTitle: e.target.value})}
+                        placeholder="Titre pour la sidebar droite"
                       />
                     </div>
 
@@ -441,128 +537,154 @@ export function TimelineEditor() {
             </div>
           </div>
 
-          {/* Contrôle temporel */}
-          <div className="space-y-2">
-            <Slider
-              value={[getProgress()]}
-              onValueChange={handleTimeSliderChange}
-              max={100}
-              step={0.1}
-              className="w-full"
-            />
-            <div className="flex justify-between items-center text-sm text-muted-foreground">
-              <span>Temps actuel: <strong>{formatTime(currentTime)}</strong></span>
-              <span>Progression: <strong>{getProgress().toFixed(1)}%</strong></span>
+          {/* Informations de statut */}
+          <div className="grid grid-cols-4 gap-4 text-sm">
+            <div>
+              <Label>Temps actuel:</Label>
+              <div className="font-mono">{moment(currentTime).format('HH:mm')}</div>
+            </div>
+            <div>
+              <Label>Progression:</Label>
+              <div className="font-mono">{getProgress().toFixed(1)}%</div>
+            </div>
+            <div>
+              <Label>Tâches actives:</Label>
+              <div className="font-mono">{getCurrentTasks().length}</div>
+            </div>
+            <div>
+              <Label>Mode:</Label>
+              <div className="font-mono">{editMode ? 'Édition' : 'Lecture'}</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Timeline principale */}
-      <Card className="mb-2 bg-background border-none shadow-none">
-        <CardContent className="px-2">
-          {/* En-tête de temps */}
-          <div className="flex mb-4">
-            <div className="w-48 flex-shrink-0"></div>
-            <div className="flex-1 relative">
-              <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                {Array.from({ length: 13 }, (_, i) => {
-                  const hour = 8 + i;
-                  return (
-                    <div key={hour} className="text-center">
-                      {hour}:00
+      <Card className="border-none shadow-none">
+        <CardContent className="p-4">
+          <div className="overflow-hidden">
+            <Timeline
+              groups={groups}
+              items={items}
+              defaultTimeStart={startTime}
+              defaultTimeEnd={endTime}
+              visibleTimeStart={visibleTimeStart}
+              visibleTimeEnd={visibleTimeEnd}
+              onTimeChange={handleTimeChange}
+              onItemMove={handleItemMove}
+              onItemResize={handleItemResize}
+              onItemSelect={handleItemSelect}
+              onItemClick={handleItemClick}
+              onCanvasClick={handleCanvasClick}
+              canMove={editMode}
+              canResize={editMode ? 'both' : false}
+              canChangeGroup={editMode}
+              itemRenderer={itemRenderer}
+              groupRenderer={groupRenderer}
+              lineHeight={50}
+              sidebarWidth={200}
+              rightSidebarWidth={150}
+              dragSnap={15 * 60 * 1000} // 15 minutes
+              buffer={3}
+              stackItems={true}
+              itemTouchSendsClick={false}
+              timeSteps={{ minute: 15, hour: 1, day: 1 }}
+            >
+              <TimelineHeaders>
+                <SidebarHeader>
+                  {({ getRootProps }) => (
+                    <div {...getRootProps()} className="flex items-center justify-center h-full bg-muted">
+                      <span className="font-medium text-sm">Équipes</span>
                     </div>
-                  );
-                })}
-              </div>
-              <div className="h-px bg-border relative">
-                <div
-                  className="absolute top-0 w-0.5 h-8 bg-red-500 z-10"
-                  style={{ left: `${getProgress()}%` }}
-                />
-              </div>
-            </div>
-          </div>
+                  )}
+                </SidebarHeader>
+                <DateHeader unit="primaryHeader" />
+                <DateHeader />
+              </TimelineHeaders>
 
-          {/* Groupes et tâches */}
-          <div className="space-y-4">
-            {groups.map((group) => (
-              <div key={group.id} className="flex">
-                {/* Nom du groupe */}
-                <div className="w-48 flex-shrink-0 pr-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className="w-4 h-4 rounded"
-                        style={{ backgroundColor: group.color }}
-                      />
-                      <span className="font-medium">
-                        {group.title}
-                      </span>
-                    </div>
-                    {editMode && (
-                      <div className="flex space-x-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedGroup(group)}
-                        >
-                          <Edit2 size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeleteGroup(group.id)}
-                        >
-                          <Trash2 size={14} />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Zone de tâches */}
-                <div
-                  className="flex-1 relative h-12 border border-border rounded"
-                  onDragOver={handleItemDragOver}
-                  onDrop={(e) => handleItemDrop(e, group.id)}
-                >
-                  {items
-                    .filter(item => item.group === group.id)
-                    .map((item) => {
-                      const startPercent = ((item.start_time - startTime) / (endTime - startTime)) * 100;
-                      const widthPercent = ((item.end_time - item.start_time) / (endTime - startTime)) * 100;
-                      const isActive = currentTime >= item.start_time && currentTime <= item.end_time;
-                      const isCompleted = currentTime > item.end_time;
-
-                      return (
-                        <div
-                          key={item.id}
-                          className={`absolute top-1 h-10 rounded px-2 py-1 text-xs text-white cursor-pointer transition-all ${
-                            isActive ? 'ring-2 ring-yellow-400' : ''
-                          } ${isCompleted ? 'opacity-60' : ''}`}
-                          style={{
-                            left: `${startPercent}%`,
-                            width: `${widthPercent}%`,
-                            backgroundColor: item.color
-                          }}
-                          draggable={editMode}
-                          onDragStart={(e) => handleItemDragStart(e, item)}
-                          onClick={() => editMode && setSelectedItem(item)}
-                        >
-                          <div className="font-medium truncate">{item.title}</div>
-                          <div className="text-xs opacity-75">
-                            {formatTime(item.start_time)} - {formatTime(item.end_time)}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              </div>
-            ))}
+              <TimelineMarkers>
+                <CustomMarker date={currentTime}>
+                  {({ styles }) => (
+                    <div
+                      style={{
+                        ...styles,
+                        backgroundColor: '#ef4444',
+                        width: '2px',
+                        zIndex: 100
+                      }}
+                    />
+                  )}
+                </CustomMarker>
+                <CursorMarker />
+              </TimelineMarkers>
+            </Timeline>
           </div>
         </CardContent>
       </Card>
+
+      {/* Panneau d'informations */}
+      {selectedItems.length > 0 && (
+        <Card className="mt-4 border-none shadow-none">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold">Tâches sélectionnées</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => selectedItems.forEach(handleDeleteItem)}
+                className="gap-2"
+              >
+                <Trash2 size={14} />
+                Supprimer
+              </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {selectedItems.map(itemId => {
+                const item = items.find(i => i.id === itemId);
+                const group = groups.find(g => g.id === item?.group);
+                if (!item) return null;
+
+                return (
+                  <div key={itemId} className="p-3 bg-muted rounded-lg">
+                    <div className="font-medium">{item.title}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {group?.title} • {item.start_time.format('HH:mm')} - {item.end_time.format('HH:mm')}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tâches en cours */}
+      {getCurrentTasks().length > 0 && (
+        <Card className="mt-4 border-none shadow-none">
+          <CardContent className="p-4">
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Clock size={16} />
+              Tâches en cours
+            </h3>
+            <div className="space-y-2">
+              {getCurrentTasks().map(task => {
+                const group = groups.find(g => g.id === task.group);
+                return (
+                  <div key={task.id} className="flex items-center justify-between p-2 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                    <div>
+                      <div className="font-medium">{task.title}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {group?.title} • {task.start_time.format('HH:mm')} - {task.end_time.format('HH:mm')}
+                      </div>
+                    </div>
+                    <Badge variant="secondary">En cours</Badge>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
