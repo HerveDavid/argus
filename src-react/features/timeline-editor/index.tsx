@@ -566,8 +566,8 @@ export const TimelineEditor = () => {
             <Timeline
               groups={groups}
               items={items}
-              defaultTimeStart={startTime}
-              defaultTimeEnd={endTime}
+              defaultTimeStart={startTime.unix()}
+              defaultTimeEnd={endTime.unix()}
               visibleTimeStart={visibleTimeStart}
               visibleTimeEnd={visibleTimeEnd}
               onTimeChange={handleTimeChange}
