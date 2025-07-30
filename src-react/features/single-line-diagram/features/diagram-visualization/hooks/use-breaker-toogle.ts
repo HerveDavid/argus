@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
 import * as d3 from 'd3';
+import React, { useCallback } from 'react';
 
 export const useBreakerToggle = (svgRef: React.RefObject<SVGSVGElement>) => {
   const toggleBreaker = useCallback(

@@ -91,7 +91,7 @@ case $OS in
         echo "Executing Linux-specific commands..."
         setup_venv
         echo "Running PyInstaller for Linux..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-unknown-linux-gnu --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-unknown-linux-gnu --distpath src-tauri/binaries/ --additional-hooks-dir=src-sidecars/powsybl/hooks src-sidecars/powsybl/main.py
         ;;
     "MacOS")
         echo "Executing MacOS-specific commands..."

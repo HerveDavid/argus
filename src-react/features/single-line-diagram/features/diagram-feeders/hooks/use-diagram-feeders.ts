@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import React, { useCallback, useEffect, useRef } from 'react';
+
 import { SldMetadata } from '@/types/sld-metadata';
 
 interface DiagramFeedersProps {
   svgRef: React.RefObject<SVGSVGElement>;
   metadata?: SldMetadata;
-  onInitialized?: () => void; // Callback quand l'initialisation est terminée
+  onInitialized?: () => void;
 }
 
 export const useDiagramFeeders = ({
@@ -26,9 +27,6 @@ export const useDiagramFeeders = ({
 
     if (!feederInfoTextElements.empty()) {
       feederInfoTextElements.text('****');
-      console.log(
-        `Initialized ${feederInfoTextElements.size()} feeder elements with ****`,
-      );
       return true;
     }
 
@@ -38,23 +36,19 @@ export const useDiagramFeeders = ({
   useEffect(() => {
     if (!svgRef.current || !metadata) return;
 
-    // Ne réinitialiser que si les métadonnées ont vraiment changé
     const metadataChanged = lastMetadataRef.current !== metadata;
 
     if (metadataChanged) {
-      console.log('Metadata changed, reinitializing feeders...');
       isInitializedRef.current = false;
       lastMetadataRef.current = metadata;
     }
 
-    // Delay pour attendre que le SVG soit monté
     const timer = setTimeout(() => {
       if (!isInitializedRef.current) {
         const success = initializeFeederValues();
         if (success) {
           isInitializedRef.current = true;
-          console.log('Feeders initialized successfully');
-          onInitialized?.(); // Notifier que l'initialisation est terminée
+          onInitialized?.();
         }
       }
     }, 100);

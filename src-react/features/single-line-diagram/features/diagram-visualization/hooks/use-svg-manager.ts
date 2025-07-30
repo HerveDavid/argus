@@ -1,12 +1,9 @@
-import { useCallback, useRef } from 'react';
 import * as d3 from 'd3';
+import { useCallback, useRef } from 'react';
+
 import { SldMetadata } from '@/types/sld-metadata';
+
 import { ElementData } from '../../../types';
-import {
-  parseSvgString,
-  validateSvgElement,
-  extractViewBox,
-} from '../utils/svg-parser';
 import { enrichElementsWithMetadata } from '../utils/element-data-processor';
 import {
   getElementSignature,
@@ -15,6 +12,11 @@ import {
   addNewElement,
   updateExistingElement,
 } from '../utils/element-updater';
+import {
+  parseSvgString,
+  validateSvgElement,
+  extractViewBox,
+} from '../utils/svg-parser';
 
 export const useSvgManager = (svgRef: React.RefObject<SVGSVGElement>) => {
   const isInitializedRef = useRef(false);

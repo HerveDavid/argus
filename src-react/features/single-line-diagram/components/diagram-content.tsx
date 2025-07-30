@@ -1,22 +1,24 @@
-import { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import { useEffect, useRef } from 'react';
+
+import { useFeederStore } from '@/hooks/use-feeder';
+import { useTaskStore } from '@/hooks/use-task';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
+
+import {
+  useDiagramFeeders,
+  useUpdateFeeders,
+} from '../features/diagram-feeders';
+import { useLineGoTo, useSvgNavigation } from '../features/diagram-navigation';
+import {
+  useSvgManager,
+  useBreakerToggle,
+} from '../features/diagram-visualization';
 import {
   EquipmentControls,
   useEquipmentControls,
 } from '../features/equipment-controls';
 import { useSldContext } from '../providers/sld.provider';
-import {
-  useSvgManager,
-  useBreakerToggle,
-} from '../features/diagram-visualization';
-import { useLineGoTo, useSvgNavigation } from '../features/diagram-navigation';
-import {
-  useDiagramFeeders,
-  useUpdateFeeders,
-} from '../features/diagram-feeders';
-import { useFeederStore } from '@/hooks/use-feeder';
-import { useTaskStore } from '@/hooks/use-task';
 
 export const DiagramContent = () => {
   const { svgRef, diagramData, currentId } = useSldContext();
@@ -34,7 +36,6 @@ export const DiagramContent = () => {
     updateFeeder,
     updateMultipleFeeders,
     generateMockData,
-    debugSvgStructure,
     getAllFeeders,
     updateAllFeeders,
   } = useUpdateFeeders({ svgRef });
@@ -134,22 +135,19 @@ export const DiagramContent = () => {
       (window as any).updateFeeder = updateFeeder;
       (window as any).generateMockData = generateMockData;
       (window as any).updateMultipleFeeders = updateMultipleFeeders;
-      (window as any).debugSvgStructure = debugSvgStructure;
       (window as any).getAllFeeders = getAllFeeders;
       (window as any).updateAllFeeders = updateAllFeeders;
       (window as any).testFeeders = () => {
         console.log('=== MANUAL TEST ===');
-        const feeders = debugSvgStructure();
         const result = updateAllFeeders();
         console.log('Test result:', result);
-        return { feeders, result };
+        return { result };
       };
     }
   }, [
     updateFeeder,
     generateMockData,
     updateMultipleFeeders,
-    debugSvgStructure,
     getAllFeeders,
     updateAllFeeders,
   ]);
