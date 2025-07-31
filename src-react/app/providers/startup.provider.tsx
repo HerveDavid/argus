@@ -22,6 +22,7 @@ export const StartupProvider: React.FC<{ children: React.ReactNode }> = ({
       yield* Effect.logInfo('Starting application...');
 
       // 1. Charger le projet courant
+      yield* Effect.sleep('3 seconds');
       const project = yield* projectClient.loadProject();
       yield* Effect.logInfo(`Project loaded successfully: ${project.name}`);
       yield* Effect.logInfo(`Project path: ${project.path}`);

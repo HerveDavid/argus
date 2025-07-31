@@ -1,21 +1,19 @@
+import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { MenuIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
+import { useHeaderStore } from '@/app/layouts/state-view/header/stores/header.store.ts';
 import {
   Menubar,
-  MenubarContent,
-  MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
-  MenubarShortcut,
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { ProjectWidget } from '@/features/projects';
-import { useEffect, useState } from 'react';
-import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
-import { getCurrentWindow } from '@tauri-apps/api/window';
 
 export const LeftMenu = () => {
-  const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
+  const [_, setAppWindow] = useState<WebviewWindow | null>(null);
+  const { setOpen } = useHeaderStore();
 
   useEffect(() => {
     const initWindow = async () => {
@@ -25,38 +23,21 @@ export const LeftMenu = () => {
     initWindow();
   }, []);
 
-  const handleClose = async () => {
-    if (appWindow) {
-      try {
-        await appWindow.close();
-      } catch (_error) {
-        // Handle error silently
-      }
-    }
+  const handleToggleMenu = () => {
+    setOpen(true);
   };
 
   return (
     <div className="flex">
       <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
         <MenubarMenu>
-          <MenubarTrigger className="bg-transparent" title="Menu">
+          <MenubarTrigger
+            className="bg-transparent"
+            title="Menu"
+            onClick={handleToggleMenu}
+          >
             <MenuIcon className="size-4" />
           </MenubarTrigger>
-          <MenubarContent>
-            <MenubarItem>
-              Open Project <MenubarShortcut>⌘O</MenubarShortcut>
-            </MenubarItem>
-            <MenubarSeparator />
-
-            <MenubarItem>
-              New Project <MenubarShortcut>⌘T</MenubarShortcut>
-            </MenubarItem>
-            <MenubarItem>New Window</MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem>Settings</MenubarItem>
-            <MenubarSeparator />
-            <MenubarItem onClick={handleClose}>Exit</MenubarItem>
-          </MenubarContent>
         </MenubarMenu>
 
         <ProjectWidget />

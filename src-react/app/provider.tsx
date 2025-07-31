@@ -9,6 +9,7 @@ import * as Logger from 'effect/Logger';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
 import React from 'react';
 
+import { ModeProvider } from '@/app/providers/mode.provider.tsx';
 import { LiveManagedRuntime } from '@/config/live-layer';
 import { ChannelClient } from '@/services/common/channel-client';
 import { FeederClient } from '@/services/common/feeder-client';
@@ -20,6 +21,7 @@ import { TaskClient } from '@/services/common/task-client';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { StartupProvider } from './providers/startup.provider';
+
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -65,9 +67,11 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RuntimeProvider runtime={runtime}>
-        <StartupProvider>{children}</StartupProvider>
-      </RuntimeProvider>
+      <ModeProvider>
+        <RuntimeProvider runtime={runtime}>
+          <StartupProvider>{children}</StartupProvider>
+        </RuntimeProvider>
+      </ModeProvider>
     </QueryClientProvider>
   );
 };
