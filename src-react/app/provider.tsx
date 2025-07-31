@@ -9,8 +9,8 @@ import * as Logger from 'effect/Logger';
 import * as ManagedRuntime from 'effect/ManagedRuntime';
 import React from 'react';
 
-import { ModeProvider } from '@/app/providers/mode.provider.tsx';
 import { LiveManagedRuntime } from '@/config/live-layer';
+import { ModeProvider } from '@/hooks/use-mode';
 import { ChannelClient } from '@/services/common/channel-client';
 import { FeederClient } from '@/services/common/feeder-client';
 import { NatsClient } from '@/services/common/nats-client';

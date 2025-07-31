@@ -1,4 +1,4 @@
-import { rightSidebarTools } from '@/config/layouts';
+import { rightSidebarTools } from '@/config/layouts/game-master';
 
 import { useRightToolsStore } from '../../stores/state-view.store';
 

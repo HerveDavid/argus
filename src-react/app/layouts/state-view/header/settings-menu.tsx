@@ -23,7 +23,7 @@ import {
   useMode,
   useCurrentMode,
   useIsTransitioning,
-} from '../../../providers/mode.provider';
+} from '@/hooks/use-mode';
 
 interface SettingsMenuProps {
   headerRef: React.RefObject<HTMLDivElement>;
@@ -57,23 +57,18 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
 
   // Handler pour le changement de mode
   const handleModeChange = (value: string) => {
-    console.log('🎯 Mode change requested:', value, 'current:', currentMode, 'transitioning:', isTransitioning);
-
     if (isTransitioning) {
-      console.log('⚠️ Ignoring mode change - transition in progress');
       return;
     }
 
     switch (value) {
       case 'game-master':
         if (currentMode !== 'GameMaster') {
-          console.log('🎮 Switching to GameMaster');
           switchToGameMaster();
         }
         break;
       case 'scada':
         if (currentMode !== 'Scada') {
-          console.log('🏭 Switching to SCADA');
           switchToScada();
         }
         break;
@@ -83,7 +78,6 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   // Conversion du mode actuel vers la valeur du radio group
   const getCurrentModeValue = () => {
     const value = currentMode === 'GameMaster' ? 'game-master' : 'scada';
-    console.log('📊 Current mode value:', value, 'from mode:', currentMode);
     return value;
   };
 
@@ -161,9 +155,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger>
-            Mode: {currentMode} {isTransitioning && '(...)'}
-          </MenubarTrigger>
+          <MenubarTrigger>Mode</MenubarTrigger>
           <MenubarContent onClick={handleModeMenuClick}>
             <MenubarRadioGroup
               value={getCurrentModeValue()}

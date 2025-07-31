@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 
-import { rightSidebarSlds } from '@/config/layouts';
+import { rightSidebarSlds } from '@/config/layouts/game-master';
 import { SidebarItem } from '@/types/sidebar-item';
 
 interface SidebarStore {

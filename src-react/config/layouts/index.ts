@@ -1,3 +1,0 @@
-export * from './left-sidebar';
-export * from './right-sidebar';
-export * from './sld-sidebar';

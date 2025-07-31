@@ -1,4 +1,4 @@
-import { leftSidebarTools } from '@/config/layouts';
+import { leftSidebarTools } from '@/config/layouts/game-master';
 
 import { useLeftToolsStore } from '../../stores/state-view.store';
 

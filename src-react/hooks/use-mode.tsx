@@ -2,7 +2,7 @@ import { useMachine } from '@xstate/react';
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Actor, StateFrom } from 'xstate';
 
-import { modeMachine } from '@/services/scada/machine'; // Ajustez le chemin selon votre structure
+import { modeMachine } from '@/services/scada/machine';
 import { AppMode } from '@/types/mode';
 
 // Types pour le contexte

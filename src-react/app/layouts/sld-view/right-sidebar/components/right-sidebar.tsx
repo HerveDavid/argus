@@ -1,4 +1,4 @@
-import { rightSidebarSlds } from '@/config/layouts';
+import { rightSidebarSlds } from '@/config/layouts/game-master';
 
 import { useRightSidebarStore } from '../hooks/use-right-sidebar-store';
 
