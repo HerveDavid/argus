@@ -1,6 +1,5 @@
 import threading
 import logging
-import sys
 
 from app.main import stdin_loop, start_api_server, shutdown_event
 
@@ -55,34 +54,3 @@ if __name__ == "__main__":
         logger.info("Shutting down...")
         shutdown_event.set()
         logger.info("=== Application terminated ===")
-
-
-def configure_advanced_logging():
-    formatter = logging.Formatter(
-        fmt='[%(asctime)s] %(name)s:%(lineno)d - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(formatter)
-
-    from logging.handlers import RotatingFileHandler
-    file_handler = RotatingFileHandler(
-        'powsybl.log',
-        maxBytes=10 * 1024 * 1024,
-        backupCount=5,
-        encoding='utf-8'
-    )
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)
-    root_logger.addHandler(console_handler)
-    root_logger.addHandler(file_handler)
-
-    logging.getLogger('urllib3').setLevel(logging.WARNING)
-    logging.getLogger('requests').setLevel(logging.WARNING)
-
-    return logging.getLogger(__name__)

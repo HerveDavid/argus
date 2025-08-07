@@ -4,6 +4,7 @@ import os
 import signal
 import sys
 import threading
+import select
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -81,7 +82,7 @@ def connect_to_api_server():
 
 @app.get("/shutdown")
 async def shutdown_server():
-    logger.info("[powsybl] Arrêt demandé via API")
+    logger.info("[powsybl] Shutdown requested via API")
     shutdown_event.set()
     if server_instance:
         server_instance.should_exit = True
@@ -161,11 +162,11 @@ def stdin_loop():
     try:
         while not shutdown_event.is_set():
             try:
-                ready, _, _ = select.select([sys.stdin], [], [], 1.0)  # timeout de 1 seconde
+                ready, _, _ = select.select([sys.stdin], [], [], 1.0)  # 1 second timeout
                 if ready:
                     user_input = sys.stdin.readline().strip()
                     if not user_input:  # EOF
-                        logger.info("[powsybl] EOF reçu, arrêt du sidecar")
+                        logger.info("[powsybl] EOF received, stopping sidecar")
                         break
 
                     match user_input:
@@ -179,17 +180,13 @@ def stdin_loop():
                 else:
                     continue
             except EOFError:
-                logger.info("[powsybl] EOF reçu, arrêt du sidecar")
+                logger.info("[powsybl] EOF received, stopping sidecar")
                 break
             except Exception as e:
-                logger.error(f"[powsybl] Erreur dans stdin_loop: {e}")
+                logger.error(f"[powsybl] Error in stdin_loop: {e}")
                 break
     except Exception as e:
-        logger.error(f"[powsybl] Erreur fatale dans stdin_loop: {e}")
+        logger.error(f"[powsybl] Fatal error in stdin_loop: {e}")
     finally:
-        logger.info("[powsybl] stdin_loop terminé")
+        logger.info("[powsybl] stdin_loop terminated")
         shutdown_event.set()
-
-
-
-import select

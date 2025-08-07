@@ -2,14 +2,16 @@ mod commands;
 mod entities;
 mod tasks;
 mod nats;
+mod powsybl;
 mod feeders;
 mod project;
+mod sessions;
 mod settings;
 mod utils;
 
 use tauri::Manager;
 
-const SIDECARS: [&str; 1] = ["powsybl"];
+const SIDECARS: [&str; 2] = ["powsybl", "powsybl-crdt"];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -53,6 +55,12 @@ pub fn run() {
                         .await
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
+
+                let session =
+                    sessions::state::SessionState::new(&app.handle())
+                        .await
+                        .expect("Failed to initialize sessions");
+                app.manage(session);
 
                 let project_db = project::state::ProjectState::new(&app.handle())
                     .await
@@ -104,12 +112,29 @@ pub fn run() {
             // Sidecars
             settings::sidecars::commands::start_sidecar,
             settings::sidecars::commands::shutdown_sidecar,
+            // Sessions
+            sessions::commands::set_session_config,
+            sessions::commands::set_session_config_with_file,
+            // Powsybl
+            powsybl::commands::get_tables,
+            powsybl::commands::get_table_data,
+            powsybl::commands::search_table,
+            powsybl::commands::get_item_by_id,
+            powsybl::commands::get_database_stats,
+            powsybl::commands::get_single_line_diagram,
+            powsybl::commands::get_network_area_diagram,
+            powsybl::commands::execute_query,
+            powsybl::commands::update_battery,
+            powsybl::commands::update_generator,
+            powsybl::commands::update_switch,
+            powsybl::commands::update_load,
+
             // Project
-            project::commands::load_project,
-            project::commands::init_database_project,
-            project::commands::query_project,
-            project::commands::create_new_project,
-            project::commands::get_single_line_diagram,
+            // project::commands::load_project,
+            // project::commands::init_database_project,
+            // project::commands::query_project,
+            // project::commands::create_new_project,
+            // project::commands::get_single_line_diagram,
             // Nats
             nats::commands::set_nats_address,
             nats::commands::connect_nats,
@@ -127,6 +152,18 @@ pub fn run() {
             // Orchestrator
             feeders::commands::add_nats_feeder,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::ExitRequested {.. } = event {
+                if let Some(sidecars_state) = app_handle.try_state::<tokio::sync::Mutex<settings::sidecars::state::SidecarsState>>() {
+                    tauri::async_runtime::block_on(async {
+                        let mut sidecars = sidecars_state.lock().await;
+                        for s in SIDECARS {
+                            let _ = sidecars.despawn_sidecar(s);
+                        }
+                    });
+                }
+            }
+        });
 }
