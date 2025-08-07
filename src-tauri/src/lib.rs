@@ -1,114 +1,132 @@
-use database::{DatabaseInner, DatabaseState};
-use std::sync::{Arc, Mutex};
-use tauri::{Manager, RunEvent};
-use tauri_plugin_shell::process::CommandChild;
-
-mod broker;
-mod database;
-mod powsybl;
+mod commands;
+mod entities;
+mod tasks;
+mod nats;
+mod feeders;
+mod project;
 mod settings;
-mod shared;
-mod sidecars;
-mod state;
+mod utils;
 
-use broker::{
-    commands::*,
-    state::{BrokerState, BrokerStateInner},
-};
-use powsybl::commands::*;
-use settings::commands::*;
-use sidecars::{commands::*, despawn_sidecar, spawn_and_monitor_sidecar};
-use state::AppStateInner;
+use tauri::Manager;
+
+const SIDECARS: [&str; 1] = ["powsybl"];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    std::env::set_var("SQLX_LOGGING", "false");
+    std::env::set_var("RUST_LOG", "info,sqlx=off");
+
     tauri::Builder::default()
-        .plugin(tauri_plugin_sql::Builder::new().build())
-        .plugin(tauri_plugin_log::Builder::new().build())
-        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .filter(|metadata| !metadata.target().starts_with("sqlx"))
+                .build(),
+        )
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_log::Builder::new().build())
-        .invoke_handler(tauri::generate_handler![
-            // Broker (nats)
-            connect_broker,
-            disconnect_broker,
-            send_command_broker,
-            send_command_breaker,
-            // Sidecars
-            start_sidecar,
-            shutdown_sidecar,
-            // Settings
-            set_server_url,
-            get_server_url,
-            set_zmq_url,
-            set_zmq_subscription,
-            get_zmq_url,
-            load_config_file,
-            // Loaders
-            load_client,
-            load_game_master_outputs_in_db,
-            load_iidm_file,
-            upload_iidm,
-            // Substations
-            get_substations,
-            get_substation_by_id,
-            get_paginated_substations,
-            search_substations,
-            load_substations,
-            // Voltage levels
-            get_voltage_levels,
-            get_voltage_levels_by_id,
-            get_paginated_voltage_levels,
-            get_voltage_levels_for_substation,
-            search_voltage_levels,
-            load_voltage_levels,
-            // Diagrams
-            get_single_line_diagram,
-            get_single_line_diagram_metadata,
-            get_single_line_diagram_with_metadata,
-            subscribe_single_line_diagram,
-            unsubscribe_single_line_diagram,
-        ])
         .setup(|app| {
             tauri::async_runtime::block_on(async move {
-                // Global app state (todo: to remove)
-                let app_state = AppStateInner::new(&app.handle())
+                app.manage(utils::channels::state::Channels::default());
+                app.manage(utils::tasks::state::Tasks::default());
+
+                app.manage(settings::banner::state::BannerState::default());
+
+                println!("-----------------------------------------------");
+
+                let settings_db = settings::database::state::DatabaseState::new(&app.handle())
                     .await
-                    .expect("Failed to initialize app state");
-                app.manage(app_state);
+                    .expect("Failed to initialize settings db");
+                app.manage(settings_db);
 
-                // Sidecar state
-                // Store the initial sidecar process in the app state
-                app.manage(Arc::new(Mutex::new(None::<CommandChild>)));
-
-                let app_handle = app.handle().clone();
-                // Spawn the Python sidecar on startup
-                spawn_and_monitor_sidecar(app_handle).ok();
-
-                // Database state
-                let database_state = DatabaseInner::new(&app.handle())
+                let broker = settings::broker::state::BrokerState::new()
                     .await
-                    .expect("Failed to initialize database state");
-                app.manage(DatabaseState::new(database_state));
+                    .expect("Failed to initialize broker");
+                app.manage(broker);
 
-                // Broker state
-                let broker_state = BrokerStateInner::new()
+                let sidecars =
+                    settings::sidecars::state::SidecarsState::new(&app.handle(), &SIDECARS)
+                        .await
+                        .expect("Failed to initialize sidecars");
+                app.manage(sidecars);
+
+                let project_db = project::state::ProjectState::new(&app.handle())
                     .await
-                    .expect("Failed to initialize broker state");
-                app.manage(BrokerState::new(broker_state));
+                    .expect("Failed to initialize project db");
+                app.manage(project_db);
+
+                let tasks = tasks::state::TasksState::new()
+                    .await
+                    .expect("Failed to initialize tasks");
+                app.manage(tasks);
+
+                let nats_state = nats::state::NatsState::new()
+                    .await
+                    .expect("Failed to initialize nats");
+                app.manage(nats_state);
+
+                println!("-----------------------------------------------");
             });
-
             Ok(())
         })
-        .build(tauri::generate_context!())
-        .expect("error while running tauri application")
-        .run(|app_handle, event| match event {
-            // Ensure the Python sidecar is killed when the app is closed
-            RunEvent::ExitRequested { .. } => despawn_sidecar(app_handle),
-            _ => {}
-        });
+        .invoke_handler(tauri::generate_handler![
+            // Channels
+            utils::channels::commands::register,
+            utils::channels::commands::unregister,
+            utils::channels::commands::start,
+            utils::channels::commands::stop,
+            utils::channels::commands::pause,
+            utils::channels::commands::get_status,
+            utils::channels::commands::list_channels,
+            // Database
+            settings::database::commands::set_setting,
+            settings::database::commands::get_setting,
+            settings::database::commands::get_setting_with_default,
+            settings::database::commands::get_setting_or_default,
+            settings::database::commands::merge_settings,
+            settings::database::commands::set_nested_setting,
+            settings::database::commands::get_nested_setting,
+            settings::database::commands::delete_setting,
+            settings::database::commands::list_all_settings,
+            settings::database::commands::setting_exists,
+            settings::database::commands::clear_all_settings,
+            settings::database::commands::count_settings,
+            settings::database::commands::set_string_setting,
+            settings::database::commands::get_string_setting,
+            settings::database::commands::set_bool_setting,
+            settings::database::commands::get_bool_setting,
+            settings::database::commands::set_number_setting,
+            settings::database::commands::get_number_setting,
+            // Sidecars
+            settings::sidecars::commands::start_sidecar,
+            settings::sidecars::commands::shutdown_sidecar,
+            // Project
+            project::commands::load_project,
+            project::commands::init_database_project,
+            project::commands::query_project,
+            project::commands::create_new_project,
+            project::commands::get_single_line_diagram,
+            // Nats
+            nats::commands::set_nats_address,
+            nats::commands::connect_nats,
+            nats::commands::disconnect_nats,
+            nats::commands::get_nats_connection_status,
+            // Feeders
+            tasks::commands::start_task,
+            tasks::commands::close_task,
+            tasks::commands::pause_task,
+            tasks::commands::resume_task,
+            tasks::commands::list_active_tasks,
+            tasks::commands::get_task_count,
+            tasks::commands::get_task_status,
+            tasks::commands::get_tasks_statistics,
+            // Orchestrator
+            feeders::commands::add_nats_feeder,
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }

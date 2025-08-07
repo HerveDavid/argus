@@ -1,3 +1,10 @@
 pypowsybl
+pandas
+duckdb
+toml
+pyzmq
+pytest
+pytest-asyncio
+pytest-cov
 pyinstaller
-zmq
+dependency-injector

@@ -12,14 +12,17 @@
   "app": {
     "windows": [
       {
-        "title": "GameMaster - State View",
-        "width": 1920,
-        "height": 1080
+        "label": "main",
+        "title": "Argus",
+        "decorations": false,
+        "titleBarStyle": "Overlay",
+        "resizable": true,
+        "width": 800,
+        "height": 600
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://localhost:* ws://localhost:* tcp://localhost:*;",
-      "dangerousDisableAssetCspModification": false
+      "csp": null
     }
   },
   "bundle": {
