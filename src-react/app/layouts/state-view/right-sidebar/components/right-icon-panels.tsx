@@ -1,4 +1,4 @@
-import { rightSidebarPanels } from '@/config/layouts';
+import { rightSidebarPanels } from '@/config/layouts/game-master';
 
 import { useRightSidebarStore } from '../../stores/state-view.store';
 

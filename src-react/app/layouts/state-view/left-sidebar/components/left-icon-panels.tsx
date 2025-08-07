@@ -1,4 +1,4 @@
-import { leftSidebarPanels } from '@/config/layouts';
+import { leftSidebarPanels } from '@/config/layouts/game-master';
 
 import { useLeftSidebarStore } from '../../stores/state-view.store';
 

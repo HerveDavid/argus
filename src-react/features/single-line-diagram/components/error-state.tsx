@@ -1,6 +1,7 @@
-import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import React from 'react';
+
+import { Button } from '@/components/ui/button';
 
 export const ErrorState: React.FC<{
   error: string | null;

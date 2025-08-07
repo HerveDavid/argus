@@ -36,7 +36,8 @@
       "icons/icon.ico"
     ],
     "externalBin": [
-      "binaries/powsybl"
+      "binaries/powsybl",
+      "binaries/powsybl-crdt"
     ]
   }
 }

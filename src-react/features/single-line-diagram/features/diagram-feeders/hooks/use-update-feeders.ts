@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
 import * as d3 from 'd3';
+import React, { useCallback } from 'react';
+import { toast } from 'sonner';
 
 interface FeederUpdate {
   id: string;
@@ -22,22 +23,17 @@ export const useUpdateFeeders = ({ svgRef }: UseUpdateFeedersProps) => {
       const element = svg.select(`#${id}`);
 
       if (element.empty()) {
-        console.warn(`Élément avec l'ID ${id} non trouvé dans le SVG`);
         return false;
       }
 
-      // Chercher l'élément texte
       const textElement = element.select('.sld-label');
       if (textElement.empty()) {
-        console.warn(`Élément .sld-label non trouvé dans: ${id}`);
         return false;
       }
 
-      // Mettre à jour la valeur (comme dans votre ancien code)
       const formattedValue = parseFloat(value.toFixed(4));
       textElement.text(formattedValue.toString());
 
-      // Gérer les classes CSS selon le signe (comme dans votre ancien code)
       if (value >= 1e-4) {
         element.classed('sld-out', true);
         element.classed('sld-in', false);
@@ -49,7 +45,6 @@ export const useUpdateFeeders = ({ svgRef }: UseUpdateFeedersProps) => {
         element.classed('sld-out', false);
       }
 
-      // Animation (comme dans votre ancien code)
       textElement
         .style('fill', 'red')
         .transition()
@@ -78,9 +73,8 @@ export const useUpdateFeeders = ({ svgRef }: UseUpdateFeedersProps) => {
         }
       });
 
-      console.log(`Mise à jour: ${successCount}/${updates.length} succès`);
       if (failures.length > 0) {
-        console.warn('Échecs:', failures);
+        toast(`Failed feeders update: ` + failures);
       }
 
       return { successCount, total: updates.length, failures };
@@ -156,40 +150,6 @@ export const useUpdateFeeders = ({ svgRef }: UseUpdateFeedersProps) => {
   }, [getAllFeeders]); // ❌ ENLEVÉ la dépendance qui causait la mise en cache
 
   /**
-   * Debug: Analyser la structure SVG
-   */
-  const debugSvgStructure = useCallback(() => {
-    if (!svgRef.current) {
-      console.log('SVG ref non disponible');
-      return;
-    }
-
-    const feeders = getAllFeeders();
-
-    console.log('=== DEBUG SVG STRUCTURE ===');
-    console.log(`Feeders trouvés: ${feeders.length}`);
-
-    feeders.forEach((feeder, index) => {
-      if (index < 10) {
-        // Afficher seulement les 10 premiers
-        console.log({
-          id: feeder.id,
-          type: feeder.type,
-          currentValue: feeder.currentValue,
-        });
-      }
-    });
-
-    if (feeders.length > 10) {
-      console.log(`... et ${feeders.length - 10} autres feeders`);
-    }
-
-    console.log('=== END DEBUG ===');
-
-    return feeders;
-  }, [getAllFeeders]);
-
-  /**
    * Met à jour TOUS les feeders avec des valeurs aléatoires FRAÎCHES
    */
   const updateAllFeeders = useCallback(() => {
@@ -228,7 +188,6 @@ export const useUpdateFeeders = ({ svgRef }: UseUpdateFeedersProps) => {
     updateFeeder,
     updateMultipleFeeders,
     generateMockData,
-    debugSvgStructure,
     getAllFeeders,
     updateAllFeeders,
   };

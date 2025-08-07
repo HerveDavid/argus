@@ -9,10 +9,10 @@ interface LineGoToProps {
 }
 
 export const useLineGoTo = ({
-  svgRef,
-  metadata,
-  onGoToVoltageLevel,
-}: LineGoToProps) => {
+                              svgRef,
+                              metadata,
+                              onGoToVoltageLevel,
+                            }: LineGoToProps) => {
   // Fonction pour déterminer le type de composant à partir des classes CSS
   const getComponentTypeFromClasses = (classList: string[]): string | null => {
     for (const cls of classList) {

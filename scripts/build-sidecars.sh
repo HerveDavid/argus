@@ -21,30 +21,35 @@ echo "Using temporary directory for spec files: $TEMP_SPEC_DIR"
 # Ensure the src-tauri/binaries/ directory exists
 mkdir -p src-tauri/binaries/
 
-# Function to setup and activate virtual environment
+# Function to setup and activate virtual environment for a given project
 setup_venv() {
+    local project_path=$1
+    local project_name=$(basename "$project_path")
+
+    echo "Setting up virtual environment for $project_name..."
+
     # Check if VIRTUAL_ENV is already set
     if [[ -z "$VIRTUAL_ENV" ]]; then
         echo "Virtual environment not active, setting it up..."
-        
+
         # Check if venv directory exists
-        if [[ ! -d "src-sidecars/powsybl/venv" ]]; then
-            echo "Creating virtual environment in src-sidecars/powsybl/venv"
-            python3 -m venv src-sidecars/powsybl/venv
+        if [[ ! -d "$project_path/venv" ]]; then
+            echo "Creating virtual environment in $project_path/venv"
+            python3 -m venv "$project_path/venv"
         else
-            echo "Found existing virtual environment"
+            echo "Found existing virtual environment for $project_name"
         fi
-        
+
         # Activate the virtual environment
-        echo "Activating virtual environment"
-        source src-sidecars/powsybl/venv/bin/activate
-        
+        echo "Activating virtual environment for $project_name"
+        source "$project_path/venv/bin/activate"
+
         # Store that we activated the venv in this script so we can deactivate later
         ACTIVATED_IN_SCRIPT=true
     else
         # Check if the active venv is in the expected location
-        if [[ "$VIRTUAL_ENV" != *"src-sidecars/powsybl"* && "$VIRTUAL_ENV" != *"src-sidecars\\powsybl"* ]]; then
-            echo "Warning: The active virtual environment doesn't seem to be in src-sidecars/powsybl"
+        if [[ "$VIRTUAL_ENV" != *"$project_path"* ]]; then
+            echo "Warning: The active virtual environment doesn't seem to be in $project_path"
             echo "Active venv: $VIRTUAL_ENV"
             read -p "Continue anyway? (y/n): " -n 1 -r
             echo
@@ -52,17 +57,17 @@ setup_venv() {
                 exit 1
             fi
         fi
-        
+
         echo "Using existing virtual environment: $VIRTUAL_ENV"
         ACTIVATED_IN_SCRIPT=false
     fi
-    
+
     # Install requirements if requirements.txt exists
-    if [[ -f "src-sidecars/powsybl/requirements.txt" ]]; then
-        echo "Installing requirements from requirements.txt..."
-        pip install -r src-sidecars/powsybl/requirements.txt
+    if [[ -f "$project_path/requirements.txt" ]]; then
+        echo "Installing requirements from $project_path/requirements.txt..."
+        pip install -r "$project_path/requirements.txt"
     else
-        echo "No requirements.txt found in src-sidecars/powsybl"
+        echo "No requirements.txt found in $project_path"
         echo "Installing PyInstaller..."
         pip install pyinstaller
     fi
@@ -70,9 +75,9 @@ setup_venv() {
 
 # Function to deactivate venv if we activated it
 cleanup_venv() {
-    if [[ "$ACTIVATED_IN_SCRIPT" == "true" ]]; then
+    if [[ "$ACTIVATED_IN_SCRIPT" == "true" && -n "$VIRTUAL_ENV" ]]; then
         echo "Deactivating virtual environment"
-        deactivate
+        deactivate 2>/dev/null || true
     fi
 }
 
@@ -82,6 +87,28 @@ cleanup_temp_dirs() {
     rm -rf "$TEMP_SPEC_DIR"
 }
 
+# Function to build a Python project
+build_python_project() {
+    local project_path=$1
+    local project_name=$2
+    local binary_name_suffix=$3
+
+    echo "Building $project_name..."
+
+    # Setup virtual environment for this project
+    setup_venv "$project_path"
+
+    # Run PyInstaller
+    echo "Running PyInstaller for $project_name on $OS..."
+    pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name "$project_name-$binary_name_suffix" --distpath src-tauri/binaries/ "$project_path/main.py"
+
+    # Cleanup venv after building this project
+    cleanup_venv
+
+    # Reset the flag for the next project
+    ACTIVATED_IN_SCRIPT=false
+}
+
 # Set up trap to ensure cleanup on exit
 trap 'cleanup_venv; cleanup_temp_dirs' EXIT
 
@@ -89,21 +116,18 @@ trap 'cleanup_venv; cleanup_temp_dirs' EXIT
 case $OS in
     "Linux")
         echo "Executing Linux-specific commands..."
-        setup_venv
-        echo "Running PyInstaller for Linux..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-unknown-linux-gnu --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        build_python_project "src-sidecars/powsybl" "powsybl" "x86_64-unknown-linux-gnu"
+        build_python_project "src-sidecars/powsybl-crdt" "powsybl-crdt" "x86_64-unknown-linux-gnu"
         ;;
     "MacOS")
         echo "Executing MacOS-specific commands..."
-        setup_venv
-        echo "Running PyInstaller for macOS..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-apple-darwin --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        build_python_project "src-sidecars/powsybl" "powsybl" "x86_64-apple-darwin"
+        build_python_project "src-sidecars/powsybl-crdt" "powsybl-crdt" "x86_64-apple-darwin"
         ;;
     "Windows")
         echo "Executing Windows-specific commands..."
-        setup_venv
-        echo "Running PyInstaller for Windows..."
-        pyinstaller -c -F --clean --specpath "$TEMP_SPEC_DIR" --name powsybl-x86_64-pc-windows-msvc --distpath src-tauri/binaries/ src-sidecars/powsybl/main.py
+        build_python_project "src-sidecars/powsybl" "powsybl" "x86_64-pc-windows-msvc"
+        build_python_project "src-sidecars/powsybl-crdt" "powsybl-crdt" "x86_64-pc-windows-msvc"
         ;;
     *)
         echo "Unsupported OS: $OS"

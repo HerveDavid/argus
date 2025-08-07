@@ -1,0 +1,14 @@
+pypowsybl==1.11.2
+pandas
+toml
+pytest
+pytest-asyncio
+pytest-cov
+pyinstaller
+fastapi
+uvicorn
+pydantic
+python-multipart
+transitions
+starlette
+duckdb

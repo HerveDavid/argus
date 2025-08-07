@@ -7,12 +7,11 @@ import {
   leftSidebarTools,
   rightSidebarPanels,
   rightSidebarTools,
-} from '@/config/layouts';
+} from '@/config/layouts/scada';
+import { LiveManagedRuntime } from '@/config/live-layer';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
 import { SettingsClient } from '@/services/common/settings-client';
 import { SidebarItem } from '@/types/sidebar-item';
-
-import { LiveManagedRuntime } from '@/config/live-layer';
 
 interface SidebarConfig {
   name: string;
@@ -44,6 +43,7 @@ const debounce = <T extends (...args: any[]) => void>(
 };
 
 const createSidebarStore = (config: SidebarConfig) => {
+  // @ts-ignore
   const store = create<SidebarStore>()(
     devtools(
       subscribeWithSelector((set) => ({

@@ -1,8 +1,11 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import './styles/gradients.css';
+import { SettingsMenu } from '@/app/layouts/state-view/header/settings-menu.tsx';
+import { useHeaderStore } from '@/app/layouts/state-view/header/stores/header.store.ts';
+
 import { CenterMenu } from './center-menu';
 import { LeftMenu } from './left-menu';
 import { RightMenu } from './right-menu';
@@ -10,6 +13,8 @@ import { RightMenu } from './right-menu';
 export const Header = () => {
   const [_isMaximized, setIsMaximized] = useState(false);
   const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
+  const { isOpen, setOpen } = useHeaderStore();
+  const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const initWindow = async () => {
@@ -24,6 +29,41 @@ export const Header = () => {
     };
     initWindow();
   }, []);
+
+  // Gestion du clic à l'extérieur - modifiée pour exclure les menus
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      // Ne pas fermer si on clique sur un élément de menu
+      const isMenuClick =
+        target.closest('[role="menubar"]') ||
+        target.closest('[role="menu"]') ||
+        target.closest('[role="menuitem"]') ||
+        target.closest('[data-radix-collection-item]');
+
+      if (
+        headerRef.current &&
+        !headerRef.current.contains(event.target as Node) &&
+        !isMenuClick
+      ) {
+        setOpen(false);
+      }
+    };
+
+    // Ajouter l'event listener seulement si le menu est ouvert
+    if (isOpen) {
+      // Petit délai pour éviter que le clic d'ouverture ferme immédiatement le menu
+      const timeoutId = setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isOpen, setOpen]);
 
   const handleMaximize = async () => {
     if (appWindow) {
@@ -45,7 +85,9 @@ export const Header = () => {
       target.closest('[role="button"]') ||
       target.closest('select') ||
       target.closest('input') ||
-      target.closest('[data-no-drag]');
+      target.closest('[data-no-drag]') ||
+      target.closest('[role="menubar"]') ||
+      target.closest('[role="menu"]');
 
     if (isInteractiveElement) {
       return;
@@ -68,8 +110,13 @@ export const Header = () => {
     e.stopPropagation();
   };
 
+  if (isOpen) {
+    return <SettingsMenu headerRef={headerRef} />;
+  }
+
   return (
     <div
+      ref={headerRef}
       className="w-full h-8 flex items-center header-glass z-10 shadow-2xs border-b"
       onMouseDown={handleDragStart}
     >

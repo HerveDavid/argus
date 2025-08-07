@@ -1,4 +1,5 @@
-import { Loader2 } from "lucide-react";
+import { Loader2 } from 'lucide-react';
+import React from 'react';
 
 export const LoadingState: React.FC = () => (
   <div className="flex items-center justify-center h-full">

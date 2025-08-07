@@ -1,11 +1,11 @@
 use log::{debug, error, info, warn};
 use std::{collections::HashMap, sync::Arc};
+use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::{
     process::{CommandChild, CommandEvent},
     ShellExt,
 };
-
 use super::error::{Error, Result};
 
 pub struct SidecarsState {
@@ -96,7 +96,7 @@ impl SidecarsState {
             .remove(sidecar)
             .ok_or(Error::SidecarNotFound(sidecar.to_string()))?;
 
-        // Send msg via stdin to sidecar where it self terminates
+        // Send msg via stdin to sidecar where itself terminates
         let command = "sidecar shutdown\n";
         let buf: &[u8] = command.as_bytes();
         child.write(buf)?;
@@ -104,6 +104,9 @@ impl SidecarsState {
         // *Important* `process.kill()` will only shutdown the parent sidecar (python process). Tauri doesnt know about the second process spawned by the "bootloader" script.
         // This only applies if you compile a "one-file" exe using PyInstaller. Otherwise, just use the line below to kill the process normally.
         // let _ = process.kill();
+
+        // Wait close
+        std::thread::sleep(Duration::from_millis(500));
 
         Ok(())
     }

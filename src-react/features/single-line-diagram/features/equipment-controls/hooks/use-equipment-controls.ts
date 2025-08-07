@@ -1,12 +1,11 @@
-import { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 export const useEquipmentControls = () => {
   const [targetElement, setTargetElement] = useState<SVGElement | null>(null);
 
   const handleContextMenuTrigger = useCallback(
     (e: React.MouseEvent<SVGSVGElement>) => {
-      const target = e.target as SVGElement;
-      let element: SVGElement | null = target;
+      let element: SVGElement | null = e.target as SVGElement;
 
       // Find parent with id
       while (

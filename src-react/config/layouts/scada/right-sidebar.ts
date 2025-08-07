@@ -5,17 +5,10 @@ import { GrafcetEditor } from '@/features/grafcet-editor';
 import { History } from '@/features/historic';
 import TaskDashboard from '@/features/task-dashboard';
 import Widgets from '@/features/widgets';
-import { SidebarItem } from '@/types/sidebar-item';
+import { SidebarItem } from '@/types/sidebar-item.ts';
 import { TimelineEditor } from '@/features/timeline-editor';
 
 export const rightSidebarPanels: SidebarItem[] = [
-  { id: 'widgets', icon: Layers, label: 'Widgets', content: Widgets },
-  {
-    id: 'sequencer',
-    icon: GitFork,
-    label: 'Sequencer',
-    content: GrafcetEditor,
-  },
   { id: 'historic', icon: ClockIcon, label: 'Historic', content: History },
 ] as const;
 

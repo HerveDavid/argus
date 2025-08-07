@@ -5,7 +5,7 @@ import {
   
   import ChartComponent from '@/features/chart';
   import Terminal from '@/features/terminal';
-  import { SidebarItem } from '@/types/sidebar-item';
+  import { SidebarItem } from '@/types/sidebar-item.ts';
   
 
   export const rightSidebarSlds: SidebarItem[] = [
