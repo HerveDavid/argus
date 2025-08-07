@@ -24,7 +24,7 @@ export class SessionClient extends Effect.Service<SessionClient>()(
           Effect.tryPromise({
             try: () => invoke<RootConfig>('set_session_config', { name, path }),
             catch: (error) =>
-              SessionError({
+              new SessionError({
                 message: error.message,
               }),
           }),

@@ -134,6 +134,7 @@ export const useBreadcrumb = (
         };
       });
 
+      // @ts-ignore
       return runtime.runPromise(program);
     },
     enabled: !!elementId, // Ne pas exécuter si pas d'elementId
