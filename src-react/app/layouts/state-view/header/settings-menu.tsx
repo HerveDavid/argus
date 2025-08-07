@@ -89,7 +89,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   return (
     <div
       ref={headerRef}
-      className="w-full h-8 flex items-center header-glass z-10 shadow-2xs border-b"
+      className="w-full h-8 flex items-center z-10 border-b"
     >
       <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
         <MenubarMenu>

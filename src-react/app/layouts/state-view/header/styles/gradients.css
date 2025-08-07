@@ -1,25 +1,71 @@
+/* Mode clair par défaut */
 .header-glass {
-  background:
-    radial-gradient(
-      circle at 30% 40%,
-      hsla(220 8% 88% / 0.4) 0%,
-      transparent 65%
-    ),
-    radial-gradient(
-      circle at 70% 60%,
-      hsla(210 6% 85% / 0.3) 0%,
-      transparent 60%
-    ),
-    linear-gradient(140deg, hsla(220 12% 94% / 0.8), hsla(225 8% 92% / 0.9));
+    background:
+            radial-gradient(
+                    circle at 30% 40%,
+                    hsla(220 8% 88% / 0.4) 0%,
+                    transparent 65%
+            ),
+            radial-gradient(
+                    circle at 70% 60%,
+                    hsla(210 6% 85% / 0.3) 0%,
+                    transparent 60%
+            ),
+            linear-gradient(140deg, hsla(220 12% 94% / 0.8), hsla(225 8% 92% / 0.9));
 }
 
-.dark .header-glass {
-  background: linear-gradient(
-    135deg,
-    hsla(225 50% 15% / 0.4) 0%,
-    hsla(280 40% 15% / 0.3) 25%,
-    hsla(200 60% 10% / 0.2) 50%,
-    hsla(260 50% 15% / 0.3) 75%,
-    hsla(225 50% 20% / 0.35) 100%
-  );
+/* SCADA Mode - Clair (vert élégant) */
+.scada .header-glass {
+    background:
+            radial-gradient(
+                    circle at 30% 40%,
+                    hsla(155 25% 85% / 0.5) 0%,
+                    transparent 65%
+            ),
+            radial-gradient(
+                    circle at 70% 60%,
+                    hsla(140 20% 88% / 0.4) 0%,
+                    transparent 60%
+            ),
+            linear-gradient(140deg, hsla(150 18% 92% / 0.85), hsla(145 15% 90% / 0.9));
+}
+
+/* SCADA Mode - Sombre (vert tech premium) */
+.scada.dark .header-glass {
+    background: linear-gradient(
+            135deg,
+            hsla(155 40% 18% / 0.45) 0%,
+            hsla(140 35% 22% / 0.4) 25%,
+            hsla(165 45% 15% / 0.35) 50%,
+            hsla(145 40% 20% / 0.42) 75%,
+            hsla(150 38% 24% / 0.45) 100%
+    );
+}
+
+/* Game Master Mode - Clair */
+.gamemaster .header-glass {
+    background:
+            radial-gradient(
+                    circle at 30% 40%,
+                    hsla(280 15% 88% / 0.4) 0%,
+                    transparent 65%
+            ),
+            radial-gradient(
+                    circle at 70% 60%,
+                    hsla(260 12% 85% / 0.3) 0%,
+                    transparent 60%
+            ),
+            linear-gradient(140deg, hsla(270 18% 94% / 0.8), hsla(265 15% 92% / 0.9));
+}
+
+/* Game Master Mode - Sombre */
+.gamemaster.dark .header-glass {
+    background: linear-gradient(
+            135deg,
+            hsla(270 45% 15% / 0.4) 0%,
+            hsla(285 40% 18% / 0.35) 25%,
+            hsla(255 50% 12% / 0.3) 50%,
+            hsla(275 45% 16% / 0.38) 75%,
+            hsla(265 42% 20% / 0.4) 100%
+    );
 }

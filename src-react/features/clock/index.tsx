@@ -15,9 +15,9 @@ const Clock = () => {
   const formattedTime = time.format('D MMMM HH:mm:ss');
 
   return (
-    <div className="flex items-center h-full text-sm font-medium">
+    <h1 className="flex items-center h-full text-sm font-medium">
       {formattedTime}
-    </div>
+    </h1>
   );
 };
 

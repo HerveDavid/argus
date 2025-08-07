@@ -4,6 +4,7 @@ import { Minus, Square, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Mode } from '@/features/mode';
 
 export const RightMenu = () => {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -57,6 +58,7 @@ export const RightMenu = () => {
 
   return (
     <div className="flex items-center gap-x-4 mr-2">
+      <Mode />
       <Button
         variant="ghost"
         size="sm"

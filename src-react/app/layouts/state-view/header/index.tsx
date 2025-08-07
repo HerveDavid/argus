@@ -5,6 +5,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import './styles/gradients.css';
 import { SettingsMenu } from '@/app/layouts/state-view/header/settings-menu.tsx';
 import { useHeaderStore } from '@/app/layouts/state-view/header/stores/header.store.ts';
+import { useCurrentMode } from '@/hooks/use-mode';
+import { AppMode } from '@/types/mode';
 
 import { CenterMenu } from './center-menu';
 import { LeftMenu } from './left-menu';
@@ -15,6 +17,37 @@ export const Header = () => {
   const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
   const { isOpen, setOpen } = useHeaderStore();
   const headerRef = useRef<HTMLDivElement>(null);
+
+  const currentMode = useCurrentMode();
+
+  // État pour gérer le thème sombre - vous pouvez l'adapter selon votre logique
+  const [isDark, setIsDark] = useState(false);
+
+  // Ou si vous avez un hook/store pour le thème, utilisez-le :
+  // const { isDark } = useTheme(); // exemple
+
+  // Ou détection automatique du thème système :
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    setIsDark(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const getModeClasses = (mode: AppMode, isDark: boolean = false): string => {
+    const darkClass = isDark ? ' dark' : '';
+    switch (mode) {
+      case 'Scada':
+        return `scada${darkClass}`;
+      case 'GameMaster':
+        return `gamemaster${darkClass}`;
+      default:
+        return darkClass.trim(); // mode par défaut
+    }
+  };
 
   useEffect(() => {
     const initWindow = async () => {
@@ -115,34 +148,36 @@ export const Header = () => {
   }
 
   return (
-    <div
-      ref={headerRef}
-      className="w-full h-8 flex items-center header-glass z-10 shadow-2xs border-b"
-      onMouseDown={handleDragStart}
-    >
+    <div className={getModeClasses(currentMode, isDark)}>
       <div
-        className="relative flex-1 flex justify-start"
-        onMouseDown={stopPropagation}
+        ref={headerRef}
+        className="w-full h-8 flex items-center header-glass z-10"
+        onMouseDown={handleDragStart}
       >
-        <LeftMenu />
-      </div>
-      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
-        &nbsp;
-      </div>
-      <div
-        className="relative flex-1 flex justify-center"
-        onMouseDown={stopPropagation}
-      >
-        <CenterMenu />
-      </div>
-      <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
-        &nbsp;
-      </div>
-      <div
-        className="relative flex-1 flex justify-end"
-        onMouseDown={stopPropagation}
-      >
-        <RightMenu />
+        <div
+          className="relative flex-1 flex justify-start"
+          onMouseDown={stopPropagation}
+        >
+          <LeftMenu />
+        </div>
+        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+          &nbsp;
+        </div>
+        <div
+          className="relative flex-1 flex justify-center"
+          onMouseDown={stopPropagation}
+        >
+          <CenterMenu />
+        </div>
+        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+          &nbsp;
+        </div>
+        <div
+          className="relative flex-1 flex justify-end"
+          onMouseDown={stopPropagation}
+        >
+          <RightMenu />
+        </div>
       </div>
     </div>
   );
