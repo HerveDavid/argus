@@ -1,7 +1,10 @@
 import logging
+import json
+import numpy as np
 from typing import List, Any, Dict, Optional
 
 from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi.encoders import jsonable_encoder
 
 from app.internal.config import ConfigFSM
 from ..dependencies import get_config, get_repository
@@ -17,12 +20,35 @@ router = APIRouter(
     dependencies=[Depends(get_config), Depends(get_repository)],
 )
 
+
+def serialize_numpy_data(data: Any) -> Any:
+    """
+    Convertit récursivement les objets numpy en types Python natifs
+    pour la sérialisation JSON/Pydantic
+    """
+    if isinstance(data, np.ndarray):
+        return data.tolist()
+    elif isinstance(data, np.integer):
+        return int(data)
+    elif isinstance(data, np.floating):
+        return float(data)
+    elif isinstance(data, np.bool_):
+        return bool(data)
+    elif isinstance(data, dict):
+        return {key: serialize_numpy_data(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [serialize_numpy_data(item) for item in data]
+    elif isinstance(data, tuple):
+        return tuple(serialize_numpy_data(item) for item in data)
+    else:
+        return data
+
+
 @router.get("/tables")
 async def get_tables(
-    config: ConfigFSM = Depends(get_config),
-    repository: RepositoryManager = Depends(get_repository),
+        config: ConfigFSM = Depends(get_config),
+        repository: RepositoryManager = Depends(get_repository),
 ) -> List[TableInfoResponse]:
-
     await repository.ensure_repository(config)
     repo = repository.get_repository_if_ready()
 
@@ -46,13 +72,17 @@ async def get_tables(
 
     for repo_name in repository_names:
         try:
-            repository = repo.get_repository(repo_name)
-            info = repository.get_table_info()
+            repository_obj = repo.get_repository(repo_name)
+            info = repository_obj.get_table_info()
+
+            # Sérialiser les données numpy
+            serialized_info = serialize_numpy_data(info)
+
             table_info.append(TableInfoResponse(
-                table_name=info["table_name"],
-                exists=info["exists"],
-                row_count=info["count"],
-                columns=info["columns"]
+                table_name=serialized_info["table_name"],
+                exists=serialized_info["exists"],
+                row_count=serialized_info["count"],
+                columns=serialized_info["columns"]
             ))
         except Exception as e:
             logger.warning(f"Could not get info for repository {repo_name}: {e}")
@@ -78,16 +108,20 @@ async def get_table_data(
         )
 
     try:
-        repository = repo.get_repository(table_name)
-        query = f"SELECT * FROM {repository.get_table_name()} LIMIT {limit} OFFSET {offset}"
+        repository_obj = repo.get_repository(table_name)
+        query = f"SELECT * FROM {repository_obj.get_table_name()} LIMIT {limit} OFFSET {offset}"
 
-        results = repository.execute_query(query)
+        results = repository_obj.execute_query(query)
+
+        # Sérialiser les données numpy
+        serialized_results = serialize_numpy_data(results)
+        columns = serialize_numpy_data(repository_obj.get_columns())
 
         return QueryResponse(
             success=True,
-            data=results,
-            row_count=len(results),
-            columns=repository.get_columns()
+            data=serialized_results,
+            row_count=len(serialized_results),
+            columns=columns
         )
     except Exception as e:
         logger.error(f"Error querying table {table_name}: {e}")
@@ -126,22 +160,25 @@ async def execute_query(
     try:
         # Get connection from any repository (they all share the same connection)
         # We'll use the substations repository as an example
-        repository = repo.get_repository("substations")
+        repository_obj = repo.get_repository("substations")
 
         # Apply limit if not specified in query
         if request.limit and 'LIMIT' not in query_upper:
             request.query += f" LIMIT {request.limit}"
 
         # Execute the query
-        results = repository.execute_query(request.query, request.parameters)
+        results = repository_obj.execute_query(request.query, request.parameters)
+
+        # Sérialiser les données numpy
+        serialized_results = serialize_numpy_data(results)
 
         # Get column names from the first result if available
-        columns = list(results[0].keys()) if results else []
+        columns = list(serialized_results[0].keys()) if serialized_results else []
 
         return QueryResponse(
             success=True,
-            data=results,
-            row_count=len(results),
+            data=serialized_results,
+            row_count=len(serialized_results),
             columns=columns
         )
     except Exception as e:
@@ -158,7 +195,7 @@ async def search_table(
         config: ConfigFSM = Depends(get_config),
         repository_manager: RepositoryManager = Depends(get_repository),
         limit: int = Query(100, ge=1, le=10000),
-        **filters: str  # Accept any query parameters as filters
+        filters: str = Query(..., description="JSON string containing search filters")
 ) -> QueryResponse:
     await repository_manager.ensure_repository(config)
 
@@ -170,36 +207,54 @@ async def search_table(
         )
 
     try:
-        repository = repo.get_repository(table_name)
+        repository_obj = repo.get_repository(table_name)
+
+        # Parse filters from JSON string
+        try:
+            filter_dict = json.loads(filters)
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid JSON format for filters parameter"
+            )
 
         # Convert string filters to appropriate types
         processed_filters = {}
-        for key, value in filters.items():
-            if value.lower() == 'true':
-                processed_filters[key] = True
-            elif value.lower() == 'false':
-                processed_filters[key] = False
-            elif value.lower() == 'null' or value.lower() == 'none':
-                processed_filters[key] = None
+        for key, value in filter_dict.items():
+            if isinstance(value, str):
+                if value.lower() == 'true':
+                    processed_filters[key] = True
+                elif value.lower() == 'false':
+                    processed_filters[key] = False
+                elif value.lower() == 'null' or value.lower() == 'none':
+                    processed_filters[key] = None
+                else:
+                    # Try to convert to number if possible
+                    try:
+                        if '.' in value:
+                            processed_filters[key] = float(value)
+                        else:
+                            processed_filters[key] = int(value)
+                    except ValueError:
+                        processed_filters[key] = value
             else:
-                # Try to convert to number if possible
-                try:
-                    if '.' in value:
-                        processed_filters[key] = float(value)
-                    else:
-                        processed_filters[key] = int(value)
-                except ValueError:
-                    processed_filters[key] = value
+                processed_filters[key] = value
 
         # Search with filters
-        results = repository.search(processed_filters, limit=limit)
+        results = repository_obj.search(processed_filters, limit=limit)
+
+        # Sérialiser les données numpy
+        serialized_results = serialize_numpy_data(results)
+        columns = serialize_numpy_data(repository_obj.get_columns())
 
         return QueryResponse(
             success=True,
-            data=results,
-            row_count=len(results),
-            columns=repository.get_columns()
+            data=serialized_results,
+            row_count=len(serialized_results),
+            columns=columns
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error searching table {table_name}: {e}")
         return QueryResponse(
@@ -225,8 +280,8 @@ async def get_item_by_id(
         )
 
     try:
-        repository = repo.get_repository(table_name)
-        result = repository.get_by_id(item_id)
+        repository_obj = repo.get_repository(table_name)
+        result = repository_obj.get_by_id(item_id)
 
         if result is None:
             raise HTTPException(
@@ -234,11 +289,15 @@ async def get_item_by_id(
                 detail=f"Item with id '{item_id}' not found in table '{table_name}'"
             )
 
+        # Sérialiser les données numpy
+        serialized_result = serialize_numpy_data(result)
+        columns = serialize_numpy_data(repository_obj.get_columns())
+
         return QueryResponse(
             success=True,
-            data=[result],
+            data=[serialized_result],
             row_count=1,
-            columns=repository.get_columns()
+            columns=columns
         )
     except HTTPException:
         raise
@@ -287,19 +346,24 @@ async def get_database_stats(
 
     for repo_name in repository_names:
         try:
-            repository = repo.get_repository(repo_name)
-            info = repository.get_table_info()
-            if info["exists"]:
-                stats["tables"][info["table_name"]] = {
-                    "row_count": info["count"],
-                    "column_count": len(info["columns"])
+            repository_obj = repo.get_repository(repo_name)
+            info = repository_obj.get_table_info()
+
+            # Sérialiser les données numpy
+            serialized_info = serialize_numpy_data(info)
+
+            if serialized_info["exists"]:
+                stats["tables"][serialized_info["table_name"]] = {
+                    "row_count": serialized_info["count"],
+                    "column_count": len(serialized_info["columns"])
                 }
-                stats["total_rows"] += info["count"]
+                stats["total_rows"] += serialized_info["count"]
                 stats["total_tables"] += 1
         except Exception as e:
             logger.warning(f"Could not get stats for {repo_name}: {e}")
 
-    return stats
+    # Sérialiser les stats finales
+    return serialize_numpy_data(stats)
 
 
 @router.get("/single_line_diagram/{element_id}", response_model=SingleLineDiagramResponse)
@@ -318,18 +382,21 @@ async def get_single_line_diagram(
 
     svg_content, metadata = await repo.generate_single_line_diagram(element_id)
 
+    # Sérialiser les métadonnées
+    serialized_metadata = serialize_numpy_data(metadata) if metadata else None
+
     if svg_content is None:
         return SingleLineDiagramResponse(
             success=False,
             element_id=element_id,
-            error=metadata.get("error", "Unknown error") if metadata else "Unknown error"
+            error=serialized_metadata.get("error", "Unknown error") if serialized_metadata else "Unknown error"
         )
 
     return SingleLineDiagramResponse(
         success=True,
         element_id=element_id,
         svg_content=svg_content,
-        metadata=metadata
+        metadata=serialized_metadata
     )
 
 
@@ -364,6 +431,9 @@ async def get_network_area_diagram(
         low_nominal_voltage_bound=low_nominal_voltage_bound
     )
 
+    # Sérialiser les métadonnées
+    serialized_metadata = serialize_numpy_data(metadata) if metadata else None
+
     if svg_content is None:
         return NetworkAreaDiagramResponse(
             success=False,
@@ -371,7 +441,7 @@ async def get_network_area_diagram(
             depth=depth,
             high_nominal_voltage_bound=high_nominal_voltage_bound if high_nominal_voltage_bound != -1 else None,
             low_nominal_voltage_bound=low_nominal_voltage_bound if low_nominal_voltage_bound != -1 else None,
-            error=metadata.get("error", "Unknown error") if metadata else "Unknown error"
+            error=serialized_metadata.get("error", "Unknown error") if serialized_metadata else "Unknown error"
         )
 
     return NetworkAreaDiagramResponse(
@@ -381,5 +451,5 @@ async def get_network_area_diagram(
         high_nominal_voltage_bound=high_nominal_voltage_bound if high_nominal_voltage_bound != -1 else None,
         low_nominal_voltage_bound=low_nominal_voltage_bound if low_nominal_voltage_bound != -1 else None,
         svg_content=svg_content,
-        metadata=metadata
+        metadata=serialized_metadata
     )

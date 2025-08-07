@@ -14,15 +14,15 @@ import { ModeProvider } from '@/hooks/use-mode';
 import { ChannelClient } from '@/services/common/channel-client';
 import { FeederClient } from '@/services/common/feeder-client';
 import { NatsClient } from '@/services/common/nats-client';
+import { PowsyblClient } from '@/services/common/powsybl-client';
 import { ProjectClient } from '@/services/common/project-client';
-import { SessionClient } from '@/services/common/session-client';
 import { QueryClient } from '@/services/common/query-client';
+import { SessionClient } from '@/services/common/session-client';
 import { SettingsClient } from '@/services/common/settings-client';
 import { TaskClient } from '@/services/common/task-client';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { StartupProvider } from './providers/startup.provider';
-
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -54,6 +54,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           SettingsClient.Default,
           SessionClient.Default,
           ProjectClient.Default,
+          PowsyblClient.Default,
           TaskClient.Default,
           FeederClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),

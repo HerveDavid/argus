@@ -1,12 +1,14 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { Effect } from 'effect';
-import { ProjectClient } from '@/services/common/project-client';
+
+import { PowsyblClient } from '@/services/common/powsybl-client';
 import { useRuntime } from '@/services/runtime/use-runtime';
+import { Substation } from '@/types/substation';
+
 import {
   SubstationQueryParams,
   SubstationQueryResponse,
 } from '../types/equipment-query.type';
-import { Substation } from '@/types/substation';
 
 export const useEquipment = (
   params: SubstationQueryParams,
@@ -18,7 +20,7 @@ export const useEquipment = (
     queryKey: ['substations', params],
     queryFn: async (): Promise<SubstationQueryResponse> => {
       const program = Effect.gen(function* () {
-        const projectClient = yield* ProjectClient;
+        const powsyblClient = yield* PowsyblClient;
 
         // Construction des conditions de filtrage
         const conditions: string[] = [];
@@ -60,12 +62,19 @@ export const useEquipment = (
 
         // Requête pour obtenir le nombre total avec les mêmes filtres
         const countQuery = `
-          SELECT COUNT(DISTINCT s.id) as total 
-          FROM substations s 
-          ${whereClause}
+          SELECT COUNT(DISTINCT s.id) as total
+          FROM substations s
+            ${whereClause}
         `;
 
-        const countResult = yield* projectClient.queryProject(countQuery);
+        const countResult = yield* powsyblClient.executeQuery({
+          query: countQuery,
+        });
+
+        if (!countResult.success || !countResult.data) {
+          return yield* Effect.fail(new Error('Failed to get count'));
+        }
+
         const total = countResult.data[0]?.total || 0;
 
         // Calcul de la pagination
@@ -73,38 +82,45 @@ export const useEquipment = (
 
         // Requête principale avec agrégation des voltage levels
         const mainQuery = `
-          SELECT 
-            s.id as substation_id,
-            s.name as substation_name,
-            s.tso,
-            s.geo_tags,
-            s.country,
-            s.fictitious,
-            COALESCE(
-              LIST(
-                STRUCT_PACK(
-                  id := vl.id,
-                  name := vl.name,
-                  substation_id := vl.substation_id,
-                  nominal_v := vl.nominal_v,
-                  high_voltage_limit := vl.high_voltage_limit,
-                  low_voltage_limit := vl.low_voltage_limit,
-                  fictitious := vl.fictitious,
-                  topology_kind := vl.topology_kind
-                ) ORDER BY vl.nominal_v DESC
-              ) FILTER (WHERE vl.id IS NOT NULL),
-              []
+          SELECT s.id            as substation_id,
+                 s.name          as substation_name,
+                 s.tso,
+                 s.geo_tags,
+                 s.country,
+                 s.fictitious,
+                 COALESCE(
+                   LIST(
+                     STRUCT_PACK(
+                       id := vl.id,
+                       name := vl.name,
+                       substation_id := vl.substation_id,
+                       nominal_v := vl.nominal_v,
+                       high_voltage_limit := vl.high_voltage_limit,
+                       low_voltage_limit := vl.low_voltage_limit,
+                       fictitious := vl.fictitious,
+                       topology_kind := vl.topology_kind
+                     ) ORDER BY vl.nominal_v DESC
+                   ) FILTER(WHERE vl.id IS NOT NULL),
+                   []
             ) as voltage_levels
           FROM substations s
-          LEFT JOIN voltage_levels vl ON s.id = vl.substation_id 
+                 LEFT JOIN voltage_levels vl ON s.id = vl.substation_id
             AND vl.fictitious = FALSE
-          ${whereClause}
+            ${whereClause}
           GROUP BY s.id, s.name, s.tso, s.geo_tags, s.country, s.fictitious
           ORDER BY s.id
-          LIMIT ${params.pageSize} OFFSET ${offset}
+            LIMIT ${params.pageSize}
+          OFFSET ${offset}
         `;
 
-        const result = yield* projectClient.queryProject(mainQuery);
+        const result = yield* powsyblClient.executeQuery({
+          query: mainQuery,
+          limit: params.pageSize,
+        });
+
+        if (!result.success || !result.data) {
+          return yield* Effect.fail(new Error('Failed to get substations'));
+        }
 
         // Transformation des données - gestion du type STRUCT[] de DuckDB
         const substations: Substation[] = yield* Effect.all(
@@ -232,8 +248,7 @@ export const useEquipment = (
       });
 
       return runtime.runPromise(program);
-    },
-    // Options par défaut
+    }, // Options par défaut
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
@@ -250,18 +265,23 @@ export const useAvailableCountries = () => {
     queryKey: ['substations', 'countries'],
     queryFn: async (): Promise<string[]> => {
       const program = Effect.gen(function* () {
-        const projectClient = yield* ProjectClient;
+        const powsyblClient = yield* PowsyblClient;
 
         const query = `
           SELECT DISTINCT country
-          FROM substations 
-          WHERE country IS NOT NULL 
+          FROM substations
+          WHERE country IS NOT NULL
             AND country != ''
             AND fictitious = FALSE
           ORDER BY country
         `;
 
-        const result = yield* projectClient.queryProject(query);
+        const result = yield* powsyblClient.executeQuery({ query });
+
+        if (!result.success || !result.data) {
+          return yield* Effect.fail(new Error('Failed to get countries'));
+        }
+
         return result.data.map((row: any) => row.country);
       });
 
@@ -279,18 +299,23 @@ export const useAvailableTSOs = () => {
     queryKey: ['substations', 'tsos'],
     queryFn: async (): Promise<string[]> => {
       const program = Effect.gen(function* () {
-        const projectClient = yield* ProjectClient;
+        const powsyblClient = yield* PowsyblClient;
 
         const query = `
           SELECT DISTINCT tso
-          FROM substations 
-          WHERE tso IS NOT NULL 
+          FROM substations
+          WHERE tso IS NOT NULL
             AND tso != ''
             AND fictitious = FALSE
           ORDER BY tso
         `;
 
-        const result = yield* projectClient.queryProject(query);
+        const result = yield* powsyblClient.executeQuery({ query });
+
+        if (!result.success || !result.data) {
+          return yield* Effect.fail(new Error('Failed to get TSOs'));
+        }
+
         return result.data.map((row: any) => row.tso);
       });
 
@@ -308,24 +333,28 @@ export const useEquipmentStats = () => {
     queryKey: ['substations', 'stats'],
     queryFn: async () => {
       const program = Effect.gen(function* () {
-        const projectClient = yield* ProjectClient;
+        const powsyblClient = yield* PowsyblClient;
 
         const query = `
-          SELECT 
-            COUNT(DISTINCT s.id) as total_substations,
-            COUNT(DISTINCT vl.id) as total_voltage_levels,
-            COUNT(DISTINCT s.country) as countries_count,
-            COUNT(DISTINCT s.tso) as tso_count,
-            MIN(vl.nominal_v) as min_voltage,
-            MAX(vl.nominal_v) as max_voltage,
-            AVG(vl.nominal_v) as avg_voltage
+          SELECT COUNT(DISTINCT s.id)      as total_substations,
+                 COUNT(DISTINCT vl.id)     as total_voltage_levels,
+                 COUNT(DISTINCT s.country) as countries_count,
+                 COUNT(DISTINCT s.tso)     as tso_count,
+                 MIN(vl.nominal_v)         as min_voltage,
+                 MAX(vl.nominal_v)         as max_voltage,
+                 AVG(vl.nominal_v)         as avg_voltage
           FROM substations s
-          LEFT JOIN voltage_levels vl ON s.id = vl.substation_id 
+                 LEFT JOIN voltage_levels vl ON s.id = vl.substation_id
             AND vl.fictitious = FALSE
           WHERE s.fictitious = FALSE
         `;
 
-        const result = yield* projectClient.queryProject(query);
+        const result = yield* powsyblClient.executeQuery({ query });
+
+        if (!result.success || !result.data) {
+          return yield* Effect.fail(new Error('Failed to get stats'));
+        }
+
         return result.data[0] || {};
       });
 

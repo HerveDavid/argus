@@ -8,7 +8,7 @@ interface EquipmentStore {
   currentPage: number;
   expandedSubstations: Set<string>;
   pageSize: number;
-  
+
   // Actions
   setSearchTerm: (term: string) => void;
   setCurrentPage: (page: number) => void;
@@ -31,43 +31,40 @@ export const useEquipmentStore = create<EquipmentStore>()(
   persist(
     (set, get) => ({
       ...initialState,
-      
-      setSearchTerm: (term: string) => 
-        set({ searchTerm: term }),
-      
-      setCurrentPage: (page: number) => 
-        set({ currentPage: page }),
-      
+
+      setSearchTerm: (term: string) => set({ searchTerm: term }),
+
+      setCurrentPage: (page: number) => set({ currentPage: page }),
+
       toggleSubstation: (substationId: string) => {
         const { expandedSubstations } = get();
         const newExpanded = new Set(expandedSubstations);
-        
+
         if (newExpanded.has(substationId)) {
           newExpanded.delete(substationId);
         } else {
           newExpanded.add(substationId);
         }
-        
+
         set({ expandedSubstations: newExpanded });
       },
-      
-      setExpandedSubstations: (expanded: Set<string>) => 
+
+      setExpandedSubstations: (expanded: Set<string>) =>
         set({ expandedSubstations: expanded }),
-      
-      handleSearch: (value: string) => 
-        set({ 
-          searchTerm: value, 
-          currentPage: 1 // Reset à la page 1 lors d'une nouvelle recherche
+
+      handleSearch: (value: string) =>
+        set({
+          searchTerm: value,
+          currentPage: 1, // Reset à la page 1 lors d'une nouvelle recherche
         }),
-      
-      handlePageChange: (page: number) => 
-        set({ currentPage: page }),
-      
-      resetFilters: () => 
-        set({ 
-          searchTerm: '', 
-          currentPage: 1, 
-          expandedSubstations: new Set<string>() 
+
+      handlePageChange: (page: number) => set({ currentPage: page }),
+
+      resetFilters: () =>
+        set({
+          searchTerm: '',
+          currentPage: 1,
+          expandedSubstations: new Set<string>(),
         }),
     }),
     {
@@ -82,9 +79,11 @@ export const useEquipmentStore = create<EquipmentStore>()(
       // Fonction pour reconstituer l'état depuis le localStorage
       onRehydrateStorage: () => (state) => {
         if (state && Array.isArray(state.expandedSubstations)) {
-          state.expandedSubstations = new Set(state.expandedSubstations as string[]);
+          state.expandedSubstations = new Set(
+            state.expandedSubstations as string[],
+          );
         }
       },
-    }
-  )
+    },
+  ),
 );
