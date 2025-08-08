@@ -1,12 +1,19 @@
-import { ChartGantt, CircleGauge, ClockIcon, GitFork, Layers, LogsIcon } from 'lucide-react';
+import {
+  ChartGantt,
+  CircleGauge,
+  ClockIcon,
+  GitFork,
+  Layers,
+  LogsIcon,
+} from 'lucide-react';
 
 import { EventsLog } from '@/features/events-log';
 import { GrafcetEditor } from '@/features/grafcet-editor';
 import { History } from '@/features/historic';
 import TaskDashboard from '@/features/task-dashboard';
+import { TimelineEditor } from '@/features/timeline-editor';
 import Widgets from '@/features/widgets';
 import { SidebarItem } from '@/types/sidebar-item.ts';
-import { TimelineEditor } from '@/features/timeline-editor';
 
 export const rightSidebarPanels: SidebarItem[] = [
   { id: 'widgets', icon: Layers, label: 'Widgets', content: Widgets },

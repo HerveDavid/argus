@@ -1,15 +1,18 @@
-import { ChartGantt, CircleGauge, ClockIcon, GitFork, Layers, LogsIcon } from 'lucide-react';
+import { ChartGantt, CircleGauge, ClockIcon, LogsIcon } from 'lucide-react';
 
 import { EventsLog } from '@/features/events-log';
-import { GrafcetEditor } from '@/features/grafcet-editor';
 import { History } from '@/features/historic';
 import TaskDashboard from '@/features/task-dashboard';
-import Widgets from '@/features/widgets';
-import { SidebarItem } from '@/types/sidebar-item.ts';
 import { TimelineEditor } from '@/features/timeline-editor';
+import { SidebarItem } from '@/types/sidebar-item.ts';
 
 export const rightSidebarPanels: SidebarItem[] = [
-  { id: 'historic', icon: ClockIcon, label: 'Historic', content: History },
+  {
+    id: 'historic',
+    icon: ClockIcon,
+    label: 'Historic',
+    content: History,
+  },
 ] as const;
 
 export const rightSidebarTools: SidebarItem[] = [

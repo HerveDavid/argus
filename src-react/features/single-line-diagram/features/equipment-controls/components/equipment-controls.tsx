@@ -11,29 +11,29 @@ import {
 } from '@/components/ui/context-menu';
 import { Badge } from '@/components/ui/badge';
 import {
+  Activity,
+  ArrowRight,
   Copy,
-  Hash,
   FileText,
+  Hash,
+  Info,
   Power,
   PowerOff,
-  Zap,
-  Info,
-  ArrowRight,
-  Activity,
   TrendingUp,
+  Zap,
 } from 'lucide-react';
 import {
-  SWITCH_COMPONENT_TYPES,
-  FEEDER_COMPONENT_TYPES,
   BUSBAR_SECTION_TYPES,
   FEEDER_ACTIVE_POWER_TYPES,
+  FEEDER_ANGLE_TYPES,
+  FEEDER_COMPONENT_TYPES,
   FEEDER_CURRENT_TYPES,
   FEEDER_REACTIVE_POWER_TYPES,
   FEEDER_VOLTAGE_TYPES,
-  FEEDER_ANGLE_TYPES,
-  SldMetadata,
-  Node,
   MeasurementType,
+  Node,
+  SldMetadata,
+  SWITCH_COMPONENT_TYPES,
 } from '@/types/sld-metadata';
 
 interface EquipmentControlsProps {
@@ -66,8 +66,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     equipmentId: string | null;
     nodeInfo: Node | null;
     isLine: boolean;
-    nextVId: string | null;
-    // Nouvelles propriétés pour les mesures
+    nextVId: string | null; // Nouvelles propriétés pour les mesures
     isMeasurement: boolean;
     measurementType: MeasurementType | null;
     measurementValue: string | null;

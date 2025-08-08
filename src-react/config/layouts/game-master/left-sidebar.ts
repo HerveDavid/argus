@@ -14,5 +14,10 @@ export const leftSidebarPanels: SidebarItem[] = [
 ] as const;
 
 export const leftSidebarTools: SidebarItem[] = [
-  { id: 'terminal', icon: TerminalIcon, label: 'Terminal', content: Terminal },
+  {
+    id: 'terminal',
+    icon: TerminalIcon,
+    label: 'Terminal',
+    content: Terminal,
+  },
 ] as const;
