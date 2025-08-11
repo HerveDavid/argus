@@ -112,3 +112,4 @@ pub async fn add_nats_feeder(
         Err(e) => Err(Error::FeederError(e)),
     }
 }
+

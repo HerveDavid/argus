@@ -17,6 +17,7 @@ import { NatsClient } from '@/services/common/nats-client';
 import { PowsyblClient } from '@/services/common/powsybl-client';
 import { ProjectClient } from '@/services/common/project-client';
 import { QueryClient } from '@/services/common/query-client';
+import { ScadaClient } from '@/services/common/scada-client';
 import { SessionClient } from '@/services/common/session-client';
 import { SettingsClient } from '@/services/common/settings-client';
 import { TaskClient } from '@/services/common/task-client';
@@ -55,6 +56,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           SessionClient.Default,
           ProjectClient.Default,
           PowsyblClient.Default,
+          ScadaClient.Default,
           TaskClient.Default,
           FeederClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),

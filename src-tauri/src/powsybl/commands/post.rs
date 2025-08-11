@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use tauri::State;
 
-use crate::sessions::error::Result;
 use crate::sessions::state::SessionState;
 
 use super::super::entities::*;
+use super::super::error::Result;
+
 
 
 #[tauri::command(rename_all = "snake_case")]

@@ -1,10 +1,10 @@
-mod commands;
 mod entities;
 mod tasks;
 mod nats;
 mod powsybl;
 mod feeders;
 mod project;
+mod scada;
 mod sessions;
 mod settings;
 mod utils;
@@ -128,7 +128,8 @@ pub fn run() {
             powsybl::commands::update_generator,
             powsybl::commands::update_switch,
             powsybl::commands::update_load,
-
+            // Scada
+            scada::commands::subscribe_scada_feeders,
             // Project
             // project::commands::load_project,
             // project::commands::init_database_project,

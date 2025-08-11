@@ -3,7 +3,10 @@ import { useEffect, useRef } from 'react';
 
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-import { useDiagramFeeders } from '../features/diagram-feeders';
+import {
+  useDiagramFeeders,
+  useSubscribeScadaFeeders,
+} from '../features/diagram-feeders';
 import { useLineGoTo, useSvgNavigation } from '../features/diagram-navigation';
 import {
   useSvgManager,
@@ -25,6 +28,8 @@ export const DiagramContent = () => {
 
   // Hook pour l'initialisation des feeders (met les ****)
   useDiagramFeeders({ svgRef, metadata: diagramData?.metadata });
+
+  useSubscribeScadaFeeders({ metadata: diagramData?.metadata, autoSubscribe: true });
 
   const { addPanel } = useCentralPanelStore();
   const feedersInitialized = useRef(false);
