@@ -5,7 +5,6 @@ use crate::sessions::entities::RootConfig;
 use super::error::{Error, Result};
 use super::state::SessionState;
 
-
 #[tauri::command(rename_all = "snake_case")]
 pub async fn set_session_config(
     session_state: State<'_, tokio::sync::Mutex<SessionState>>,
@@ -18,7 +17,9 @@ pub async fn set_session_config(
         .text("name", name.clone())
         .text("path", path.clone());
 
-    let response = session.post_multipart::<RootConfig>("sessions/config", form).await?;
+    let response = session
+        .post_multipart::<RootConfig>("sessions/config", form)
+        .await?;
 
     Ok(response)
 }
@@ -33,24 +34,25 @@ pub async fn set_session_config_with_file(
 ) -> Result<RootConfig> {
     let session = session_state.lock().await;
 
-    let file_content = std::fs::read(&file_path)
-        .map_err(|e| Error::ClientError {
-            message: format!("Failed to read file {}: {}", file_path, e)
-        })?;
+    let file_content = std::fs::read(&file_path).map_err(|e| Error::ClientError {
+        message: format!("Failed to read file {}: {}", file_path, e),
+    })?;
 
     let file_name = std::path::Path::new(&file_path)
         .file_name()
         .and_then(|n| n.to_str())
         .unwrap_or("config.toml");
 
-    let response = session.post_multipart_with_file::<RootConfig>(
-        "sessions/config",
-        name,
-        path,
-        file_content,
-        file_name,
-        base_directory
-    ).await?;
+    let response = session
+        .post_multipart_with_file::<RootConfig>(
+            "sessions/config",
+            name,
+            path,
+            file_content,
+            file_name,
+            base_directory,
+        )
+        .await?;
 
     Ok(response)
 }

@@ -4,12 +4,9 @@ import { MenuIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { useHeaderStore } from '@/app/layouts/state-view/header/stores/header.store.ts';
-import {
-  Menubar,
-  MenubarMenu,
-  MenubarTrigger,
-} from '@/components/ui/menubar';
+import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
 import { ProjectWidget } from '@/features/projects';
+import { SessionWidget } from '@/features/sessions';
 
 export const LeftMenu = () => {
   const [_, setAppWindow] = useState<WebviewWindow | null>(null);
@@ -41,6 +38,7 @@ export const LeftMenu = () => {
         </MenubarMenu>
 
         <ProjectWidget />
+        <SessionWidget />
       </Menubar>
     </div>
   );

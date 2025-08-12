@@ -1,4 +1,3 @@
-
 export interface RootConfig {
   name: string;
   source: string;
@@ -43,14 +42,8 @@ export interface Network {
   base_directory: string | null;
 }
 
-export interface SetSessionConfigRequest {
+export interface Session {
   name: string;
   path: string;
-}
-
-export interface SetSessionConfigWithFileRequest {
-  name: string;
-  path?: string;
-  filePath: string;
-  baseDirectory?: string;
+  lastAccessed: Date;
 }

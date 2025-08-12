@@ -24,6 +24,8 @@ import { TaskClient } from '@/services/common/task-client';
 import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { StartupProvider } from './providers/startup.provider';
+import { RegistryProvider } from '@effect-rx/rx-react';
+import { InitProvider } from './providers/init.provider';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -71,13 +73,18 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ModeProvider>
-        <RuntimeProvider runtime={runtime}>
-          <StartupProvider>{children}</StartupProvider>
-        </RuntimeProvider>
-      </ModeProvider>
-    </QueryClientProvider>
+    <RegistryProvider>
+      <InitProvider>
+        <QueryClientProvider client={queryClient}>
+          <ModeProvider>
+            <RuntimeProvider runtime={runtime}>
+              {children}
+              {/* <StartupProvider>{children}</StartupProvider> */}
+            </RuntimeProvider>
+          </ModeProvider>
+        </QueryClientProvider>
+      </InitProvider>
+    </RegistryProvider>
   );
 };
 

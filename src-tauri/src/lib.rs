@@ -1,12 +1,12 @@
 mod entities;
-mod tasks;
+mod feeders;
 mod nats;
 mod powsybl;
-mod feeders;
 mod project;
 mod scada;
 mod sessions;
 mod settings;
+mod tasks;
 mod utils;
 
 use tauri::Manager;
@@ -56,10 +56,9 @@ pub fn run() {
                         .expect("Failed to initialize sidecars");
                 app.manage(sidecars);
 
-                let session =
-                    sessions::state::SessionState::new(&app.handle())
-                        .await
-                        .expect("Failed to initialize sessions");
+                let session = sessions::state::SessionState::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize sessions");
                 app.manage(session);
 
                 let project_db = project::state::ProjectState::new(&app.handle())
@@ -115,6 +114,7 @@ pub fn run() {
             // Sessions
             sessions::commands::set_session_config,
             sessions::commands::set_session_config_with_file,
+            sessions::commands::get_session_status,
             // Powsybl
             powsybl::commands::get_tables,
             powsybl::commands::get_table_data,
@@ -156,8 +156,10 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(|app_handle, event| {
-            if let tauri::RunEvent::ExitRequested {.. } = event {
-                if let Some(sidecars_state) = app_handle.try_state::<tokio::sync::Mutex<settings::sidecars::state::SidecarsState>>() {
+            if let tauri::RunEvent::ExitRequested { .. } = event {
+                if let Some(sidecars_state) = app_handle
+                    .try_state::<tokio::sync::Mutex<settings::sidecars::state::SidecarsState>>()
+                {
                     tauri::async_runtime::block_on(async {
                         let mut sidecars = sidecars_state.lock().await;
                         for s in SIDECARS {
