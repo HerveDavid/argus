@@ -8,12 +8,13 @@ import {
 } from '../machines/subscribe-scada.machine';
 import { SldMetadata } from '@/types/sld-metadata';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
-import { ScadaOutput } from '@/services/common/scada-client/types';
+import { ScadaOutput,ScadaDataPoint } from '@/services/common/scada-client/types';
 
 interface UseSubscribeScadaFeedersOptions {
   metadata?: SldMetadata;
   autoSubscribe?: boolean;
-  autoUnsubscribeOnUnmount?: boolean; // Nouvelle option
+  autoUnsubscribeOnUnmount?: boolean;
+  onDataPoint?: (dataPoint: ScadaDataPoint) => void; // ✅ Changé pour ScadaDataPoint
 }
 
 export interface ScadaFeedersStore {
@@ -45,6 +46,10 @@ export interface ScadaFeedersStore {
 
   // Actions
   subscribe: (metadata: SldMetadata) => void;
+  subscribeWithDataHandler: (
+    metadata: SldMetadata,
+    onDataPoint: (dataPoint: ScadaDataPoint) => void,
+  ) => void; // ✅ Nouvelle action
   unsubscribe: () => void;
   retry: () => void;
   clearError: () => void;
@@ -65,6 +70,7 @@ const useSubscribeScadaFeedersInner = (
     metadata,
     autoSubscribe = false,
     autoUnsubscribeOnUnmount = true,
+    onDataPoint, // ✅ Changé pour onDataPoint
   } = options;
   const [state, send] = useActor(scadaFeedersMachine);
 
@@ -82,9 +88,27 @@ const useSubscribeScadaFeedersInner = (
     return state.context.lastSubscription.toLocaleString();
   };
 
-  // Actions de base
-  const subscribe = (metadata: SldMetadata) =>
-    send({ type: 'SUBSCRIBE', metadata });
+  // ✅ Actions mises à jour
+  const subscribe = (metadata: SldMetadata) => {
+    // Souscription simple sans handler de données
+    send({
+      type: 'SUBSCRIBE',
+      metadata,
+    });
+  };
+
+  const subscribeWithDataHandler = (
+    metadata: SldMetadata,
+    onDataPoint: (dataPoint: ScadaDataPoint) => void,
+  ) => {
+    // Souscription avec handler de données
+    send({
+      type: 'SUBSCRIBE',
+      metadata,
+      onDataPoint, // ✅ Passer le handler ScadaDataPoint
+    });
+  };
+
   const unsubscribe = () => send({ type: 'UNSUBSCRIBE' });
 
   // Gestion de l'auto-subscription
@@ -98,14 +122,18 @@ const useSubscribeScadaFeedersInner = (
       isReady && (isMetadataChanged || !hasInitializedRef.current);
 
     if (shouldSubscribe) {
-      // Souscrire avec les nouvelles métadonnées
-      subscribe(metadata);
+      // ✅ Choisir la bonne méthode selon si on a un handler
+      if (onDataPoint) {
+        subscribeWithDataHandler(metadata, onDataPoint);
+      } else {
+        subscribe(metadata);
+      }
 
       // Marquer comme initialisé et sauvegarder les métadonnées actuelles
       hasInitializedRef.current = true;
       previousMetadataRef.current = metadata;
     }
-  }, [metadata, state.context.runtime, autoSubscribe]);
+  }, [metadata, state.context.runtime, autoSubscribe, onDataPoint]); // ✅ onDataPoint dans les dépendances
 
   // Réinitialiser les refs si les métadonnées changent
   useEffect(() => {
@@ -158,6 +186,7 @@ const useSubscribeScadaFeedersInner = (
 
     // Actions
     subscribe,
+    subscribeWithDataHandler, // ✅ Nouvelle action exportée
     unsubscribe,
     retry: () => send({ type: 'RETRY' }),
     clearError: () => send({ type: 'CLEAR_ERROR' }),

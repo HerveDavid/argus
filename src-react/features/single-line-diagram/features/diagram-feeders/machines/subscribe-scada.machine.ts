@@ -8,6 +8,10 @@ import { SldMetadata } from '@/types/sld-metadata';
 import { Channel } from '@tauri-apps/api/core';
 import { ScadaMessage } from '@/types/tstm';
 import { ScadaOutput } from '@/services/common/scada-client/types';
+import {
+  ScadaDataPoint,
+  createScadaDataPoint,
+} from '@/services/common/scada-client';
 
 export interface ScadaFeedersContext {
   metadata: SldMetadata | null;
@@ -15,11 +19,16 @@ export interface ScadaFeedersContext {
   runtime: LiveManagedRuntime | null;
   lastSubscription: Date | null;
   isSubscribed: boolean;
-  scadaOutputs: ScadaOutput[]; // Stocker les outputs pour l'unsubscribe
+  scadaOutputs: ScadaOutput[];
+  onDataPoint?: (dataPoint: ScadaDataPoint) => void; // ✅ Handler pour ScadaDataPoint
 }
 
 export type ScadaFeedersEvent =
-  | { type: 'SUBSCRIBE'; metadata: SldMetadata }
+  | {
+      type: 'SUBSCRIBE';
+      metadata: SldMetadata;
+      onDataPoint?: (dataPoint: ScadaDataPoint) => void; // ✅ Changé pour ScadaDataPoint
+    }
   | { type: 'UNSUBSCRIBE' }
   | { type: 'RETRY' }
   | { type: 'SET_RUNTIME'; runtime: LiveManagedRuntime }
@@ -33,10 +42,61 @@ const subscribeScadaFeedersActor = fromPromise(
   }) => {
     const { metadata, runtime } = input;
 
-    // TODO
     const onEvent = new Channel<ScadaMessage>();
     onEvent.onmessage = (message) => {
       console.log(`got ${message}`);
+    };
+
+    const program = Effect.gen(function* () {
+      const scadaClient = yield* ScadaClient;
+      const outputs = yield* scadaClient.subscribeScadaFeeders(
+        metadata,
+        onEvent,
+      );
+      return { metadata, outputs };
+    });
+
+    return runtime.runPromise(program);
+  },
+);
+
+const subscribeScadaFeedersActorWIP = fromPromise(
+  async ({
+    input,
+  }: {
+    input: {
+      metadata: SldMetadata;
+      runtime: LiveManagedRuntime;
+      scadaOutputs: ScadaOutput[]; // ✅ Ajout des outputs pour le morphisme
+      onDataPoint: (dataPoint: ScadaDataPoint) => void; // ✅ Handler pour ScadaDataPoint
+    };
+  }) => {
+    const { metadata, runtime, scadaOutputs, onDataPoint } = input;
+
+    // Créer une Map des outputs pour une recherche rapide par ID
+    const outputsMap = new Map(
+      scadaOutputs.map((output) => [output.id, output]),
+    );
+
+    const onEvent = new Channel<ScadaMessage>();
+
+    // ✅ Morphisme: ScadaMessage -> ScadaDataPoint
+    onEvent.onmessage = (message: ScadaMessage) => {
+      const output = outputsMap.get(message.id);
+
+      if (output) {
+        const dataPoint = createScadaDataPoint(output, message);
+        if (dataPoint) {
+          onDataPoint(dataPoint);
+        } else {
+          console.warn(
+            `Failed to create ScadaDataPoint for message ID: ${message.id}`,
+          );
+        }
+      } else {
+        console.table(scadaOutputs);
+        console.warn(`No ScadaOutput found for message ID: ${JSON.stringify(message)}`);
+      }
     };
 
     const program = Effect.gen(function* () {
@@ -76,6 +136,7 @@ export const scadaFeedersMachine = setup({
   },
   actors: {
     subscribeScadaFeeders: subscribeScadaFeedersActor,
+    subscribeScadaFeedersWIP: subscribeScadaFeedersActorWIP,
     unsubscribeScadaFeeders: unsubscribeScadaFeedersActor,
   },
   guards: {
@@ -91,6 +152,10 @@ export const scadaFeedersMachine = setup({
     hasOutputsToUnsubscribe: ({ context }) => {
       return context.scadaOutputs.length > 0;
     },
+    // ✅ Nouveau guard pour vérifier si on a un handler
+    hasDataPointHandler: ({ context }) => {
+      return context.onDataPoint !== undefined;
+    },
   },
   actions: {
     setRuntime: assign(({ context, event }) => {
@@ -101,11 +166,13 @@ export const scadaFeedersMachine = setup({
       };
     }),
 
+    // ✅ Mise à jour pour inclure le handler
     setMetadata: assign(({ context, event }) => {
       if (event.type !== 'SUBSCRIBE') return context;
       return {
         ...context,
         metadata: event.metadata,
+        onDataPoint: event.onDataPoint, // Sauvegarder le handler dans le contexte
         error: null,
       };
     }),
@@ -117,6 +184,7 @@ export const scadaFeedersMachine = setup({
       lastSubscription: null,
       isSubscribed: false,
       scadaOutputs: [],
+      onDataPoint: undefined, // ✅ Nettoyer le handler
     })),
 
     clearError: assign(({ context }) => ({
@@ -125,7 +193,6 @@ export const scadaFeedersMachine = setup({
     })),
 
     updateLastSubscriptionTime: assign(({ context, event }) => {
-      // L'event contient la data de l'acteur dans event.output
       const outputData = event.output as {
         metadata: SldMetadata;
         outputs: ScadaOutput[];
@@ -154,6 +221,7 @@ export const scadaFeedersMachine = setup({
     lastSubscription: null,
     isSubscribed: false,
     scadaOutputs: [],
+    onDataPoint: undefined, // ✅ Initialiser le handler
   },
   states: {
     idle: {
@@ -190,27 +258,57 @@ export const scadaFeedersMachine = setup({
         },
       },
     },
+    // ✅ Mise à jour de l'état subscribing pour choisir le bon acteur
     subscribing: {
-      invoke: {
-        id: 'subscribeScadaFeeders',
-        src: 'subscribeScadaFeeders',
-        input: ({ context }) => ({
-          metadata: context.metadata!,
-          runtime: context.runtime!,
-        }),
-        onDone: {
-          target: 'subscribed',
-          actions: ['updateLastSubscriptionTime'],
+      invoke: [
+        {
+          // Utiliser l'acteur WIP si on a un handler de dataPoint ET des outputs existants
+          guard: ({ context }) =>
+            context.onDataPoint !== undefined &&
+            context.scadaOutputs.length > 0,
+          id: 'subscribeScadaFeedersWIP',
+          src: 'subscribeScadaFeedersWIP',
+          input: ({ context }) => ({
+            metadata: context.metadata!,
+            runtime: context.runtime!,
+            scadaOutputs: context.scadaOutputs, // ✅ Passer les outputs existants
+            onDataPoint: context.onDataPoint!,
+          }),
+          onDone: {
+            target: 'subscribed',
+            actions: ['updateLastSubscriptionTime'],
+          },
+          onError: {
+            target: 'error',
+            actions: assign(({ context, event }) => ({
+              ...context,
+              error: String(event.error) || 'Erreur de souscription inconnue',
+              isSubscribed: false,
+            })),
+          },
         },
-        onError: {
-          target: 'error',
-          actions: assign(({ context, event }) => ({
-            ...context,
-            error: String(event.error) || 'Erreur de souscription inconnue',
-            isSubscribed: false,
-          })),
+        {
+          // Utiliser l'acteur classique si pas de handler ou pas d'outputs
+          id: 'subscribeScadaFeeders',
+          src: 'subscribeScadaFeeders',
+          input: ({ context }) => ({
+            metadata: context.metadata!,
+            runtime: context.runtime!,
+          }),
+          onDone: {
+            target: 'subscribed',
+            actions: ['updateLastSubscriptionTime'],
+          },
+          onError: {
+            target: 'error',
+            actions: assign(({ context, event }) => ({
+              ...context,
+              error: String(event.error) || 'Erreur de souscription inconnue',
+              isSubscribed: false,
+            })),
+          },
         },
-      },
+      ],
     },
     subscribed: {
       on: {

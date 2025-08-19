@@ -1,7 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-// import { getProjectInitials } from '../../utils/utils';
-
 export const SessionAvatar = ({
   name,
   className = 'size-6',

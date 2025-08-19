@@ -3,8 +3,6 @@ import React from 'react';
 import { MenubarItem } from '@/components/ui/menubar';
 import { Session } from '@/types/session';
 
-// import { formatProjectDate } from '../../utils/utils';
-
 import { SessionAvatar } from './session-avatar';
 import { SessionFiles } from './session-files';
 import { RemoveSessionButton } from './remove-session-button';
@@ -32,7 +30,6 @@ export const RecentSessionItem = ({
       <div className="flex items-center justify-between mt-1">
         <SessionFiles path={session.path} />
         <div className="text-xs text-muted-foreground">
-          {/* {formatProjectDate(session.lastAccessed)} */}
           {session.lastAccessed.getDate()}
         </div>
       </div>

@@ -17,6 +17,7 @@ import {
   useEquipmentControls,
 } from '../features/equipment-controls';
 import { useSldContext } from '../providers/sld.provider';
+import { ScadaDataPoint } from '@/services/common/scada-client';
 
 export const DiagramContent = () => {
   const { svgRef, diagramData } = useSldContext();
@@ -33,6 +34,9 @@ export const DiagramContent = () => {
     metadata: diagramData?.metadata,
     autoSubscribe: true,
     autoUnsubscribeOnUnmount: true,
+    onDataPoint: (dataPoint: ScadaDataPoint) => {
+      console.log('bjr: ' + dataPoint);
+    },
   });
 
   const { addPanel } = useCentralPanelStore();
