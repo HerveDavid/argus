@@ -2,23 +2,35 @@
 import { useActor } from '@xstate/react';
 import { useRef, useEffect } from 'react';
 import { LiveManagedRuntime } from '@/config/live-layer';
-import { scadaFeedersMachine } from '../machines/subscribe-scada.machine';
+import {
+  scadaFeedersMachine,
+  ScadaFeedersContext,
+} from '../machines/subscribe-scada.machine';
 import { SldMetadata } from '@/types/sld-metadata';
 import { useStoreRuntime } from '@/hooks/use-store-runtime';
+import { ScadaOutput } from '@/services/common/scada-client/types';
 
 interface UseSubscribeScadaFeedersOptions {
   metadata?: SldMetadata;
   autoSubscribe?: boolean;
+  autoUnsubscribeOnUnmount?: boolean; // Nouvelle option
 }
 
 export interface ScadaFeedersStore {
   // State
-  state: 'error' | 'idle' | 'subscribed' | 'subscribing' | 'waitingForRuntime';
-  context: typeof scadaFeedersMachine.initialState.context;
+  state:
+    | 'error'
+    | 'idle'
+    | 'subscribed'
+    | 'subscribing'
+    | 'waitingForRuntime'
+    | 'unsubscribing';
+  context: ScadaFeedersContext;
 
   // Computed States
   isSubscribing: boolean;
   isSubscribed: boolean;
+  isUnsubscribing: boolean;
   isError: boolean;
   isIdle: boolean;
   isWaitingForRuntime: boolean;
@@ -29,6 +41,7 @@ export interface ScadaFeedersStore {
   error: string | null;
   lastSubscription: Date | null;
   currentMetadata?: SldMetadata;
+  scadaOutputs: ScadaOutput[];
 
   // Actions
   subscribe: (metadata: SldMetadata) => void;
@@ -48,7 +61,11 @@ export interface ScadaFeedersStore {
 const useSubscribeScadaFeedersInner = (
   options: UseSubscribeScadaFeedersOptions = {},
 ): ScadaFeedersStore => {
-  const { metadata, autoSubscribe = false } = options;
+  const {
+    metadata,
+    autoSubscribe = false,
+    autoUnsubscribeOnUnmount = true,
+  } = options;
   const [state, send] = useActor(scadaFeedersMachine);
 
   // Refs pour la gestion des métadonnées
@@ -77,7 +94,8 @@ const useSubscribeScadaFeedersInner = (
     const isMetadataChanged =
       JSON.stringify(previousMetadataRef.current) !== JSON.stringify(metadata);
     const isReady = state.context.runtime !== null;
-    const shouldSubscribe = isReady && (isMetadataChanged || !hasInitializedRef.current);
+    const shouldSubscribe =
+      isReady && (isMetadataChanged || !hasInitializedRef.current);
 
     if (shouldSubscribe) {
       // Souscrire avec les nouvelles métadonnées
@@ -93,11 +111,23 @@ const useSubscribeScadaFeedersInner = (
   useEffect(() => {
     if (!autoSubscribe) return;
 
-    if (previousMetadataRef.current !== null &&
-      JSON.stringify(previousMetadataRef.current) !== JSON.stringify(metadata)) {
+    if (
+      previousMetadataRef.current !== null &&
+      JSON.stringify(previousMetadataRef.current) !== JSON.stringify(metadata)
+    ) {
       hasInitializedRef.current = false;
     }
   }, [metadata, autoSubscribe]);
+
+  // Cleanup automatique lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (autoUnsubscribeOnUnmount && state.context.isSubscribed) {
+        // Effectuer l'unsubscribe lors du démontage
+        unsubscribe();
+      }
+    };
+  }, [autoUnsubscribeOnUnmount, state.context.isSubscribed]);
 
   return {
     // State
@@ -106,12 +136,14 @@ const useSubscribeScadaFeedersInner = (
       | 'idle'
       | 'subscribed'
       | 'subscribing'
-      | 'waitingForRuntime',
+      | 'waitingForRuntime'
+      | 'unsubscribing',
     context: state.context,
 
     // Computed States
     isSubscribing: state.matches('subscribing'),
     isSubscribed: state.matches('subscribed'),
+    isUnsubscribing: state.matches('unsubscribing'),
     isError: state.matches('error'),
     isIdle: state.matches('idle'),
     isWaitingForRuntime: state.matches('waitingForRuntime'),
@@ -122,6 +154,7 @@ const useSubscribeScadaFeedersInner = (
     error: state.context.error,
     lastSubscription: state.context.lastSubscription,
     currentMetadata: metadata,
+    scadaOutputs: state.context.scadaOutputs,
 
     // Actions
     subscribe,
@@ -141,8 +174,8 @@ const useSubscribeScadaFeedersInner = (
 };
 
 export const useSubscribeScadaFeeders = (
-  options?: UseSubscribeScadaFeedersOptions
+  options?: UseSubscribeScadaFeedersOptions,
 ) =>
   useStoreRuntime<ScadaFeedersStore>(() =>
-    useSubscribeScadaFeedersInner(options)
+    useSubscribeScadaFeedersInner(options),
   );

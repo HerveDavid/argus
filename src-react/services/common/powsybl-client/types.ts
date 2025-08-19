@@ -1,3 +1,5 @@
+import { SldDiagram } from "@/types/sld-diagram";
+
 export interface TableInfoResponse {
   table_name: string;
   exists: boolean;
@@ -22,7 +24,7 @@ export interface SQLQueryRequest {
 export interface SingleLineDiagramResponse {
   success: boolean;
   svg_content?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: SldDiagram| null;
   error?: string | null;
   element_id?: string | null;
 }

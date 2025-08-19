@@ -130,6 +130,8 @@ pub fn run() {
             powsybl::commands::update_load,
             // Scada
             scada::commands::subscribe_scada_feeders,
+            scada::commands::unsubscribe_scada_feeders,
+            scada::commands::unsubscribe_all_scada_feeders,
             // Project
             // project::commands::load_project,
             // project::commands::init_database_project,

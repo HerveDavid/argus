@@ -29,7 +29,11 @@ export const DiagramContent = () => {
   // Hook pour l'initialisation des feeders (met les ****)
   useDiagramFeeders({ svgRef, metadata: diagramData?.metadata });
 
-  useSubscribeScadaFeeders({ metadata: diagramData?.metadata, autoSubscribe: true });
+  useSubscribeScadaFeeders({
+    metadata: diagramData?.metadata,
+    autoSubscribe: true,
+    autoUnsubscribeOnUnmount: true,
+  });
 
   const { addPanel } = useCentralPanelStore();
   const feedersInitialized = useRef(false);

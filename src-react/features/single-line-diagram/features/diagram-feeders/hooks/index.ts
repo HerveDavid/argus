@@ -1,3 +1,4 @@
+// features/diagram-feeders/index.ts
 export { useDiagramFeeders } from './use-diagram-feeders';
-export { useSubscribeScadaFeeders } from './use-subscribe-scada-feeders.ts';
+export { useSubscribeScadaFeeders } from './use-subscribe-scada-feeders'; // ❌ Enlever le .ts
 export { useUpdateFeeders } from './use-update-feeders';

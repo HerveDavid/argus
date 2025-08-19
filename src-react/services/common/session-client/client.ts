@@ -1,14 +1,21 @@
 import { invoke } from '@tauri-apps/api/core';
-import { Effect } from 'effect';
+import * as Effect from 'effect/Effect';
 
-import { SessionError } from './error';
-import { RootConfig } from '@/types/session.ts';
+import { SessionError, createSessionError } from './errors';
+import { RootConfig } from '@/types/session';
 
-interface SessionService {
-  readonly setConfigSession: (
+export interface SessionService {
+  readonly setSessionConfig: (
     name: string,
-    path: string,
+    filePath: string,
   ) => Effect.Effect<RootConfig, SessionError>;
+  readonly setSessionConfigWithFile: (
+    name: string,
+    path: string | null,
+    filePath: string,
+    baseDirectory: string | null,
+  ) => Effect.Effect<RootConfig, SessionError>;
+  readonly getSessionStatus: () => Effect.Effect<RootConfig, SessionError>;
 }
 
 export class SessionClient extends Effect.Service<SessionClient>()(
@@ -17,16 +24,36 @@ export class SessionClient extends Effect.Service<SessionClient>()(
     dependencies: [],
     effect: Effect.gen(function* () {
       return {
-        setConfigSession: (
-          name: string,
-          path: string,
-        ): Effect.Effect<RootConfig, SessionError> =>
+        // Set session config with name and path
+        setSessionConfig: (name: string, path: string) =>
           Effect.tryPromise({
             try: () => invoke<RootConfig>('set_session_config', { name, path }),
-            catch: (error) =>
-              new SessionError({
-                message: error.message,
+            catch: (error) => createSessionError(String(error)),
+          }),
+
+        // Set session config with file upload
+        setSessionConfigWithFile: (
+          name: string,
+          path: string | null,
+          filePath: string,
+          baseDirectory: string | null,
+        ) =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<RootConfig>('set_session_config_with_file', {
+                name,
+                path,
+                file_path: filePath,
+                base_directory: baseDirectory,
               }),
+            catch: (error) => createSessionError(String(error)),
+          }),
+
+        // Get current session status
+        getSessionStatus: () =>
+          Effect.tryPromise({
+            try: () => invoke<RootConfig>('get_session_status'),
+            catch: (error) => createSessionError(String(error)),
           }),
       } satisfies SessionService;
     }),

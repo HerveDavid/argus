@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/menubar';
 import { rxRuntime, runtime } from '@/config/runtime';
 import { SettingsClient } from '@/services/common/settings-client';
-import { SessionClient } from '@/services/session';
+import { SessionClient } from '@/services/common/session-client';
 import { useRxValue, Result } from '@effect-rx/rx-react';
 import { Session } from '@/types/session';
 
@@ -20,6 +20,7 @@ import { EmptyState } from './session-widget/empty-state';
 import { RecentSessionsSection } from './session-widget/recent-sessions-section';
 import { SessionCreate } from './session-create';
 import { SessionEdit } from './session-edit';
+import { SessionData } from '../types/session-data';
 
 interface SessionSettings {
   current: Session | null;
@@ -68,11 +69,7 @@ const switchSessionEffect = (session: Session) =>
     return updatedSession;
   });
 
-const createSessionEffect = (sessionData: {
-  name: string;
-  path: string;
-  filePath: string;
-}) =>
+const createSessionEffect = (sessionData: SessionData) =>
   Effect.gen(function* () {
     const settingsClient = yield* SettingsClient;
     const sessionClient = yield* SessionClient;
@@ -139,11 +136,7 @@ export const SessionWidget = () => {
     }
   };
 
-  const handleCreateSession = async (sessionData: {
-    name: string;
-    path: string;
-    filePath: string;
-  }) => {
+  const handleCreateSession = async (sessionData: SessionData) => {
     try {
       await runtime.runPromise(createSessionEffect(sessionData));
       setShowCreateDialog(false);

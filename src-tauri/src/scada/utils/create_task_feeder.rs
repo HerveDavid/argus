@@ -1,21 +1,19 @@
 use crate::utils::tasks::CancellableTask;
-use crate::scada::entities::ScadaOutput;
+use crate::scada::entities::{ScadaOutput, ScadaMessage, FallbackMessage, TsTmMessage, LegacyMessage};
 
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use log::{debug, info, warn, error};
 use futures::StreamExt;
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize};
 use tauri::ipc::Channel;
 
 pub fn create_task_feeder(
     client: Arc<async_nats::Client>,
-    channel: Channel<serde_json::Value>,
+    channel: Channel<ScadaMessage>,
     scada_output: ScadaOutput,
+    paused: Arc<AtomicBool>,
 ) -> CancellableTask<()> {
-
-    // Flag for pausing feeder
-    let paused = Arc::new(AtomicBool::new(false));
 
     // Create cancellable task for this NATS subscription
     CancellableTask::new({
@@ -63,33 +61,33 @@ pub fn create_task_feeder(
                                 debug!("Feeder '{}' received raw payload: {}", id, payload_str);
 
                                 // Try to parse as JSON
-                                match serde_json::from_str::<Value>(payload_str) {
+                                match serde_json::from_str::<serde_json::Value>(payload_str) {
                                     Ok(parsed_json) => {
                                         // Process TS/TM format or Legacy format
-                                        let processed_event = process_scada_message(
+                                        let processed_message = process_scada_message(
                                             &scada_output,
                                             &parsed_json
                                         );
 
-                                        debug!("Processed event for '{}': {:?}", id, processed_event);
+                                        debug!("Processed message for '{}': {:?}", id, processed_message);
 
-                                        if let Err(e) = channel.send(processed_event) {
-                                            warn!("Failed to send event to channel for '{}': {:?}", id, e);
+                                        if let Err(e) = channel.send(processed_message) {
+                                            warn!("Failed to send message to channel for '{}': {:?}", id, e);
                                         }
                                     },
                                     Err(e) => {
                                         warn!("Failed to parse JSON payload for '{}': {} - Raw: {}",
                                               id, e, payload_str);
 
-                                        // Send raw payload as fallback
-                                        let fallback_event = json!({
-                                            "id": id,
-                                            "raw_payload": payload_str,
-                                            "parse_error": e.to_string()
+                                        // Send fallback message
+                                        let fallback_message = ScadaMessage::Fallback(FallbackMessage {
+                                            id: id.clone(),
+                                            raw_payload: payload_str.to_string(),
+                                            parse_error: e.to_string(),
                                         });
 
-                                        if let Err(e) = channel.send(fallback_event) {
-                                            warn!("Failed to send fallback event to channel for '{}': {:?}", id, e);
+                                        if let Err(e) = channel.send(fallback_message) {
+                                            warn!("Failed to send fallback message to channel for '{}': {:?}", id, e);
                                         }
                                     }
                                 }
@@ -111,70 +109,57 @@ pub fn create_task_feeder(
 }
 
 /// Process incoming SCADA message and format it for the frontend
-fn process_scada_message(scada_output: &ScadaOutput, message: &Value) -> Value {
-    let id = &scada_output.id;
+fn process_scada_message(scada_output: &ScadaOutput, message: &serde_json::Value) -> ScadaMessage {
+    let id = scada_output.id.clone();
+    let dynawo_id = scada_output.dynawo_id.clone();
 
     // Check if this is a TS/TM format message (has tase2 field)
-    if let Some(tase2) = message.get("tase2") {
+    if let Some(tase2) = message.get("tase2").and_then(|v| v.as_str()) {
         // TS/TM format message
-        let mut processed = json!({
-            "id": id,
-            "dynawo_id": &scada_output.dynawo_id,
-            "tase2": tase2,
-            "format": "TS_TM",
-            "timestamp": message.get("ts").and_then(|v| v.as_u64()).unwrap_or(0),
-            "cause": message.get("cause").and_then(|v| v.as_str()).unwrap_or("unknown"),
-            "validity": message.get("validity").and_then(|v| v.as_str()).unwrap_or("unknown"),
-            "operator_blocked": message.get("operatorBlocked").and_then(|v| v.as_bool()).unwrap_or(false)
-        });
+        let timestamp = message.get("ts").and_then(|v| v.as_u64()).unwrap_or(0);
+        let cause = message.get("cause").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
+        let validity = message.get("validity").and_then(|v| v.as_str()).unwrap_or("unknown").to_string();
+        let operator_blocked = message.get("operatorBlocked").and_then(|v| v.as_bool()).unwrap_or(false);
+        let tfos = message.get("tfos").and_then(|v| v.as_str()).map(|s| s.to_string());
 
-        // Handle different value types
-        if let Some(value) = message.get("value") {
+        // Determine message type and extract values
+        let (message_type, value, st_val) = if let Some(val) = message.get("value").and_then(|v| v.as_f64()) {
             // Télémesure (TM) - analog value
-            processed["value"] = value.clone();
-            processed["type"] = json!("TM");
-        } else if let Some(st_val) = message.get("stVal") {
+            ("TM".to_string(), Some(val), None)
+        } else if let Some(st_value) = message.get("stVal") {
             // Télésignalisation (TS) - digital value
-            processed["stVal"] = st_val.clone();
-            processed["type"] = json!("TS");
-        }
+            ("TS".to_string(), None, Some(st_value.clone()))
+        } else {
+            // Default to TM with no value if neither is present
+            ("TM".to_string(), None, None)
+        };
 
-        // Add TFOS if present
-        if let Some(tfos) = message.get("tfos") {
-            processed["tfos"] = tfos.clone();
-        }
-
-        processed
+        ScadaMessage::TsTm(TsTmMessage {
+            id,
+            dynawo_id,
+            format: "TS_TM".to_string(),
+            tase2: tase2.to_string(),
+            timestamp,
+            cause,
+            validity,
+            operator_blocked,
+            message_type,
+            value,
+            st_val,
+            tfos,
+        })
     } else {
         // Legacy format message
-        json!({
-            "id": id,
-            "dynawo_id": &scada_output.dynawo_id,
-            "format": "Legacy",
-            "value": message.get("value"),
-            "time_sent": message.get("time_sent"),
-            "time_received": message.get("time_received"),
-            "raw_message": message
+        ScadaMessage::Legacy(LegacyMessage {
+            id,
+            dynawo_id,
+            format: "Legacy".to_string(),
+            value: message.get("value").cloned(),
+            time_sent: message.get("time_sent").and_then(|v| v.as_f64()),
+            time_received: message.get("time_received").and_then(|v| v.as_f64()),
+            raw_message: message.clone(),
         })
     }
-}
-
-/// Utility function to create multiple feeders from a list of SCADA outputs
-pub fn create_feeders_for_outputs(
-    client: Arc<async_nats::Client>,
-    channel: Channel<serde_json::Value>,
-    scada_outputs: Vec<ScadaOutput>,
-) -> Vec<CancellableTask<()>> {
-    scada_outputs
-        .into_iter()
-        .map(|output| {
-            create_task_feeder(
-                client.clone(),
-                channel.clone(),
-                output,
-            )
-        })
-        .collect()
 }
 
 #[cfg(test)]
@@ -183,7 +168,7 @@ mod tests {
     use serde_json::json;
 
     #[test]
-    fn test_process_ts_tm_message() {
+    fn test_process_ts_tm_telemesure_message() {
         let scada_output = ScadaOutput {
             id: "NETWORK_.A.ZA6.ACAM.1_QRaw_value".to_string(),
             dynawo_id: "NETWORK_.A.ZA6.ACAM.1_QRaw_value".to_string(),
@@ -208,10 +193,54 @@ mod tests {
 
         let processed = process_scada_message(&scada_output, &ts_tm_message);
 
-        assert_eq!(processed["format"], "TS_TM");
-        assert_eq!(processed["type"], "TM");
-        assert_eq!(processed["value"], 15.75);
-        assert_eq!(processed["tase2"], "M_3486_6_1_2");
+        match processed {
+            ScadaMessage::TsTm(msg) => {
+                assert_eq!(msg.format, "TS_TM");
+                assert_eq!(msg.tase2, "M_3486_6_1_2");
+                assert_eq!(msg.timestamp, 1692640800);
+                assert_eq!(msg.message_type, "TM");
+                assert_eq!(msg.value, Some(15.75));
+                assert_eq!(msg.st_val, None);
+                assert_eq!(msg.tfos, Some("111110011101111011100100".to_string()));
+            },
+            _ => panic!("Expected TsTm message"),
+        }
+    }
+
+    #[test]
+    fn test_process_ts_tm_telesignalisation_message() {
+        let scada_output = ScadaOutput {
+            id: "NETWORK_.A.ZA6.ACAM.1_Status".to_string(),
+            dynawo_id: "NETWORK_.A.ZA6.ACAM.1_Status".to_string(),
+            tase2: "M_3486_6_1_3".to_string(),
+            source: "RTU_ICCP_REE".to_string(),
+            destination: "SCADA".to_string(),
+            topic: ".A.ZA".to_string(),
+            graphical_id: "id_46_A_46_ZA6_46_ACAM_46_1_STATUS".to_string(),
+            publish_on_change: None,
+        };
+
+        let ts_message = json!({
+            "id": "NETWORK_.A.ZA6.ACAM.1_Status",
+            "tase2": "M_3486_6_1_3",
+            "cause": "1",
+            "validity": "0",
+            "operatorBlocked": false,
+            "ts": 1692640800,
+            "stVal": true
+        });
+
+        let processed = process_scada_message(&scada_output, &ts_message);
+
+        match processed {
+            ScadaMessage::TsTm(msg) => {
+                assert_eq!(msg.format, "TS_TM");
+                assert_eq!(msg.message_type, "TS");
+                assert_eq!(msg.value, None);
+                assert_eq!(msg.st_val, Some(json!(true)));
+            },
+            _ => panic!("Expected TsTm message"),
+        }
     }
 
     #[test]
@@ -236,18 +265,59 @@ mod tests {
 
         let processed = process_scada_message(&scada_output, &legacy_message);
 
-        assert_eq!(processed["format"], "Legacy");
-        assert_eq!(processed["value"], 15.75);
+        match processed {
+            ScadaMessage::Legacy(msg) => {
+                assert_eq!(msg.format, "Legacy");
+                assert_eq!(msg.value, Some(json!(15.75)));
+                assert_eq!(msg.time_sent, Some(1692640800.123));
+                assert_eq!(msg.time_received, Some(1692640800.150));
+            },
+            _ => panic!("Expected Legacy message"),
+        }
     }
 
     #[test]
     fn test_topic_sanitization() {
-        // This would be tested in the actual task creation
         let topic = ".A.ZA";
         let sanitized = topic.replace(".", "_");
         assert_eq!(sanitized, "_A_ZA");
 
         let full_topic = format!("HMI.SCADA.{}", sanitized);
         assert_eq!(full_topic, "HMI.SCADA._A_ZA");
+    }
+
+    #[test]
+    fn test_serialization() {
+        let ts_message = ScadaMessage::TsTm(TsTmMessage {
+            id: "test".to_string(),
+            dynawo_id: "test_dynawo".to_string(),
+            format: "TS_TM".to_string(),
+            tase2: "M_123".to_string(),
+            timestamp: 1692640800,
+            cause: "1".to_string(),
+            validity: "0".to_string(),
+            operator_blocked: false,
+            message_type: "TM".to_string(),
+            value: Some(15.75),
+            st_val: None,
+            tfos: None,
+        });
+
+        // Test serialization
+        let json_str = serde_json::to_string(&ts_message).unwrap();
+        assert!(json_str.contains("TS_TM"));
+        assert!(json_str.contains("TM"));
+
+        // Test deserialization
+        let deserialized: ScadaMessage = serde_json::from_str(&json_str).unwrap();
+        match deserialized {
+            ScadaMessage::TsTm(msg) => {
+                assert_eq!(msg.id, "test");
+                assert_eq!(msg.format, "TS_TM");
+                assert_eq!(msg.message_type, "TM");
+                assert_eq!(msg.value, Some(15.75));
+            },
+            _ => panic!("Expected TsTm message"),
+        }
     }
 }

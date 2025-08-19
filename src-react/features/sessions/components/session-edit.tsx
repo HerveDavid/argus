@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { runtime } from '@/config/runtime';
 import { SettingsClient } from '@/services/common/settings-client';
-import { SessionClient } from '@/services/session';
+import { SessionClient } from '@/services/common/session-client';
 import { Session } from '@/types/session';
 
 interface SessionEditProps {

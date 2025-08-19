@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 
 import { useHeaderStore } from '@/app/layouts/state-view/header/stores/header.store.ts';
 import { Menubar, MenubarMenu, MenubarTrigger } from '@/components/ui/menubar';
-import { ProjectWidget } from '@/features/projects';
 import { SessionWidget } from '@/features/sessions';
 
 export const LeftMenu = () => {
@@ -37,7 +36,6 @@ export const LeftMenu = () => {
           </MenubarTrigger>
         </MenubarMenu>
 
-        <ProjectWidget />
         <SessionWidget />
       </Menubar>
     </div>

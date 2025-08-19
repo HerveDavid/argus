@@ -37,7 +37,6 @@ export class PowsyblClient extends Effect.Service<PowsyblClient>()(
   '@/common/PowsyblClient',
   {
     dependencies: [],
-    // eslint-disable-next-line require-yield
     effect: Effect.gen(function* () {
       return {
         getTables: (): Effect.Effect<TableInfoResponse[], PowsyblError> =>

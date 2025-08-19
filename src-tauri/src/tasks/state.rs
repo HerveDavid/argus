@@ -8,6 +8,10 @@ use std::sync::{
     Arc,
 };
 use std::{collections::HashMap, time::Duration};
+use tauri::ipc::Channel;
+
+use crate::scada::entities::{ScadaOutput, ScadaMessage};
+use crate::scada::utils;
 
 pub struct TasksState {
     pub subscriptions: HashMap<String, (Arc<AtomicBool>, CancellableTask<()>)>,
@@ -32,7 +36,7 @@ impl TasksState {
             return Err(Error::TaskAlreadyExists(id));
         }
 
-        let paused = Arc::new(AtomicBool::new(true));
+        let paused = Arc::new(AtomicBool::new(false));
 
         self.subscriptions.insert(id.clone(), (paused, task));
 
@@ -124,5 +128,23 @@ impl TasksState {
             .iter()
             .map(|(id, (paused, _))| (id.clone(), paused.load(Ordering::Relaxed)))
             .collect()
+    }
+
+    pub fn add_feeder_task(&mut self, id: String, client: Arc<async_nats::Client>, channel: Channel<ScadaMessage>, scada_output: ScadaOutput) -> Result<()> {
+        if self.has_subscription(&id) {
+            info!("Subscription already exists for task '{}'", id);
+            return Err(Error::TaskAlreadyExists(id));
+        }
+
+        // Créer le flag paused partagé
+        let paused = Arc::new(AtomicBool::new(false)); // Commencer actif
+
+        // Créer la tâche avec le flag partagé
+        let task = utils::create_task_feeder(client, channel, scada_output, paused.clone());
+
+        self.subscriptions.insert(id.clone(), (paused, task));
+
+        info!("Feeder task '{}' added successfully (active by default)", id);
+        Ok(())
     }
 }
