@@ -35,6 +35,7 @@ const initProjectRx = rxRuntime.rx(
     const sessionClient = yield* SessionClient;
 
     yield* Effect.logInfo('Starting application...');
+    yield* Effect.sleep('2 seconds');
 
     const apiReady = yield* waitForApiEffect();
 

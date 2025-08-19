@@ -69,13 +69,13 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <RegistryProvider>
-      <InitProvider>
-        <QueryClientProvider client={queryClient}>
-          <ModeProvider>
-            <RuntimeProvider runtime={runtime}>{children}</RuntimeProvider>
-          </ModeProvider>
-        </QueryClientProvider>
-      </InitProvider>
+      <QueryClientProvider client={queryClient}>
+        <ModeProvider>
+          <RuntimeProvider runtime={runtime}>
+            <InitProvider>{children}</InitProvider>
+          </RuntimeProvider>
+        </ModeProvider>
+      </QueryClientProvider>
     </RegistryProvider>
   );
 };

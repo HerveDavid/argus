@@ -89,7 +89,7 @@ const setupAutoSave = (
 ) => {
   const debouncedSave = debounce(async (state: SidebarStore) => {
     await saveState(state, runtime, settingsKey);
-  }, 500); // 500ms delay
+  }, 500);
 
   store.subscribe(
     (state: SidebarStore): PersistableState => ({
@@ -120,9 +120,33 @@ const loadState = async (
   try {
     const loadEffect = Effect.gen(function* () {
       const settingsClient = yield* SettingsClient;
-      return yield* settingsClient.getSetting<
-        Pick<SidebarStore, 'isOpen' | 'size'> & { activeItemId: string }
-      >(config.name);
+
+      const savedState = yield* settingsClient
+        .getSetting<
+          Pick<SidebarStore, 'isOpen' | 'size'> & { activeItemId: string }
+        >(config.name)
+        .pipe(
+          Effect.catchAll((error) =>
+            Effect.gen(function* () {
+              yield* Effect.logDebug(
+                `Setting '${config.name}' not found, using defaults: ${error.message}`,
+              );
+              return null;
+            }),
+          ),
+        );
+
+      if (savedState) {
+        yield* Effect.logDebug(
+          `Loaded state for ${config.name}: ${JSON.stringify(savedState)}`,
+        );
+      } else {
+        yield* Effect.logDebug(
+          `No saved state found for ${config.name}, using defaults`,
+        );
+      }
+
+      return savedState;
     });
 
     const savedState = await runtime.runPromise(loadEffect);
@@ -142,7 +166,10 @@ const loadState = async (
       }
     }
   } catch (error) {
-    console.warn(`Error in loading config ${config.name}:`, error);
+    const logEffect = Effect.logWarning(
+      `Unexpected error loading config ${config.name}: ${error}`,
+    );
+    await runtime.runPromise(logEffect);
   }
 };
 
@@ -161,11 +188,17 @@ const saveState = async (
     const setEffect = Effect.gen(function* () {
       const settingsClient = yield* SettingsClient;
       yield* settingsClient.setSetting(settingsKey, stateToSave);
+      yield* Effect.logDebug(
+        `Saved state for ${settingsKey}: ${JSON.stringify(stateToSave)}`,
+      );
     });
 
     await runtime.runPromise(setEffect);
   } catch (error) {
-    console.error(`Error when saved state-view ${settingsKey}:`, error);
+    const logEffect = Effect.logError(
+      `Error when saving state ${settingsKey}: ${error}`,
+    );
+    await runtime.runPromise(logEffect);
   }
 };
 
@@ -179,6 +212,9 @@ const getSidebarStore = (name: string): any => {
       return useLeftToolsStoreInner;
     case 'right-tools-store':
       return useRightToolsStoreInner;
+    default:
+      console.warn(`Unknown sidebar store: ${name}`);
+      return null;
   }
 };
 

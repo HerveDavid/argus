@@ -131,7 +131,6 @@ const saveLayout = async (api: DockviewApi, runtime: LiveManagedRuntime) => {
         KEY_CENTRAL_PANEL_SETTING,
         api.toJSON(),
       );
-      yield* Effect.log('Layout saved');
     });
     await runtime.runPromise(setEffect);
   } catch (error) {
