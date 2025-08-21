@@ -17,7 +17,7 @@ impl Default for ModeState {
 }
 
 impl ModeState {
-    pub async fn new(settings_db: Arc<tokio::sync::Mutex<DatabaseState>>) -> Result<tokio::sync::Mutex<Self>> {
+    pub async fn new(settings_db: &tokio::sync::Mutex<DatabaseState>) -> Result<tokio::sync::Mutex<Self>> {
         let db_guard = settings_db.lock().await;
         let mode = db_guard
             .get_setting_or_default::<ModeState>("current-mode")

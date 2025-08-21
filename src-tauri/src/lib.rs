@@ -45,11 +45,11 @@ pub fn run() {
                 let settings_db = settings::database::state::DatabaseState::new(&app.handle())
                     .await
                     .expect("Failed to initialize settings db");
-                app.manage(settings_db.clone());
 
-                let mode_state = mode::state::ModeState::new(settings_db.clone())
+                let mode_state = mode::state::ModeState::new(&settings_db)
                     .await
                     .expect("Failed to initialize mode");
+                app.manage(settings_db);
                 app.manage(mode_state);
 
                 let broker = settings::broker::state::BrokerState::new()
