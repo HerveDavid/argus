@@ -1,5 +1,7 @@
 mod entities;
 mod feeders;
+
+mod mode;
 mod nats;
 mod powsybl;
 mod project;
@@ -43,7 +45,12 @@ pub fn run() {
                 let settings_db = settings::database::state::DatabaseState::new(&app.handle())
                     .await
                     .expect("Failed to initialize settings db");
-                app.manage(settings_db);
+                app.manage(settings_db.clone());
+
+                let mode_state = mode::state::ModeState::new(settings_db.clone())
+                    .await
+                    .expect("Failed to initialize mode");
+                app.manage(mode_state);
 
                 let broker = settings::broker::state::BrokerState::new()
                     .await
@@ -115,6 +122,8 @@ pub fn run() {
             sessions::commands::set_session_config,
             sessions::commands::set_session_config_with_file,
             sessions::commands::get_session_status,
+            // Mode
+            mode::commands::switch_mode,
             // Powsybl
             powsybl::commands::get_tables,
             powsybl::commands::get_table_data,

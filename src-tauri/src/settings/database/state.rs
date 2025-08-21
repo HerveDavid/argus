@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-
+use std::sync::Arc;
 use serde::Serialize;
 use serde_json::{Map, Value};
 use sqlx::{Pool, Row, Sqlite, SqlitePool};
@@ -12,7 +12,7 @@ pub struct DatabaseState {
 }
 
 impl DatabaseState {
-    pub async fn new(app_handle: &AppHandle) -> Result<tokio::sync::Mutex<Self>> {
+    pub async fn new(app_handle: &AppHandle) -> Result<Arc<tokio::sync::Mutex<Self>>> {
         let app_dir = app_handle
             .path()
             .app_data_dir()
@@ -39,7 +39,7 @@ impl DatabaseState {
         // SQLx will track which migrations have been run
         sqlx::migrate!("./migrations").run(&pool).await?;
 
-        Ok(tokio::sync::Mutex::new(Self { pool }))
+        Ok(Arc::new(tokio::sync::Mutex::new(Self { pool })))
     }
 
     pub async fn set_setting<T: Serialize>(&self, key: &str, value: &T) -> Result<()> {
