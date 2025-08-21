@@ -18,12 +18,7 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 
-// Import du hook de mode
-import {
-  useMode,
-  useCurrentMode,
-  useIsTransitioning,
-} from '@/hooks/use-mode';
+import { useMode, useModeError } from '@/hooks/use-mode';
 
 interface SettingsMenuProps {
   headerRef: React.RefObject<HTMLDivElement>;
@@ -32,10 +27,17 @@ interface SettingsMenuProps {
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
 
-  // Utilisation des hooks de mode
-  const { switchToScada, switchToGameMaster } = useMode();
-  const currentMode = useCurrentMode();
-  const isTransitioning = useIsTransitioning();
+  // Utilisation des hooks de mode avec la nouvelle intégration
+  const {
+    switchToScada,
+    switchToGameMaster,
+    switchToKpi,
+    currentMode,
+    isTransitioning,
+    state,
+  } = useMode();
+
+  const { error, hasError, retryModeChange } = useModeError();
 
   useEffect(() => {
     const initWindow = async () => {
@@ -55,7 +57,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
     }
   };
 
-  // Handler pour le changement de mode
+  // Handler pour le changement de mode avec gestion d'erreur
   const handleModeChange = (value: string) => {
     if (isTransitioning) {
       return;
@@ -72,13 +74,26 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
           switchToScada();
         }
         break;
+      case 'kpi':
+        if (currentMode !== 'Kpi') {
+          switchToKpi();
+        }
+        break;
     }
   };
 
   // Conversion du mode actuel vers la valeur du radio group
   const getCurrentModeValue = () => {
-    const value = currentMode === 'GameMaster' ? 'game-master' : 'scada';
-    return value;
+    switch (currentMode) {
+      case 'GameMaster':
+        return 'game-master';
+      case 'Scada':
+        return 'scada';
+      case 'Kpi':
+        return 'kpi';
+      default:
+        return 'game-master';
+    }
   };
 
   // Empêcher la propagation des événements de clic dans le menu Mode
@@ -86,11 +101,22 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
     e.stopPropagation();
   };
 
+  // Indicateur de statut dans le menu
+  const getModeStatus = () => {
+    if (state.matches('INITIALIZING')) {
+      return '(Initializing...)';
+    }
+    if (isTransitioning) {
+      return '(Switching...)';
+    }
+    if (hasError) {
+      return '(Error)';
+    }
+    return '';
+  };
+
   return (
-    <div
-      ref={headerRef}
-      className="w-full h-8 flex items-center z-10 border-b"
-    >
+    <div ref={headerRef} className="w-full h-8 flex items-center z-10 border-b">
       <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
         <MenubarMenu>
           <MenubarTrigger>File</MenubarTrigger>
@@ -155,27 +181,80 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
         </MenubarMenu>
 
         <MenubarMenu>
-          <MenubarTrigger>Mode</MenubarTrigger>
+          <MenubarTrigger>Mode {getModeStatus()}</MenubarTrigger>
           <MenubarContent onClick={handleModeMenuClick}>
+            {/* Affichage d'erreur si nécessaire */}
+            {hasError && (
+              <>
+                <MenubarItem
+                  className="text-red-600 cursor-default"
+                  onClick={handleModeMenuClick}
+                >
+                  Error: {error?.message}
+                </MenubarItem>
+                <MenubarItem onClick={retryModeChange}>
+                  Retry Mode Change
+                </MenubarItem>
+                <MenubarSeparator />
+              </>
+            )}
+
+            {/* Radio group pour les modes */}
             <MenubarRadioGroup
               value={getCurrentModeValue()}
               onValueChange={handleModeChange}
             >
               <MenubarRadioItem
                 value="game-master"
-                disabled={isTransitioning}
+                disabled={isTransitioning || state.matches('INITIALIZING')}
                 onClick={handleModeMenuClick}
               >
                 GameMaster
+                {currentMode === 'GameMaster' &&
+                  isTransitioning &&
+                  ' (switching...)'}
               </MenubarRadioItem>
+
               <MenubarRadioItem
                 value="scada"
-                disabled={isTransitioning}
+                disabled={isTransitioning || state.matches('INITIALIZING')}
                 onClick={handleModeMenuClick}
               >
                 SCADA
+                {currentMode === 'Scada' &&
+                  isTransitioning &&
+                  ' (switching...)'}
+              </MenubarRadioItem>
+
+              <MenubarRadioItem
+                value="kpi"
+                disabled={isTransitioning || state.matches('INITIALIZING')}
+                onClick={handleModeMenuClick}
+              >
+                KPI
+                {currentMode === 'Kpi' && isTransitioning && ' (switching...)'}
               </MenubarRadioItem>
             </MenubarRadioGroup>
+
+            {/* Informations de debug en mode développement */}
+            {process.env.NODE_ENV === 'development' && (
+              <>
+                <MenubarSeparator />
+                <MenubarItem
+                  className="text-gray-500 cursor-default text-xs"
+                  onClick={handleModeMenuClick}
+                >
+                  State: {state.value.toString()}
+                </MenubarItem>
+                <MenubarItem
+                  className="text-gray-500 cursor-default text-xs"
+                  onClick={handleModeMenuClick}
+                >
+                  Last change:{' '}
+                  {state.context.lastModeChange.toLocaleTimeString()}
+                </MenubarItem>
+              </>
+            )}
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

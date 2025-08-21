@@ -124,6 +124,7 @@ pub fn run() {
             sessions::commands::get_session_status,
             // Mode
             mode::commands::switch_mode,
+            mode::commands::get_current_mode,
             // Powsybl
             powsybl::commands::get_tables,
             powsybl::commands::get_table_data,

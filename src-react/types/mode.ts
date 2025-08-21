@@ -1,4 +1,4 @@
-export type AppMode = 'GameMaster' | 'Scada';
+export type AppMode = 'GameMaster' | 'Scada' | 'Kpi';
 
 export interface AppContext {
   currentMode: AppMode;
