@@ -9,37 +9,52 @@ import {
 import { SldMetadata } from '@/types/sld-metadata';
 import { Channel } from '@tauri-apps/api/core';
 import { ScadaMessage } from '@/types/tstm';
+import { updateFeeder } from '../utils/update-feeder';
 
 const runtimeAtom = Atom.runtime(Layer.mergeAll(ScadaClient.Default));
 
-export const loadFeeders = Atom.family((metadata: SldMetadata) =>
-  runtimeAtom.fn(
-    Effect.fn(function* () {
-      const scadaClient = yield* ScadaClient;
+type LoadFeedersProps = {
+  metadata: SldMetadata;
+  svgRef: React.RefObject<SVGSVGElement>;
+};
 
-      const outputs = yield* scadaClient.getScadaOutputs(metadata);
+export const loadFeeders = Atom.family(
+  ({ metadata, svgRef }: LoadFeedersProps) =>
+    runtimeAtom.fn(
+      Effect.fn(function* () {
+        const scadaClient = yield* ScadaClient;
 
-      if (!outputs || outputs.length == 0) {
-        return yield* new ScadaError({ message: 'Outputs is empty' });
-      }
+        const outputs = yield* scadaClient.getScadaOutputs(metadata);
 
-      yield* Effect.forEach(
-        outputs,
-        (output) =>
-          Effect.gen(function* () {
-            const channel = new Channel<ScadaMessage>();
-            channel.onmessage = (message) => {
-              console.log(`${output.id} received message: `, message);
-            };
+        if (!outputs || outputs.length == 0) {
+          return yield* new ScadaError({ message: 'Outputs is empty' });
+        }
 
-            yield* scadaClient.subscribeScadaFeeders(metadata, channel);
-          }),
-        { concurrency: 'unbounded' },
-      );
+        yield* Effect.forEach(
+          outputs,
+          (output) =>
+            Effect.gen(function* () {
+              const channel = new Channel<ScadaMessage>();
 
-      return outputs;
-    }),
-  ),
+              channel.onmessage = (message) => {
+                if (
+                  svgRef &&
+                  (message.format === 'TS_TM' || message.format === 'Legacy')
+                ) {
+                  updateFeeder(svgRef, output.graphical_id, message.value!);
+                  console.log(`${output.id} received message: `, message);
+                }
+
+              };
+
+              yield* scadaClient.subscribeScadaFeeders(metadata, channel);
+            }),
+          { concurrency: 'unbounded' },
+        );
+
+        return outputs;
+      }),
+    ),
 );
 
 export const removeFeeders = runtimeAtom.fn(

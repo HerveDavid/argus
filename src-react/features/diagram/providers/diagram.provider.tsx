@@ -13,6 +13,7 @@ import { useSvgNavigation } from '@/features/single-line-diagram/features/diagra
 
 type DiagramContextType = {
   svgRef: React.RefObject<SVGSVGElement>;
+  isInitialized: boolean;
 };
 
 const DiagramContext = createContext<DiagramContextType | undefined>(undefined);
@@ -37,6 +38,7 @@ export const DiagramProvider = ({
   const svgRef = React.useRef<SVGSVGElement>(null);
   const isInitializedRef = React.useRef(false);
   const lastSvgStringRef = React.useRef<string>('');
+  const [isInitialized, setIsInitialized] = React.useState(false);
 
   // React callback
   const { setupZoom, cleanup } = useSvgNavigation();
@@ -79,6 +81,7 @@ export const DiagramProvider = ({
 
       lastSvgStringRef.current = svgString;
       isInitializedRef.current = true;
+      setIsInitialized(true); // Notifier que l'initialisation est terminée
     },
     [svgRef, ensureZoomGroup],
   );
@@ -115,7 +118,13 @@ export const DiagramProvider = ({
   }, [cleanup]);
 
   // Context
-  const store = React.useMemo(() => ({ svgRef }), [svgRef]);
+  const store = React.useMemo(
+    () => ({
+      svgRef,
+      isInitialized,
+    }),
+    [svgRef, isInitialized],
+  );
 
   return (
     <DiagramContext.Provider value={store}>{children}</DiagramContext.Provider>
