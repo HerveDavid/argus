@@ -4,9 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 
 import {
-  useDiagramFeeders,
-  useSubscribeScadaFeeders,
-  useUpdateFeeders,
+  useFeederUpdater, // Garde seulement celui-ci
 } from '../features/diagram-feeders';
 import { useLineGoTo, useSvgNavigation } from '../features/diagram-navigation';
 import {
@@ -18,10 +16,6 @@ import {
   useEquipmentControls,
 } from '../features/equipment-controls';
 import { useSldContext } from '../providers/sld.provider';
-import { ScadaDataPoint } from '@/services/common/scada-client';
-import { scadaUpdateFeedersAtom } from '../providers/diagram.provider/atoms';
-import { Result, useAtom } from '@effect-atom/atom-react';
-import { useDiagram } from '../providers/diagram.provider';
 
 export const DiagramContent = () => {
   const { svgRef, diagramData } = useSldContext();
@@ -31,24 +25,12 @@ export const DiagramContent = () => {
   const { toggleBreaker } = useBreakerToggle(svgRef);
   const { targetElement, handleContextMenuTrigger } = useEquipmentControls();
 
-  const { isLoaded, metadataRef, isInitialized: isInitialized2 } = useDiagram();
-
-  // Hook pour l'initialisation des feeders (met les ****)
-  useDiagramFeeders({ svgRef, metadata: diagramData?.metadata });
-
-  const [outputs, setOutputs] = useAtom(scadaUpdateFeedersAtom);
-
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-  const { updateFeeder, updateAllFeeders } = useUpdateFeeders({ svgContainerRef });
-
-  // useSubscribeScadaFeeders({
-  //   metadata: diagramData?.metadata,
-  //   autoSubscribe: true,
-  //   autoUnsubscribeOnUnmount: true,
-  //   onDataPoint: (dataPoint: ScadaDataPoint) => {
-  //     console.log('bjr: ' + dataPoint);
-  //   },
-  // });
+  // Utilise seulement useFeederUpdater avec les bons paramètres
+  const { updateFeeder, resetAllFeeders, getAllFeederIds, isSubscribed } =
+    useFeederUpdater({
+      svgRef,
+      metadata: diagramData?.metadata, // Utilise metadata, pas diagramData entier
+    });
 
   const { addPanel } = useCentralPanelStore();
   const feedersInitialized = useRef(false);
@@ -77,12 +59,22 @@ export const DiagramContent = () => {
       initializeSvg(diagramData.svg).then(() => {
         const svg = d3.select(svgRef.current!);
         setupZoom(svg);
+
+        // Optionnel : reset des feeders après initialisation
+        setTimeout(() => {
+          resetAllFeeders('---');
+        }, 100);
       });
     } else {
       const svg = d3.select(svgRef.current);
       const zoomGroup = ensureZoomGroup(svg);
       updateSvg(diagramData.svg, diagramData.metadata, () => {
         restoreTransform(zoomGroup);
+
+        // Reset des feeders après mise à jour
+        setTimeout(() => {
+          resetAllFeeders('---');
+        }, 100);
       });
     }
   }, [
@@ -94,37 +86,48 @@ export const DiagramContent = () => {
     ensureZoomGroup,
     restoreTransform,
     setupZoom,
+    resetAllFeeders,
   ]);
 
+  // Debug - affiche l'état de la souscription SCADA
   useEffect(() => {
-    if (isLoaded && metadataRef && metadataRef.current && !isInitialized2) {
-      setOutputs({
-        metadata: metadataRef.current,
-        update: (id, value) => {
-          console.log(id, value);
-          return updateFeeder(id, value);
-        },
-      });
-
-      Result.match(outputs, {
-        onFailure(error) {
-          console.error(JSON.stringify(error));
-        },
-        onSuccess({ value }) {
-          // setScadaOutputs(value);
-        },
-        onInitial() {},
-      });
+    if (isSubscribed) {
+      console.log('SCADA subscription active');
+      const feederIds = getAllFeederIds();
+      console.log('Available feeder IDs:', feederIds);
     }
+  }, [isSubscribed, getAllFeederIds]);
 
-    return () => {
-      // unsubscribe(scadaOutputs);
-      // clearInterval(setInterval(() => {}, 1000));
-    };
-  }, [isLoaded, isInitialized, initializeSvg, svgRef]);
+  // Fonction utilitaire pour tester les feeders manuellement (dev uniquement)
+  const testFeeders = () => {
+    const feederIds = getAllFeederIds();
+    feederIds.forEach((id, index) => {
+      setTimeout(() => {
+        updateFeeder(id, Math.floor(Math.random() * 100));
+      }, index * 500);
+    });
+  };
 
   return (
     <div className="h-full flex flex-col relative">
+      {/* Bouton de test en dev uniquement */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="absolute top-2 right-2 z-10 space-x-2">
+          <button
+            onClick={testFeeders}
+            className="px-2 py-1 bg-blue-500 text-white text-xs rounded"
+          >
+            Test Feeders
+          </button>
+          <button
+            onClick={() => resetAllFeeders('0')}
+            className="px-2 py-1 bg-gray-500 text-white text-xs rounded"
+          >
+            Reset
+          </button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-hidden bg-background border-0 rounded">
         <EquipmentControls
           targetElement={targetElement}
@@ -132,14 +135,12 @@ export const DiagramContent = () => {
           metadata={diagramData?.metadata}
           onGoToVoltageLevel={goto}
         >
-          <div ref={svgContainerRef}>
-            <svg
-              ref={svgRef}
-              className="w-full h-full cursor-default"
-              style={{ minHeight: '400px' }}
-              onContextMenu={handleContextMenuTrigger}
-            />
-          </div>
+          <svg
+            ref={svgRef}
+            className="w-full h-full cursor-default"
+            style={{ minHeight: '400px' }}
+            onContextMenu={handleContextMenuTrigger}
+          />
         </EquipmentControls>
       </div>
     </div>

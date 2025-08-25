@@ -52,6 +52,7 @@ export const DiagramProvider: React.FC<DiagramProviderProps> = ({
   // const [outputs, setOutputs] = useAtom(outputsAtom);
   // const [outputs, setOutputs] = useAtom(scadaFeedersAtom);
   const [outputs, setOutputs] = useAtom(scadaUpdateFeedersAtom);
+
   const [_, unsubscribe] = useAtom(scadaRemoveFeedersAtom);
 
   const [isLoaded, setIsLoaded] = useState(false);

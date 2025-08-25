@@ -14,7 +14,6 @@ const useDiagramReloaderInner = (options: UseDiagramReloaderOptions = {}) => {
   const { id, autoLoad = false } = options;
   const [state, send] = useActor(reloaderMachine);
 
-  // Refs pour la gestion de l'ID
   const previousIdRef = useRef<string | null>(null);
   const hasInitializedRef = useRef(false);
 
@@ -33,30 +32,25 @@ const useDiagramReloaderInner = (options: UseDiagramReloaderOptions = {}) => {
     send({ type: 'LOAD_DIAGRAM', lineId });
   const clearDiagram = () => send({ type: 'CLEAR_DIAGRAM' });
 
-  // Gestion de l'initialisation et du changement d'ID
   useEffect(() => {
     if (!autoLoad || !id) return;
 
     const isIdChanged = previousIdRef.current !== id;
-    const isReady = state.context.runtime !== null; // ou votre condition pour isReady
+    const isReady = state.context.runtime !== null;
     const shouldLoad = isReady && (isIdChanged || !hasInitializedRef.current);
 
     if (shouldLoad) {
-      // Nettoyer le diagramme précédent si l'ID a changé
       if (isIdChanged && previousIdRef.current !== null) {
         clearDiagram();
       }
 
-      // Charger le nouveau diagramme
       loadDiagram(id);
 
-      // Marquer comme initialisé et sauvegarder l'ID actuel
       hasInitializedRef.current = true;
       previousIdRef.current = id;
     }
   }, [id, state.context.runtime, autoLoad]);
 
-  // Réinitialiser les refs si l'ID change
   useEffect(() => {
     if (!autoLoad) return;
 
@@ -83,7 +77,7 @@ const useDiagramReloaderInner = (options: UseDiagramReloaderOptions = {}) => {
     isIdle: state.matches('idle'),
     isWaitingForRuntime: state.matches('waitingForRuntime'),
     isRefreshing: state.matches('refreshing'),
-    isReady: state.context.runtime !== null, // ou votre logique pour isReady
+    isReady: state.context.runtime !== null,
 
     // Data
     diagramData: state.context.diagramData,

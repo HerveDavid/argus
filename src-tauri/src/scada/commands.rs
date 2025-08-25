@@ -53,6 +53,32 @@ pub async fn subscribe_scada_feeders(
     Ok(outputs)
 }
 
+#[tauri::command(rename_all = "snake_case")]
+pub async fn subscribe_single_scada_feeder(
+    tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
+    nats_state: State<'_, tokio::sync::Mutex<NatsState>>,
+    output: ScadaOutput,
+    channel: Channel<ScadaMessage>,
+) -> Result<bool> {
+    // Get NATS client
+    let nats_client = {
+        let nats_state = nats_state.lock().await;
+        match nats_state.get_client() {
+            Some(client) => client,
+            None => return Err(Error::ClientNotInitialized),
+        }
+    };
+
+    let id = output.id.clone();
+    let paused = Arc::new(AtomicBool::new(false));
+    let task = utils::create_task_feeder(nats_client.clone(), channel, output, paused);
+    
+    tasks_state.lock().await.add_task(id.clone(), task)?;
+    
+    log::info!("Subscribed to individual feeder: {}", id);
+    Ok(true)
+}
+
 // #[tauri::command(rename_all = "snake_case")]
 // pub async fn subscribe_scada_feeders(
 //     tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,

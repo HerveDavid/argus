@@ -146,6 +146,7 @@ pub fn run() {
             powsybl::commands::update_load,
             // Scada
             scada::commands::subscribe_scada_feeders,
+            scada::commands::subscribe_single_scada_feeder,
             scada::commands::unsubscribe_scada_feeders,
             scada::commands::unsubscribe_all_scada_feeders,
             scada::commands::get_scada_outputs,
