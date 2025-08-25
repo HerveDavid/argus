@@ -7,6 +7,7 @@ interface BaseScadaMessage {
 export interface TSTM extends BaseScadaMessage {
   format: 'TS_TM';
   tase2: string;
+  graphical_id: string,
   timestamp: number;
   cause: string;
   validity: string;
@@ -19,6 +20,7 @@ export interface TSTM extends BaseScadaMessage {
 
 export interface LegacyScadaMessage extends BaseScadaMessage {
   format: 'Legacy';
+  graphical_id: string,
   value?: any;
   time_sent?: number;
   time_received?: number;

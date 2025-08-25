@@ -1,1 +1,1 @@
-export { SingleLineDiagram as Sld } from './components2/single-line-diagram';
+export { SingleLineDiagram as Sld } from './components/single-line-diagram';

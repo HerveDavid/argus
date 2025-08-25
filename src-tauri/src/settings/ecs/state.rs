@@ -1,20 +1,20 @@
 use bevy::prelude::*;
-use std::sync::Arc;
 
 pub struct EcsState {
-    app: Arc<tokio::sync::Mutex<App>>,
+    app: App,
 }
 
-impl EcsState {
-    pub fn new() -> Self {
-        let app = App::new();
+unsafe impl Send for EcsState {}
+unsafe impl Sync for EcsState {}
 
-        Self {
-            app: Arc::new(tokio::sync::Mutex::new(app)),
-        }
+impl EcsState {
+    pub async fn new() -> Result<tokio::sync::Mutex<Self>> {
+        let mut app = App::new();
+
+        Ok(tokio::sync::Mutex::new(Self { app }))
     }
 
-    pub async fn update(&self) {
-        self.app.lock().await.update();
+    pub fn update(&mut self) {
+        self.app.update();
     }
 }

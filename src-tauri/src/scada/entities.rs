@@ -26,7 +26,6 @@ pub struct ScadaOutput {
     pub publish_on_change: Option<bool>,
 }
 
-
 // Types pour les messages SCADA
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -42,6 +41,7 @@ pub struct TsTmMessage {
     pub dynawo_id: String,
     pub format: String, // Always "TS_TM"
     pub tase2: String,
+    pub graphical_id: String,
     pub timestamp: u64,
     pub cause: String,
     pub validity: String,
@@ -61,7 +61,9 @@ pub struct TsTmMessage {
 pub struct LegacyMessage {
     pub id: String,
     pub dynawo_id: String,
+    pub graphical_id: String,
     pub format: String, // Always "Legacy"
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<serde_json::Value>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -49,6 +49,7 @@ pub fn run() {
                 let mode_state = mode::state::ModeState::new(&settings_db)
                     .await
                     .expect("Failed to initialize mode");
+
                 app.manage(settings_db);
                 app.manage(mode_state);
 
@@ -67,6 +68,11 @@ pub fn run() {
                     .await
                     .expect("Failed to initialize sessions");
                 app.manage(session);
+
+                let ecs_state = settings::ecs::state::EcsState::new()
+                    .await
+                    .expect("Failed to initialize ecs");
+                app.manage(ecs_state);
 
                 let project_db = project::state::ProjectState::new(&app.handle())
                     .await
@@ -142,6 +148,7 @@ pub fn run() {
             scada::commands::subscribe_scada_feeders,
             scada::commands::unsubscribe_scada_feeders,
             scada::commands::unsubscribe_all_scada_feeders,
+            scada::commands::get_scada_outputs,
             // Project
             // project::commands::load_project,
             // project::commands::init_database_project,

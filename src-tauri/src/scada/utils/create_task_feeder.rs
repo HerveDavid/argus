@@ -5,7 +5,6 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use log::{debug, info, warn, error};
 use futures::StreamExt;
-use serde::{Deserialize, Serialize};
 use tauri::ipc::Channel;
 
 pub fn create_task_feeder(
@@ -112,6 +111,7 @@ pub fn create_task_feeder(
 fn process_scada_message(scada_output: &ScadaOutput, message: &serde_json::Value) -> ScadaMessage {
     let id = scada_output.id.clone();
     let dynawo_id = scada_output.dynawo_id.clone();
+    let graphical_id = scada_output.graphical_id.clone();
 
     // Check if this is a TS/TM format message (has tase2 field)
     if let Some(tase2) = message.get("tase2").and_then(|v| v.as_str()) {
@@ -139,6 +139,7 @@ fn process_scada_message(scada_output: &ScadaOutput, message: &serde_json::Value
             dynawo_id,
             format: "TS_TM".to_string(),
             tase2: tase2.to_string(),
+            graphical_id,
             timestamp,
             cause,
             validity,
@@ -153,6 +154,7 @@ fn process_scada_message(scada_output: &ScadaOutput, message: &serde_json::Value
         ScadaMessage::Legacy(LegacyMessage {
             id,
             dynawo_id,
+            graphical_id,
             format: "Legacy".to_string(),
             value: message.get("value").cloned(),
             time_sent: message.get("time_sent").and_then(|v| v.as_f64()),
@@ -291,6 +293,7 @@ mod tests {
         let ts_message = ScadaMessage::TsTm(TsTmMessage {
             id: "test".to_string(),
             dynawo_id: "test_dynawo".to_string(),
+            graphical_id: "graphical_id".to_string(),
             format: "TS_TM".to_string(),
             tase2: "M_123".to_string(),
             timestamp: 1692640800,

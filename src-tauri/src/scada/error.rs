@@ -40,10 +40,7 @@ pub enum Error {
     SessionError(#[from] crate::sessions::error::Error),
 
     #[error("HTTP error {status}: {message}")]
-    HttpError {
-        status: u16,
-        message: String,
-    },
+    HttpError { status: u16, message: String },
 
     #[error("Request error: {0}")]
     RequestError(#[from] reqwest::Error),
@@ -53,6 +50,9 @@ pub enum Error {
 
     #[error("Invalid response format")]
     InvalidResponseFormat,
+
+    #[error("Outputs are empty")]
+    OutputsEmpty,
 }
 
 impl Serialize for Error {

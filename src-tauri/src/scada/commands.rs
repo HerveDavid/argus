@@ -1,3 +1,6 @@
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
+
 use crate::entities::sld_metadata::SldMetadata;
 use crate::nats::state::NatsState;
 use crate::sessions::state::SessionState;
@@ -17,15 +20,13 @@ pub async fn subscribe_scada_feeders(
     session_state: State<'_, tokio::sync::Mutex<SessionState>>,
     metadata: SldMetadata,
     channel: Channel<ScadaMessage>,
-) -> Result<Vec<String>> {  // Retourne maintenant les IDs des feeders créés
-    log::info!("Starting SCADA feeders subscription");
-
-    // Debug: Log les métadonnées reçues
-    log::info!("Received metadata: feeder_count={}", metadata.feeder_infos.len());
-
-    // Get session client
+) -> Result<Vec<ScadaOutput>> {
     let session_client = session_state.lock().await;
-    log::info!("Session client acquired");
+    let outputs = utils::get_scada_outputs(session_client, metadata).await?;
+
+    if outputs.is_empty() {
+        return Err(Error::OutputsEmpty);
+    }
 
     // Get NATS client
     let nats_client = {
@@ -34,7 +35,7 @@ pub async fn subscribe_scada_feeders(
             Some(client) => {
                 log::info!("NATS client acquired successfully");
                 client
-            },
+            }
             None => {
                 log::error!("NATS client not initialized");
                 return Err(Error::ClientNotInitialized);
@@ -42,87 +43,157 @@ pub async fn subscribe_scada_feeders(
         }
     };
 
-    // Run a query in session to get SCADA outputs by graphical IDs
-    log::info!("Executing SCADA outputs query");
-    let scada_outputs = match utils::get_scada_outputs(session_client, metadata).await {
-        Ok(outputs) => {
-            log::info!("Query successful, found {} SCADA outputs", outputs.len());
-            outputs
-        },
-        Err(e) => {
-            log::error!("Failed to get SCADA outputs: {:?}", e);
-            return Err(e);
-        }
-    };
-
-    let mut successful_feeder_ids = Vec::new();
-
-    // Add the feeder to the state
-    let mut tasks_state = tasks_state.lock().await;
-    log::info!("Tasks state acquired, adding feeders");
-
-    for scada_output in scada_outputs {
-        let id = scada_output.id.clone();
-        log::info!("Processing feeder: {}", id);
-
-        match tasks_state.add_feeder_task(
-            id.clone(),
-            nats_client.clone(),
-            channel.clone(),
-            scada_output,
-        ) {
-            Ok(()) => {
-                log::info!("NATS feeder '{}' added and started successfully", id);
-                successful_feeder_ids.push(id);
-            }
-            Err(e) => {
-                log::error!("Failed to add NATS feeder '{}': {:?}", id, e);
-                // Continuer avec les autres feeders au lieu de tout arrêter
-            }
-        }
+    for output in outputs.clone() {
+        let id = output.id.clone();
+        let paused = Arc::new(AtomicBool::new(false));
+        let task = utils::create_task_feeder(nats_client.clone(), channel.clone(), output, paused);
+        tasks_state.lock().await.add_task(id, task)?;
     }
 
-    log::info!("Subscription completed: {}/{} feeders added successfully",
-              successful_feeder_ids.len(), successful_feeder_ids.len());
-
-    Ok(successful_feeder_ids)
+    Ok(outputs)
 }
+
+// #[tauri::command(rename_all = "snake_case")]
+// pub async fn subscribe_scada_feeders(
+//     tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
+//     nats_state: State<'_, tokio::sync::Mutex<NatsState>>,
+//     session_state: State<'_, tokio::sync::Mutex<SessionState>>,
+//     metadata: SldMetadata,
+//     channel: Channel<ScadaMessage>,
+// ) -> Result<Vec<String>> {
+//     // Retourne maintenant les IDs des feeders créés
+//     log::info!("Starting SCADA feeders subscription");
+
+//     // Debug: Log les métadonnées reçues
+//     log::info!(
+//         "Received metadata: feeder_count={}",
+//         metadata.feeder_infos.len()
+//     );
+
+//     // Get session client
+//     let session_client = session_state.lock().await;
+//     log::info!("Session client acquired");
+
+//     // Get NATS client
+//     let nats_client = {
+//         let nats_state = nats_state.lock().await;
+//         match nats_state.get_client() {
+//             Some(client) => {
+//                 log::info!("NATS client acquired successfully");
+//                 client
+//             }
+//             None => {
+//                 log::error!("NATS client not initialized");
+//                 return Err(Error::ClientNotInitialized);
+//             }
+//         }
+//     };
+
+//     // Run a query in session to get SCADA outputs by graphical IDs
+//     log::info!("Executing SCADA outputs query");
+//     let scada_outputs = match utils::get_scada_outputs(session_client, metadata).await {
+//         Ok(outputs) => {
+//             log::info!("Query successful, found {} SCADA outputs", outputs.len());
+//             outputs
+//         }
+//         Err(e) => {
+//             log::error!("Failed to get SCADA outputs: {:?}", e);
+//             return Err(e);
+//         }
+//     };
+
+//     let mut successful_feeder_ids = Vec::new();
+
+//     // Add the feeder to the state
+//     let mut tasks_state = tasks_state.lock().await;
+//     log::info!("Tasks state acquired, adding feeders");
+
+//     for scada_output in scada_outputs {
+//         let id = scada_output.id.clone();
+//         log::info!("Processing feeder: {}", id);
+
+//         match tasks_state.add_feeder_task(
+//             id.clone(),
+//             nats_client.clone(),
+//             channel.clone(),
+//             scada_output,
+//         ) {
+//             Ok(()) => {
+//                 log::info!("NATS feeder '{}' added and started successfully", id);
+//                 successful_feeder_ids.push(id);
+//             }
+//             Err(e) => {
+//                 log::error!("Failed to add NATS feeder '{}': {:?}", id, e);
+//                 // Continuer avec les autres feeders au lieu de tout arrêter
+//             }
+//         }
+//     }
+
+//     log::info!(
+//         "Subscription completed: {}/{} feeders added successfully",
+//         successful_feeder_ids.len(),
+//         successful_feeder_ids.len()
+//     );
+
+//     Ok(successful_feeder_ids)
+// }
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn unsubscribe_scada_feeders(
     tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
-    feeder_ids: Vec<String>,
-) -> Result<Vec<String>> {  // Retourne les IDs des feeders supprimés avec succès
-    log::info!("Starting SCADA feeders unsubscription for {} feeders", feeder_ids.len());
-
-    let mut tasks_state = tasks_state.lock().await;
-    let mut successfully_removed = Vec::new();
-
-    for feeder_id in feeder_ids {
-        log::info!("Removing feeder: {}", feeder_id);
-
-        match tasks_state.close_task(&feeder_id).await {
-            Ok(()) => {
-                log::info!("NATS feeder '{}' removed successfully", feeder_id);
-                successfully_removed.push(feeder_id);
-            }
-            Err(e) => {
-                log::error!("Failed to remove NATS feeder '{}': {:?}", feeder_id, e);
-                // Continuer avec les autres feeders
-            }
-        }
+    outputs: Vec<ScadaOutput>,
+) -> Result<bool> {
+    let mut tasks_guard = tasks_state.lock().await;
+    for output in outputs {
+        tasks_guard.close_task(&output.id).await?;
     }
 
-    log::info!("Unsubscription completed: {}/{} feeders removed successfully",
-              successfully_removed.len(), successfully_removed.len());
-
-    Ok(successfully_removed)
+    Ok(true)
 }
+
+// #[tauri::command(rename_all = "snake_case")]
+// pub async fn unsubscribe_scada_feeders(
+//     tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
+//     feeder_ids: Vec<String>,
+// ) -> Result<Vec<String>> {
+//     // Retourne les IDs des feeders supprimés avec succès
+//     log::info!(
+//         "Starting SCADA feeders unsubscription for {} feeders",
+//         feeder_ids.len()
+//     );
+
+//     let mut tasks_state = tasks_state.lock().await;
+//     let mut successfully_removed = Vec::new();
+
+//     for feeder_id in feeder_ids {
+//         log::info!("Removing feeder: {}", feeder_id);
+
+//         match tasks_state.close_task(&feeder_id).await {
+//             Ok(()) => {
+//                 log::info!("NATS feeder '{}' removed successfully", feeder_id);
+//                 successfully_removed.push(feeder_id);
+//             }
+//             Err(e) => {
+//                 log::error!("Failed to remove NATS feeder '{}': {:?}", feeder_id, e);
+//                 // Continuer avec les autres feeders
+//             }
+//         }
+//     }
+
+//     log::info!(
+//         "Unsubscription completed: {}/{} feeders removed successfully",
+//         successfully_removed.len(),
+//         successfully_removed.len()
+//     );
+
+//     Ok(successfully_removed)
+// }
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn unsubscribe_all_scada_feeders(
     tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
-) -> Result<Vec<String>> {  // Retourne les IDs de tous les feeders supprimés
+) -> Result<Vec<String>> {
+    // Retourne les IDs de tous les feeders supprimés
     log::info!("Starting unsubscription of all SCADA feeders");
 
     let mut tasks_state = tasks_state.lock().await;
@@ -149,8 +220,20 @@ pub async fn unsubscribe_all_scada_feeders(
         }
     }
 
-    log::info!("Unsubscription of all feeders completed: {}/{} feeders removed successfully",
-              successfully_removed.len(), feeder_count);
+    log::info!(
+        "Unsubscription of all feeders completed: {}/{} feeders removed successfully",
+        successfully_removed.len(),
+        feeder_count
+    );
 
     Ok(successfully_removed)
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_scada_outputs(
+    session_state: State<'_, tokio::sync::Mutex<SessionState>>,
+    metadata: SldMetadata,
+) -> Result<Vec<ScadaOutput>> {
+    let session_client = session_state.lock().await;
+    utils::get_scada_outputs(session_client, metadata).await
 }

@@ -15,9 +15,13 @@ export interface ScadaService {
 
   readonly unsubscribeScadaFeeders: (
     outputs: ScadaOutput[],
-  ) => Effect.Effect<void, ScadaError>;
+  ) => Effect.Effect<boolean, ScadaError>;
 
   readonly unsubscribeAllScadaFeeders: () => Effect.Effect<void, ScadaError>;
+
+  readonly getScadaOutputs: (
+    metadata: SldMetadata,
+  ) => Effect.Effect<ScadaOutput[], ScadaError>;
 }
 
 export class ScadaClient extends Effect.Service<ScadaService>()(
@@ -46,11 +50,11 @@ export class ScadaClient extends Effect.Service<ScadaService>()(
             return outputs;
           }),
 
-        unsubscribeScadaFeeders: (outputs): Effect.Effect<void, ScadaError> =>
+        unsubscribeScadaFeeders: (outputs): Effect.Effect<boolean, ScadaError> =>
           Effect.gen(function* () {
-            yield* Effect.tryPromise({
+            return yield* Effect.tryPromise({
               try: () =>
-                invoke<void>('unsubscribe_scada_feeders', {
+                invoke<boolean>('unsubscribe_scada_feeders', {
                   outputs,
                 }),
               catch: (error) =>
@@ -65,6 +69,23 @@ export class ScadaClient extends Effect.Service<ScadaService>()(
           Effect.gen(function* () {
             yield* Effect.tryPromise({
               try: () => invoke<void>('unsubscribe_all_scada_feeders'),
+              catch: (error) =>
+                new ScadaError({
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                }),
+            });
+          }),
+
+        getScadaOutputs: (
+          metadata: SldMetadata,
+        ): Effect.Effect<ScadaOutput[], ScadaError> =>
+          Effect.gen(function* () {
+            return yield* Effect.tryPromise({
+              try: () =>
+                invoke<ScadaOutput[]>('get_scada_outputs', {
+                  metadata,
+                }),
               catch: (error) =>
                 new ScadaError({
                   message:

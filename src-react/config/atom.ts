@@ -5,7 +5,7 @@ import { SessionClient } from '@/services/common/session-client';
 import { SettingsClient } from '@/services/common/settings-client';
 import { NatsClient } from '@/services/common/nats-client';
 import { PowsyblClient } from '@/services/common/powsybl-client';
-import { ModeClient } from '@/services/common/mode-client';
+import { ModeClient } from '@/services/common/mode-client/client';
 
 export const makeAtomRuntime = Atom.context({ memoMap: Atom.defaultMemoMap });
 makeAtomRuntime.addGlobalLayer(
