@@ -30,20 +30,12 @@ export const FeedersProvider = ({
   const { svgRef, isInitialized } = useDiagram();
   const [_, remove] = useAtom(removeFeeders);
 
-  // Fonction pour obtenir la référence SVG de façon dynamique
   const getSvgRef = useCallback(() => {
-    console.log('getSvgRef called:', {
-      hasSvgRef: !!svgRef?.current,
-      isInitialized,
-      svgContent: svgRef?.current?.innerHTML?.substring(0, 100) + '...',
-    });
     return svgRef;
   }, [svgRef, isInitialized]);
 
   const feedersAtom = React.useMemo(() => {
-    // Ne créer l'atom que si le SVG est initialisé
     if (!isInitialized) {
-      console.log('SVG not initialized yet, waiting...');
       return null;
     }
 
@@ -51,7 +43,6 @@ export const FeedersProvider = ({
       onInitial: () => null,
       onFailure: () => null,
       onSuccess: ({ value }) => {
-        console.log('Creating loadFeeders atom with metadata:', value.metadata);
         return loadFeeders({
           metadata: value.metadata,
           svgRef,
@@ -67,9 +58,7 @@ export const FeedersProvider = ({
   const isLoadingFeeders = Result.isInitial(feeders);
 
   React.useEffect(() => {
-    // Ne charger les feeders que si le SVG est initialisé et l'atom existe
     if (isInitialized && feedersAtom && loadFeedersAction) {
-      console.log('SVG is initialized, loading feeders...');
       loadFeedersAction();
     }
   }, [feedersAtom, loadFeedersAction, isInitialized]);

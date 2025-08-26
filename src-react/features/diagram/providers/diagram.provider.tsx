@@ -81,7 +81,7 @@ export const DiagramProvider = ({
 
       lastSvgStringRef.current = svgString;
       isInitializedRef.current = true;
-      setIsInitialized(true); // Notifier que l'initialisation est terminée
+      setIsInitialized(true);
     },
     [svgRef, ensureZoomGroup],
   );

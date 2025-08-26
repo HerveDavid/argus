@@ -1,9 +1,6 @@
 import * as d3 from 'd3';
 import React from 'react';
 
-/**
- * Met à jour un feeder spécifique par son ID
- */
 export const updateFeeder = (
   svgRef: React.RefObject<SVGSVGElement>,
   id: string,
