@@ -2,7 +2,12 @@ use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum Error {}
+pub enum Error {
+    #[error("Broker is not connected")]
+    BrokerNotConnected,
+    #[error("Client not initialized")]
+    ClientNotInitialized,
+}
 
 impl Serialize for Error {
     fn serialize<S>(&self, serializer: S) -> core::result::Result<S::Ok, S::Error>

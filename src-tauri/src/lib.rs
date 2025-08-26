@@ -69,11 +69,6 @@ pub fn run() {
                     .expect("Failed to initialize sessions");
                 app.manage(session);
 
-                let ecs_state = settings::ecs::state::EcsState::new()
-                    .await
-                    .expect("Failed to initialize ecs");
-                app.manage(ecs_state);
-
                 let project_db = project::state::ProjectState::new(&app.handle())
                     .await
                     .expect("Failed to initialize project db");
@@ -88,6 +83,11 @@ pub fn run() {
                     .await
                     .expect("Failed to initialize nats");
                 app.manage(nats_state);
+
+                let ecs_state = settings::ecs::state::EcsState::new()
+                    .await
+                    .expect("Failed to initialize ecs");
+                app.manage(ecs_state);
 
                 println!("-----------------------------------------------");
             });
