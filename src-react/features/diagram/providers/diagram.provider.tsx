@@ -9,7 +9,11 @@ import {
   extractViewBox,
 } from '../utils/svg-parser';
 
-import { useSvgNavigation } from '@/features/single-line-diagram/features/diagram-navigation';
+import {
+  useLineGoTo,
+  useSvgNavigation,
+} from '@/features/single-line-diagram/features/diagram-navigation';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 
 type DiagramContextType = {
   svgRef: React.RefObject<SVGSVGElement>;
@@ -31,8 +35,9 @@ export const DiagramProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  // Effect-ts
+  // Hooks
   const { metadata } = useMetadata();
+  const { addPanel } = useCentralPanelStore();
 
   // States
   const svgRef = React.useRef<SVGSVGElement>(null);
@@ -85,6 +90,24 @@ export const DiagramProvider = ({
     },
     [svgRef, ensureZoomGroup],
   );
+
+  // Uses
+  useLineGoTo({
+    svgRef,
+    metadata: Result.match(metadata, {
+      onInitial: () => undefined,
+      onFailure: () => undefined,
+      onSuccess: ({ value }) => value.metadata,
+    }),
+    onGoToVoltageLevel: (id: string) => {
+      addPanel({
+        id,
+        tabComponent: 'default',
+        component: 'sld',
+        params: { id },
+      });
+    },
+  });
 
   // React useEffect
   React.useEffect(() => {

@@ -5,7 +5,6 @@ import { useMetadata } from './metadata.provider';
 import { loadFeeders, removeFeeders } from '../services/feeders.service';
 import { ScadaError, ScadaOutput } from '@/services/common/scada-client';
 import { useDiagram } from './diagram.provider';
-import { getOutputs } from '../services/mode.service';
 
 type FeedersContextType = {
   feeders: Result.Result<ScadaOutput[], ScadaError> | null;
@@ -32,7 +31,7 @@ export const FeedersProvider = ({
   const [_, remove] = useAtom(removeFeeders);
 
   // Todo
-  const [outputs, loadOutputs] = useAtom(getOutputs);
+  // const [outputs, loadOutputs] = useAtom(getOutputs);
 
   const getSvgRef = useCallback(() => {
     return svgRef;
@@ -47,8 +46,10 @@ export const FeedersProvider = ({
       onInitial: () => null,
       onFailure: () => null,
       onSuccess: ({ value }) => {
-        // Todo
-        loadOutputs(value.metadata);
+        // // Todo
+        // loadOutputs(value.metadata);
+
+        console.log(JSON.stringify(value.metadata));
 
         return loadFeeders({
           metadata: value.metadata,
@@ -67,8 +68,6 @@ export const FeedersProvider = ({
   React.useEffect(() => {
     if (isInitialized && feedersAtom && loadFeedersAction) {
       loadFeedersAction();
-
-      console.log(outputs);
     }
   }, [feedersAtom, loadFeedersAction, isInitialized]);
 

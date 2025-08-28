@@ -2,16 +2,17 @@ use std::sync::Arc;
 
 use bevy::prelude::Event;
 use futures::StreamExt;
-use log::{debug, error, info, warn};
+use log::error;
 use serde::{Deserialize, Serialize};
 use tauri::State;
+use tokio::sync::MutexGuard;
 
 use crate::nats::state::NatsState;
 use crate::tasks::state::TasksState;
 use crate::utils::tasks::CancellableTask;
 
 use super::error::{Error, Result};
-use super::{scada::BrokerClient, state::EcsState};
+use super::state::EcsState;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Output {
@@ -47,7 +48,6 @@ pub async fn subscribe_output_scada(
     let ecs = ecs_state.inner().clone();
 
     let task = CancellableTask::new({
-        let id = output.id.clone();
         let destination = output.destination.clone();
         let local_topic = output.topic.clone();
         let sanitized_topic = local_topic.replace(".", "_");
