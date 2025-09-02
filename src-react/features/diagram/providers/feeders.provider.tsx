@@ -1,15 +1,19 @@
 import { Result, useAtom } from '@effect-atom/atom-react';
-import React, { createContext, useCallback } from 'react';
+import React, { createContext } from 'react';
 
 import { useMetadata } from './metadata.provider';
-import { loadFeeders, removeFeeders } from '../services/feeders.service';
+import {
+  subscribeToFeeders,
+  unsubscribeFromFeeders,
+} from '../services/feeders.service';
 import { useDiagram } from './diagram.provider';
 import { Channel } from '@tauri-apps/api/core';
 import { ScadaMessage } from '@/types/tstm';
+import { updateFeeder } from '../utils/update-feeder';
 
 type FeedersContextType = {
-  isLoadingFeeders: boolean;
-  channelRef: React.RefObject<Channel<ScadaMessage> | undefined>;
+  isSubscribing: boolean;
+  scadaChannel: React.RefObject<Channel<ScadaMessage> | undefined>;
   subscriptionId: string;
 };
 
@@ -28,85 +32,92 @@ export const FeedersProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  // Hooks
   const { metadata } = useMetadata();
   const { svgRef, isInitialized } = useDiagram();
 
-  // States & Actions
   const [subscriptionId] = React.useState(() => crypto.randomUUID());
-  const channelRef = React.useRef<Channel<ScadaMessage>>(undefined);
 
-  const getSvgRef = useCallback(() => {
-    return svgRef;
-  }, [svgRef, isInitialized]);
+  const scadaChannel = React.useRef<Channel<ScadaMessage>>(undefined);
 
-  const feedersAtom = React.useMemo(() => {
-    if (!isInitialized) {
-      return null;
-    }
+  const subscriptionAtom = React.useMemo(() => {
+    if (!isInitialized) return null;
 
     return Result.match(metadata, {
       onInitial: () => null,
       onFailure: () => null,
       onSuccess: ({ value }) => {
-        if (channelRef.current) {
-          return loadFeeders({
+        if (scadaChannel.current) {
+          return subscribeToFeeders({
             metadata: value.metadata,
-            id: subscriptionId,
-            channelRef,
+            subscriptionId,
+            scadaChannel,
           });
         }
+        return null;
       },
     });
-  }, [metadata, getSvgRef, isInitialized]);
+  }, [metadata, isInitialized, subscriptionId]);
 
-  const [feeders, loadFeedersAction] = useAtom(
-    feedersAtom || loadFeeders({} as any),
-  );
-
-  const removeFeedersAtom = React.useMemo(() => {
-    return removeFeeders({ id: subscriptionId });
+  const unsubscriptionAtom = React.useMemo(() => {
+    return unsubscribeFromFeeders({ subscriptionId });
   }, [subscriptionId]);
 
-  const [, removeFeedersAction] = useAtom(removeFeedersAtom);
+  const [subscriptionResult, executeSubscription] = useAtom(
+    subscriptionAtom || subscribeToFeeders({} as any),
+  );
 
-  const isLoadingFeeders = Result.isInitial(feeders);
+  const [, executeUnsubscription] = useAtom(unsubscriptionAtom);
+
+  const isSubscribing = Result.isInitial(subscriptionResult);
 
   React.useEffect(() => {
-    if (!channelRef.current) {
+    if (!scadaChannel.current) {
       const channel = new Channel<ScadaMessage>();
+
       channel.onmessage = (message) => {
-        console.log('SCADA Message received:', message);
+        console.log(`[${subscriptionId}] SCADA message received:`, message);
+        switch (message.format) {
+          case 'Legacy':
+            updateFeeder(svgRef, message.graphical_id, message.value!);
+            break;
+          case 'TS_TM':
+            updateFeeder(svgRef, message.graphical_id, message.value!);
+            break;
+        }
       };
-      channelRef.current = channel;
+
+      scadaChannel.current = channel;
     }
 
     return () => {
-      if (channelRef.current) {
-        if (removeFeedersAction) {
-          removeFeedersAction();
+      if (scadaChannel.current) {
+        if (executeUnsubscription) {
+          executeUnsubscription();
         }
-        channelRef.current = undefined;
+
+        scadaChannel.current = undefined;
       }
     };
-  }, []);
+  }, [subscriptionId, executeUnsubscription]);
 
   React.useEffect(() => {
-    if (isInitialized && feedersAtom && loadFeedersAction) {
-      loadFeedersAction();
+    if (isInitialized && subscriptionAtom && executeSubscription) {
+      executeSubscription();
     }
-  }, [feedersAtom, loadFeedersAction, isInitialized]);
+  }, [subscriptionAtom, executeSubscription, isInitialized, subscriptionId]);
 
-  const store = React.useMemo(
+  const contextValue = React.useMemo(
     () => ({
-      isLoadingFeeders,
-      channelRef,
+      isSubscribing,
+      scadaChannel,
       subscriptionId,
     }),
-    [feeders, feedersAtom, isLoadingFeeders],
+    [isSubscribing, subscriptionId],
   );
 
   return (
-    <FeedersContext.Provider value={store}>{children}</FeedersContext.Provider>
+    <FeedersContext.Provider value={contextValue}>
+      {children}
+    </FeedersContext.Provider>
   );
 };
