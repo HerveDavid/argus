@@ -10,11 +10,12 @@ import { ScadaMessage } from '@/types/tstm.ts';
 export interface ScadaService {
   readonly subscribeScadaFeeders: (
     metadata: SldMetadata,
+    id: string,
     channel: Channel<ScadaMessage>,
   ) => Effect.Effect<ScadaOutput[], ScadaError>;
 
   readonly unsubscribeScadaFeeders: (
-    outputs: ScadaOutput[],
+    id: string,
   ) => Effect.Effect<boolean, ScadaError>;
 
   readonly unsubscribeAllScadaFeeders: () => Effect.Effect<void, ScadaError>;
@@ -42,6 +43,7 @@ export class ScadaClient extends Effect.Service<ScadaService>()(
       return {
         subscribeScadaFeeders: (
           metadata,
+          id,
           channel,
         ): Effect.Effect<ScadaOutput[], ScadaError> =>
           Effect.gen(function* () {
@@ -49,6 +51,7 @@ export class ScadaClient extends Effect.Service<ScadaService>()(
               try: () =>
                 invoke<ScadaOutput[]>('subscribe_scada_feeders', {
                   metadata,
+                  id,
                   channel,
                 }),
               catch: (error) =>
@@ -61,13 +64,13 @@ export class ScadaClient extends Effect.Service<ScadaService>()(
           }),
 
         unsubscribeScadaFeeders: (
-          outputs,
+          id,
         ): Effect.Effect<boolean, ScadaError> =>
           Effect.gen(function* () {
             return yield* Effect.tryPromise({
               try: () =>
                 invoke<boolean>('unsubscribe_scada_feeders', {
-                  outputs,
+                  id,
                 }),
               catch: (error) =>
                 new ScadaError({

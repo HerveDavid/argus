@@ -13,7 +13,7 @@ import '../styles/dockview-theme.css';
 
 import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-import { customTailwindTheme } from './dockview-theme';
+import { customTailwindTheme } from '../utils';
 import { LeftHeaderActions } from './left-header-actions';
 import { RightHeaderActions } from './right-header-actions';
 import { TabComponent } from './tab-component';
