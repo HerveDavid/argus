@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/menubar';
 
 import { useMode, useModeError } from '@/hooks/use-mode';
+import { useLeftSidebarStore } from '../stores/state-view.store';
 
 interface SettingsMenuProps {
   headerRef: React.RefObject<HTMLDivElement>;
@@ -38,6 +39,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   } = useMode();
 
   const { error, hasError, retryModeChange } = useModeError();
+
+  const { panels, activeItem, switchLayout } = useLeftSidebarStore();
+  
 
   useEffect(() => {
     const initWindow = async () => {
@@ -67,11 +71,13 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
       case 'game-master':
         if (currentMode !== 'GameMaster') {
           switchToGameMaster();
+          switchLayout('game-master')
         }
         break;
       case 'scada':
         if (currentMode !== 'Scada') {
           switchToScada();
+          switchLayout('scada')
         }
         break;
       case 'kpi':

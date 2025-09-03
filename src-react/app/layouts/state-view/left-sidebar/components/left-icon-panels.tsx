@@ -1,9 +1,7 @@
-import { leftSidebarPanels } from '@/config/layouts/game-master';
-
 import { useLeftSidebarStore } from '../../stores/state-view.store';
 
 export const LeftIconPanels = () => {
-  const { activeItem, setActiveItem, isOpen, openPanel, closePanel } =
+  const { panels, activeItem, setActiveItem, isOpen, openPanel, closePanel } =
     useLeftSidebarStore();
 
   const handleIconPanelClick = (itemId: string) => {
@@ -13,7 +11,7 @@ export const LeftIconPanels = () => {
 
   return (
     <div className="space-y-3">
-      {leftSidebarPanels.map((item) => {
+      {panels.map((item) => {
         const Icon = item.icon;
         const isActive = activeItem.id === item.id;
         const handleClick = isOpen

@@ -1,6 +1,6 @@
 import { useEquipmentControls } from '../hooks/use-equipment-controls';
 import { FeedersProvider } from '../providers/feeders.provider';
-import { ElementControls } from './element-controls';
+import { EquipmentControls } from './equipment-controls';
 
 export const SvgRender = ({
   svgRef,
@@ -14,14 +14,14 @@ export const SvgRender = ({
     <FeedersProvider>
       <div className="h-full flex flex-col relative">
         <div className="flex-1 overflow-hidden bg-background border-0 rounded">
-          <ElementControls targetElement={targetElement}>
+          <EquipmentControls targetElement={targetElement}>
             <svg
               ref={svgRef}
               className="w-full h-full cursor-default"
               style={{ minHeight: '400px' }}
               onContextMenu={handleContextMenuTrigger}
             />
-          </ElementControls>
+          </EquipmentControls>
         </div>
       </div>
     </FeedersProvider>

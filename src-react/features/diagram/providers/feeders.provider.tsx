@@ -36,7 +36,6 @@ export const FeedersProvider = ({
   const { svgRef, isInitialized } = useDiagram();
 
   const [subscriptionId] = React.useState(() => crypto.randomUUID());
-
   const scadaChannel = React.useRef<Channel<ScadaMessage>>(undefined);
 
   const subscriptionAtom = React.useMemo(() => {
@@ -75,7 +74,6 @@ export const FeedersProvider = ({
       const channel = new Channel<ScadaMessage>();
 
       channel.onmessage = (message) => {
-        console.log(`[${subscriptionId}] SCADA message received:`, message);
         switch (message.format) {
           case 'Legacy':
             updateFeeder(svgRef, message.graphical_id, message.value!);

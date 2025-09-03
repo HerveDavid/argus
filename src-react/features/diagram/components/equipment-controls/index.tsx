@@ -1,25 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { useMetadata } from '../providers/metadata.provider';
-import { ElementInfo } from '../types/element-info.type';
+import { Result } from '@effect-atom/atom-react';
+import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
+
+import { useMetadata } from '../../providers/metadata.provider';
+import { ElementInfo } from '../../types/element-info.type';
 import {
   extractEquipmentId,
   extractParentEquipmentId,
   findNodeInfo,
   getComponentTypeFromClasses,
   getMeasurementTypeFromClasses,
-} from '../utils/element-getters';
+} from '../../utils/element-getters';
 import { SldMetadata } from '@/types/sld-metadata';
-import { Result } from '@effect-atom/atom-react';
-import { Attribute } from '../types/attribute.type';
+import { Attribute } from '../../types/attribute.type';
 import { ContextMenu, ContextMenuContent } from '@/components/ui/context-menu';
-import { ContextMenuTrigger } from '@radix-ui/react-context-menu';
+import { EquipmentMenu } from './equipment-menu';
 
-interface ElementControlsProps {
+interface EquipmentControlsProps {
   children: React.ReactNode;
   targetElement: SVGElement | null;
 }
 
-export const ElementControls: React.FC<ElementControlsProps> = ({
+export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   children,
   targetElement,
 }) => {
@@ -29,7 +31,7 @@ export const ElementControls: React.FC<ElementControlsProps> = ({
   // States
   const [metadata, setMetadata] = useState<SldMetadata>();
   const [elementInfo, setElementInfo] = useState<ElementInfo>();
-  const [attributes, setAttributes] = useState<Attribute[]>([]);
+  const [_, setAttributes] = useState<Attribute[]>([]);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
   // Effects
@@ -130,7 +132,9 @@ export const ElementControls: React.FC<ElementControlsProps> = ({
     <ContextMenu onOpenChange={handleContextMenuOpenChange}>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       {elementInfo && (
-        <ContextMenuContent>#{elementInfo.id}</ContextMenuContent>
+        <ContextMenuContent>
+          <EquipmentMenu elementInfo={elementInfo} />
+        </ContextMenuContent>
       )}
     </ContextMenu>
   );

@@ -1,8 +1,9 @@
 import { Atom } from '@effect-atom/atom-react';
 import { Effect, Layer } from 'effect';
 
-import { PowsyblClient, PowsyblError } from '@/services/common/powsybl-client';
 import { Metadata } from '../types/metadata.type';
+
+import { PowsyblClient, PowsyblError } from '@/services/common/powsybl-client';
 import { SldMetadata } from '@/types/sld-metadata';
 
 const runtimeAtom = Atom.runtime(Layer.mergeAll(PowsyblClient.Default));

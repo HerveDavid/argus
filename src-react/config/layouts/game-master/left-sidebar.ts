@@ -1,4 +1,4 @@
-import { Folder, Terminal as TerminalIcon } from 'lucide-react';
+import { Clapperboard, Folder, Terminal as TerminalIcon } from 'lucide-react';
 
 import { EquipmentExplorer } from '@/features/equipment-explorer';
 import Terminal from '@/features/terminal';
@@ -9,6 +9,12 @@ export const leftSidebarPanels: SidebarItem[] = [
     id: 'equipment-explorer',
     icon: Folder,
     label: 'Explorer',
+    content: EquipmentExplorer,
+  },
+  {
+    id: 'scenario-explorer',
+    icon: Clapperboard,
+    label: 'Scenario',
     content: EquipmentExplorer,
   },
 ] as const;
