@@ -24,6 +24,7 @@ import {
   useLeftSidebarStore,
   useLeftToolsStore,
   useRightSidebarStore,
+  useRightToolsStore,
 } from '../stores/state-view.store';
 
 interface SettingsMenuProps {
@@ -46,9 +47,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   const { error, hasError, retryModeChange } = useModeError();
 
   const leftSidebar = useLeftSidebarStore();
-  const leftTools = useLeftToolsStore();
   const rightSidebar = useRightSidebarStore();
-  const rightTools = useRightSidebarStore();
+  const leftTools = useLeftToolsStore();
+  const rightTools = useRightToolsStore();
 
   useEffect(() => {
     const initWindow = async () => {
@@ -69,11 +70,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   };
 
   const switchMode = async (mode: ModeType) => {
-    await leftSidebar.loadPanelsForMode(mode);
-    await leftTools.loadPanelsForMode(mode);
-
-    await rightSidebar.loadPanelsForMode(mode);
-    await rightTools.loadPanelsForMode(mode);
+    const stores = [leftSidebar, rightSidebar, leftTools, rightTools];
+    await Promise.all(stores.map((store) => store.loadPanelsForMode(mode)));
   };
 
   // Handler pour le changement de mode avec gestion d'erreur
