@@ -1,6 +1,7 @@
 import { IDockviewPanelProps } from 'dockview';
 
 import { SldView } from '../sld-view';
+import { DslEditor } from '@/features/editor';
 
 export const CentralPanelLayouts: Record<
   string,
@@ -11,5 +12,8 @@ export const CentralPanelLayouts: Record<
   },
   sld: (props: IDockviewPanelProps<{ id: string }>) => {
     return <SldView {...props} />;
+  },
+  editor: (props: IDockviewPanelProps<{ id: string }>) => {
+    return <DslEditor />;
   },
 };

@@ -6,7 +6,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@/components/ui/resizable';
-import { Sld } from '@/features/single-line-diagram';
 import { useSelectedItemStore } from '@/stores/window-header.store';
 
 import { SldBreadcrumb } from './components/sld-breadcrumb';

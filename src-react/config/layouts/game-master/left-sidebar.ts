@@ -1,8 +1,15 @@
-import { Clapperboard, Folder, Terminal as TerminalIcon } from 'lucide-react';
+import {
+  Clapperboard,
+  ClockIcon,
+  Folder,
+  Terminal as TerminalIcon,
+} from 'lucide-react';
 
 import { EquipmentExplorer } from '@/features/equipment-explorer';
 import Terminal from '@/features/terminal';
 import { SidebarItem } from '@/types/sidebar-item.ts';
+import { History } from '@/features/historic';
+import { TreeFolder } from '@/features/editor';
 
 export const leftSidebarPanels: SidebarItem[] = [
   {
@@ -12,10 +19,10 @@ export const leftSidebarPanels: SidebarItem[] = [
     content: EquipmentExplorer,
   },
   {
-    id: 'scenario-explorer',
+    id: 'scenario-folder',
     icon: Clapperboard,
     label: 'Scenario',
-    content: EquipmentExplorer,
+    content: TreeFolder,
   },
 ] as const;
 
@@ -26,4 +33,5 @@ export const leftSidebarTools: SidebarItem[] = [
     label: 'Terminal',
     content: Terminal,
   },
+  { id: 'historic', icon: ClockIcon, label: 'Historic', content: History },
 ] as const;
