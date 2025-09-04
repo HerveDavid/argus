@@ -1,9 +1,7 @@
-import { rightSidebarPanels } from '@/config/layouts/game-master';
-
 import { useRightSidebarStore } from '../../stores/state-view.store';
 
 export const RightIconPanels = () => {
-  const { activeItem, setActiveItem, isOpen, openPanel, closePanel } =
+  const { panels, activeItem, setActiveItem, isOpen, openPanel, closePanel } =
     useRightSidebarStore();
 
   const handleIconClick = (itemId: string) => {
@@ -12,10 +10,10 @@ export const RightIconPanels = () => {
   };
 
   return (
-    <div className='space-y-3'>
-      {rightSidebarPanels.map((item) => {
+    <div className="space-y-3">
+      {panels.map((item) => {
         const Icon = item.icon;
-        const isActive = activeItem.id === item.id;
+        const isActive = activeItem?.id === item.id;
         const handleClick = isOpen
           ? () => (isActive ? closePanel() : handleIconClick(item.id))
           : () => handleIconClick(item.id);

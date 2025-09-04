@@ -1,9 +1,7 @@
-import { leftSidebarTools } from '@/config/layouts/game-master';
-
 import { useLeftToolsStore } from '../../stores/state-view.store';
 
 export const LeftIconTools = () => {
-  const { activeItem, setActiveItem, isOpen, openPanel, closePanel } =
+  const { panels, activeItem, setActiveItem, isOpen, openPanel, closePanel } =
     useLeftToolsStore();
 
   const handleIconPanelClick = (itemId: string) => {
@@ -13,9 +11,9 @@ export const LeftIconTools = () => {
 
   return (
     <div className="space-y-3">
-      {leftSidebarTools.map((item) => {
+      {panels.map((item) => {
         const Icon = item.icon;
-        const isActive = activeItem.id === item.id;
+        const isActive = activeItem?.id === item.id;
         const handleClick = isOpen
           ? () => (isActive ? closePanel() : handleIconPanelClick(item.id))
           : () => handleIconPanelClick(item.id);

@@ -1,5 +1,4 @@
 import React, { createContext } from 'react';
-import { useEquipmentControls } from '../hooks/use-equipment-controls';
 
 type ElementControlsType = {};
 

@@ -19,7 +19,12 @@ import {
 } from '@/components/ui/menubar';
 
 import { useMode, useModeError } from '@/hooks/use-mode';
-import { useLeftSidebarStore } from '../stores/state-view.store';
+import {
+  ModeType,
+  useLeftSidebarStore,
+  useLeftToolsStore,
+  useRightSidebarStore,
+} from '../stores/state-view.store';
 
 interface SettingsMenuProps {
   headerRef: React.RefObject<HTMLDivElement>;
@@ -40,8 +45,10 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
 
   const { error, hasError, retryModeChange } = useModeError();
 
-  const { panels, activeItem, switchLayout } = useLeftSidebarStore();
-  
+  const leftSidebar = useLeftSidebarStore();
+  const leftTools = useLeftToolsStore();
+  const rightSidebar = useRightSidebarStore();
+  const rightTools = useRightSidebarStore();
 
   useEffect(() => {
     const initWindow = async () => {
@@ -61,8 +68,16 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
     }
   };
 
+  const switchMode = async (mode: ModeType) => {
+    await leftSidebar.loadPanelsForMode(mode);
+    await leftTools.loadPanelsForMode(mode);
+
+    await rightSidebar.loadPanelsForMode(mode);
+    await rightTools.loadPanelsForMode(mode);
+  };
+
   // Handler pour le changement de mode avec gestion d'erreur
-  const handleModeChange = (value: string) => {
+  const handleModeChange = async (value: string) => {
     if (isTransitioning) {
       return;
     }
@@ -71,13 +86,13 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
       case 'game-master':
         if (currentMode !== 'GameMaster') {
           switchToGameMaster();
-          switchLayout('game-master')
+          await switchMode('GameMaster');
         }
         break;
       case 'scada':
         if (currentMode !== 'Scada') {
           switchToScada();
-          switchLayout('scada')
+          await switchMode('Scada');
         }
         break;
       case 'kpi':

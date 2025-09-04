@@ -6,13 +6,18 @@ import { useLeftToolsStore } from '../../stores/state-view.store';
 
 export const LeftTools = () => {
   const { activeItem, closePanel } = useLeftToolsStore();
+
+  if (!activeItem) {
+    return null;
+  }
+
   const ContentComponent = activeItem.content;
 
   return (
     <div className="flex flex-col bg-sidebar h-full">
       <div className="flex bg-background border-y justify-between">
         <div className="font-medium text-xs uppercase tracking-wide text-sidebar-foreground ml-2">
-          {activeItem.label}
+          {activeItem?.label}
         </div>
 
         <Button

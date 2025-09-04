@@ -23,6 +23,7 @@ import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 
 import { RegistryProvider } from '@effect-rx/rx-react';
 import { InitProvider } from './providers/init.provider';
+import { ModeClient } from '@/services/common/mode-client';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -56,6 +57,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           ScadaClient.Default,
           TaskClient.Default,
           FeederClient.Default,
+          ModeClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),
         ).pipe(
           Layer.provide(Logger.pretty),

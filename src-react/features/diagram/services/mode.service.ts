@@ -39,12 +39,10 @@ const getOutputsEffect = (metadata: SldMetadata) =>
 
     switch (currentMode) {
       case 'GameMaster': {
-        console.log('GameMaster');
         const outputs = yield* gameMasterClient.getGameMasterOutputs(metadata);
         return { mode: 'GameMaster' as const, outputs } as OutputResult;
       }
       case 'Scada': {
-        console.log('Scada');
         const outputs = yield* scadaClient.getScadaOutputs(metadata);
         return { mode: 'Scada' as const, outputs } as OutputResult;
       }

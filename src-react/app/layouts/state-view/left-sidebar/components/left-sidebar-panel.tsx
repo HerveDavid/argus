@@ -5,7 +5,22 @@ import { Button } from '@/components/ui/button';
 import { useLeftSidebarStore } from '../../stores/state-view.store';
 
 export const LeftSidebarPanel = () => {
-  const { activeItem, closePanel } = useLeftSidebarStore();
+  const { activeItem, closePanel, currentMode } = useLeftSidebarStore();
+
+  if (!currentMode) {
+    return (
+      <div className="h-full bg-sidebar border-r flex items-center justify-center">
+        <div className="text-center text-sidebar-foreground/60">
+          <p className="text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeItem) {
+    return null;
+  }
+
   const ContentComponent = activeItem.content;
 
   return (

@@ -13,7 +13,7 @@ export const LeftIconPanels = () => {
     <div className="space-y-3">
       {panels.map((item) => {
         const Icon = item.icon;
-        const isActive = activeItem.id === item.id;
+        const isActive = activeItem?.id === item.id;
         const handleClick = isOpen
           ? () => (isActive ? closePanel() : handleIconPanelClick(item.id))
           : () => handleIconPanelClick(item.id);
