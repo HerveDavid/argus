@@ -9,20 +9,20 @@ import { EquipmentExplorer } from '@/features/equipment-explorer';
 import Terminal from '@/features/terminal';
 import { SidebarItem } from '@/types/sidebar-item.ts';
 import { History } from '@/features/historic';
-import { TreeFolder } from '@/features/editor';
+import { DslExplorer } from '@/features/dsl-explorer';
 
 export const leftSidebarPanels: SidebarItem[] = [
   {
     id: 'equipment-explorer',
     icon: Folder,
-    label: 'Explorer',
+    label: 'Equipment',
     content: EquipmentExplorer,
   },
   {
-    id: 'scenario-folder',
+    id: 'scenario-explorer',
     icon: Clapperboard,
     label: 'Scenario',
-    content: TreeFolder,
+    content: DslExplorer,
   },
 ] as const;
 

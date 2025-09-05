@@ -10,7 +10,6 @@ import {
   Loader2,
 } from 'lucide-react';
 
-import { CardAction, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -59,23 +58,23 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
   return (
     <TooltipProvider>
-      <header className="flex items-center justify-between px-2 border-b bg-background">
+      <header className="bg-background flex items-center justify-between border-b px-2">
         {/* Zone gauche - Titre */}
-        <div className="flex items-center min-w-0">
-          <h1 className="text-sm font-medium truncate">
+        <div className="flex min-w-0 items-center">
+          <h1 className="truncate text-sm font-medium">
             Sequence 1
             {isModified && (
-              <span className="ml-1 text-muted-foreground">*</span>
+              <span className="text-muted-foreground ml-1">*</span>
             )}
           </h1>
           <EllipsisVertical
             size={16}
-            className="ml-2 text-muted-foreground flex-shrink-0"
+            className="text-muted-foreground ml-2 flex-shrink-0"
           />
         </div>
 
         {/* Zone droite - Actions */}
-        <div className="flex items-center gap-1 ml-4">
+        <div className="ml-4 flex items-center gap-1">
           {/* Undo/Redo */}
           <div className="flex items-center gap-1">
             <Tooltip>
@@ -188,7 +187,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClearDiagram}
-                  className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                  className="text-destructive hover:text-destructive h-8 w-8 p-0"
                 >
                   <Trash2 size={16} />
                 </Button>

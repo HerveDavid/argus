@@ -28,19 +28,19 @@ interface EditorFooterProps {
 }
 
 export const EditorFooter: React.FC<EditorFooterProps> = ({
-                                                            onSave,
-                                                            onValidate,
-                                                            onPreview,
-                                                            onSettings,
-                                                            isModified,
-                                                            isSaving,
-                                                            isValidating = false,
-                                                            validationStatus = null,
-                                                            validationMessage = '',
-                                                            nodeCount = 0,
-                                                            linkCount = 0,
-                                                            selectedCount = 0,
-                                                          }) => {
+  onSave,
+  onValidate,
+  onPreview,
+  onSettings,
+  isModified,
+  isSaving,
+  isValidating = false,
+  validationStatus = null,
+  validationMessage = '',
+  nodeCount = 0,
+  linkCount = 0,
+  selectedCount = 0,
+}) => {
   const getValidationIcon = () => {
     if (isValidating) return <Loader2 size={14} className="animate-spin" />;
 
@@ -86,17 +86,17 @@ export const EditorFooter: React.FC<EditorFooterProps> = ({
   };
 
   return (
-    <footer className="w-full flex items-center justify-between px-2 border-t bg-background">
+    <footer className="bg-background flex w-full items-center justify-between border-t px-2">
       {/* Left zone - Validation status */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex min-w-0 items-center gap-2">
         {getValidationIcon()}
-        <span className={`text-xs truncate ${getValidationTextColor()}`}>
+        <span className={`truncate text-xs ${getValidationTextColor()}`}>
           {getValidationText()}
         </span>
       </div>
 
       {/* Right zone - Actions */}
-      <div className="flex items-center gap-2 ml-4">
+      <div className="ml-4 flex items-center gap-2">
         {/* Secondary actions */}
         <div className="flex items-center gap-1">
           <Button
@@ -111,12 +111,12 @@ export const EditorFooter: React.FC<EditorFooterProps> = ({
             ) : (
               <CheckCircle size={16} />
             )}
-            <span className="ml-1 text-xs hidden sm:inline">Validate</span>
+            <span className="ml-1 hidden text-xs sm:inline">Validate</span>
           </Button>
         </div>
 
         {/* Separator hidden on mobile */}
-        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        <Separator orientation="vertical" className="hidden h-6 sm:block" />
 
         {/* Primary action - Save */}
         <Button

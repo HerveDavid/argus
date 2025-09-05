@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button';
+import { Play } from 'lucide-react';
 import React from 'react';
 
 interface ExecuteButtonProps {
@@ -28,21 +30,14 @@ export const ExecuteButton: React.FC<ExecuteButtonProps> = ({
       : lineContent;
 
   return (
-    <button
-      onClick={handleClick}
-      title={`Execute: ${truncatedContent}`}
-      style={{
-        background: '#4CAF50',
-        color: 'white',
-        border: 'none',
-        borderRadius: '3px',
-        padding: '2px 6px',
-        fontSize: '10px',
-        cursor: 'pointer',
-        marginLeft: '4px',
-      }}
-    >
-      ▶
-    </button>
+    <div className="mx-2">
+      <Button
+        size="xs"
+        onClick={handleClick}
+        title={`Execute: ${truncatedContent}`}
+      >
+        <Play className='size-3'/>
+      </Button>
+    </div>
   );
 };
