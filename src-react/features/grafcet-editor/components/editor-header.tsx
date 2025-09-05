@@ -187,7 +187,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClearDiagram}
-                  className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                  className="hover:text-destructive h-8 w-8 p-0"
                 >
                   <Trash2 size={16} />
                 </Button>

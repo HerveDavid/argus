@@ -32,6 +32,7 @@ export const ExecuteButton: React.FC<ExecuteButtonProps> = ({
   return (
     <div className="mx-2">
       <Button
+        className='rounded-sm'
         size="xs"
         onClick={handleClick}
         title={`Execute: ${truncatedContent}`}

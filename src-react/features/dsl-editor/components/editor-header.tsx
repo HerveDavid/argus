@@ -12,7 +12,7 @@ import {
 export const Header = () => {
   return (
     <TooltipProvider>
-      <header className="bg-sidecar flex items-center justify-between border-b px-2">
+      <header className="bg-sidecar flex items-center justify-between border-b px-1">
         <div className="flex min-w-0 items-center">
           <EllipsisVertical
             size={16}
