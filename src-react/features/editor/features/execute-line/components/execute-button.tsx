@@ -1,6 +1,5 @@
 import React from 'react';
 
-// Composant React pour le bouton d'exécution
 interface ExecuteButtonProps {
   lineNumber: number;
   lineContent: string;
@@ -12,11 +11,6 @@ export const ExecuteButton: React.FC<ExecuteButtonProps> = ({
   lineContent,
   onExecute,
 }) => {
-  const truncatedContent =
-    lineContent.length > 50
-      ? lineContent.substring(0, 50) + '...'
-      : lineContent;
-
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -28,10 +22,14 @@ export const ExecuteButton: React.FC<ExecuteButtonProps> = ({
     }
   };
 
+  const truncatedContent =
+    lineContent.length > 50
+      ? lineContent.substring(0, 50) + '...'
+      : lineContent;
+
   return (
     <button
       onClick={handleClick}
-      className="execute-btn"
       title={`Execute: ${truncatedContent}`}
       style={{
         background: '#4CAF50',

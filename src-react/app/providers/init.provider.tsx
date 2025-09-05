@@ -172,7 +172,7 @@ export const InitProvider: React.FC<{ children: React.ReactNode }> = ({
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-lg">Loading argus...</p>
           <p className="mt-2 text-sm text-gray-600">
-            Waiting for backend API...
+            Waiting something
           </p>
         </div>
       </div>
