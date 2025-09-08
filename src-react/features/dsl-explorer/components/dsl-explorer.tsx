@@ -1,100 +1,247 @@
 import React, { useState } from 'react';
 import {
-  ChevronRight,
   ChevronDown,
-  File,
+  ChevronRight,
   Folder,
-  Plus,
-  FolderPlus,
-  FileText,
   FolderOpen,
+  File,
+  FolderPlus,
+  Plus,
   Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useCentralPanelStore } from '@/stores/central-panel.store';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { readDir } from '@tauri-apps/plugin-fs';
-import { FileNode } from '../types/file-node.type';
+import { useCentralPanelStore } from '@/stores/central-panel.store';
 
-export const DslExplorer = () => {
-  const [files, setFiles] = useState<FileNode[]>([
-    {
-      id: '1',
-      name: 'src',
-      type: 'folder',
-      children: [
-        {
-          id: '2',
-          name: 'components',
-          type: 'folder',
-          parent: '1',
-          children: [
-            { id: '3', name: 'Button.tsx', type: 'file', parent: '2' },
-            { id: '4', name: 'Input.tsx', type: 'file', parent: '2' },
-          ],
-        },
-        { id: '5', name: 'App.tsx', type: 'file', parent: '1' },
-      ],
-    },
-    { id: '6', name: 'package.json', type: 'file' },
-  ]);
+interface FileNode {
+  id: string;
+  name: string;
+  type: 'folder' | 'file';
+  path: string;
+  parent: string;
+  children: FileNode[];
+}
 
+interface TreeNodeProps {
+  node: FileNode;
+  level: number;
+  expandedFolders: Set<string>;
+  onToggleFolder: (id: string) => void;
+  onFileClick: (node: FileNode) => void;
+  onAddNode: (parentId: string, type: 'file' | 'folder') => void;
+  editingNode: string | null;
+  editingValue: string;
+  onEdit: (nodeId: string, value: string) => void;
+  onEditComplete: () => void;
+  onEditCancel: () => void;
+}
+
+const TreeNode: React.FC<TreeNodeProps> = ({
+  node,
+  level,
+  expandedFolders,
+  onToggleFolder,
+  onFileClick,
+  onAddNode,
+  editingNode,
+  editingValue,
+  onEdit,
+  onEditComplete,
+  onEditCancel,
+}) => {
+  const isExpanded = expandedFolders.has(node.id);
+  const hasChildren = node.children.length > 0;
+  const isEditing = editingNode === node.id;
+
+  const handleClick = () => {
+    if (node.type === 'folder') {
+      onToggleFolder(node.id);
+    } else {
+      onFileClick(node);
+    }
+  };
+
+  const handleDoubleClick = () => {
+    onEdit(node.id, node.name);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onEditComplete();
+    }
+    if (e.key === 'Escape') {
+      onEditCancel();
+    }
+  };
+
+  const paddingLeft = level * 16 + 8;
+
+  return (
+    <div className="select-none">
+      <div
+        className="hover:bg-accent/50 group flex items-center gap-1 rounded-sm px-2 py-1"
+        style={{ paddingLeft: `${paddingLeft}px` }}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        title={node.path}
+      >
+        {node.type === 'folder' ? (
+          hasChildren ? (
+            isExpanded ? (
+              <ChevronDown className="text-muted-foreground h-4 w-4" />
+            ) : (
+              <ChevronRight className="text-muted-foreground h-4 w-4" />
+            )
+          ) : (
+            <ChevronRight className="text-muted-foreground h-4 w-4 opacity-50" />
+          )
+        ) : (
+          <div className="w-4" />
+        )}
+
+        {node.type === 'folder' ? (
+          isExpanded ? (
+            <FolderOpen className="h-4 w-4 text-blue-400" />
+          ) : (
+            <Folder className="h-4 w-4 text-blue-400" />
+          )
+        ) : (
+          <File className="text-muted-foreground h-4 w-4" />
+        )}
+
+        {isEditing ? (
+          <Input
+            value={editingValue}
+            onChange={(e) => onEdit(node.id, e.target.value)}
+            onBlur={onEditComplete}
+            onKeyDown={handleKeyPress}
+            className="ml-1 h-6 flex-1 px-1 py-0 text-sm"
+            autoFocus
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <span className="ml-1 flex-1 cursor-pointer truncate text-sm">
+            {node.name}
+          </span>
+        )}
+
+        {node.type === 'folder' && (
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddNode(node.id, 'file');
+              }}
+              title="Add file"
+              className="h-6 w-6 p-0"
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddNode(node.id, 'folder');
+              }}
+              title="Add folder"
+              className="h-6 w-6 p-0"
+            >
+              <FolderPlus className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {node.type === 'folder' && hasChildren && isExpanded && (
+        <div>
+          {node.children.map((child) => (
+            <TreeNode
+              key={child.id}
+              node={child}
+              level={level + 1}
+              expandedFolders={expandedFolders}
+              onToggleFolder={onToggleFolder}
+              onFileClick={onFileClick}
+              onAddNode={onAddNode}
+              editingNode={editingNode}
+              editingValue={editingValue}
+              onEdit={onEdit}
+              onEditComplete={onEditComplete}
+              onEditCancel={onEditCancel}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const DslExplorer: React.FC = () => {
+  const [files, setFiles] = useState<FileNode[]>([]);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set(['1', '2']),
+    new Set(),
   );
   const [editingNode, setEditingNode] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
-  const [currentPath, setCurrentPath] = useState('/home/twin-eu/');
+  const [currentPath, setCurrentPath] = useState('No folder selected');
   const [isLoading, setIsLoading] = useState(false);
-
   const { addPanel } = useCentralPanelStore();
 
-  const handleFileClick = (filepath: string, filename: string) => {
-    addPanel({
-      id: filepath,
-      tabComponent: 'editor',
-      component: 'editor',
-      params: {
-        file: {
-          filepath: filepath,
-          filename: filename,
-        },
-      },
-    });
-  };
-
   // Fonction pour convertir les entrées de fichiers Tauri en FileNode
-  const convertToFileNode = (entry: any, parentId?: string): FileNode => {
+  const convertToFileNode = (entry: any, parentPath = ''): FileNode => {
     const isDirectory = entry.isDirectory || entry.children !== undefined;
+    const fullPath = entry.path || `${parentPath}/${entry.name || 'unknown'}`;
+
+    // Validation et valeurs par défaut
+    const name = entry.name || 'Unknown';
+
+    console.log('Converting entry:', { entry, fullPath, name, isDirectory });
+
     return {
-      id: `${entry.path}-${Date.now()}-${Math.random()}`,
-      name: entry.name,
+      id: fullPath, // Utilise le path comme ID
+      name: name,
       type: isDirectory ? 'folder' : 'file',
-      path: entry.path,
-      parent: parentId,
-      children: isDirectory ? [] : undefined,
+      path: fullPath,
+      parent: parentPath,
+      children: [], // Toujours un tableau, même vide
     };
   };
 
-  // Fonction pour lire récursivement un dossier
+  // Fonction pour lire récursivement un dossier avec l'API Tauri
   const readDirectory = async (dirPath: string): Promise<FileNode[]> => {
     try {
+      console.log('Reading directory:', dirPath);
       const entries = await readDir(dirPath);
+      console.log('Raw entries from readDir:', entries);
+
       const nodes: FileNode[] = [];
 
       for (const entry of entries) {
-        const node = convertToFileNode(entry);
+        console.log('Processing entry:', entry);
+
+        if (!entry.name) {
+          console.warn('Entry without name, skipping:', entry);
+          continue;
+        }
+
+        const node = convertToFileNode(entry, dirPath);
 
         // Si c'est un dossier, on peut aussi lire son contenu (optionnel)
         if (entry.isDirectory) {
           try {
-            const children = await readDirectory(entry.path);
+            const children = await readDirectory(
+              entry.path || `${dirPath}/${entry.name}`,
+            );
             node.children = children;
           } catch (error) {
             // Erreur de lecture du sous-dossier (permissions, etc.)
             console.warn(`Cannot read directory ${entry.path}:`, error);
-            node.children = [];
+            node.children = []; // Tableau vide au lieu d'undefined
           }
         }
 
@@ -114,7 +261,7 @@ export const DslExplorer = () => {
     }
   };
 
-  // Fonction pour ouvrir un dossier
+  // Fonction pour ouvrir un dossier avec l'API Tauri
   const openFolder = async () => {
     try {
       setIsLoading(true);
@@ -132,31 +279,35 @@ export const DslExplorer = () => {
           folderPath.split('\\').pop() ||
           'Unknown';
 
+        console.log('Opening folder:', { folderPath, folderName });
+
         // Lire le contenu du dossier
         const children = await readDirectory(folderPath);
 
         const newNode: FileNode = {
-          id: `folder-${Date.now()}`,
+          id: folderPath, // Utilise le path comme ID
           name: folderName,
           type: 'folder',
           path: folderPath,
+          parent: '', // Pas de parent pour le dossier racine
           children: children,
         };
 
-        // Ajouter le dossier à la racine
-        setFiles((prev) => [...prev, newNode]);
-        setExpandedFolders((prev) => new Set(prev).add(newNode.id));
+        console.log('Created root node:', newNode);
+
+        // Remplacer tous les fichiers par le nouveau dossier ouvert
+        setFiles([newNode]);
+        setExpandedFolders(new Set([newNode.id]));
         setCurrentPath(folderPath);
       }
     } catch (error) {
       console.error('Error opening folder:', error);
-      // Vous pourriez ajouter une notification d'erreur ici
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fonction pour ouvrir des fichiers
+  // Fonction pour ouvrir des fichiers avec l'API Tauri
   const openFiles = async () => {
     try {
       setIsLoading(true);
@@ -182,11 +333,14 @@ export const DslExplorer = () => {
             filePath.split('/').pop() ||
             filePath.split('\\').pop() ||
             'Unknown';
+
           return {
-            id: `file-${Date.now()}-${Math.random()}`,
+            id: filePath, // Utilise le path comme ID
             name: fileName,
             type: 'file',
             path: filePath,
+            parent: '', // Pas de parent pour les fichiers individuels
+            children: [], // Toujours un tableau vide pour les fichiers
           };
         });
 
@@ -201,7 +355,10 @@ export const DslExplorer = () => {
 
   // Fonction pour charger paresseusement le contenu d'un dossier
   const loadFolderContents = async (node: FileNode) => {
-    if (!node.path || node.children === undefined) return;
+    if (!node.path) {
+      console.warn('Node without path, cannot load contents:', node);
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -215,55 +372,15 @@ export const DslExplorer = () => {
     }
   };
 
-  const toggleFolder = async (folderId: string) => {
-    const node = findNodeById(files, folderId);
-
-    setExpandedFolders((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(folderId)) {
-        newSet.delete(folderId);
-      } else {
-        newSet.add(folderId);
-
-        // Charger le contenu si le dossier n'a pas encore été chargé
-        if (node && node.children && node.children.length === 0 && node.path) {
-          loadFolderContents(node);
-        }
-      }
-      return newSet;
-    });
-  };
-
   const findNodeById = (nodes: FileNode[], id: string): FileNode | null => {
     for (const node of nodes) {
       if (node.id === id) return node;
-      if (node.children) {
+      if (node.children.length > 0) {
         const found = findNodeById(node.children, id);
         if (found) return found;
       }
     }
     return null;
-  };
-
-  const addNode = (parentId: string | null, type: 'file' | 'folder') => {
-    const newId = Date.now().toString();
-    const newNode: FileNode = {
-      id: newId,
-      name: type === 'file' ? 'new-file.txt' : 'new-folder',
-      type,
-      parent: parentId || undefined,
-      children: type === 'folder' ? [] : undefined,
-    };
-
-    if (parentId) {
-      setFiles((prev) => updateNodeChildren(prev, parentId, newNode));
-      setExpandedFolders((prev) => new Set(prev).add(parentId));
-    } else {
-      setFiles((prev) => [...prev, newNode]);
-    }
-
-    setEditingNode(newId);
-    setEditingValue(newNode.name);
   };
 
   const updateNodeChildren = (
@@ -272,10 +389,10 @@ export const DslExplorer = () => {
     ...newNodes: FileNode[]
   ): FileNode[] => {
     return nodes.map((node) => {
-      if (node.id === parentId && node.children) {
+      if (node.id === parentId) {
         return { ...node, children: [...node.children, ...newNodes] };
       }
-      if (node.children) {
+      if (node.children.length > 0) {
         return {
           ...node,
           children: updateNodeChildren(node.children, parentId, ...newNodes),
@@ -294,7 +411,7 @@ export const DslExplorer = () => {
       if (node.id === nodeId) {
         return { ...node, name: newName };
       }
-      if (node.children) {
+      if (node.children.length > 0) {
         return {
           ...node,
           children: updateNodeName(node.children, nodeId, newName),
@@ -302,6 +419,91 @@ export const DslExplorer = () => {
       }
       return node;
     });
+  };
+
+  const addNode = (parentId: string | null, type: 'file' | 'folder') => {
+    const timestamp = Date.now();
+    let parentPath = '';
+
+    if (parentId) {
+      const parentNode = findNodeById(files, parentId);
+      parentPath = parentNode?.path || '';
+    }
+
+    const nodeName = type === 'file' ? 'new-file.txt' : 'new-folder';
+    const nodePath = parentPath ? `${parentPath}/${nodeName}` : nodeName;
+
+    const newNode: FileNode = {
+      id: nodePath, // Utilise le path comme ID
+      name: nodeName,
+      type,
+      path: nodePath,
+      parent: parentPath,
+      children: [], // Toujours un tableau vide
+    };
+
+    console.log('Adding new node:', newNode);
+
+    if (parentId) {
+      setFiles((prev) => updateNodeChildren(prev, parentId, newNode));
+      setExpandedFolders((prev) => new Set(prev).add(parentId));
+    } else {
+      setFiles((prev) => [...prev, newNode]);
+    }
+
+    setEditingNode(newNode.id);
+    setEditingValue(newNode.name);
+  };
+
+  const toggleFolder = async (folderId: string) => {
+    const node = findNodeById(files, folderId);
+
+    setExpandedFolders((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(folderId)) {
+        newSet.delete(folderId);
+      } else {
+        newSet.add(folderId);
+
+        // Charger le contenu si le dossier n'a pas encore été chargé
+        if (node && node.children.length === 0 && node.path) {
+          loadFolderContents(node);
+        }
+      }
+      return newSet;
+    });
+  };
+
+  const handleFileClick = (node: FileNode) => {
+    console.log('File clicked - node:', node);
+    console.log('Path:', node.path, 'Name:', node.name);
+
+    // Maintenant tous les champs sont garantis d'exister
+    if (node.path && node.name) {
+      console.log('Opening file in editor:', {
+        path: node.path,
+        name: node.name,
+      });
+
+      addPanel({
+        id: node.path,
+        tabComponent: 'editor',
+        component: 'editor',
+        params: {
+          file: {
+            filepath: node.path,
+            filename: node.name,
+          },
+        },
+      });
+    } else {
+      console.error('Node missing required fields:', node);
+    }
+  };
+
+  const handleEdit = (nodeId: string, value: string) => {
+    setEditingNode(nodeId);
+    setEditingValue(value);
   };
 
   const handleEditComplete = () => {
@@ -314,140 +516,17 @@ export const DslExplorer = () => {
     setEditingValue('');
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleEditComplete();
-    }
-    if (e.key === 'Escape') {
-      setEditingNode(null);
-      setEditingValue('');
-    }
-  };
-
-  // NOUVEAU : Gérer le simple clic pour ouvrir le fichier
-  const handleSingleClick = (node: FileNode) => {
-    if (node.type === 'file') {
-      // Pour les fichiers chargés depuis le système de fichiers
-      if (node.path) {
-        handleFileClick(node.path, node.name);
-      } else {
-        // Pour les fichiers créés manuellement (fallback)
-        handleFileClick(crypto.randomUUID(), node.name);
-      }
-    }
-  };
-
-  // NOUVEAU : Gérer le double clic pour éditer le nom
-  const handleDoubleClick = (node: FileNode) => {
-    setEditingNode(node.id);
-    setEditingValue(node.name);
-  };
-
-  const TreeNode = ({
-    node,
-    level = 0,
-  }: {
-    node: FileNode;
-    level?: number;
-  }) => {
-    const isExpanded = expandedFolders.has(node.id);
-    const isEditing = editingNode === node.id;
-
-    return (
-      <div className="select-none">
-        <div
-          className="hover:bg-accent/50 group flex items-center gap-1 rounded-sm px-2 py-1"
-          style={{ paddingLeft: `${level * 16 + 8}px` }}
-          onClick={() => handleSingleClick(node)} // Simple clic : ouvre le fichier
-          onDoubleClick={() => handleDoubleClick(node)} // Double clic : édite le nom
-        >
-          {node.type === 'folder' && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleFolder(node.id);
-              }}
-              className="hover:bg-accent rounded-sm p-0.5"
-            >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronRight className="h-4 w-4" />
-              )}
-            </button>
-          )}
-
-          {node.type === 'folder' ? (
-            <Folder className="text-muted-foreground h-4 w-4" />
-          ) : (
-            <FileText className="text-muted-foreground h-4 w-4" />
-          )}
-
-          {isEditing ? (
-            <Input
-              value={editingValue}
-              onChange={(e) => setEditingValue(e.target.value)}
-              onBlur={handleEditComplete}
-              onKeyDown={handleKeyPress}
-              className="ml-1 h-6 flex-1 px-1 py-0 text-sm"
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <span
-              className="ml-1 flex-1 cursor-pointer text-sm"
-              title={node.path}
-            >
-              {node.name}
-            </span>
-          )}
-
-          {node.type === 'folder' && (
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addNode(node.id, 'file');
-                }}
-                title="Add file"
-              >
-                <Plus className="h-3 w-3" />
-                <File className="h-3 w-3" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addNode(node.id, 'folder');
-                }}
-                title="Add folder"
-              >
-                <FolderPlus className="h-3 w-3" />
-              </Button>
-            </div>
-          )}
-        </div>
-
-        {node.type === 'folder' && node.children && isExpanded && (
-          <div>
-            {node.children.map((child) => (
-              <TreeNode key={child.id} node={child} level={level + 1} />
-            ))}
-          </div>
-        )}
-      </div>
-    );
+  const handleEditCancel = () => {
+    setEditingNode(null);
+    setEditingValue('');
   };
 
   return (
     <div className="w-full max-w-md">
       <div className="">
         <div className="flex items-center justify-between p-3">
-          <h3 className="text-sm font-semibold" title={currentPath}>
-            {currentPath}
+          <h3 className="truncate text-sm font-semibold" title={currentPath}>
+            Explorer
           </h3>
           <div className="flex gap-1">
             <Button
@@ -456,7 +535,6 @@ export const DslExplorer = () => {
               onClick={openFolder}
               title="Ouvrir un dossier"
               disabled={isLoading}
-              type="button"
             >
               <FolderOpen className="h-3 w-3" />
             </Button>
@@ -466,7 +544,6 @@ export const DslExplorer = () => {
               onClick={openFiles}
               title="Ouvrir des fichiers"
               disabled={isLoading}
-              type="button"
             >
               <Upload className="h-3 w-3" />
             </Button>
@@ -476,7 +553,6 @@ export const DslExplorer = () => {
               onClick={() => addNode(null, 'file')}
               title="New file"
               disabled={isLoading}
-              type="button"
             >
               <Plus className="mr-1 h-3 w-3" />
               <File className="h-3 w-3" />
@@ -487,10 +563,19 @@ export const DslExplorer = () => {
               onClick={() => addNode(null, 'folder')}
               title="New folder"
               disabled={isLoading}
-              type="button"
             >
               <FolderPlus className="h-3 w-3" />
             </Button>
+          </div>
+        </div>
+
+        {/* Affichage du chemin actuel */}
+        <div className="px-3 pb-2">
+          <div
+            className="text-muted-foreground truncate text-xs"
+            title={currentPath}
+          >
+            {currentPath}
           </div>
         </div>
 
@@ -502,12 +587,25 @@ export const DslExplorer = () => {
           )}
 
           {files.map((file: FileNode) => (
-            <TreeNode key={file.id} node={file} />
+            <TreeNode
+              key={file.id}
+              node={file}
+              level={0}
+              expandedFolders={expandedFolders}
+              onToggleFolder={toggleFolder}
+              onFileClick={handleFileClick}
+              onAddNode={addNode}
+              editingNode={editingNode}
+              editingValue={editingValue}
+              onEdit={handleEdit}
+              onEditComplete={handleEditComplete}
+              onEditCancel={handleEditCancel}
+            />
           ))}
 
           {files.length === 0 && !isLoading && (
             <div className="text-muted-foreground py-8 text-center text-sm">
-              Aucun fichier. Utilisez les boutons + ou 📁 pour commencer.
+              Aucun fichier. Cliquez sur 📁 pour ouvrir un dossier.
             </div>
           )}
         </div>
