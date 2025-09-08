@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export const Header = () => {
+export const Header = ({ filepath }: { filepath: String }) => {
   return (
     <TooltipProvider>
       <header className="bg-sidecar flex items-center justify-between border-b px-1">
@@ -18,7 +18,9 @@ export const Header = () => {
             size={16}
             className="text-muted-foreground mr-2 flex-shrink-0"
           />
-          <h1 className="truncate text-xs text-muted-foreground font-medium">TwinScript</h1>
+          <h1 className="text-muted-foreground truncate text-xs font-medium">
+            {filepath}
+          </h1>
         </div>
 
         <div className="ml-4 flex items-center gap-1">

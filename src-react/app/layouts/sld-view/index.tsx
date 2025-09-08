@@ -71,9 +71,6 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
           <RightSidebar id={id} />
         </div>
       )}
-      <footer className="bg-background flex h-5 items-center border-t px-2">
-        <p className='text-xs text-muted-foreground'>powysbl v1.11.2</p>
-      </footer>
     </div>
   );
 };

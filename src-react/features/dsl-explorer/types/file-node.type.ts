@@ -1,8 +1,8 @@
-export interface FileNode {
+interface FileNode {
   id: string;
   name: string;
-  type: 'file' | 'folder';
-  children?: FileNode[];
-  parent?: string;
-  path?: string;
+  type: 'folder' | 'file';
+  path: string;
+  parent: string;
+  children: FileNode[];
 }

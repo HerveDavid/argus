@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   setExpandedSubstations,
 }) => {
   return (
-    <div className="flex-shrink-0 space-y-4 p-4">
+    <div className="flex-shrink-0 space-y-4 p-4 bg-background border-b">
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input

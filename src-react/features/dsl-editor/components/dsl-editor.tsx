@@ -33,7 +33,7 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
 
   return (
     <div className="flex h-full flex-col">
-      <Header />
+      <Header filepath={file.filepath} />
       <div className="flex-1 overflow-hidden">
         <CodeMirror
           className="h-full border-t"
@@ -58,7 +58,6 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
           }}
         />
       </div>
-      <Footer filepath={file.filepath} />
     </div>
   );
 };

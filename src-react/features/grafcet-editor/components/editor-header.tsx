@@ -56,8 +56,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
   return (
     <TooltipProvider>
-      <header className="bg-sidecar flex items-center justify-between border-b px-2">
-        {/* Zone gauche - Titre */}
+      <header className="bg-background flex items-center justify-between border-b px-2">
         <div className="flex min-w-0 items-center">
           <h1 className="truncate text-sm font-medium">
             Sequence 1
@@ -71,9 +70,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
           />
         </div>
 
-        {/* Zone droite - Actions */}
         <div className="ml-4 flex items-center gap-1">
-          {/* Undo/Redo */}
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -88,7 +85,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Annuler (Ctrl+Z)</p>
+                <p>Undo (Ctrl+Z)</p>
               </TooltipContent>
             </Tooltip>
 
@@ -105,15 +102,13 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Rétablir (Ctrl+Y)</p>
+                <p>Redo (Ctrl+Y)</p>
               </TooltipContent>
             </Tooltip>
           </div>
 
-          {/* Séparateur caché sur mobile */}
           <Separator orientation="vertical" className="hidden sm:block" />
 
-          {/* Import/Export */}
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -132,7 +127,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Importer un fichier JSON</p>
+                <p>Import JSON file</p>
               </TooltipContent>
             </Tooltip>
 
@@ -153,15 +148,13 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Exporter en JSON</p>
+                <p>Export to JSON</p>
               </TooltipContent>
             </Tooltip>
           </div>
 
-          {/* Séparateur caché sur mobile */}
           <Separator orientation="vertical" className="hidden sm:block" />
 
-          {/* Reset/Clear */}
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -175,7 +168,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Réinitialiser avec l'exemple</p>
+                <p>Reset to example</p>
               </TooltipContent>
             </Tooltip>
 
@@ -191,13 +184,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Effacer le diagramme</p>
+                <p>Clear diagram</p>
               </TooltipContent>
             </Tooltip>
           </div>
         </div>
 
-        {/* Input file caché */}
         <input
           ref={fileInputRef}
           type="file"
