@@ -36,7 +36,6 @@ interface EditorHeaderProps {
 }
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
-  onSave,
   onExportJSON,
   onImport,
   onResetToExample,
@@ -46,7 +45,6 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   canUndo,
   canRedo,
   isModified,
-  isSaving,
   isExporting,
   isImporting,
 }) => {
