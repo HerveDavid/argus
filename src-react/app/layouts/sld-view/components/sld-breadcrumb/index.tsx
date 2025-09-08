@@ -73,7 +73,7 @@ export const SldBreadcrumb: React.FC<SldBreadcrumbProps> = ({ id }) => {
   };
 
   return (
-    <Breadcrumb className="mx-2 text-xs">
+    <Breadcrumb className="text-xs">
       <BreadcrumbList>{renderBreadcrumbContent()}</BreadcrumbList>
     </Breadcrumb>
   );

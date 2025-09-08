@@ -11,6 +11,7 @@ import { useSelectedItemStore } from '@/stores/window-header.store';
 import { SldBreadcrumb } from './components/sld-breadcrumb';
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
 import { SingleLineDiagram } from '@/features/diagram';
+import { SldTools } from './components/sld-tools';
 
 export interface SldViewProps {
   id: string;
@@ -37,9 +38,9 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
   };
 
   return (
-    <div className="flex flex-col h-full" onClick={handleSldClick}>
-      <header className="border-b bg-sidebar h-5 flex items-center">
-        <SldBreadcrumb id={id} />
+    <div className="flex h-full flex-col" onClick={handleSldClick}>
+      <header className="bg-sidecar flex items-center justify-between border-b px-1">
+        <SldTools id={id} />
       </header>
       {isRightOpen ? (
         <ResizablePanelGroup
@@ -48,8 +49,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
           className="flex flex-1 overflow-hidden"
         >
           <ResizablePanel order={0} className="flex-1 overflow-hidden">
-            <div className="h-full bg-gradient-to-br from-background/10 to-foreground/7">
-              {/* <Sld id={id} /> */}
+            <div className="from-background/10 to-foreground/7 h-full bg-gradient-to-br">
               <SingleLineDiagram elementId={id} />
             </div>
           </ResizablePanel>
@@ -65,13 +65,15 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
         </ResizablePanelGroup>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-hidden bg-gradient-to-br from-background/10 to-foreground/7">
-            {/* <Sld id={id} /> */}
+          <div className="from-background/10 to-foreground/7 flex-1 overflow-hidden bg-gradient-to-br">
             <SingleLineDiagram elementId={id} />
           </div>
           <RightSidebar id={id} />
         </div>
       )}
+      <footer className="bg-background flex h-5 items-center border-t px-2">
+        <p className='text-xs text-muted-foreground'>powysbl v1.11.2</p>
+      </footer>
     </div>
   );
 };
