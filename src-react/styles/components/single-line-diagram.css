@@ -189,6 +189,10 @@
   .sld-frame {
     fill: var(--sld-background-color, transparent) !important;
   }
+  .sld-breaker {
+    stroke: blue !important;
+    fill: #cfcfcf !important;
+  }
   .sld-breaker.sld-fictitious {
     stroke: maroon !important;
   }

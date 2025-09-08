@@ -181,10 +181,10 @@ export const GrafcetEditor = () => {
           />
         </CardHeader>
 
-        <CardContent className="flex-1 overflow-hidden p-2 m-0">
+        <CardContent className="flex-1 overflow-hidden m-0">
           <ReactDiagram
             ref={diagramRef}
-            divClassName="w-full h-full bg-background rounded"
+            divClassName="w-full h-full bg-background"
             initDiagram={initDiagram}
             nodeDataArray={context.diagramData.nodeDataArray}
             linkDataArray={context.diagramData.linkDataArray}

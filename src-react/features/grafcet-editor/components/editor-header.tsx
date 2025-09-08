@@ -56,7 +56,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
 
   return (
     <TooltipProvider>
-      <header className="bg-background flex items-center justify-between border-b px-2">
+      <header className="bg-sidecar flex items-center justify-between border-b px-2">
         {/* Zone gauche - Titre */}
         <div className="flex min-w-0 items-center">
           <h1 className="truncate text-sm font-medium">
