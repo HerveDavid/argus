@@ -1,0 +1,937 @@
+{
+  "components": [
+    {
+      "type": "BUSBAR_SECTION",
+      "size": {
+        "width": 0.0,
+        "height": 0.0
+      },
+      "styleClass": "sld-busbar-section"
+    },
+    {
+      "type": "ARROW_REACTIVE",
+      "size": {
+        "width": 10.0,
+        "height": 10.0
+      },
+      "transformations": {
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "styleClass": "sld-reactive-power"
+    },
+    {
+      "type": "ARROW_ACTIVE",
+      "size": {
+        "width": 10.0,
+        "height": 10.0
+      },
+      "transformations": {
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "styleClass": "sld-active-power"
+    },
+    {
+      "type": "LOAD",
+      "anchorPoints": [
+        {
+          "orientation": "VERTICAL"
+        },
+        {
+          "orientation": "VERTICAL"
+        }
+      ],
+      "size": {
+        "width": 16.0,
+        "height": 9.0
+      },
+      "transformations": {
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "styleClass": "sld-load"
+    },
+    {
+      "type": "NODE",
+      "anchorPoints": [
+        {
+          "orientation": "NONE"
+        }
+      ],
+      "size": {
+        "width": 8.0,
+        "height": 8.0
+      },
+      "styleClass": "sld-node"
+    },
+    {
+      "type": "DISCONNECTOR",
+      "anchorPoints": [
+        {
+          "orientation": "VERTICAL"
+        }
+      ],
+      "size": {
+        "width": 8.0,
+        "height": 8.0
+      },
+      "styleClass": "sld-disconnector"
+    },
+    {
+      "type": "LINE",
+      "anchorPoints": [
+        {
+          "orientation": "NONE"
+        }
+      ],
+      "size": {
+        "width": 0.0,
+        "height": 0.0
+      }
+    },
+    {
+      "type": "ARROW_CURRENT",
+      "size": {
+        "width": 10.0,
+        "height": 10.0
+      },
+      "transformations": {
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "styleClass": "sld-current"
+    },
+    {
+      "type": "BREAKER",
+      "anchorPoints": [
+        {
+          "orientation": "VERTICAL"
+        },
+        {
+          "orientation": "VERTICAL"
+        }
+      ],
+      "size": {
+        "width": 20.0,
+        "height": 20.0
+      },
+      "transformations": {
+        "LEFT": "ROTATION",
+        "RIGHT": "ROTATION"
+      },
+      "styleClass": "sld-breaker"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_2",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_1",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": true,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT1 SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT2 DJ_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT1 DJ_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "vid": ".A.ZA 6",
+      "nextVId": ".MTTO 6",
+      "componentType": "LINE",
+      "open": false,
+      "direction": "TOP",
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6 .MTTO 1",
+      "labels": [
+        {
+          "id": ".A.ZA 6 .MTTO 1_ONE_N_LABEL",
+          "positionName": "N_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6COUPL SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95_1",
+      "vid": ".A.ZA 6",
+      "componentType": "BUSBAR_SECTION",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_1",
+      "labels": [
+        {
+          "id": ".A.ZA 6_1_NW_LABEL",
+          "positionName": "NW_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95_2",
+      "vid": ".A.ZA 6",
+      "componentType": "BUSBAR_SECTION",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_2",
+      "labels": [
+        {
+          "id": ".A.ZA 6_2_NW_LABEL",
+          "positionName": "NW_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95_9",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_1",
+      "vid": ".A.ZA 6",
+      "componentType": "LOAD",
+      "open": false,
+      "direction": "BOTTOM",
+      "vlabel": false,
+      "equipmentId": ".A.ZA6AVEZT_1",
+      "labels": [
+        {
+          "id": ".A.ZA6AVEZT_1_S_LABEL",
+          "positionName": "S_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_2",
+      "vid": ".A.ZA 6",
+      "componentType": "LOAD",
+      "open": false,
+      "direction": "TOP",
+      "vlabel": false,
+      "equipmentId": ".A.ZA6AVEZT_2",
+      "labels": [
+        {
+          "id": ".A.ZA6AVEZT_2_N_LABEL",
+          "positionName": "N_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95_7",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT2 SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": true,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.PENA.1 SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.MTTO.1 SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": true,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.ACAM.1 SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.ACAM.1 DJ_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA6_46_ACAM_46_1",
+      "vid": ".A.ZA 6",
+      "componentType": "LOAD",
+      "open": false,
+      "direction": "TOP",
+      "vlabel": false,
+      "equipmentId": ".A.ZA6.ACAM.1",
+      "labels": [
+        {
+          "id": ".A.ZA6.ACAM.1_N_LABEL",
+          "positionName": "N_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6COUPL SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.ACAM.1 SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.PENA.1 DJ_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT1 SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95_12",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "vid": ".A.ZA 6",
+      "nextVId": ".PENA 6",
+      "componentType": "LINE",
+      "open": false,
+      "direction": "BOTTOM",
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6 .PENA 1",
+      "labels": [
+        {
+          "id": ".A.ZA 6 .PENA 1_ONE_S_LABEL",
+          "positionName": "S_LABEL"
+        }
+      ]
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95_10",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95_11",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6COUPL DJ_OC",
+      "labels": []
+    },
+    {
+      "id": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "vid": ".A.ZA 6",
+      "componentType": "NODE",
+      "open": false,
+      "vlabel": false,
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_1_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": true,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.AVEZT2 SA.1_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": true,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.MTTO.1 SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_2_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "DISCONNECTOR",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.PENA.1 SA.2_OC",
+      "labels": []
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_DJ_95_OC",
+      "vid": ".A.ZA 6",
+      "componentType": "BREAKER",
+      "open": false,
+      "vlabel": false,
+      "equipmentId": ".A.ZA 6_.A.ZA6.MTTO.1 DJ_OC",
+      "labels": []
+    }
+  ],
+  "wires": [
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_11_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_11",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_10_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_1_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_10",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_7_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_7",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_1_95__46_A_46_ZA6AVEZT_95_1",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_1",
+      "nodeId2": "id_46_A_46_ZA6AVEZT_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_11_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_1_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_11",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_10_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_10",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95_2_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC",
+      "nodeId1": "id_46_A_46_ZA_32_6_95_2",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_2_95_OC_95__46_A_46_ZA_32_6_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_2_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_12_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_12",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_2_95_OC_95__46_A_46_ZA_32_6_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_2_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_7_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_2_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_7",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_2_95__46_A_46_ZA6AVEZT_95_2",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_2",
+      "nodeId2": "id_46_A_46_ZA6AVEZT_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_1_95_OC_95__46_A_46_ZA_32_6_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_1_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_95__46_A_46_ZA6_46_ACAM_46_1",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1",
+      "nodeId2": "id_46_A_46_ZA6_46_ACAM_46_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_2_95_OC_45__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_9_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_1_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_9",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_12_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_2_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_12",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_11_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_2_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_11",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "nodeId2": "id_46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_1_95_OC_95__46_A_46_ZA_32_6_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_1_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_10_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_2_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_10",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_2_95_OC_95__46_A_46_ZA_32_6_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_2_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "nodeId2": "id_46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_1_95_OC_95__46_A_46_ZA_32_6_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_1_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_9_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_DJ_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_9",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_DJ_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_DJ_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_DJ_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95_1_95__46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC",
+      "nodeId1": "id_46_A_46_ZA_32_6_95_1",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6COUPL_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_7_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_1_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_7",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_2_95_OC_95__46_A_46_ZA_32_6_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_2_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_1_95_OC_95__46_A_46_ZA_32_6_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_SA_46_1_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_DJ_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT1_32_DJ_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_12_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_1_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_12",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_1_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_1_95_OC_95__46_A_46_ZA_32_6_95_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_SA_46_1_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_DJ_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1_32_DJ_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_ACAM_46_1",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_2_95_OC_95__46_A_46_ZA_32_6_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_PENA_46_1_32_SA_46_2_95_OC",
+      "nodeId2": "id_46_A_46_ZA_32_6_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_DJ_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_2",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_DJ_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA6AVEZT_95_2",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95_INTERNAL_95__46_A_46_ZA_32_6_95_9_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_2_95_OC",
+      "nodeId1": "idINTERNAL_95__46_A_46_ZA_32_6_95_9",
+      "nodeId2": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_AVEZT2_32_SA_46_2_95_OC",
+      "straight": false,
+      "snakeLine": false
+    },
+    {
+      "id": "_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_DJ_95_OC_95_INTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "nodeId1": "id_46_A_46_ZA_32_6_95__46_A_46_ZA6_46_MTTO_46_1_32_DJ_95_OC",
+      "nodeId2": "idINTERNAL_95__46_A_46_ZA_32_6_95__46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE",
+      "straight": false,
+      "snakeLine": false
+    }
+  ],
+  "lines": [],
+  "feederInfos": [
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE_ARROW_REACTIVE",
+      "equipmentId": ".A.ZA 6 .PENA 1",
+      "side": "ONE",
+      "componentType": "ARROW_REACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6_46_ACAM_46_1_ARROW_CURRENT",
+      "equipmentId": ".A.ZA6.ACAM.1",
+      "componentType": "ARROW_CURRENT"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_2_ARROW_CURRENT",
+      "equipmentId": ".A.ZA6AVEZT_2",
+      "componentType": "ARROW_CURRENT"
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE_ARROW_ACTIVE",
+      "equipmentId": ".A.ZA 6 .PENA 1",
+      "side": "ONE",
+      "componentType": "ARROW_ACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_1_ARROW_CURRENT",
+      "equipmentId": ".A.ZA6AVEZT_1",
+      "componentType": "ARROW_CURRENT"
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE_ARROW_ACTIVE",
+      "equipmentId": ".A.ZA 6 .MTTO 1",
+      "side": "ONE",
+      "componentType": "ARROW_ACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6_46_ACAM_46_1_ARROW_REACTIVE",
+      "equipmentId": ".A.ZA6.ACAM.1",
+      "componentType": "ARROW_REACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_2_ARROW_REACTIVE",
+      "equipmentId": ".A.ZA6AVEZT_2",
+      "componentType": "ARROW_REACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6_46_ACAM_46_1_ARROW_ACTIVE",
+      "equipmentId": ".A.ZA6.ACAM.1",
+      "componentType": "ARROW_ACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE_ARROW_CURRENT",
+      "equipmentId": ".A.ZA 6 .MTTO 1",
+      "side": "ONE",
+      "componentType": "ARROW_CURRENT"
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_MTTO_32_1_95_ONE_ARROW_REACTIVE",
+      "equipmentId": ".A.ZA 6 .MTTO 1",
+      "side": "ONE",
+      "componentType": "ARROW_REACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA_32_6_32__46_PENA_32_1_95_ONE_ARROW_CURRENT",
+      "equipmentId": ".A.ZA 6 .PENA 1",
+      "side": "ONE",
+      "componentType": "ARROW_CURRENT"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_1_ARROW_REACTIVE",
+      "equipmentId": ".A.ZA6AVEZT_1",
+      "componentType": "ARROW_REACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_1_ARROW_ACTIVE",
+      "equipmentId": ".A.ZA6AVEZT_1",
+      "componentType": "ARROW_ACTIVE"
+    },
+    {
+      "id": "id_46_A_46_ZA6AVEZT_95_2_ARROW_ACTIVE",
+      "equipmentId": ".A.ZA6AVEZT_2",
+      "componentType": "ARROW_ACTIVE"
+    }
+  ],
+  "busLegendInfos": [
+    {
+      "id": "NODE_.A.ZA 6_0"
+    }
+  ],
+  "busInfos": [],
+  "layoutParams": {
+    "verticalSpaceBus": 25.0,
+    "horizontalBusPadding": 20.0,
+    "cellWidth": 50.0,
+    "externCellHeight": 250.0,
+    "internCellHeight": 40.0,
+    "stackHeight": 30.0,
+    "horizontalSnakeLinePadding": 20.0,
+    "verticalSnakeLinePadding": 25.0,
+    "spaceForFeederInfos": 50.0,
+    "adaptCellHeightToContent": true,
+    "maxComponentHeight": 12.0,
+    "minSpaceBetweenComponents": 15.0,
+    "minExternCellHeight": 80.0,
+    "voltageLevelPadding": {
+      "left": 20.0,
+      "top": 60.0,
+      "right": 20.0,
+      "bottom": 60.0
+    },
+    "diagramPadding": {
+      "left": 20.0,
+      "top": 20.0,
+      "right": 20.0,
+      "bottom": 20.0
+    },
+    "busbarsAlignment": "FIRST",
+    "componentsOnBusbars": ["DISCONNECTOR"],
+    "removeFictitiousSwitchNodes": false,
+    "cgmesScaleFactor": 1.0,
+    "cgmesDiagramName": null,
+    "cgmesUseNames": true,
+    "zoneLayoutSnakeLinePadding": 90
+  },
+  "svgParams": {
+    "prefixId": "",
+    "undefinedValueSymbol": "—",
+    "languageTag": "en",
+    "voltageValuePrecision": 1,
+    "powerValuePrecision": 0,
+    "angleValuePrecision": 1,
+    "currentValuePrecision": 0,
+    "activePowerUnit": "MW",
+    "reactivePowerUnit": "",
+    "currentUnit": "",
+    "busInfoMargin": 0.0,
+    "feederInfosIntraMargin": 10.0,
+    "feederInfosOuterMargin": 20.0,
+    "feederInfoSymmetry": false,
+    "busesLegendAdded": true,
+    "useName": true,
+    "angleLabelShift": 15.0,
+    "labelCentered": true,
+    "labelDiagonal": false,
+    "tooltipEnabled": true,
+    "svgWidthAndHeightAdded": true,
+    "cssLocation": "INSERTED_IN_SVG",
+    "avoidSVGComponentsDuplication": false,
+    "diagramName": null,
+    "drawStraightWires": false,
+    "showGrid": false,
+    "showInternalNodes": false,
+    "displayCurrentFeederInfo": true,
+    "displayEquipmentNodesLabel": false,
+    "displayConnectivityNodesId": false,
+    "unifyVoltageLevelColors": false
+  }
+}

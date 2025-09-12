@@ -7,7 +7,6 @@ import React from 'react';
 import { DslFile } from '@/types/dsl';
 import { IDockviewPanelProps } from 'dockview';
 import { Header } from './editor-header';
-import { Footer } from './editor-footer';
 
 const EXAMPLE = `set simulation duration to 10 seconds;
 set time step to 1 seconds;

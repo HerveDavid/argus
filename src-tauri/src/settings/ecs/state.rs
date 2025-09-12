@@ -1,8 +1,6 @@
 use bevy::prelude::*;
 use std::sync::Arc;
 
-use super::scada::ScadaPlugin;
-
 pub struct EcsState {
     app: App,
 }
@@ -13,7 +11,6 @@ unsafe impl Sync for EcsState {}
 impl EcsState {
     pub async fn new() -> Result<Arc<tokio::sync::Mutex<Self>>> {
         let mut app = App::new();
-        app.add_plugins(ScadaPlugin);
 
         Ok(Arc::new(tokio::sync::Mutex::new(Self { app })))
     }
