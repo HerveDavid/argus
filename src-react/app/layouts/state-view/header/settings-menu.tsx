@@ -26,6 +26,7 @@ import {
   useRightSidebarStore,
   useRightToolsStore,
 } from '../stores/state-view.store';
+import { invoke } from '@tauri-apps/api/core';
 
 interface SettingsMenuProps {
   headerRef: React.RefObject<HTMLDivElement>;
@@ -72,6 +73,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   const switchMode = async (mode: ModeType) => {
     const stores = [leftSidebar, rightSidebar, leftTools, rightTools];
     await Promise.all(stores.map((store) => store.loadPanelsForMode(mode)));
+    await invoke('switch_mode_ecs', { mode });
   };
 
   // Handler pour le changement de mode avec gestion d'erreur
@@ -135,8 +137,8 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
   };
 
   return (
-    <div ref={headerRef} className="w-full h-8 flex items-center z-10 border-b">
-      <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
+    <div ref={headerRef} className="z-10 flex h-8 w-full items-center border-b">
+      <Menubar className="border-0 bg-transparent p-0 text-xs shadow-none">
         <MenubarMenu>
           <MenubarTrigger>File</MenubarTrigger>
           <MenubarContent>
@@ -206,7 +208,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
             {hasError && (
               <>
                 <MenubarItem
-                  className="text-red-600 cursor-default"
+                  className="cursor-default text-red-600"
                   onClick={handleModeMenuClick}
                 >
                   Error: {error?.message}
@@ -260,13 +262,13 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ headerRef }) => {
               <>
                 <MenubarSeparator />
                 <MenubarItem
-                  className="text-gray-500 cursor-default text-xs"
+                  className="cursor-default text-xs text-gray-500"
                   onClick={handleModeMenuClick}
                 >
                   State: {state.value.toString()}
                 </MenubarItem>
                 <MenubarItem
-                  className="text-gray-500 cursor-default text-xs"
+                  className="cursor-default text-xs text-gray-500"
                   onClick={handleModeMenuClick}
                 >
                   Last change:{' '}

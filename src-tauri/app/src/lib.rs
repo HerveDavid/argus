@@ -175,6 +175,7 @@ pub fn run() {
             // Feeder
             feeders::commands::add_nats_feeder,
             // ECS
+            settings::ecs::commands::switch_mode_ecs,
             settings::ecs::commands::add_subscription,
             settings::ecs::commands::remove_subscription,
         ])

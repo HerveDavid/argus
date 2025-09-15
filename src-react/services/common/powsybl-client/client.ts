@@ -55,20 +55,10 @@ export class PowsyblClient extends Effect.Service<PowsyblClient>()(
           PowsyblError
         > =>
           Effect.tryPromise({
-            try: async () => {
-              // const channel = new Channel<String>();
-              // channel.onmessage = console.log;
-              // await invoke('add_subscription', {
-              //   element_id,
-              //   channel,
-              // });
-              return invoke<SingleLineDiagramResponse>(
-                'get_single_line_diagram',
-                {
-                  element_id,
-                },
-              );
-            },
+            try: async () =>
+              invoke<SingleLineDiagramResponse>('get_single_line_diagram', {
+                element_id,
+              }),
             catch: (error) =>
               new PowsyblError({
                 message: error instanceof Error ? error.message : String(error),

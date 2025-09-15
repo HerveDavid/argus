@@ -1,7 +1,6 @@
 use super::error::Result;
 use crate::settings::database::state::DatabaseState;
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ModeState {
@@ -17,7 +16,9 @@ impl Default for ModeState {
 }
 
 impl ModeState {
-    pub async fn new(settings_db: &tokio::sync::Mutex<DatabaseState>) -> Result<tokio::sync::Mutex<Self>> {
+    pub async fn new(
+        settings_db: &tokio::sync::Mutex<DatabaseState>,
+    ) -> Result<tokio::sync::Mutex<Self>> {
         let db_guard = settings_db.lock().await;
         let mode = db_guard
             .get_setting_or_default::<ModeState>("current-mode")
@@ -30,7 +31,7 @@ impl ModeState {
 
     pub async fn switch_to_scada(
         mutex: &tokio::sync::Mutex<Self>,
-        settings_db: &tokio::sync::Mutex<DatabaseState>
+        settings_db: &tokio::sync::Mutex<DatabaseState>,
     ) -> Result<()> {
         let mut state = mutex.lock().await;
         *state = ModeState::Scada;
@@ -41,7 +42,7 @@ impl ModeState {
 
     pub async fn switch_to_game_master(
         mutex: &tokio::sync::Mutex<Self>,
-        settings_db: &tokio::sync::Mutex<DatabaseState>
+        settings_db: &tokio::sync::Mutex<DatabaseState>,
     ) -> Result<()> {
         let mut state = mutex.lock().await;
         *state = ModeState::GameMaster;
@@ -52,7 +53,7 @@ impl ModeState {
 
     pub async fn switch_to_kpi(
         mutex: &tokio::sync::Mutex<Self>,
-        settings_db: &tokio::sync::Mutex<DatabaseState>
+        settings_db: &tokio::sync::Mutex<DatabaseState>,
     ) -> Result<()> {
         let mut state = mutex.lock().await;
         *state = ModeState::Kpi;
@@ -64,7 +65,7 @@ impl ModeState {
     pub async fn switch_to(
         mutex: &tokio::sync::Mutex<Self>,
         new_mode: ModeState,
-        settings_db: &tokio::sync::Mutex<DatabaseState>
+        settings_db: &tokio::sync::Mutex<DatabaseState>,
     ) -> Result<()> {
         let mut state = mutex.lock().await;
         let db_guard = settings_db.lock().await;

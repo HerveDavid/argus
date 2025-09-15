@@ -12,7 +12,7 @@ export class EcsClient extends Effect.Service<EcsClient>()(
         // Config
         switch_mode: (mode: AppMode) =>
           Effect.tryPromise({
-            try: () => invoke('switch_mode', { mode }),
+            try: () => invoke('switch_mode_ecs', { mode }),
             catch: (error) =>
               new EcsError({
                 message: error instanceof Error ? error.message : String(error),

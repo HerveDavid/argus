@@ -9,7 +9,6 @@ pub fn dispatch_tauri_event(
     if let Ok(mut receiver) = tauri_res.receiver.try_lock() {
         while let Ok(msg) = receiver.try_recv() {
             event_writer.write(msg);
-            println!("Coucou");
         }
     }
 }

@@ -6,6 +6,9 @@ use thiserror::Error;
 pub enum Error {
     #[error(transparent)]
     SendError(#[from] tokio::sync::mpsc::error::SendError<TauriEvent>),
+
+    #[error("Mode is not implemented yet")]
+    ModeNotImplemented,
 }
 
 impl Serialize for Error {
