@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use tauri::ipc::Channel;
 
-#[derive(Debug, Event)]
-pub struct SubscriptionEvent(pub String, pub Entity);
+#[derive(Event)]
+pub struct SubscriptionEvent(pub String, pub Entity, pub Channel<String>);

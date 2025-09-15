@@ -1,3 +1,4 @@
+mod dsl;
 mod entities;
 mod feeders;
 mod game_master;
@@ -152,12 +153,6 @@ pub fn run() {
             scada::commands::get_scada_outputs,
             // GameMaster
             game_master::commands::get_game_master_outputs,
-            // Project
-            // project::commands::load_project,
-            // project::commands::init_database_project,
-            // project::commands::query_project,
-            // project::commands::create_new_project,
-            // project::commands::get_single_line_diagram,
             // Nats
             nats::commands::set_nats_address,
             nats::commands::connect_nats,
@@ -178,6 +173,8 @@ pub fn run() {
             settings::ecs::commands::switch_mode_ecs,
             settings::ecs::commands::add_subscription,
             settings::ecs::commands::remove_subscription,
+            // DSL
+            dsl::commands::init_dsl_file,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

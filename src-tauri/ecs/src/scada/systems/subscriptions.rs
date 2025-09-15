@@ -18,7 +18,7 @@ pub fn spawn_scada_output(
     client: Res<PowsyblClient>,
 ) {
     for event in events.read() {
-        let SubscriptionEvent(element_id, entity) = event;
+        let SubscriptionEvent(element_id, entity, ..) = event;
 
         if let Err(err) = spawner_scada_output(element_id, entity, &mut commands, &client) {
             eprintln!("Error scada output: {}", err);
@@ -52,7 +52,7 @@ pub fn spawn_scada_subscription(
     nats: Res<NatsClient>,
 ) {
     for event in events.read() {
-        let SubscriptionEvent(element_id, entity) = event;
+        let SubscriptionEvent(element_id, entity, ..) = event;
 
         let topic = format!("{}.{}", config.topic, element_id.replace(".", "_")); // Sanitize substation_id before use as topic ('.' is a delimiter in NATS)
         let (sender, receiver) = tokio::sync::mpsc::unbounded_channel::<NatsEvent>();
