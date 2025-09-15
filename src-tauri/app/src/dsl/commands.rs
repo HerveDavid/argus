@@ -21,7 +21,7 @@ pub async fn init_dsl_file(
 
     if let Some(session) = db.get_setting::<Session>("session-current").await? {
         if let Some(client) = nats.get_client() {
-            let file = format!("{}/{}.config.toml", session.path, session.path);
+            let file = format!("docs/orchestrator/examples/scenario_MQIS_NB/config_mapped.toml");
             client.publish("Start", file.into()).await?;
             log::info!("Orchestrator init");
         }
