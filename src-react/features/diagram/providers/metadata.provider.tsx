@@ -53,16 +53,6 @@ export const MetadataProvider = ({
     load();
   }, [elementId, load]);
 
-  // React.useEffect(() => {
-  //   Result.match(metadata, {
-  //     onInitial: () => null,
-  //     onFailure: () => null,
-  //     onSuccess: ({ value }) => {
-  //       value.channel.onmessage = console.log;
-  //     },
-  //   });
-  // }, [elementId, metadata]);
-
   // Context
   const store = React.useMemo(
     () => ({
