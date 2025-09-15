@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use tauri::ipc::Channel;
 
-use crate::subscriber::{components::Subscription, events::SubscriptionEvent};
+use crate::subscriber::events::SubscriptionEvent;
 
 use super::{
-    components::{Feeder, SingleLineDiagram, api::SingleLineDiagramResponse},
+    components::{DiagramEvent, Feeder, SingleLineDiagram, api::SingleLineDiagramResponse},
     resources::PowsyblClient,
 };
 
@@ -24,7 +24,7 @@ pub(super) fn handle_subcription_event(
 fn spawn_diagram(
     element_id: &str,
     entity: &Entity,
-    channel: &Channel<String>,
+    channel: &Channel<DiagramEvent>,
     commands: &mut Commands,
     client: &Res<PowsyblClient>,
 ) {
@@ -53,46 +53,60 @@ fn spawn_diagram(
 pub(super) fn log_feeder_to_sld_changes(
     changed_feeders: Query<(&Feeder, &ChildOf), Changed<Feeder>>,
     diagrams: Query<(&SingleLineDiagram, &ChildOf)>,
-    subscriptions: Query<&Subscription>,
 ) {
-    // Créer un mapping parent -> SingleLineDiagram pour une recherche efficace
-    let diagrams_by_parent: HashMap<Entity, &SingleLineDiagram> = diagrams
-        .iter()
-        .map(|(diagram, parent)| (parent.0, diagram))
-        .collect();
+    // Si pas de feeders changés, on sort
+    if changed_feeders.is_empty() {
+        return;
+    }
 
-    let mut changes_by_sld: HashMap<String, Vec<(String, &Feeder)>> = HashMap::new();
+    // Créer le mapping parent -> diagramme (type explicite)
+    let mut diagrams_by_parent: HashMap<Entity, &SingleLineDiagram> = HashMap::new();
+    for (diagram, parent) in diagrams.iter() {
+        diagrams_by_parent.insert(parent.0, diagram);
+    }
 
-    for (feeder, feeder_parent) in &changed_feeders {
-        // Chercher le SingleLineDiagram qui a le même parent que le Feeder
-        if let Some(diagram) = diagrams_by_parent.get(&feeder_parent.0) {
-            match diagram.channel.send("Hello world".to_string()) {
-                Ok(_) => println!("Message envoyé via channel pour feeder: {}", feeder.id),
-                Err(e) => eprintln!("Erreur lors de l'envoi du message: {e:?}"),
+    // Grouper les feeders par parent (type explicite)
+    let mut feeders_by_parent: HashMap<Entity, Vec<(String, f64)>> = HashMap::new();
+
+    for (feeder, parent) in changed_feeders.iter() {
+        let parent_entity = parent.0;
+
+        // Vérifier que ce parent a bien un diagramme
+        if diagrams_by_parent.contains_key(&parent_entity) {
+            // Corriger l'accès aux valeurs - values() retourne Vec<f64>, pas Option<Vec<f64>>
+            let value = feeder.values().first().copied().unwrap_or(0.0);
+
+            let feeder_data = (feeder.id.clone(), value);
+
+            if let Some(feeders_list) = feeders_by_parent.get_mut(&parent_entity) {
+                feeders_list.push(feeder_data);
+            } else {
+                feeders_by_parent.insert(parent_entity, vec![feeder_data]);
             }
-        }
-
-        // Logique existante pour grouper les changements par SLD
-        if let Ok(sub) = subscriptions.get(feeder_parent.0) {
-            changes_by_sld
-                .entry(sub.0.clone())
-                .or_insert_with(Vec::new)
-                .push((feeder.id.clone(), feeder));
         }
     }
 
-    // Affichage des changements groupés par SLD
-    if !changes_by_sld.is_empty() {
-        println!("Feeder changes by SLD:");
-        for (sld_id, feeder_ids) in changes_by_sld {
-            println!("  SLD '{}': {} feeders changed", sld_id, feeder_ids.len());
-            for feeder in feeder_ids {
-                println!(
-                    "    ├─ {} = {:?} {:?}",
-                    feeder.0,
-                    feeder.1.get_range(),
-                    feeder.1.values()
-                );
+    // Envoyer pour chaque parent qui a des changements
+    for (parent_entity, feeder_updates) in feeders_by_parent {
+        if let Some(diagram) = diagrams_by_parent.get(&parent_entity) {
+            let event = DiagramEvent::FeederUpdate {
+                feeders: feeder_updates.clone(),
+            };
+
+            match diagram.channel.send(event) {
+                Ok(_) => {
+                    println!(
+                        "✅ SLD '{}': {} feeders envoyés",
+                        diagram.id,
+                        feeder_updates.len()
+                    );
+                    for (feeder_id, value) in &feeder_updates {
+                        println!("  ├─ {} = {}", feeder_id, value);
+                    }
+                }
+                Err(e) => {
+                    eprintln!("❌ Erreur SLD '{}': {e:?}", diagram.id);
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use tauri::ipc::Channel;
 
-use crate::mode::resources::Kind;
+use crate::{mode::resources::Kind, powsybl::components::DiagramEvent};
 
 #[derive(Event)]
 pub enum TauriEvent {
@@ -12,7 +12,7 @@ pub enum TauriEvent {
     // Powsybl
     Subscribe {
         element_id: String,
-        channel: Channel<String>,
+        channel: Channel<DiagramEvent>,
     },
 
     Unubscribe {

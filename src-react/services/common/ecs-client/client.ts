@@ -2,6 +2,7 @@ import { Channel, invoke } from '@tauri-apps/api/core';
 import { Effect } from 'effect';
 import { EcsError } from './errors';
 import { AppMode } from '@/types/mode';
+import { DiagramEvent } from '@/types/diagram-event';
 
 export class EcsClient extends Effect.Service<EcsClient>()(
   '@/common/EcsClient',
@@ -25,7 +26,7 @@ export class EcsClient extends Effect.Service<EcsClient>()(
           channel,
         }: {
           elementId: string;
-          channel: Channel<string>;
+          channel: Channel<DiagramEvent>;
         }) =>
           Effect.tryPromise({
             try: () =>

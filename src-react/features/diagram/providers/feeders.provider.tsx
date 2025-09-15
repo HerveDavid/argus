@@ -10,6 +10,7 @@ import { useDiagram } from './diagram.provider';
 import { Channel } from '@tauri-apps/api/core';
 import { ScadaMessage } from '@/types/tstm';
 import { updateFeeder } from '../utils/update-feeder';
+import { DiagramEvent } from '@/types/diagram-event';
 
 type FeedersContextType = {
   isSubscribing: boolean;
@@ -45,17 +46,27 @@ export const FeedersProvider = ({
       onInitial: () => null,
       onFailure: () => null,
       onSuccess: ({ value }) => {
-        if (scadaChannel.current) {
-          return subscribeToFeeders({
-            metadata: value.metadata,
-            subscriptionId,
-            scadaChannel,
-          });
-        }
-        return null;
+        value.channel.onmessage = (event: DiagramEvent) => {
+          console.log(event)
+          if (event.tag === 'FeederUpdate') {
+            event.content.feeders.forEach(([id, value]) => {
+              updateFeeder(svgRef, id, value);
+              console.log(id, value)
+            });
+          }
+        };
+
+        // if (scadaChannel.current) {
+        //   return subscribeToFeeders({
+        //     metadata: value.metadata,
+        //     subscriptionId,
+        //     scadaChannel,
+        //   });
+        // }
+        // return null;
       },
     });
-  }, [metadata, isInitialized, subscriptionId]);
+  }, [metadata, isInitialized, subscriptionId, svgRef]);
 
   const unsubscriptionAtom = React.useMemo(() => {
     return unsubscribeFromFeeders({ subscriptionId });
@@ -65,38 +76,38 @@ export const FeedersProvider = ({
     subscriptionAtom || subscribeToFeeders({} as any),
   );
 
-  const [, executeUnsubscription] = useAtom(unsubscriptionAtom);
+  // const [, executeUnsubscription] = useAtom(unsubscriptionAtom);
 
   const isSubscribing = Result.isInitial(subscriptionResult);
 
-  React.useEffect(() => {
-    if (!scadaChannel.current) {
-      const channel = new Channel<ScadaMessage>();
+  // React.useEffect(() => {
+  //   if (!scadaChannel.current) {
+  //     const channel = new Channel<ScadaMessage>();
 
-      channel.onmessage = (message) => {
-        switch (message.format) {
-          case 'Legacy':
-            updateFeeder(svgRef, message.graphical_id, message.value!);
-            break;
-          case 'TS_TM':
-            updateFeeder(svgRef, message.graphical_id, message.value!);
-            break;
-        }
-      };
+  //     channel.onmessage = (message) => {
+  //       switch (message.format) {
+  //         case 'Legacy':
+  //           updateFeeder(svgRef, message.graphical_id, message.value!);
+  //           break;
+  //         case 'TS_TM':
+  //           updateFeeder(svgRef, message.graphical_id, message.value!);
+  //           break;
+  //       }
+  //     };
 
-      scadaChannel.current = channel;
-    }
+  //     scadaChannel.current = channel;
+  //   }
 
-    return () => {
-      if (scadaChannel.current) {
-        if (executeUnsubscription) {
-          executeUnsubscription();
-        }
+  //   return () => {
+  //     if (scadaChannel.current) {
+  //       if (executeUnsubscription) {
+  //         executeUnsubscription();
+  //       }
 
-        scadaChannel.current = undefined;
-      }
-    };
-  }, [subscriptionId, executeUnsubscription]);
+  //       scadaChannel.current = undefined;
+  //     }
+  //   };
+  // }, [subscriptionId, executeUnsubscription]);
 
   React.useEffect(() => {
     if (isInitialized && subscriptionAtom && executeSubscription) {

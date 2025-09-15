@@ -1,16 +1,25 @@
 import { Result, useAtom } from '@effect-atom/atom-react';
 import React, { createContext, useContext } from 'react';
 import {
-  loadSldMetadata,
+  loadSldMetadataV2,
   unloadSldMetadata,
 } from '../services/metadata.service';
-import { Metadata } from '../types/metadata.type';
 import { PowsyblError } from '@/services/common/powsybl-client';
 import { EcsError } from '@/services/common/ecs-client/errors';
+import { DiagramEvent } from '@/types/diagram-event';
+import { SldMetadata } from '@/types/sld-metadata';
+import { Channel } from '@tauri-apps/api/core';
 
 type MetadataContextType = {
   elementId: string;
-  metadata: Result.Result<Metadata, PowsyblError | EcsError>;
+  metadata: Result.Result<
+    {
+      readonly metadata: SldMetadata;
+      readonly svg: string;
+      readonly channel: Channel<DiagramEvent>;
+    },
+    PowsyblError | EcsError
+  >;
 };
 
 const MetadataContext = createContext<MetadataContextType | undefined>(
@@ -33,7 +42,7 @@ export const MetadataProvider = ({
   elementId: string;
 }) => {
   // Effect-ts
-  const metadataAtom = loadSldMetadata(elementId);
+  const metadataAtom = loadSldMetadataV2(elementId);
   const [metadata, load] = useAtom(metadataAtom);
 
   const removeAtom = unloadSldMetadata(elementId);
@@ -43,6 +52,16 @@ export const MetadataProvider = ({
   React.useEffect(() => {
     load();
   }, [elementId, load]);
+
+  // React.useEffect(() => {
+  //   Result.match(metadata, {
+  //     onInitial: () => null,
+  //     onFailure: () => null,
+  //     onSuccess: ({ value }) => {
+  //       value.channel.onmessage = console.log;
+  //     },
+  //   });
+  // }, [elementId, metadata]);
 
   // Context
   const store = React.useMemo(

@@ -13,11 +13,11 @@ use tokio::sync::mpsc::UnboundedReceiver;
 mod async_runtime;
 mod game_master;
 mod nats;
-mod powsybl;
 mod scada;
 mod subscriber;
 
 pub mod mode;
+pub mod powsybl;
 pub mod tauri;
 
 pub fn create_app(receiver: UnboundedReceiver<TauriEvent>) -> App {

@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use ecs::mode::resources::Kind;
+use ecs::powsybl::components::DiagramEvent;
 use ecs::tauri::events::TauriEvent;
 use tauri::{ipc::Channel, State};
 
@@ -26,7 +27,7 @@ pub async fn switch_mode_ecs(
 pub async fn add_subscription(
     ecs_state: State<'_, Arc<tokio::sync::Mutex<EcsState>>>,
     element_id: String,
-    channel: Channel<String>,
+    channel: Channel<DiagramEvent>,
 ) -> Result<()> {
     ecs_state.lock().await.send(TauriEvent::Subscribe {
         element_id,
