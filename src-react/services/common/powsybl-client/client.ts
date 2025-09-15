@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { Channel, invoke } from '@tauri-apps/api/core';
 import { Effect } from 'effect';
 
 import { PowsyblError } from './error';
@@ -55,10 +55,20 @@ export class PowsyblClient extends Effect.Service<PowsyblClient>()(
           PowsyblError
         > =>
           Effect.tryPromise({
-            try: () =>
-              invoke<SingleLineDiagramResponse>('get_single_line_diagram', {
-                element_id,
-              }),
+            try: async () => {
+              // const channel = new Channel<String>();
+              // channel.onmessage = console.log;
+              // await invoke('add_subscription', {
+              //   element_id,
+              //   channel,
+              // });
+              return invoke<SingleLineDiagramResponse>(
+                'get_single_line_diagram',
+                {
+                  element_id,
+                },
+              );
+            },
             catch: (error) =>
               new PowsyblError({
                 message: error instanceof Error ? error.message : String(error),

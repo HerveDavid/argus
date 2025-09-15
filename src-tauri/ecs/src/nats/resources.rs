@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use futures::StreamExt;
 use tokio::{runtime::Handle, sync::mpsc::UnboundedSender, task::JoinHandle};
 
-use crate::tokio::resource::AsyncRt;
+use crate::async_runtime::resource::AsyncRt;
 
 use super::{error::Result, events::NatsEvent};
 

@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 bevy = { workspace = true }
+tauri = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

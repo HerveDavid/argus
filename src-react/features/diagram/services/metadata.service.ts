@@ -5,13 +5,19 @@ import { Metadata } from '../types/metadata.type';
 
 import { PowsyblClient, PowsyblError } from '@/services/common/powsybl-client';
 import { SldMetadata } from '@/types/sld-metadata';
+import { EcsClient } from '@/services/common/ecs-client/client';
+import { Channel } from '@tauri-apps/api/core';
 
-const runtimeAtom = Atom.runtime(Layer.mergeAll(PowsyblClient.Default));
+const runtimeAtom = Atom.runtime(
+  Layer.mergeAll(PowsyblClient.Default, EcsClient.Default),
+);
 
 export const loadSldMetadata = Atom.family((elementId: string) =>
   runtimeAtom.fn(
     Effect.fn(function* () {
       const powsyblClient = yield* PowsyblClient;
+      const ecsClient = yield* EcsClient;
+
       const metadata = yield* powsyblClient.getSingleLineDiagram({
         element_id: elementId,
       });
@@ -28,10 +34,23 @@ export const loadSldMetadata = Atom.family((elementId: string) =>
         );
       }
 
+      const channel = new Channel<string>();
+      channel.onmessage = console.log;
+      yield* ecsClient.add_subscription({ elementId, channel });
+
       return {
         metadata: metadata.metadata as unknown as SldMetadata,
         svg: metadata.svg_content,
       } as Metadata;
+    }),
+  ),
+);
+
+export const unloadSldMetadata = Atom.family((elementId: string) =>
+  runtimeAtom.fn(
+    Effect.fn(function* () {
+      const ecsClient = yield* EcsClient;
+      yield* ecsClient.remove_subscription({ elementId });
     }),
   ),
 );

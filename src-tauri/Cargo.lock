@@ -2177,6 +2177,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "tauri",
  "thiserror 2.0.16",
  "tokio",
 ]

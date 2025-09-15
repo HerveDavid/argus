@@ -172,8 +172,11 @@ pub fn run() {
             tasks::commands::get_task_count,
             tasks::commands::get_task_status,
             tasks::commands::get_tasks_statistics,
-            // Orchestrator
+            // Feeder
             feeders::commands::add_nats_feeder,
+            // ECS
+            settings::ecs::commands::add_subscription,
+            settings::ecs::commands::remove_subscription,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

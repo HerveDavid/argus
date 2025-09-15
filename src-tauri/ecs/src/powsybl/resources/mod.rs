@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use super::error::{Error, Result};
-use crate::tokio::resource::AsyncRt;
+use crate::async_runtime::resource::AsyncRt;
 
 const ADDRESS: &str = "http://localhost:46728";
 

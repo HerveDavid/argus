@@ -1,12 +1,11 @@
+use ecs::tauri::events::TauriEvent;
 use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("Broker is not connected")]
-    BrokerNotConnected,
-    #[error("Client not initialized")]
-    ClientNotInitialized,
+    #[error(transparent)]
+    SendError(#[from] tokio::sync::mpsc::error::SendError<TauriEvent>),
 }
 
 impl Serialize for Error {

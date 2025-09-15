@@ -1,6 +1,10 @@
 use bevy::prelude::*;
 
-use super::{events::SubscriptionEvent, resource::SubscriberManager, systems::send_new_subscriber};
+use super::{
+    events::SubscriptionEvent,
+    resource::SubscriberManager,
+    systems::{send_new_subscription, send_remove_subscription},
+};
 
 pub struct SubscriberPlugin;
 
@@ -14,9 +18,7 @@ impl Plugin for SubscriberPlugin {
 
         app.add_systems(
             Update,
-            (send_new_subscriber)
-                .in_set(SubscriberSet::OnChange)
-                .run_if(resource_exists_and_changed::<SubscriberManager>),
+            (send_new_subscription, send_remove_subscription).in_set(SubscriberSet::OnChange),
         );
     }
 }

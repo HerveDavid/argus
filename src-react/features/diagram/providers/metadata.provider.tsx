@@ -1,12 +1,16 @@
 import { Result, useAtom } from '@effect-atom/atom-react';
 import React, { createContext, useContext } from 'react';
-import { loadSldMetadata } from '../services/metadata.service';
+import {
+  loadSldMetadata,
+  unloadSldMetadata,
+} from '../services/metadata.service';
 import { Metadata } from '../types/metadata.type';
 import { PowsyblError } from '@/services/common/powsybl-client';
+import { EcsError } from '@/services/common/ecs-client/errors';
 
 type MetadataContextType = {
   elementId: string;
-  metadata: Result.Result<Metadata, PowsyblError>;
+  metadata: Result.Result<Metadata, PowsyblError | EcsError>;
 };
 
 const MetadataContext = createContext<MetadataContextType | undefined>(
@@ -32,6 +36,9 @@ export const MetadataProvider = ({
   const metadataAtom = loadSldMetadata(elementId);
   const [metadata, load] = useAtom(metadataAtom);
 
+  const removeAtom = unloadSldMetadata(elementId);
+  const [_, unload] = useAtom(removeAtom);
+
   // React useEffect
   React.useEffect(() => {
     load();
@@ -45,6 +52,11 @@ export const MetadataProvider = ({
     }),
     [elementId, metadata],
   );
+
+  // Unmount
+  React.useEffect(() => {
+    return () => unload();
+  }, [elementId, unload]);
 
   return (
     <MetadataContext.Provider value={store}>

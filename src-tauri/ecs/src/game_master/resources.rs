@@ -8,7 +8,7 @@ use tokio::{
     task::JoinHandle,
 };
 
-use crate::{nats::resources::NatsClient, tokio::resource::AsyncRt};
+use crate::{async_runtime::resource::AsyncRt, nats::resources::NatsClient};
 
 use super::events::TimeEvent;
 
