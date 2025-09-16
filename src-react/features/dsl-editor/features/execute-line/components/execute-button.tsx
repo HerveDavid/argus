@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Play } from 'lucide-react';
+import { BugPlay } from 'lucide-react';
 import React from 'react';
 
 interface ExecuteButtonProps {
@@ -37,7 +37,7 @@ export const ExecuteButton: React.FC<ExecuteButtonProps> = ({
         onClick={handleClick}
         title={`Execute: ${truncatedContent}`}
       >
-        <Play className='size-3'/>
+        <BugPlay className='size-3'/>
       </Button>
     </div>
   );

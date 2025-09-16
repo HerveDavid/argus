@@ -78,11 +78,11 @@ export const Header = ({ filepath }: { filepath: String }) => {
                   className="h-8 w-8 p-0"
                   onClick={onInitScenario}
                 >
-                  <Upload size={16} />
+                  <Play size={16} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Init Scenario</p>
+                <p>Play Scenario</p>
               </TooltipContent>
             </Tooltip>
 
