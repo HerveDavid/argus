@@ -75,6 +75,11 @@ pub fn run() {
                     .expect("Failed to initialize project db");
                 app.manage(project_db);
 
+                let gamemaster_state = game_master::state::GameMasterState::new(&app.handle())
+                    .await
+                    .expect("Failed to initialize gamemaster");
+                app.manage(gamemaster_state);
+
                 let tasks = tasks::state::TasksState::new()
                     .await
                     .expect("Failed to initialize tasks");
@@ -153,6 +158,22 @@ pub fn run() {
             scada::commands::get_scada_outputs,
             // GameMaster
             game_master::commands::get_game_master_outputs,
+            game_master::commands::init_game_master_scenario,
+            game_master::commands::trainer_update_system_state_command,
+            game_master::commands::trainer_get_current_state_command,
+            game_master::commands::get_dsl_file_command,
+            game_master::commands::simulator_control_command,
+            game_master::commands::sim_update_system_state_command,
+            game_master::commands::simulator_control_v2_command,
+            game_master::commands::user_control_command,
+            game_master::commands::dsl_control_command,
+            game_master::commands::cluster_control_command,
+            game_master::commands::user_get_current_state_command,
+            game_master::commands::get_pending_controls_command,
+            game_master::commands::upload_iidm_file_command,
+            game_master::commands::get_iidm_properties_command,
+            game_master::commands::list_events_command,
+            game_master::commands::get_queue_summary_command,
             // Nats
             nats::commands::set_nats_address,
             nats::commands::connect_nats,

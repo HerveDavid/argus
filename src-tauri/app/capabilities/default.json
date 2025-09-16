@@ -28,6 +28,11 @@
           "args": false,
           "name": "binaries/powsybl",
           "sidecar": true
+        },
+        {
+          "args": false,
+          "name": "binaries/powsybl-crdt",
+          "sidecar": true
         }
       ]
     },
