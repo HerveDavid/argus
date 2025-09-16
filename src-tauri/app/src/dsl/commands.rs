@@ -20,12 +20,22 @@ pub async fn init_dsl_file(
     let db = settings_db.lock().await;
 
     if let Some(session) = db.get_setting::<Session>("session-current").await? {
-        if let Some(client) = nats.get_client() {
-            let file = format!("docs/orchestrator/examples/scenario_MQIS_NB/config_mapped.toml");
-            client.publish("Start", file.into()).await?;
-            log::info!("Orchestrator init");
-        }
+
+        let client = nats.try_client()?;
+        let file = format!("docs/orchestrator/examples/scenario_MQIS_NB/config_mapped.toml");
+        client.publish("Start", file.into()).await?;
+        log::info!("Orchestrator init");
+
+        // if let Some(client) = nats.get_client() {
+        //     let file = format!("docs/orchestrator/examples/scenario_MQIS_NB/config_mapped.toml");
+        //     client.publish("Start", file.into()).await?;
+        //     log::info!("Orchestrator init");
+        // } else {
+        //     log::error!("Whereis the client?")
+        // }
     }
+
+    
 
     Ok("Orchestrator init".into())
 }

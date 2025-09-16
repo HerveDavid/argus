@@ -157,6 +157,13 @@ impl NatsState {
         self.client.clone()
     }
 
+    pub fn try_client(&self) -> Result<Arc<async_nats::Client>> {
+        match self.client.clone() {
+            Some(client) => Ok(client.clone()),
+            None => Err(Error::ClientNotInitialized),
+        }
+    }
+
     pub fn is_connected(&self) -> bool {
         self.client.is_some()
     }

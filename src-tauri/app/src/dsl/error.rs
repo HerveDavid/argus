@@ -8,6 +8,9 @@ pub enum Error {
 
     #[error(transparent)]
     PublishError(#[from] async_nats::client::PublishError),
+
+    #[error(transparent)]
+    NatsError(#[from] crate::nats::error::Error),
 }
 
 impl Serialize for Error {
