@@ -24,8 +24,8 @@ export const LeftMenu = () => {
   };
 
   return (
-    <div className="flex">
-      <Menubar className="bg-transparent border-0 shadow-none text-xs p-0">
+    <div className="flex items-center gap-x-4">
+      <Menubar className="border-0 bg-transparent p-0 text-xs shadow-none">
         <MenubarMenu>
           <MenubarTrigger
             className="bg-transparent"

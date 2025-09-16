@@ -6,7 +6,7 @@ import { subscribeToFeeders } from '../services/feeders.service';
 import { useDiagram } from './diagram.provider';
 import { Channel } from '@tauri-apps/api/core';
 import { ScadaMessage } from '@/types/tstm';
-import { updateFeeder, updateFeedersBatch } from '../utils/update-feeder';
+import { updateFeedersBatch } from '../utils/update-feeder';
 import { DiagramEvent } from '@/types/diagram-event';
 
 type FeedersContextType = {

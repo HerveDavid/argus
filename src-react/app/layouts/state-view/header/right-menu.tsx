@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Mode } from '@/features/mode';
+import { DslCommands } from '@/features/dsl-editor/components/dsl-commands';
 
 export const RightMenu = () => {
   const [isMaximized, setIsMaximized] = useState(false);
@@ -57,35 +58,40 @@ export const RightMenu = () => {
   };
 
   return (
-    <div className="flex items-center gap-x-4 mr-2">
-      <Mode />
-      <Button
-        variant="ghost"
-        size="sm"
-        className="size-5 p-2 rounded-full"
-        onClick={handleMinimize}
-        title="Minimize"
-      >
-        <Minus className="size-3" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="size-5 p-2 rounded-full"
-        onClick={handleMaximize}
-        title={isMaximized ? 'Restore' : 'Maximize'}
-      >
-        <Square className="size-3" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="size-5 p-2 rounded-full"
-        onClick={handleClose}
-        title="Close"
-      >
-        <X className="size-3" />
-      </Button>
+    <div className="mr-2 flex items-center gap-x-4">
+      <DslCommands />
+
+      <div className="bg-border h-6 w-px"></div>
+
+      <div className="flex items-center gap-x-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="size-5 rounded-full p-2"
+          onClick={handleMinimize}
+          title="Minimize"
+        >
+          <Minus className="size-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="size-5 rounded-full p-2"
+          onClick={handleMaximize}
+          title={isMaximized ? 'Restore' : 'Maximize'}
+        >
+          <Square className="size-3" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="size-5 rounded-full p-2"
+          onClick={handleClose}
+          title="Close"
+        >
+          <X className="size-3" />
+        </Button>
+      </div>
     </div>
   );
 };

@@ -160,16 +160,16 @@ export const Header = () => {
         >
           <LeftMenu />
         </div>
-        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1 m-2">
           &nbsp;
         </div>
         <div
-          className="relative flex-1 flex justify-center"
+          className="relative flex flex justify-center"
           onMouseDown={stopPropagation}
         >
           <CenterMenu />
         </div>
-        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1">
+        <div className="relative hover:bg-foreground/10 cursor-grab flex flex-1 m-2">
           &nbsp;
         </div>
         <div

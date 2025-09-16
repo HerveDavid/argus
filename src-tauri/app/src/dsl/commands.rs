@@ -5,7 +5,7 @@ use crate::nats::state::NatsState;
 use super::error::Result;
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn init_dsl_file(
+pub async fn start_dsl_file(
     nats_state: State<'_, tokio::sync::Mutex<NatsState>>,
 ) -> Result<String> {
     let nats = nats_state.lock().await;
@@ -17,14 +17,4 @@ pub async fn init_dsl_file(
 
     
     Ok("Orchestrator init".into())
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn start_scenario(nats_state: State<'_, tokio::sync::Mutex<NatsState>>) -> Result<()> {
-    Ok(())
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn stop_dsl_scenario(nats_state: State<'_, tokio::sync::Mutex<NatsState>>) -> Result<()> {
-    Ok(())
 }

@@ -1,10 +1,9 @@
 use super::error::{Error, Result};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use tauri::AppHandle;
 
-const ADDRESS: &str = "http://localhost:46728";
+const ADDRESS: &str = "http://localhost:8000";
 
 // API Models
 #[derive(Debug, Serialize, Deserialize)]

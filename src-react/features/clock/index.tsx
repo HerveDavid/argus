@@ -14,11 +14,7 @@ const Clock = () => {
 
   const formattedTime = time.format('D MMMM HH:mm:ss');
 
-  return (
-    <h1 className="flex items-center h-full text-sm font-medium">
-      {formattedTime}
-    </h1>
-  );
+  return <h1 className="text-sm font-medium">{formattedTime}</h1>;
 };
 
 export default Clock;

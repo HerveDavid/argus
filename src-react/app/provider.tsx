@@ -24,6 +24,7 @@ import { RuntimeProvider } from '@/services/runtime/runtime-provider';
 import { RegistryProvider } from '@effect-rx/rx-react';
 import { InitProvider } from './providers/init.provider';
 import { ModeClient } from '@/services/common/mode-client';
+import { DslProvider } from '@/features/dsl-editor/provider/dsl.provider';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -74,7 +75,9 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
       <QueryClientProvider client={queryClient}>
         <ModeProvider>
           <RuntimeProvider runtime={runtime}>
-            <InitProvider>{children}</InitProvider>
+            <InitProvider>
+              <DslProvider>{children}</DslProvider>
+            </InitProvider>
           </RuntimeProvider>
         </ModeProvider>
       </QueryClientProvider>

@@ -1,11 +1,4 @@
-import {
-  EllipsisVertical,
-  Undo2,
-  Redo2,
-  Play,
-  Bug,
-  Upload,
-} from 'lucide-react';
+import { EllipsisVertical, Undo2, Redo2, Play, Bug } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -16,6 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { invoke } from '@tauri-apps/api/core';
+import { LoadButton } from '../features/trainer-commands/components/load-button';
 
 export const Header = ({ filepath }: { filepath: String }) => {
   const onInitScenario = async () => {
@@ -79,26 +73,8 @@ export const Header = ({ filepath }: { filepath: String }) => {
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Upload size={16} />
-                </Button>
+                <LoadButton />
               </TooltipTrigger>
-              <TooltipContent>
-                <p>Init Scenario</p>
-              </TooltipContent>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  onClick={onInitScenario}
-                >
-                  <Play size={16} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Play Scenario</p>
-              </TooltipContent>
             </Tooltip>
 
             <Tooltip>
