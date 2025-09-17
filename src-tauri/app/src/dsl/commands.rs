@@ -1,8 +1,9 @@
 use tauri::State;
+use tokio::fs;
 
 use crate::nats::state::NatsState;
 
-use super::error::Result;
+use super::error::{Error, Result};
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn start_dsl_file(
@@ -15,6 +16,14 @@ pub async fn start_dsl_file(
     client.publish("Start", file.into()).await?;
     log::info!("Orchestrator init");
 
-    
     Ok("Orchestrator init".into())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn read_dsl_file(file_path: String) -> Result<String> {
+    let content = fs::read_to_string(&file_path)
+        .await
+        .map_err(|e| Error::FileReadError(file_path, e))?;
+
+    Ok(content)
 }

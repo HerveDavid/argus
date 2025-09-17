@@ -196,6 +196,7 @@ pub fn run() {
             settings::ecs::commands::remove_subscription,
             // DSL
             dsl::commands::start_dsl_file,
+            dsl::commands::read_dsl_file,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

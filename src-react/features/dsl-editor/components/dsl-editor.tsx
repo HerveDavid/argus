@@ -8,22 +8,7 @@ import { DslFile } from '@/types/dsl';
 import { IDockviewPanelProps } from 'dockview';
 import { Header } from './editor-header';
 import { useDsl } from '../provider/dsl.provider';
-
-const EXAMPLE = `set simulation duration to 30 seconds;
-set time step to 1 seconds;
-at 5 seconds, open switch "S1" tagged "event1";
-at 15 seconds, close switch "S1";
-at [10 seconds, 20 seconds] with law "linear", increase load "B1" by 20%;
-when voltage at bus "B1" > 1.05 pu, decrease generator "G1" by 10% tagged "voltage_control";
-after "event1" is completed, close switch "S2";
-at 12 seconds, apply fault at line "L1";
-at 18 seconds, clear fault at line "L1";
-at 3 seconds, increase load ["B2", "B3", "B4"] by 15%;
-at 25 seconds, decrease generator cluster "GenCluster" ["G2", "G3"] by 5%;
-when (voltage at bus "B2" < 0.95 pu and frequency at bus "B2" > 50.1 Hz), increase load "B2" by 5%;
-at [7 seconds, 14 seconds] with law "step", decrease load "B3" by 10%;
-after "voltage_control" is completed, open switch "S3";
-`;
+import { invoke } from '@tauri-apps/api/core';
 
 type DslEditorProps = {
   file: DslFile;
@@ -37,7 +22,9 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
     setInitScenarioRequest,
     setCurrentFileName,
   } = useDsl();
-  const [dslContent, setDslContent] = useState(EXAMPLE);
+  const [dslContent, setDslContent] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const isInitializedRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -49,9 +36,51 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
     };
   }, []);
 
-  // Initialiser le contenu DSL au montage du composant
+  // Charger le fichier DSL au montage
   useEffect(() => {
-    if (!isInitializedRef.current && isMountedRef.current) {
+    const loadDslFile = async () => {
+      if (!isMountedRef.current) return;
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // Construire le chemin complet du fichier
+        const fullPath = `${file.filepath}`;
+
+        // Appeler la fonction read_dsl depuis Rust
+        const content = await invoke<string>('read_dsl_file', {
+          file_path: fullPath,
+        });
+
+        if (isMountedRef.current) {
+          setDslContent(content);
+        }
+      } catch (err) {
+        console.error('Error loading DSL file:', err);
+        if (isMountedRef.current) {
+          setError(`Failed to load file: ${err}`);
+          // Garder le contenu vide en cas d'erreur
+          setDslContent('');
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadDslFile();
+  }, [file.filepath, file.filename]);
+
+  // Initialiser le contenu DSL après le chargement
+  useEffect(() => {
+    if (
+      !isInitializedRef.current &&
+      !isLoading &&
+      isMountedRef.current &&
+      dslContent
+    ) {
       const dslContentBytes = new TextEncoder().encode(dslContent);
 
       // Définir le nom du fichier actuel
@@ -69,6 +98,7 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
     file.filepath,
     file.filename,
     dslContent,
+    isLoading,
     setInitScenarioRequest,
     setCurrentFileName,
   ]);
@@ -157,6 +187,39 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
   return (
     <div className="flex h-full flex-col">
       <Header filepath={file.filepath} />
+
+      {/* Affichage des états de chargement et d'erreur */}
+      {isLoading && (
+        <div className="flex items-center justify-center bg-gray-800 p-4 text-white">
+          <div className="mr-3 h-5 w-5 animate-spin rounded-full border-b-2 border-white"></div>
+          Loading DSL file...
+        </div>
+      )}
+
+      {error && (
+        <div className="border-l-4 border-red-500 bg-red-900 p-4 text-red-100">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-red-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">Error loading file</p>
+              <p className="mt-1 text-sm text-red-200">{error}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-hidden">
         <CodeMirror
           className="h-full border-t"
@@ -166,6 +229,7 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
           onChange={handleContentChange}
           extensions={extensions}
           basicSetup={basicSetup}
+          editable={!isLoading} // Désactive l'édition pendant le chargement
         />
       </div>
     </div>

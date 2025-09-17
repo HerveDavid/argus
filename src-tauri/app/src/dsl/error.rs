@@ -11,6 +11,9 @@ pub enum Error {
 
     #[error(transparent)]
     NatsError(#[from] crate::nats::error::Error),
+
+    #[error("Failed to read file '{0}': {1}")]
+    FileReadError(String, std::io::Error),
 }
 
 impl Serialize for Error {
