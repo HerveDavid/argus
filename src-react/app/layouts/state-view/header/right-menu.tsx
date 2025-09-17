@@ -4,12 +4,13 @@ import { Minus, Square, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { Mode } from '@/features/mode';
 import { DslCommands } from '@/features/dsl-editor/components/dsl-commands';
+import { useMode } from '@/hooks/use-mode';
 
 export const RightMenu = () => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [appWindow, setAppWindow] = useState<WebviewWindow | null>(null);
+  const { currentMode } = useMode();
 
   useEffect(() => {
     const initWindow = async () => {
@@ -59,7 +60,7 @@ export const RightMenu = () => {
 
   return (
     <div className="mr-2 flex items-center gap-x-4">
-      <DslCommands />
+      {currentMode === 'GameMaster' && <DslCommands />}
 
       <div className="bg-border h-6 w-px"></div>
 

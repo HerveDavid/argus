@@ -37,42 +37,6 @@ export const Header = ({ filepath }: { filepath: String }) => {
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={true}
-                  className="h-8 w-8 p-0"
-                >
-                  <Undo2 size={16} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Undo (Ctrl+Z)</p>
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  disabled={true}
-                  className="h-8 w-8 p-0"
-                >
-                  <Redo2 size={16} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Redo (Ctrl+Y)</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
-          <Separator orientation="vertical" className="hidden sm:block" />
-
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
                 <LoadButton />
               </TooltipTrigger>
             </Tooltip>
