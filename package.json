@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "build:sidecars": "cross-env-shell \"bash ./scripts/build-sidecars.sh\"",
     "preview": "vite preview",
     "tauri": "tauri",

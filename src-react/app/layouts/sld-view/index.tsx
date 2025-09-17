@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/resizable';
 import { useSelectedItemStore } from '@/stores/window-header.store';
 
-import { SldBreadcrumb } from './components/sld-breadcrumb';
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
 import { SingleLineDiagram } from '@/features/diagram';
 import { SldTools } from './components/sld-tools';

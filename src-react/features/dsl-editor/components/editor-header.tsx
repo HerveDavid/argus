@@ -1,25 +1,15 @@
-import { EllipsisVertical, Undo2, Redo2, Play, Bug } from 'lucide-react';
+import { EllipsisVertical, Bug } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { invoke } from '@tauri-apps/api/core';
 import { LoadButton } from '../features/trainer-commands/components/load-button';
 
 export const Header = ({ filepath }: { filepath: String }) => {
-  const onInitScenario = async () => {
-    await invoke('init_dsl_file')
-      .catch(console.error)
-      .then((msg) => {
-        console.log(msg);
-      });
-  };
-
   return (
     <TooltipProvider>
       <header className="bg-sidecar flex items-center justify-between border-b px-1">
