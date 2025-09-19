@@ -11,6 +11,7 @@ import {
   DslEditorProvider,
   useDslEditor,
 } from '../provider/dsl-editor.provider';
+import { useNextStepDsl } from '../provider/dsl.provider'; // Ajustez le chemin
 
 type DslEditorProps = {
   file: DslFile;
@@ -30,6 +31,9 @@ export const DslEditorInner: React.FC<DslEditorProps> = ({ file }) => {
   // Utilisation du nouveau provider
   const { dslState, updateDslState, loadDslFile, isLoading, error } =
     useDslEditor();
+
+  // Hook pour les fonctions DSL
+  const { nextStepDsl, isNextStepping, canExecuteNextStep } = useNextStepDsl();
 
   const [dslContent, setDslContent] = useState('');
   const isInitializedRef = useRef(false);
@@ -94,28 +98,6 @@ export const DslEditorInner: React.FC<DslEditorProps> = ({ file }) => {
     }
   }, [file.filename, dslContent, isLoading, updateDslState]);
 
-  // Handler pour l'exécution de ligne avec gestion d'erreur
-  const handleExecuteLine = useCallback(
-    (lineNumber: number, lineContent: string) => {
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      console.log(`Executing DSL line ${lineNumber}:`, lineContent);
-
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          try {
-            alert(`Executed: ${lineContent}`);
-          } catch (error) {
-            console.error('Error executing line:', error);
-          }
-        }
-      }, 0);
-    },
-    [],
-  );
-
   // Handler pour le changement de contenu
   const handleContentChange = useCallback(
     (value: string) => {
@@ -140,19 +122,31 @@ export const DslEditorInner: React.FC<DslEditorProps> = ({ file }) => {
     [updateDslState, file.filename],
   );
 
+  const handleNexStep = async (dsl: string) => {
+    console.log(dsl);
+    return nextStepDsl(dsl);
+  };
+
   // Mémoriser les extensions pour éviter la recréation
   const extensions = React.useMemo(() => {
     try {
+      // Créer l'objet des fonctions DSL à passer à l'extension
+      const dslFunctions = {
+        nextStepDsl: handleNexStep,
+        isNextStepping,
+        canExecuteNextStep,
+      };
+
       return [
         javascript(),
-        ...createExecuteLineExtension(handleExecuteLine),
+        ...createExecuteLineExtension(dslFunctions),
         EditorView.lineWrapping,
       ];
     } catch (error) {
       console.error('Error creating extensions:', error);
       return [javascript(), EditorView.lineWrapping];
     }
-  }, [handleExecuteLine]);
+  }, [nextStepDsl, isNextStepping, canExecuteNextStep]);
 
   // Configuration básica memoizada
   const basicSetup = React.useMemo(

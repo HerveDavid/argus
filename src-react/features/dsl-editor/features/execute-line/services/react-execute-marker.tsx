@@ -2,26 +2,83 @@
 import { GutterMarker } from '@codemirror/view';
 import { createRoot, Root } from 'react-dom/client';
 import React from 'react';
-import { ExecuteCallback } from '../types';
-import { Button } from '@/components/ui/button';
 import { BugPlay } from 'lucide-react';
+import { toast } from 'sonner';
 
-// Composant React pour le bouton d'exécution
+// Interface pour les fonctions DSL injectées
+interface DslFunctions {
+  nextStepDsl: (
+    dsl: string,
+  ) => Promise<{
+    message: string;
+    simulationName: string;
+    target_time: number;
+  } | null>;
+  isNextStepping: boolean;
+  canExecuteNextStep: boolean;
+}
+
+// Composant React pour le bouton d'exécution - maintenant sans hook
 const ExecuteButton: React.FC<{
   lineNumber: number;
   lineContent: string;
-  onExecute?: ExecuteCallback;
-}> = ({ lineNumber, lineContent, onExecute }) => {
-  const handleClick = (e: React.MouseEvent) => {
+  dslFunctions: DslFunctions;
+}> = ({ lineNumber, lineContent, dslFunctions }) => {
+  const { nextStepDsl, isNextStepping, canExecuteNextStep } = dslFunctions;
+
+  const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (onExecute && lineContent.trim()) {
-      try {
-        onExecute(lineNumber, lineContent);
-      } catch (error) {
-        console.error('Error executing line:', error);
+    if (!canExecuteNextStep) {
+      toast.error("Impossible d'exécuter la ligne", {
+        description: 'La simulation doit être prête et en cours de démarrage',
+      });
+      return;
+    }
+
+    if (!lineContent.trim()) {
+      toast.warning('Ligne vide', {
+        description: "Impossible d'exécuter une ligne vide",
+      });
+      return;
+    }
+
+    try {
+      // Toast de début d'exécution
+      toast.loading(`Exécution de la ligne ${lineNumber}...`, {
+        id: `execute-${lineNumber}`,
+        description:
+          lineContent.length > 50
+            ? lineContent.substring(0, 50) + '...'
+            : lineContent,
+      });
+
+      const result = await nextStepDsl(lineContent);
+
+      if (result) {
+        // Toast de succès
+        toast.success('Ligne exécutée avec succès', {
+          id: `execute-${lineNumber}`,
+          description: `${result.message} - Target time: ${result.target_time}`,
+          duration: 3000,
+        });
+      } else {
+        // En cas d'échec mais sans exception
+        toast.error("Échec de l'exécution", {
+          id: `execute-${lineNumber}`,
+          description: "La ligne n'a pas pu être exécutée",
+        });
       }
+    } catch (error) {
+      // Toast d'erreur
+      toast.error("Erreur lors de l'exécution", {
+        id: `execute-${lineNumber}`,
+        description:
+          error instanceof Error
+            ? error.message
+            : "Une erreur inconnue s'est produite",
+      });
     }
   };
 
@@ -33,11 +90,13 @@ const ExecuteButton: React.FC<{
     <button
       className="cm-execute-button mr-4"
       onClick={handleClick}
+      disabled={!canExecuteNextStep || isNextStepping}
       title={`Execute line ${lineNumber}: ${lineContent}`}
       style={{
         background: 'transparent',
         border: 'none',
-        cursor: 'pointer',
+        cursor:
+          !canExecuteNextStep || isNextStepping ? 'not-allowed' : 'pointer',
         padding: '2px',
         display: 'flex',
         alignItems: 'center',
@@ -45,17 +104,21 @@ const ExecuteButton: React.FC<{
         width: '25px',
         height: '25px',
         borderRadius: '3px',
-        color: '#4ade80',
+        color: !canExecuteNextStep || isNextStepping ? '#6b7280' : '#4ade80',
         fontSize: '12px',
+        opacity: !canExecuteNextStep || isNextStepping ? 0.5 : 1,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(74, 222, 128, 0.1)';
+        if (!(!canExecuteNextStep || isNextStepping)) {
+          e.currentTarget.style.background = 'rgba(74, 222, 128, 0.1)';
+        }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'transparent';
       }}
     >
-      <BugPlay />▶
+      <BugPlay />
+      {isNextStepping ? '⏳' : '▶'}
     </button>
   );
 };
@@ -69,7 +132,7 @@ export class ReactExecuteMarker extends GutterMarker {
   constructor(
     private lineNumber: number,
     private lineContent: string,
-    private onExecute?: ExecuteCallback,
+    private dslFunctions: DslFunctions,
   ) {
     super();
   }
@@ -94,12 +157,12 @@ export class ReactExecuteMarker extends GutterMarker {
       // Créer le root React
       this.root = createRoot(this.element);
 
-      // Render le composant React
+      // Render le composant React avec les fonctions DSL injectées
       this.root.render(
         <ExecuteButton
           lineNumber={this.lineNumber}
           lineContent={this.lineContent}
-          onExecute={this.onExecute}
+          dslFunctions={this.dslFunctions}
         />,
       );
 

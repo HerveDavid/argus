@@ -582,8 +582,10 @@ impl GameMasterState {
 
     // NEW ATOMIC UPDATE METHOD:
     pub async fn enqueue_next_step_dsl(&self, dsl: String) -> Result<serde_json::Value> {
-        let form_data = format!("dsl={}", urlencoding::encode(&dsl));
-        self.put_form_data("atomic/rt-user_control_dsl", &form_data)
+        let mut form = reqwest::multipart::Form::new();
+        form = form.text("dsl", dsl);
+
+        self.post_multipart("atomic/rt-user_control_dsl", form)
             .await
     }
 }

@@ -23,6 +23,21 @@ interface UserStatus {
   services: ServicesStatus;
 }
 
+// Types pour la réponse de next_step_dsl_command
+interface NextStepResponse {
+  message: string;
+  simulationName: string;
+  target_time: number;
+}
+
+interface NextStepError {
+  detail: Array<{
+    loc: string[];
+    msg: string;
+    type: string;
+  }>;
+}
+
 // Interface pour le contexte
 interface DslContextType {
   userStatus: UserStatus | null;
@@ -38,6 +53,12 @@ interface DslContextType {
   startDslFile: () => Promise<void>;
   isStarting: boolean;
   startError: string | null;
+  // Nouvel état pour savoir si la simulation est en cours d'exécution
+  isRunning: boolean;
+  // Fonction next step
+  nextStepDsl: (dsl: string) => Promise<NextStepResponse | null>;
+  isNextStepping: boolean;
+  nextStepError: string | null;
 }
 
 // Création du contexte
@@ -59,6 +80,9 @@ export const DslProvider: React.FC<DslProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState<boolean>(false); // Nouvel état
+  const [isNextStepping, setIsNextStepping] = useState<boolean>(false);
+  const [nextStepError, setNextStepError] = useState<string | null>(null);
 
   // Fonction pour appeler la commande Tauri
   const fetchUserStatus = async (): Promise<void> => {
@@ -98,6 +122,9 @@ export const DslProvider: React.FC<DslProviderProps> = ({
 
       await invoke('start_dsl_file');
 
+      // Marquer la simulation comme en cours d'exécution
+      setIsRunning(true);
+
       // Optionnel : rafraîchir le status après le démarrage
       await fetchUserStatus();
     } catch (err) {
@@ -107,6 +134,63 @@ export const DslProvider: React.FC<DslProviderProps> = ({
       console.error('Erreur lors du démarrage du fichier DSL:', err);
     } finally {
       setIsStarting(false);
+    }
+  };
+
+  // Fonction pour exécuter la prochaine étape DSL
+  const nextStepDsl = async (dsl: string): Promise<NextStepResponse | null> => {
+    // Vérifier les conditions : simulation ready et en cours d'exécution
+    if (simulationStatus !== 'ready') {
+      setNextStepError(
+        'Impossible d\'exécuter la prochaine étape : le status de la simulation doit être "ready"',
+      );
+      return null;
+    }
+
+    if (!isRunning) {
+      setNextStepError(
+        "Impossible d'exécuter la prochaine étape : la simulation doit être en cours d'exécution",
+      );
+      return null;
+    }
+
+    try {
+      setIsNextStepping(true);
+      setNextStepError(null);
+
+      const response = await invoke<NextStepResponse>(
+        'enqueue_next_step_dsl_command',
+        {
+          dsl,
+        },
+      );
+
+      console.log(dsl);
+      console.log(response);
+
+      return response;
+    } catch (err) {
+      let errorMessage = "Erreur lors de l'exécution de la prochaine étape";
+
+      // Traiter les erreurs spécifiques du format attendu
+      if (err && typeof err === 'object' && 'detail' in err) {
+        const nextStepErr = err as NextStepError;
+        const details = nextStepErr.detail
+          .map((detail) => `${detail.loc.join('.')}: ${detail.msg}`)
+          .join(', ');
+        errorMessage = `Erreur de validation: ${details}`;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+
+      setNextStepError(errorMessage);
+      console.error(
+        "Erreur lors de l'exécution de la prochaine étape DSL:",
+        err,
+      );
+      return null;
+    } finally {
+      setIsNextStepping(false);
     }
   };
 
@@ -150,6 +234,10 @@ export const DslProvider: React.FC<DslProviderProps> = ({
     startDslFile,
     isStarting,
     startError,
+    isRunning, // Nouvel état ajouté au contexte
+    nextStepDsl,
+    isNextStepping,
+    nextStepError,
   };
 
   return (
@@ -183,6 +271,25 @@ export const useServicesStatus = () => {
 
 // Hook spécialisé pour le démarrage DSL
 export const useStartDsl = () => {
-  const { startDslFile, isStarting, startError, isReady } = useDsl();
-  return { startDslFile, isStarting, startError, isReady };
+  const { startDslFile, isStarting, startError, isReady, isRunning } = useDsl();
+  return { startDslFile, isStarting, startError, isReady, isRunning };
+};
+
+// Hook spécialisé pour la prochaine étape DSL
+export const useNextStepDsl = () => {
+  const {
+    nextStepDsl,
+    isNextStepping,
+    nextStepError,
+    simulationStatus,
+    isRunning,
+  } = useDsl();
+  const canExecuteNextStep = simulationStatus === 'ready' && isRunning;
+
+  return {
+    nextStepDsl,
+    isNextStepping,
+    nextStepError,
+    canExecuteNextStep,
+  };
 };
