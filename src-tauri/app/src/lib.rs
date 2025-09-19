@@ -19,7 +19,7 @@ const SIDECARS: [&str; 2] = ["powsybl", "powsybl-crdt"];
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     std::env::set_var("SQLX_LOGGING", "false");
-    std::env::set_var("RUST_LOG", "info,sqlx=off");
+    std::env::set_var("RUST_LOG", "info,async_nats=warn,sqlx=warn");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::new().build())
@@ -174,6 +174,12 @@ pub fn run() {
             game_master::commands::get_iidm_properties_command,
             game_master::commands::list_events_command,
             game_master::commands::get_queue_summary_command,
+            game_master::commands::list_saved_simulations_command,
+            game_master::commands::list_saved_iidm_command,
+            game_master::commands::update_dsl_command,
+            game_master::commands::delete_dsl_command,
+            game_master::commands::user_status_command,
+            game_master::commands::enqueue_next_step_dsl_command,
             // Nats
             nats::commands::set_nats_address,
             nats::commands::connect_nats,

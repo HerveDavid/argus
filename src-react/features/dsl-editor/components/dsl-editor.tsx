@@ -7,8 +7,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { DslFile } from '@/types/dsl';
 import { IDockviewPanelProps } from 'dockview';
 import { Header } from './editor-header';
-import { useDsl } from '../provider/dsl.provider';
-import { invoke } from '@tauri-apps/api/core';
+import {
+  DslEditorProvider,
+  useDslEditor,
+} from '../provider/dsl-editor.provider';
 
 type DslEditorProps = {
   file: DslFile;
@@ -17,14 +19,19 @@ type DslEditorProps = {
 export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
   params: { file },
 }) => {
-  const {
-    updateInitScenarioRequest,
-    setInitScenarioRequest,
-    setCurrentFileName,
-  } = useDsl();
+  return (
+    <DslEditorProvider>
+      <DslEditorInner file={file} />
+    </DslEditorProvider>
+  );
+};
+
+export const DslEditorInner: React.FC<DslEditorProps> = ({ file }) => {
+  // Utilisation du nouveau provider
+  const { dslState, updateDslState, loadDslFile, isLoading, error } =
+    useDslEditor();
+
   const [dslContent, setDslContent] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const isInitializedRef = useRef(false);
   const isMountedRef = useRef(true);
 
@@ -38,42 +45,39 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
 
   // Charger le fichier DSL au montage
   useEffect(() => {
-    const loadDslFile = async () => {
+    const initializeDslFile = async () => {
       if (!isMountedRef.current) return;
 
-      setIsLoading(true);
-      setError(null);
-
       try {
-        // Construire le chemin complet du fichier
-        const fullPath = `${file.filepath}`;
+        // Charger le fichier via le provider
+        await loadDslFile(file.filepath.toString());
 
-        // Appeler la fonction read_dsl depuis Rust
-        const content = await invoke<string>('read_dsl_file', {
-          file_path: fullPath,
-        });
-
-        if (isMountedRef.current) {
+        // Le contenu sera mis à jour via dslState
+        if (isMountedRef.current && dslState.dsl_file_content.length > 0) {
+          const content = new TextDecoder().decode(
+            new Uint8Array(dslState.dsl_file_content),
+          );
           setDslContent(content);
         }
       } catch (err) {
-        console.error('Error loading DSL file:', err);
-        if (isMountedRef.current) {
-          setError(`Failed to load file: ${err}`);
-          // Garder le contenu vide en cas d'erreur
-          setDslContent('');
-        }
-      } finally {
-        if (isMountedRef.current) {
-          setIsLoading(false);
-        }
+        console.error('Error initializing DSL file:', err);
       }
     };
 
-    loadDslFile();
-  }, [file.filepath, file.filename]);
+    initializeDslFile();
+  }, [file.filepath, loadDslFile]);
 
-  // Initialiser le contenu DSL après le chargement
+  // Synchroniser l'état local avec le provider
+  useEffect(() => {
+    if (dslState.dsl_file_content.length > 0) {
+      const content = new TextDecoder().decode(
+        new Uint8Array(dslState.dsl_file_content),
+      );
+      setDslContent(content);
+    }
+  }, [dslState.dsl_file_content]);
+
+  // Initialiser les métadonnées du provider
   useEffect(() => {
     if (
       !isInitializedRef.current &&
@@ -81,39 +85,24 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
       isMountedRef.current &&
       dslContent
     ) {
-      const dslContentBytes = new TextEncoder().encode(dslContent);
-
-      // Définir le nom du fichier actuel
-      setCurrentFileName(file.filepath.toString());
-
-      setInitScenarioRequest({
-        dsl_file_content: Array.from(dslContentBytes),
+      // Mettre à jour le nom de simulation dans le provider
+      updateDslState({
         simulation_name: file.filename.toString(),
-        artifact_id: 'ieee14bus',
       });
 
       isInitializedRef.current = true;
     }
-  }, [
-    file.filepath,
-    file.filename,
-    dslContent,
-    isLoading,
-    setInitScenarioRequest,
-    setCurrentFileName,
-  ]);
+  }, [file.filename, dslContent, isLoading, updateDslState]);
 
   // Handler pour l'exécution de ligne avec gestion d'erreur
   const handleExecuteLine = useCallback(
     (lineNumber: number, lineContent: string) => {
-      // Vérifier si le composant est toujours monté
       if (!isMountedRef.current) {
         return;
       }
 
       console.log(`Executing DSL line ${lineNumber}:`, lineContent);
 
-      // Utiliser setTimeout pour éviter les problèmes de race condition
       setTimeout(() => {
         if (isMountedRef.current) {
           try {
@@ -127,7 +116,7 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
     [],
   );
 
-  // Handler pour le changement de contenu avec debounce amélioré
+  // Handler pour le changement de contenu
   const handleContentChange = useCallback(
     (value: string) => {
       if (!isMountedRef.current) {
@@ -136,21 +125,19 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
 
       setDslContent(value);
 
-      // Utiliser setTimeout pour éviter les mises à jour synchrones
       setTimeout(() => {
         if (isMountedRef.current) {
           const dslContentBytes = new TextEncoder().encode(value);
 
-          // Utiliser updateInitScenarioRequest pour les modifications (avec debounce)
-          updateInitScenarioRequest({
+          // Mettre à jour le provider avec le nouveau contenu
+          updateDslState({
             dsl_file_content: Array.from(dslContentBytes),
             simulation_name: file.filename.toString(),
-            artifact_id: 'ieee14bus',
           });
         }
       }, 0);
     },
-    [updateInitScenarioRequest, file.filename],
+    [updateDslState, file.filename],
   );
 
   // Mémoriser les extensions pour éviter la recréation
@@ -163,7 +150,6 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
       ];
     } catch (error) {
       console.error('Error creating extensions:', error);
-      // Fallback sans l'extension d'exécution en cas d'erreur
       return [javascript(), EditorView.lineWrapping];
     }
   }, [handleExecuteLine]);
@@ -229,7 +215,7 @@ export const DslEditor: React.FC<IDockviewPanelProps<DslEditorProps>> = ({
           onChange={handleContentChange}
           extensions={extensions}
           basicSetup={basicSetup}
-          editable={!isLoading} // Désactive l'édition pendant le chargement
+          editable={!isLoading}
         />
       </div>
     </div>

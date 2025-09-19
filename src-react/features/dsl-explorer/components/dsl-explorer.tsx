@@ -1,94 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FolderOpen, File, FolderPlus, Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
 import { readDir } from '@tauri-apps/plugin-fs';
 import { useCentralPanelStore } from '@/stores/central-panel.store';
+import { useDslExplorerStore, FileNode } from '../stores/dsl.store';
 import { TreeNode } from './tree-node';
 
-interface FileNode {
-  id: string;
-  name: string;
-  type: 'folder' | 'file';
-  path: string;
-  parent: string;
-  children: FileNode[];
-}
-
 export const DslExplorer: React.FC = () => {
-  const [files, setFiles] = useState<FileNode[]>([]);
-  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set(),
-  );
   const [editingNode, setEditingNode] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
-  const [currentPath, setCurrentPath] = useState('No folder selected');
   const [isLoading, setIsLoading] = useState(false);
   const { addPanel } = useCentralPanelStore();
 
-  const convertToFileNode = (entry: any, parentPath = ''): FileNode => {
-    const isDirectory = entry.isDirectory || entry.children !== undefined;
-    const fullPath = entry.path || `${parentPath}/${entry.name || 'unknown'}`;
-    const name = entry.name || 'Unknown';
+  // Utilisation du store
+  const {
+    files,
+    expandedFolders,
+    currentPath,
+    recentFolders,
+    setFiles,
+    addFiles,
+    toggleFolder: toggleFolderStore,
+    setCurrentPath,
+    addRecentFile,
+    updateNodeName,
+    updateNodeChildren,
+    addNode: addNodeToStore,
+  } = useDslExplorerStore();
 
-    console.log('Converting entry:', { entry, fullPath, name, isDirectory });
+  const convertToFileNode = useCallback(
+    (entry: any, parentPath = ''): FileNode => {
+      const isDirectory = entry.isDirectory || entry.children !== undefined;
+      const fullPath = entry.path || `${parentPath}/${entry.name || 'unknown'}`;
+      const name = entry.name || 'Unknown';
 
-    return {
-      id: fullPath,
-      name: name,
-      type: isDirectory ? 'folder' : 'file',
-      path: fullPath,
-      parent: parentPath,
-      children: [],
-    };
-  };
+      console.log('Converting entry:', { entry, fullPath, name, isDirectory });
 
-  const readDirectory = async (dirPath: string): Promise<FileNode[]> => {
-    try {
-      console.log('Reading directory:', dirPath);
-      const entries = await readDir(dirPath);
-      console.log('Raw entries from readDir:', entries);
+      return {
+        id: fullPath,
+        name: name,
+        type: isDirectory ? 'folder' : 'file',
+        path: fullPath,
+        parent: parentPath,
+        children: [],
+      };
+    },
+    [],
+  );
 
-      const nodes: FileNode[] = [];
+  const readDirectory = useCallback(
+    async (dirPath: string): Promise<FileNode[]> => {
+      try {
+        console.log('Reading directory:', dirPath);
+        const entries = await readDir(dirPath);
+        console.log('Raw entries from readDir:', entries);
 
-      for (const entry of entries) {
-        console.log('Processing entry:', entry);
+        const nodes: FileNode[] = [];
 
-        if (!entry.name) {
-          console.warn('Entry without name, skipping:', entry);
-          continue;
-        }
+        for (const entry of entries) {
+          console.log('Processing entry:', entry);
 
-        const node = convertToFileNode(entry, dirPath);
-
-        if (entry.isDirectory) {
-          try {
-            const children = await readDirectory(
-              entry.name || `${dirPath}/${entry.name}`,
-            );
-            node.children = children;
-          } catch (error) {
-            console.warn(`Cannot read directory ${entry.name}:`, error);
-            node.children = [];
+          if (!entry.name) {
+            console.warn('Entry without name, skipping:', entry);
+            continue;
           }
+
+          const node = convertToFileNode(entry, dirPath);
+
+          // Pour les dossiers, on ne lit pas récursivement tout de suite
+          // On le fera à la demande lors de l'expansion
+          if (entry.isDirectory) {
+            node.children = []; // Laissé vide, sera chargé lors de l'expansion
+          }
+
+          nodes.push(node);
         }
 
-        nodes.push(node);
+        return nodes.sort((a, b) => {
+          if (a.type !== b.type) {
+            return a.type === 'folder' ? -1 : 1;
+          }
+          return a.name.localeCompare(b.name);
+        });
+      } catch (error) {
+        console.error('Error reading directory:', error);
+        throw error;
       }
+    },
+    [convertToFileNode],
+  );
 
-      return nodes.sort((a, b) => {
-        if (a.type !== b.type) {
-          return a.type === 'folder' ? -1 : 1;
-        }
-        return a.name.localeCompare(b.name);
-      });
-    } catch (error) {
-      console.error('Error reading directory:', error);
-      throw error;
-    }
-  };
-
-  const openFolder = async () => {
+  const openFolder = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -121,7 +124,9 @@ export const DslExplorer: React.FC = () => {
         console.log('Created root node:', newNode);
 
         setFiles([newNode]);
-        setExpandedFolders(new Set([newNode.id]));
+        // Auto-expand le dossier racine
+        const newExpanded = new Set([newNode.id]);
+        useDslExplorerStore.getState().setExpandedFolders(newExpanded);
         setCurrentPath(folderPath);
       }
     } catch (error) {
@@ -129,9 +134,9 @@ export const DslExplorer: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [readDirectory, setFiles, setCurrentPath]);
 
-  const openFiles = async () => {
+  const openFiles = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -167,185 +172,162 @@ export const DslExplorer: React.FC = () => {
           };
         });
 
-        setFiles((prev) => [...prev, ...newFiles]);
+        addFiles(newFiles);
       }
     } catch (error) {
       console.error('Error opening files:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [addFiles]);
 
-  const loadFolderContents = async (node: FileNode) => {
-    if (!node.path) {
-      console.warn('Node without path, cannot load contents:', node);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const children = await readDirectory(node.path);
-
-      setFiles((prev) => updateNodeChildren(prev, node.id, ...children));
-    } catch (error) {
-      console.error('Error loading folder contents:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const findNodeById = (nodes: FileNode[], id: string): FileNode | null => {
-    for (const node of nodes) {
-      if (node.id === id) return node;
-      if (node.children.length > 0) {
-        const found = findNodeById(node.children, id);
-        if (found) return found;
+  const loadFolderContents = useCallback(
+    async (node: FileNode) => {
+      if (!node.path) {
+        console.warn('Node without path, cannot load contents:', node);
+        return;
       }
-    }
-    return null;
-  };
 
-  const updateNodeChildren = (
-    nodes: FileNode[],
-    parentId: string,
-    ...newNodes: FileNode[]
-  ): FileNode[] => {
-    return nodes.map((node) => {
-      if (node.id === parentId) {
-        return { ...node, children: [...node.children, ...newNodes] };
+      try {
+        setIsLoading(true);
+        const children = await readDirectory(node.path);
+        updateNodeChildren(node.id, children);
+      } catch (error) {
+        console.error('Error loading folder contents:', error);
+      } finally {
+        setIsLoading(false);
       }
-      if (node.children.length > 0) {
-        return {
-          ...node,
-          children: updateNodeChildren(node.children, parentId, ...newNodes),
-        };
-      }
-      return node;
-    });
-  };
+    },
+    [readDirectory, updateNodeChildren],
+  );
 
-  const updateNodeName = (
-    nodes: FileNode[],
-    nodeId: string,
-    newName: string,
-  ): FileNode[] => {
-    return nodes.map((node) => {
-      if (node.id === nodeId) {
-        return { ...node, name: newName };
-      }
-      if (node.children.length > 0) {
-        return {
-          ...node,
-          children: updateNodeName(node.children, nodeId, newName),
-        };
-      }
-      return node;
-    });
-  };
-
-  const addNode = (parentId: string | null, type: 'file' | 'folder') => {
-    let parentPath = '';
-
-    if (parentId) {
-      const parentNode = findNodeById(files, parentId);
-      parentPath = parentNode?.path || '';
-    }
-
-    const nodeName = type === 'file' ? 'new-file.txt' : 'new-folder';
-    const nodePath = parentPath ? `${parentPath}/${nodeName}` : nodeName;
-
-    const newNode: FileNode = {
-      id: nodePath,
-      name: nodeName,
-      type,
-      path: nodePath,
-      parent: parentPath,
-      children: [],
-    };
-
-    console.log('Adding new node:', newNode);
-
-    if (parentId) {
-      setFiles((prev) => updateNodeChildren(prev, parentId, newNode));
-      setExpandedFolders((prev) => new Set(prev).add(parentId));
-    } else {
-      setFiles((prev) => [...prev, newNode]);
-    }
-
-    setEditingNode(newNode.id);
-    setEditingValue(newNode.name);
-  };
-
-  const toggleFolder = async (folderId: string) => {
-    const node = findNodeById(files, folderId);
-
-    setExpandedFolders((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(folderId)) {
-        newSet.delete(folderId);
-      } else {
-        newSet.add(folderId);
-
-        if (node && node.children.length === 0 && node.path) {
-          loadFolderContents(node);
+  const findNodeById = useCallback(
+    (nodes: FileNode[], id: string): FileNode | null => {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        if (node.children.length > 0) {
+          const found = findNodeById(node.children, id);
+          if (found) return found;
         }
       }
-      return newSet;
-    });
-  };
+      return null;
+    },
+    [],
+  );
 
-  const handleFileClick = (node: FileNode) => {
-    console.log('File clicked - node:', node);
-    console.log('Path:', node.path, 'Name:', node.name);
+  const toggleFolder = useCallback(
+    async (folderId: string) => {
+      const node = findNodeById(files, folderId);
 
-    if (node.path && node.name) {
-      console.log('Opening file in editor:', {
-        path: node.path,
-        name: node.name,
-      });
+      // Toggle l'état dans le store
+      toggleFolderStore(folderId);
 
-      addPanel({
-        id: node.path,
-        tabComponent: 'editor',
-        component: 'editor',
-        params: {
-          file: {
-            filepath: node.path,
-            filename: node.name,
+      // Si on ouvre le dossier et qu'il n'a pas encore de contenu, on le charge
+      if (
+        node &&
+        !expandedFolders.has(folderId) &&
+        node.children.length === 0 &&
+        node.path
+      ) {
+        await loadFolderContents(node);
+      }
+    },
+    [
+      files,
+      expandedFolders,
+      findNodeById,
+      toggleFolderStore,
+      loadFolderContents,
+    ],
+  );
+
+  const handleFileClick = useCallback(
+    (node: FileNode) => {
+      console.log('File clicked - node:', node);
+      console.log('Path:', node.path, 'Name:', node.name);
+
+      if (node.path && node.name) {
+        console.log('Opening file in editor:', {
+          path: node.path,
+          name: node.name,
+        });
+
+        addPanel({
+          id: node.path,
+          tabComponent: 'editor',
+          component: 'editor',
+          params: {
+            file: {
+              filepath: node.path,
+              filename: node.name,
+            },
           },
-        },
-      });
-    } else {
-      console.error('Node missing required fields:', node);
-    }
-  };
+        });
 
-  const handleEdit = (nodeId: string, value: string) => {
+        // Ajouter aux fichiers récents
+        addRecentFile(node.path);
+      } else {
+        console.error('Node missing required fields:', node);
+      }
+    },
+    [addPanel, addRecentFile],
+  );
+
+  const addNode = useCallback(
+    (parentId: string | null, type: 'file' | 'folder') => {
+      let parentPath = '';
+
+      if (parentId) {
+        const parentNode = findNodeById(files, parentId);
+        parentPath = parentNode?.path || '';
+      }
+
+      const nodeName = type === 'file' ? 'new-file.txt' : 'new-folder';
+      const nodePath = parentPath ? `${parentPath}/${nodeName}` : nodeName;
+
+      const newNode: FileNode = {
+        id: nodePath,
+        name: nodeName,
+        type,
+        path: nodePath,
+        parent: parentPath,
+        children: [],
+      };
+
+      console.log('Adding new node:', newNode);
+
+      addNodeToStore(parentId, newNode);
+
+      setEditingNode(newNode.id);
+      setEditingValue(newNode.name);
+    },
+    [files, findNodeById, addNodeToStore],
+  );
+
+  const handleEdit = useCallback((nodeId: string, value: string) => {
     setEditingNode(nodeId);
     setEditingValue(value);
-  };
+  }, []);
 
-  const handleEditComplete = () => {
+  const handleEditComplete = useCallback(() => {
     if (editingNode && editingValue.trim()) {
-      setFiles((prev) =>
-        updateNodeName(prev, editingNode, editingValue.trim()),
-      );
+      updateNodeName(editingNode, editingValue.trim());
     }
     setEditingNode(null);
     setEditingValue('');
-  };
+  }, [editingNode, editingValue, updateNodeName]);
 
-  const handleEditCancel = () => {
+  const handleEditCancel = useCallback(() => {
     setEditingNode(null);
     setEditingValue('');
-  };
+  }, []);
 
   return (
     <div className="flex h-full flex-col">
       <header className="bg-background sticky top-0 z-10 border-b">
         <div className="flex items-center justify-between p-3">
           <h3 className="truncate text-sm font-semibold" title={currentPath}>
-            scenario_MQIS_NB
+            DSL Explorer
           </h3>
           <div className="flex gap-1">
             <Button
@@ -424,7 +406,7 @@ export const DslExplorer: React.FC = () => {
 
         {files.length === 0 && !isLoading && (
           <div className="text-muted-foreground py-8 text-center text-sm">
-            No file, open a dir.
+            No files loaded. Open a folder or select files to get started.
           </div>
         )}
       </div>

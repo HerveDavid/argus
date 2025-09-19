@@ -1,14 +1,9 @@
 import { Result, useAtom } from '@effect-atom/atom-react';
 import React, { createContext, useContext } from 'react';
-import {
-  loadSldMetadataV2,
-  unloadSldMetadata,
-} from '../services/metadata.service';
+import { loadSldMetadata } from '../services/metadata.service';
 import { PowsyblError } from '@/services/common/powsybl-client';
 import { EcsError } from '@/services/common/ecs-client/errors';
-import { DiagramEvent } from '@/types/diagram-event';
 import { SldMetadata } from '@/types/sld-metadata';
-import { Channel } from '@tauri-apps/api/core';
 
 type MetadataContextType = {
   elementId: string;
@@ -16,7 +11,6 @@ type MetadataContextType = {
     {
       readonly metadata: SldMetadata;
       readonly svg: string;
-      readonly channel: Channel<DiagramEvent>;
     },
     PowsyblError | EcsError
   >;
@@ -42,16 +36,13 @@ export const MetadataProvider = ({
   elementId: string;
 }) => {
   // Effect-ts
-  const metadataAtom = loadSldMetadataV2(elementId);
+  const metadataAtom = loadSldMetadata(elementId);
   const [metadata, load] = useAtom(metadataAtom);
-
-  const removeAtom = unloadSldMetadata(elementId);
-  const [_, unload] = useAtom(removeAtom);
 
   // React useEffect
   React.useEffect(() => {
     load();
-  }, [elementId, load]);
+  }, [elementId]);
 
   // Context
   const store = React.useMemo(
@@ -64,8 +55,8 @@ export const MetadataProvider = ({
 
   // Unmount
   React.useEffect(() => {
-    return () => unload();
-  }, [elementId, unload]);
+    return () => {};
+  }, [elementId]);
 
   return (
     <MetadataContext.Provider value={store}>

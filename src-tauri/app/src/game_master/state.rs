@@ -123,7 +123,6 @@ impl GameMasterState {
         }))
     }
 
-    // Helper methods for HTTP requests
     async fn get<T>(&self, endpoint: &str) -> Result<T>
     where
         T: for<'de> Deserialize<'de>,
@@ -238,7 +237,66 @@ impl GameMasterState {
         Ok(data)
     }
 
-    // TRAINER endpoints
+    async fn delete<T>(&self, endpoint: &str) -> Result<T>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.trim_start_matches('/')
+        );
+
+        let response = self.client.delete(&url).send().await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            return Err(Error::HttpError {
+                status: status.as_u16(),
+                message: format!("DELETE request failed for {}", endpoint),
+            });
+        }
+
+        let data = response
+            .json::<T>()
+            .await
+            .map_err(|e| Error::JsonDeserialization(e.to_string()))?;
+
+        Ok(data)
+    }
+
+    async fn put_form_data(&self, endpoint: &str, form_data: &str) -> Result<serde_json::Value> {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.trim_start_matches('/')
+        );
+
+        let response = self
+            .client
+            .put(&url)
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(form_data.to_owned())
+            .send()
+            .await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            return Err(Error::HttpError {
+                status: status.as_u16(),
+                message: format!("PUT form data request failed for {}", endpoint),
+            });
+        }
+
+        let data = response
+            .json::<serde_json::Value>()
+            .await
+            .map_err(|e| Error::JsonDeserialization(e.to_string()))?;
+
+        Ok(data)
+    }
+
+    // TRAINER endpoints (existing ones remain the same)
     pub async fn init_scenario(
         &self,
         dsl_file_content: Vec<u8>,
@@ -263,6 +321,66 @@ impl GameMasterState {
         }
 
         self.post_multipart("trainer/init", form).await
+    }
+
+    // NEW TRAINER METHODS:
+    pub async fn list_saved_simulations(&self) -> Result<serde_json::Value> {
+        self.get("trainer/dsl/simulations").await
+    }
+
+    pub async fn list_saved_iidm(&self) -> Result<serde_json::Value> {
+        self.get("trainer/iidm").await
+    }
+
+    pub async fn update_dsl(
+        &self,
+        simulation_name: String,
+        dsl_file_content: Vec<u8>,
+    ) -> Result<serde_json::Value> {
+        let mut form = reqwest::multipart::Form::new();
+
+        let file_part = reqwest::multipart::Part::bytes(dsl_file_content)
+            .file_name("scenario.dsl")
+            .mime_str("application/octet-stream")
+            .map_err(|_| Error::InvalidResponseFormat)?;
+
+        form = form.part("dsl_file", file_part);
+
+        let endpoint = format!("trainer/dsl/{}", simulation_name);
+        self.put_multipart(&endpoint, form).await
+    }
+
+    pub async fn delete_dsl(&self, simulation_name: String) -> Result<serde_json::Value> {
+        let endpoint = format!("trainer/dsl/{}", simulation_name);
+        self.delete(&endpoint).await
+    }
+
+    async fn put_multipart<T>(&self, endpoint: &str, form: reqwest::multipart::Form) -> Result<T>
+    where
+        T: for<'de> serde::Deserialize<'de>,
+    {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.trim_start_matches('/')
+        );
+
+        let response = self.client.put(&url).multipart(form).send().await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            return Err(Error::HttpError {
+                status: status.as_u16(),
+                message: format!("PUT multipart request failed for {}", endpoint),
+            });
+        }
+
+        let data = response
+            .json::<T>()
+            .await
+            .map_err(|e| Error::JsonDeserialization(e.to_string()))?;
+
+        Ok(data)
     }
 
     pub async fn trainer_update_system_state(
@@ -319,7 +437,7 @@ impl GameMasterState {
         Ok(text)
     }
 
-    // SIMULATOR CONTROL endpoints
+    // SIMULATOR CONTROL endpoints (existing ones remain the same)
     pub async fn simulator_control(&self, input: &AggregateInput) -> Result<AggregateOutput> {
         self.post("sim/simulatorcontrol", input).await
     }
@@ -335,7 +453,7 @@ impl GameMasterState {
         self.post("sim/simulatorcontrol_v2", input).await
     }
 
-    // USER CONTROL endpoints
+    // USER CONTROL endpoints (existing ones remain the same)
     pub async fn user_control(&self, control: &ControlInput) -> Result<serde_json::Value> {
         self.put("user/control", control).await
     }
@@ -378,7 +496,12 @@ impl GameMasterState {
         self.get("user/controls").await
     }
 
-    // IIDM CONTROL endpoints
+    // NEW USER CONTROL METHOD:
+    pub async fn user_status(&self) -> Result<serde_json::Value> {
+        self.get("user/status").await
+    }
+
+    // IIDM CONTROL endpoints (existing ones remain the same)
     pub async fn upload_iidm_file(
         &self,
         file_content: Vec<u8>,
@@ -408,7 +531,7 @@ impl GameMasterState {
         self.get(&endpoint).await
     }
 
-    // EVENT STORE endpoints
+    // EVENT STORE endpoints (existing ones remain the same)
     pub async fn list_events(
         &self,
         status: Option<&str>,
@@ -455,5 +578,12 @@ impl GameMasterState {
 
     pub async fn get_queue_summary(&self) -> Result<serde_json::Value> {
         self.get("queue/summary").await
+    }
+
+    // NEW ATOMIC UPDATE METHOD:
+    pub async fn enqueue_next_step_dsl(&self, dsl: String) -> Result<serde_json::Value> {
+        let form_data = format!("dsl={}", urlencoding::encode(&dsl));
+        self.put_form_data("atomic/rt-user_control_dsl", &form_data)
+            .await
     }
 }

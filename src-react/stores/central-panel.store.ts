@@ -77,15 +77,45 @@ const useCentralPanelStoreInner = create<CentralPanelStore>()(
       },
 
       detachPanel: (id) => {
-        get().removePanel(id);
-        new WebviewWindow(id, {
-          url: paths.panels.getHref(id),
-          title: id,
-          width: 800,
-          height: 600,
-          resizable: true,
-          focus: true,
-        });
+        try {
+          const cleanId = id.replace(/[^a-zA-Z0-9\-\/_:]/g, '_');
+
+          const webview = new WebviewWindow(cleanId, {
+            url: paths.panels.getHref(id),
+            title: id,
+            width: 800,
+            height: 600,
+            resizable: true,
+            focus: true,
+            center: false,
+            minimizable: true,
+            maximizable: true,
+            closable: true,
+            alwaysOnTop: false,
+            fullscreen: false,
+            transparent: false,
+            visible: true,
+            decorations: false,
+            devtools: true,
+            titleBarStyle: 'overlay',
+          });
+
+          // Gérer les événements de création
+          webview.once('tauri://created', () => {
+            console.log('Fenêtre créée avec succès');
+            // Forcer l'affichage
+            webview.show();
+            webview.setFocus();
+          });
+
+          webview.once('tauri://error', (error) => {
+            console.error('Erreur lors de la création de la fenêtre:', error);
+          });
+
+          console.log('WebviewWindow créée:', webview);
+        } catch (error) {
+          console.error('Erreur:', error);
+        }
       },
 
       removeGroup: (group) => {
@@ -135,10 +165,7 @@ const saveLayout = async (api: DockviewApi, runtime: LiveManagedRuntime) => {
     await runtime.runPromise(setEffect);
   } catch (error) {
     const errorEffect = Effect.gen(function* () {
-      yield* Effect.logError(
-        'Error when saving layout:',
-        error,
-      );
+      yield* Effect.logError('Error when saving layout:', error);
     });
     await runtime.runPromise(errorEffect);
   }

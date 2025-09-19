@@ -1,12 +1,14 @@
 import { useParams } from 'react-router';
+import { CentralPanelLayouts } from '@/app/layouts/central-panel';
+import { StateView } from '@/app/layouts/state-view';
+import { CentralPanel } from '@/features/central-panel';
 
 const Panels = () => {
-  const { id } = useParams();
-
+  const { _id } = useParams();
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col">
-      {id!} NOT IMPLEMENTED YET
-    </div>
+    <StateView>
+      <CentralPanel layouts={CentralPanelLayouts} />
+    </StateView>
   );
 };
 

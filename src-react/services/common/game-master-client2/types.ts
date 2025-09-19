@@ -1,4 +1,3 @@
-// types.ts
 export interface SimulationConfig {
   simulation_name: string;
   start_time: number;
@@ -37,7 +36,7 @@ export interface AggregateOutput {
 
 export type ClusterTarget = string[] | Record<string, any>;
 
-// Request types
+// Request types existants
 export interface InitScenarioRequest {
   dsl_file_content: number[];
   simulation_name?: string;
@@ -116,4 +115,79 @@ export interface ListEventsRequest {
   simulation?: string;
   limit?: number;
   offset?: number;
+}
+
+// NOUVEAUX TYPES DE REQUÊTE
+export interface ListSavedSimulationsRequest {
+  // Pas de paramètres nécessaires pour cette requête
+}
+
+export interface ListSavedIidmRequest {
+  // Pas de paramètres nécessaires pour cette requête
+}
+
+export interface UpdateDslRequest {
+  simulation_name: string;
+  dsl_file_content: number[];
+}
+
+export interface DeleteDslRequest {
+  simulation_name: string;
+}
+
+export interface UserStatusRequest {
+  // Pas de paramètres nécessaires pour cette requête
+}
+
+export interface EnqueueNextStepDslRequest {
+  dsl: string;
+}
+
+// Types de réponse pour les nouvelles API
+export interface SavedSimulation {
+  simulationName: string;
+  path: string;
+  size: number;
+  lastModified: string;
+  etag: string;
+}
+
+export interface SavedIidm {
+  id: string;
+  fileName: string;
+  path: string;
+  size: number;
+  lastModified: string;
+  description?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface QueueSummary {
+  pending: number;
+  scheduled: number;
+  active: number;
+  completed: number;
+  canceled: number;
+  failed: number;
+  locked: number;
+  total: number;
+}
+
+export interface EventItem {
+  id: string;
+  status:
+    | 'pending'
+    | 'scheduled'
+    | 'active'
+    | 'completed'
+    | 'canceled'
+    | 'failed'
+    | 'locked';
+  source: 'dsl' | 'user' | 'system';
+  time_spec: 'point' | 'interval' | 'condition';
+  simulation?: string;
+  timestamp: number;
+  data: Record<string, any>;
+  created_at: string;
+  updated_at: string;
 }

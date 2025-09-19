@@ -1,71 +1,12 @@
-use std::sync::atomic::AtomicBool;
-use std::sync::Arc;
-
 use crate::entities::sld_metadata::SldMetadata;
-use crate::nats::state::NatsState;
 use crate::sessions::state::SessionState;
-use crate::tasks::state::TasksState;
 
-use super::entities::{ScadaMessage, ScadaOutput};
-use super::error::{Error, Result};
+use super::entities::ScadaOutput;
+use super::error::Result;
 use super::state::*;
 use super::utils;
 
-use tauri::ipc::Channel;
 use tauri::State;
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn subscribe_game_master_feeders(
-    tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
-    nats_state: State<'_, tokio::sync::Mutex<NatsState>>,
-    session_state: State<'_, tokio::sync::Mutex<SessionState>>,
-    metadata: SldMetadata,
-    channel: Channel<ScadaMessage>,
-) -> Result<Vec<ScadaOutput>> {
-    let session_client = session_state.lock().await;
-    let outputs = utils::get_scada_outputs(session_client, metadata).await?;
-
-    if outputs.is_empty() {
-        return Err(Error::OutputsEmpty);
-    }
-
-    // Get NATS client
-    let nats_client = {
-        let nats_state = nats_state.lock().await;
-        match nats_state.get_client() {
-            Some(client) => {
-                log::info!("NATS client acquired successfully");
-                client
-            }
-            None => {
-                log::error!("NATS client not initialized");
-                return Err(Error::ClientNotInitialized);
-            }
-        }
-    };
-
-    for output in outputs.clone() {
-        let id = output.id.clone();
-        let paused = Arc::new(AtomicBool::new(false));
-        let task = utils::create_task_feeder(nats_client.clone(), channel.clone(), output, paused);
-        tasks_state.lock().await.add_task(id, task)?;
-    }
-
-    Ok(outputs)
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn unsubscribe_game_master_feeders(
-    tasks_state: State<'_, tokio::sync::Mutex<TasksState>>,
-    outputs: Vec<ScadaOutput>,
-) -> Result<bool> {
-    let mut tasks_guard = tasks_state.lock().await;
-    for output in outputs {
-        tasks_guard.close_task(&output.id).await?;
-    }
-
-    Ok(true)
-}
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_game_master_outputs(
@@ -87,20 +28,6 @@ pub async fn init_game_master_scenario(
     state
         .init_scenario(dsl_file_content, simulation_name, artifact_id)
         .await
-}
-
-#[tauri::command(rename_all = "snake_case")]
-pub async fn trainer_update_system_state_command(
-    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
-    current_time: f64,
-    state: Option<serde_json::Value>,
-) -> Result<serde_json::Value> {
-    let gm_state = gamemaster_state.lock().await;
-    let update = SystemStateUpdate {
-        current_time,
-        state,
-    };
-    gm_state.trainer_update_system_state(&update).await
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -288,4 +215,70 @@ pub async fn get_queue_summary_command(
 ) -> Result<serde_json::Value> {
     let state = gamemaster_state.lock().await;
     state.get_queue_summary().await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn list_saved_simulations_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.list_saved_simulations().await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn list_saved_iidm_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.list_saved_iidm().await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn update_dsl_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+    simulation_name: String,
+    dsl_file_content: Vec<u8>,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.update_dsl(simulation_name, dsl_file_content).await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn delete_dsl_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+    simulation_name: String,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.delete_dsl(simulation_name).await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn trainer_update_system_state_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+    current_time: f64,
+    state: Option<serde_json::Value>,
+) -> Result<serde_json::Value> {
+    let gm_state = gamemaster_state.lock().await;
+    let update = SystemStateUpdate {
+        current_time,
+        state,
+    };
+    gm_state.trainer_update_system_state(&update).await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn user_status_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.user_status().await
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn enqueue_next_step_dsl_command(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+    dsl: String,
+) -> Result<serde_json::Value> {
+    let state = gamemaster_state.lock().await;
+    state.enqueue_next_step_dsl(dsl).await
 }

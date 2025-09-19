@@ -17,7 +17,6 @@ export const loadSldMetadata = Atom.family((elementId: string) =>
   runtimeAtom.fn(
     Effect.fn(function* () {
       const powsyblClient = yield* PowsyblClient;
-      const ecsClient = yield* EcsClient;
 
       const metadata = yield* powsyblClient.getSingleLineDiagram({
         element_id: elementId,
@@ -34,10 +33,6 @@ export const loadSldMetadata = Atom.family((elementId: string) =>
           new PowsyblError({ message: `Svg is empty: ${elementId}` }),
         );
       }
-
-      const channel = new Channel<DiagramEvent>();
-      channel.onmessage = console.log;
-      yield* ecsClient.add_subscription({ elementId, channel });
 
       return {
         metadata: metadata.metadata as unknown as SldMetadata,
@@ -47,39 +42,25 @@ export const loadSldMetadata = Atom.family((elementId: string) =>
   ),
 );
 
+export const addChannelFeeders = Atom.family(
+  ({
+    elementId,
+    channel,
+  }: {
+    elementId: string;
+    channel: Channel<DiagramEvent>;
+  }) =>
+    runtimeAtom.fn(
+      Effect.fn(function* () {
+        const ecsClient = yield* EcsClient;
 
-export const loadSldMetadataV2 = Atom.family((elementId: string) =>
-  runtimeAtom.fn(
-    Effect.fn(function* () {
-      const powsyblClient = yield* PowsyblClient;
-      const ecsClient = yield* EcsClient;
+        yield* ecsClient.add_subscription({ elementId, channel });
 
-      const metadata = yield* powsyblClient.getSingleLineDiagram({
-        element_id: elementId,
-      });
-
-      if (!metadata.metadata) {
-        return yield* Effect.fail(
-          new PowsyblError({ message: `Metadata is empty: ${elementId}` }),
-        );
-      }
-
-      if (!metadata.svg_content) {
-        return yield* Effect.fail(
-          new PowsyblError({ message: `Svg is empty: ${elementId}` }),
-        );
-      }
-
-      const channel = new Channel<DiagramEvent>();
-      yield* ecsClient.add_subscription({ elementId, channel });
-
-      return {
-        metadata: metadata.metadata as unknown as SldMetadata,
-        svg: metadata.svg_content,
-        channel,
-      } as const;
-    }),
-  ),
+        return {
+          channel,
+        } as const;
+      }),
+    ),
 );
 
 export const unloadSldMetadata = Atom.family((elementId: string) =>

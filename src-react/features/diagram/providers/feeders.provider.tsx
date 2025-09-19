@@ -2,17 +2,14 @@ import { Result, useAtom } from '@effect-atom/atom-react';
 import React, { createContext } from 'react';
 
 import { useMetadata } from './metadata.provider';
-import { subscribeToFeeders } from '../services/feeders.service';
 import { useDiagram } from './diagram.provider';
-import { Channel } from '@tauri-apps/api/core';
-import { ScadaMessage } from '@/types/tstm';
 import { updateFeedersBatch } from '../utils/update-feeder';
 import { DiagramEvent } from '@/types/diagram-event';
+import { Channel } from '@tauri-apps/api/core';
+import { addChannelFeeders } from '../services/metadata.service';
 
 type FeedersContextType = {
-  isSubscribing: boolean;
-  scadaChannel: React.RefObject<Channel<ScadaMessage> | undefined>;
-  subscriptionId: string;
+  channel: React.RefObject<Channel<DiagramEvent>>;
 };
 
 const FeedersContext = createContext<FeedersContextType | undefined>(undefined);
@@ -30,48 +27,30 @@ export const FeedersProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const { metadata } = useMetadata();
+  const { elementId } = useMetadata();
   const { svgRef, isInitialized } = useDiagram();
 
-  const [subscriptionId] = React.useState(() => crypto.randomUUID());
-  const scadaChannel = React.useRef<Channel<ScadaMessage>>(undefined);
-
-  const subscriptionAtom = React.useMemo(() => {
-    if (!isInitialized) return null;
-
-    return Result.match(metadata, {
-      onInitial: () => null,
-      onFailure: () => null,
-      onSuccess: ({ value }) => {
-        value.channel.onmessage = (event: DiagramEvent) => {
-          if (event.tag === 'FeederUpdate') {
-            updateFeedersBatch(svgRef, event.content.feeders);
-          }
-        };
-      },
-    });
-  }, [metadata, isInitialized, subscriptionId, svgRef]);
-
-  const [subscriptionResult, executeSubscription] = useAtom(
-    subscriptionAtom || subscribeToFeeders({} as any),
+  const channel = React.useRef(
+    new Channel<DiagramEvent>((event) => {
+      if (event.tag === 'FeederUpdate') {
+        updateFeedersBatch(svgRef, event.content.feeders);
+      }
+    }),
   );
 
-  const isSubscribing = Result.isInitial(subscriptionResult);
+  const channelAtom = addChannelFeeders({
+    elementId,
+    channel: channel.current,
+  });
+  const [_, addChannel] = useAtom(channelAtom);
 
   React.useEffect(() => {
-    if (isInitialized && subscriptionAtom && executeSubscription) {
-      executeSubscription();
+    if (isInitialized) {
+      addChannel();
     }
-  }, [subscriptionAtom, executeSubscription, isInitialized, subscriptionId]);
+  }, [isInitialized]);
 
-  const contextValue = React.useMemo(
-    () => ({
-      isSubscribing,
-      scadaChannel,
-      subscriptionId,
-    }),
-    [isSubscribing, subscriptionId],
-  );
+  const contextValue = React.useMemo(() => ({ channel }), []);
 
   return (
     <FeedersContext.Provider value={contextValue}>
