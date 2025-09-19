@@ -1,5 +1,4 @@
 import { Play, Square, Pause, FileText } from 'lucide-react';
-import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -8,43 +7,60 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { invoke } from '@tauri-apps/api/core';
 import { useDsl } from '../provider/dsl.provider';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 type SimulationState = 'idle' | 'running' | 'paused';
 
 export const DslCommands = () => {
   const {
-    simulationConfig,
-    initScenarioRequest,
+    simulationName,
+    simulationStatus,
+    isReady,
     isLoading: dslLoading,
+    startDslFile,
+    isStarting,
+    startError,
+    servicesHealthy,
   } = useDsl();
 
+  // État local pour la simulation (idle, running, paused)
+  // Note: Ceci pourrait être déplacé dans le provider si vous avez des commandes pause/stop
   const [simulationState, setSimulationState] =
     useState<SimulationState>('idle');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
-  const isReady = !!simulationConfig;
   const isRunning = simulationState === 'running';
   const isPaused = simulationState === 'paused';
-  const isActive = isRunning || isPaused; // Simulation active (running ou paused)
+  const isActive = isRunning || isPaused;
+  const isLoading = isActionLoading || isStarting || dslLoading;
 
   const handlePlay = async () => {
     if (!isReady || isLoading) return;
 
     try {
-      setIsLoading(true);
+      setIsActionLoading(true);
 
-      if (simulationState === 'idle' || simulationState === 'paused') {
-        await invoke('start_dsl_file');
+      if (simulationState === 'idle') {
+        // Utilise la fonction du provider
+        await startDslFile();
+
+        // Si pas d'erreur, on considère que c'est démarré
+        if (!startError) {
+          setSimulationState('running');
+          console.log('Simulation started');
+        }
+      } else if (simulationState === 'paused') {
+        // Resume logic (si vous avez une commande resume)
+        // await invoke('resume_dsl_file');
         setSimulationState('running');
-        console.log('Simulation started');
+        console.log('Simulation resumed');
       }
     } catch (error) {
-      console.error('Error starting simulation:', error);
+      console.error('Error with play action:', error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
@@ -52,14 +68,14 @@ export const DslCommands = () => {
     if (!isRunning || isLoading) return;
 
     try {
-      setIsLoading(true);
-      // await invoke('pause_dsl_file');
+      setIsActionLoading(true);
+      // await invoke('pause_dsl_file'); // À implémenter dans le provider si nécessaire
       setSimulationState('paused');
       console.log('Simulation paused');
     } catch (error) {
       console.error('Error pausing simulation:', error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
@@ -67,14 +83,14 @@ export const DslCommands = () => {
     if (simulationState === 'idle' || isLoading) return;
 
     try {
-      setIsLoading(true);
-      // await invoke('stop_dsl_file');
+      setIsActionLoading(true);
+      // await invoke('stop_dsl_file'); // À implémenter dans le provider si nécessaire
       setSimulationState('idle');
       console.log('Simulation stopped');
     } catch (error) {
       console.error('Error stopping simulation:', error);
     } finally {
-      setIsLoading(false);
+      setIsActionLoading(false);
     }
   };
 
@@ -90,120 +106,141 @@ export const DslCommands = () => {
   };
 
   const getStateText = () => {
+    if (!isReady) return 'Not Ready';
+    if (!servicesHealthy) return 'Services Down';
+
     switch (simulationState) {
       case 'running':
         return 'Running';
       case 'paused':
         return 'Paused';
       default:
-        return 'Ready';
+        return simulationStatus === 'ready' ? 'Ready' : 'Not Ready';
     }
   };
 
   // Fonction pour obtenir le nom à afficher
   const getDisplayName = () => {
-    return initScenarioRequest?.simulation_name || 'No file';
+    return simulationName || 'No file';
   };
 
-  return (
-    <div
-      className={cn(
-        'flex items-center gap-2 rounded-lg p-2 transition-all duration-200',
-        isRunning && 'border-2 border-green-500/30 bg-green-500/10',
-      )}
-    >
-      <div className="flex items-center gap-1">
-        {/* Play/Pause Button - Se transforme selon l'état */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={cn(
-                'h-8 w-8 p-0 transition-all duration-200',
-                !isReady && 'cursor-not-allowed opacity-50',
-              )}
-              onClick={isRunning ? handlePause : handlePlay}
-              disabled={!isReady || isLoading || dslLoading}
-            >
-              {isRunning ? (
-                <Pause
-                  size={16}
-                  className="text-yellow-600 transition-colors hover:text-yellow-700"
-                />
-              ) : (
-                <Play
-                  size={16}
-                  className={cn(
-                    'transition-colors',
-                    isReady && 'text-green-600 hover:text-green-700',
-                  )}
-                />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{isRunning ? 'Pause' : isPaused ? 'Resume' : 'Play'}</p>
-          </TooltipContent>
-        </Tooltip>
+  // Afficher les erreurs de démarrage
+  const hasError = !!startError;
 
-        {/* Stop Button - Visible seulement si la simulation est active */}
-        {isActive && (
+  return (
+    <div className="space-y-2">
+      {/* Affichage des erreurs */}
+      {hasError && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">
+          <span className="font-medium">Start Error:</span> {startError}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          'flex items-center gap-2 rounded-lg p-2 transition-all duration-200',
+          isRunning && 'border-2 border-green-500/30 bg-green-500/10',
+          hasError && 'border-2 border-red-500/30 bg-red-500/10',
+        )}
+      >
+        <div className="flex items-center gap-1">
+          {/* Play/Pause Button */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 transition-all duration-200"
-                onClick={handleStop}
-                disabled={isLoading}
+                className={cn(
+                  'h-8 w-8 p-0 transition-all duration-200',
+                  (!isReady || !servicesHealthy) &&
+                    'cursor-not-allowed opacity-50',
+                )}
+                onClick={isRunning ? handlePause : handlePlay}
+                disabled={!isReady || !servicesHealthy || isLoading}
               >
-                <Square
-                  size={14}
-                  className="text-red-600 transition-colors hover:text-red-700"
-                />
+                {isRunning ? (
+                  <Pause
+                    size={16}
+                    className="text-yellow-600 transition-colors hover:text-yellow-700"
+                  />
+                ) : (
+                  <Play
+                    size={16}
+                    className={cn(
+                      'transition-colors',
+                      isReady &&
+                        servicesHealthy &&
+                        'text-green-600 hover:text-green-700',
+                    )}
+                  />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Stop</p>
+              <p>
+                {!isReady
+                  ? 'Simulation not ready'
+                  : !servicesHealthy
+                    ? 'Services not healthy'
+                    : isRunning
+                      ? 'Pause'
+                      : isPaused
+                        ? 'Resume'
+                        : 'Start'}
+              </p>
             </TooltipContent>
           </Tooltip>
-        )}
-      </div>
 
-      {/* Simulation Info */}
-      <div className="ml-2 flex items-center gap-2">
-        {isReady ? (
+          {/* Stop Button */}
+          {isActive && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 transition-all duration-200"
+                  onClick={handleStop}
+                  disabled={isLoading}
+                >
+                  <Square
+                    size={14}
+                    className="text-red-600 transition-colors hover:text-red-700"
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Stop</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+
+        {/* Simulation Info */}
+        <div className="ml-2 flex items-center gap-2">
           <Badge
             variant="outline"
             className={cn(
               'text-xs font-medium transition-colors',
               getStateColor(),
+              !servicesHealthy && 'border-red-200 text-red-600',
             )}
           >
             {getStateText()}
           </Badge>
-        ) : (
-          <Badge
-            variant="outline"
-            className="text-xs font-medium"
-          >
-            Not Ready
-          </Badge>
-        )}
 
-        <div className="flex items-center gap-1">
-          <FileText size={14} />
-          <span className="max-w-48 truncate text-sm">
-            {getDisplayName()}
-          </span>
+          <div className="flex items-center gap-1">
+            <FileText size={14} />
+            <span className="max-w-48 truncate text-sm">
+              {getDisplayName()}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Loading indicator */}
-      {(isLoading || dslLoading) && (
-        <div className="border-primary ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-      )}
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="border-primary ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
+        )}
+      </div>
     </div>
   );
 };

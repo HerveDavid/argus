@@ -175,7 +175,7 @@ export const ArtifactSelect: React.FC<ArtifactSelectProps> = ({
             <HardDrive className="h-4 w-4" />
             <span className="truncate">
               {selectedArtifact
-                ? selectedArtifact.artifactId
+                ? selectedArtifact.artifactId.split('-')[0]
                 : 'Select Artifact'}
             </span>
           </div>

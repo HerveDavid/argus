@@ -119,18 +119,18 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
             >
               {filepath}
             </h1>
-            <div className="mt-1 flex items-center gap-2">
-              <Badge variant={systemStatus.variant} className="text-xs">
-                {systemStatus.label}
-              </Badge>
-              {simulationConfig && (
-                <Badge variant="secondary" className="text-xs">
-                  <CheckCircle className="mr-1 h-3 w-3" />
-                  {simulationConfig.simulationName}
-                </Badge>
-              )}
-            </div>
           </div>
+        </div>
+        <div className="mt-1 flex items-center gap-2">
+          <Badge variant={systemStatus.variant} className="text-xs">
+            {systemStatus.label}
+          </Badge>
+          {simulationConfig && (
+            <Badge variant="secondary" className="text-xs">
+              <CheckCircle className="mr-1 h-3 w-3" />
+              {simulationConfig.simulationName}
+            </Badge>
+          )}
         </div>
 
         {/* Section milieu - Informations système */}
@@ -145,9 +145,9 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
             <span className="text-muted-foreground/70">Artifact:</span>
             <span
               className="max-w-24 truncate font-mono"
-              title={dslState.artifact_id}
+              title={dslState.artifact_id.split('-')[0]}
             >
-              {dslState.artifact_id || 'None'}
+              {dslState.artifact_id.split('-')[0] || 'None'}
             </span>
           </div>
           <div className="flex items-center gap-1">
@@ -192,7 +192,7 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
                     {!canInitialize
                       ? dslState.dsl_file_content.length === 0
                         ? 'Load a DSL file first'
-                        : !dslState.artifact_id.trim()
+                        : !dslState.artifact_id.trim().split('-')[0]
                           ? 'Select an artifact first'
                           : 'Initializing...'
                       : 'Ready to initialize'}
