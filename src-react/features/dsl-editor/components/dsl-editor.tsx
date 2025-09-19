@@ -172,7 +172,7 @@ export const DslEditorInner: React.FC<DslEditorProps> = ({ file }) => {
 
   return (
     <div className="flex h-full flex-col">
-      <Header filepath={file.filepath} />
+      <Header filepath={file.filepath.toString()} />
 
       {/* Affichage des états de chargement et d'erreur */}
       {isLoading && (
