@@ -59,6 +59,10 @@ interface DslContextType {
   nextStepDsl: (dsl: string) => Promise<NextStepResponse | null>;
   isNextStepping: boolean;
   nextStepError: string | null;
+  // Fonction stop
+  stopOrchestrator: () => Promise<void>;
+  isStopping: boolean;
+  stopError: string | null;
 }
 
 // Création du contexte
@@ -80,9 +84,11 @@ export const DslProvider: React.FC<DslProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [startError, setStartError] = useState<string | null>(null);
-  const [isRunning, setIsRunning] = useState<boolean>(false); // Nouvel état
+  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [isNextStepping, setIsNextStepping] = useState<boolean>(false);
   const [nextStepError, setNextStepError] = useState<string | null>(null);
+  const [isStopping, setIsStopping] = useState<boolean>(false);
+  const [stopError, setStopError] = useState<string | null>(null);
 
   // Fonction pour appeler la commande Tauri
   const fetchUserStatus = async (): Promise<void> => {
@@ -134,6 +140,37 @@ export const DslProvider: React.FC<DslProviderProps> = ({
       console.error('Erreur lors du démarrage du fichier DSL:', err);
     } finally {
       setIsStarting(false);
+    }
+  };
+
+  // Fonction pour arrêter l'orchestrateur
+  const stopOrchestrator = async (): Promise<void> => {
+    // Vérifier que la simulation est en cours d'exécution
+    if (!isRunning) {
+      setStopError(
+        "Impossible d'arrêter : la simulation n'est pas en cours d'exécution",
+      );
+      return;
+    }
+
+    try {
+      setIsStopping(true);
+      setStopError(null);
+
+      await invoke('stop_orchestrator');
+
+      // Marquer la simulation comme arrêtée
+      setIsRunning(false);
+
+      // Optionnel : rafraîchir le status après l'arrêt
+      await fetchUserStatus();
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Erreur lors de l'arrêt";
+      setStopError(errorMessage);
+      console.error("Erreur lors de l'arrêt de l'orchestrateur:", err);
+    } finally {
+      setIsStopping(false);
     }
   };
 
@@ -234,10 +271,13 @@ export const DslProvider: React.FC<DslProviderProps> = ({
     startDslFile,
     isStarting,
     startError,
-    isRunning, // Nouvel état ajouté au contexte
+    isRunning,
     nextStepDsl,
     isNextStepping,
     nextStepError,
+    stopOrchestrator,
+    isStopping,
+    stopError,
   };
 
   return (
@@ -273,6 +313,12 @@ export const useServicesStatus = () => {
 export const useStartDsl = () => {
   const { startDslFile, isStarting, startError, isReady, isRunning } = useDsl();
   return { startDslFile, isStarting, startError, isReady, isRunning };
+};
+
+// Hook spécialisé pour l'arrêt de l'orchestrateur
+export const useStopDsl = () => {
+  const { stopOrchestrator, isStopping, stopError, isRunning } = useDsl();
+  return { stopOrchestrator, isStopping, stopError, isRunning };
 };
 
 // Hook spécialisé pour la prochaine étape DSL

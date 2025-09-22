@@ -203,6 +203,7 @@ pub fn run() {
             // DSL
             dsl::commands::start_dsl_file,
             dsl::commands::read_dsl_file,
+            dsl::commands::stop_orchestrator,
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

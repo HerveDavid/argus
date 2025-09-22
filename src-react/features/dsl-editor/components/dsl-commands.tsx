@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { useDsl } from '../provider/dsl.provider';
+import { useDsl, useStopDsl } from '../provider/dsl.provider';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -23,18 +23,19 @@ export const DslCommands = () => {
     isStarting,
     startError,
     servicesHealthy,
+    isRunning: providerIsRunning, // État du provider
   } = useDsl();
 
-  // État local pour la simulation (idle, running, paused)
-  // Note: Ceci pourrait être déplacé dans le provider si vous avez des commandes pause/stop
-  const [simulationState, setSimulationState] =
-    useState<SimulationState>('idle');
+  const { stopOrchestrator, isStopping, stopError } = useStopDsl();
+
+  // État local pour pause (le running vient maintenant du provider)
+  const [isPaused, setIsPaused] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
-  const isRunning = simulationState === 'running';
-  const isPaused = simulationState === 'paused';
-  const isActive = isRunning || isPaused;
-  const isLoading = isActionLoading || isStarting || dslLoading;
+  // Utiliser l'état du provider pour déterminer si on est en cours d'exécution
+  const isRunning = providerIsRunning && !isPaused;
+  const isActive = providerIsRunning; // Actif si le provider dit qu'on est running
+  const isLoading = isActionLoading || isStarting || isStopping || dslLoading;
 
   const handlePlay = async () => {
     if (!isReady || isLoading) return;
@@ -42,19 +43,13 @@ export const DslCommands = () => {
     try {
       setIsActionLoading(true);
 
-      if (simulationState === 'idle') {
-        // Utilise la fonction du provider
+      if (!providerIsRunning) {
+        // Démarrer la simulation via le provider
         await startDslFile();
-
-        // Si pas d'erreur, on considère que c'est démarré
-        if (!startError) {
-          setSimulationState('running');
-          console.log('Simulation started');
-        }
-      } else if (simulationState === 'paused') {
-        // Resume logic (si vous avez une commande resume)
-        // await invoke('resume_dsl_file');
-        setSimulationState('running');
+        // Le provider gère isRunning automatiquement
+      } else if (isPaused) {
+        // Resume logic (local state seulement)
+        setIsPaused(false);
         console.log('Simulation resumed');
       }
     } catch (error) {
@@ -69,8 +64,8 @@ export const DslCommands = () => {
 
     try {
       setIsActionLoading(true);
-      // await invoke('pause_dsl_file'); // À implémenter dans le provider si nécessaire
-      setSimulationState('paused');
+      // Pause locale seulement (pas d'appel au provider)
+      setIsPaused(true);
       console.log('Simulation paused');
     } catch (error) {
       console.error('Error pausing simulation:', error);
@@ -80,12 +75,16 @@ export const DslCommands = () => {
   };
 
   const handleStop = async () => {
-    if (simulationState === 'idle' || isLoading) return;
+    if (!providerIsRunning || isLoading) return;
 
     try {
       setIsActionLoading(true);
-      // await invoke('stop_dsl_file'); // À implémenter dans le provider si nécessaire
-      setSimulationState('idle');
+      // Utiliser la fonction stop du provider
+      await stopOrchestrator();
+
+      // Réinitialiser l'état local de pause
+      setIsPaused(false);
+
       console.log('Simulation stopped');
     } catch (error) {
       console.error('Error stopping simulation:', error);
@@ -95,28 +94,26 @@ export const DslCommands = () => {
   };
 
   const getStateColor = () => {
-    switch (simulationState) {
-      case 'running':
-        return 'text-[hsl(var(--success))] border-[hsl(var(--success)/0.2)]';
-      case 'paused':
-        return 'text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.2)]';
-      default:
-        return 'text-color border-border';
+    if (!providerIsRunning) {
+      return 'text-color border-border';
     }
+
+    if (isPaused) {
+      return 'text-[hsl(var(--warning))] border-[hsl(var(--warning)/0.2)]';
+    }
+
+    return 'text-[hsl(var(--success))] border-[hsl(var(--success)/0.2)]';
   };
 
   const getStateText = () => {
     if (!isReady) return 'Not Ready';
     if (!servicesHealthy) return 'Services Down';
 
-    switch (simulationState) {
-      case 'running':
-        return 'Running';
-      case 'paused':
-        return 'Paused';
-      default:
-        return simulationStatus === 'ready' ? 'Ready' : 'Not Ready';
+    if (providerIsRunning) {
+      return isPaused ? 'Paused' : 'Running';
     }
+
+    return simulationStatus === 'ready' ? 'Ready' : 'Not Ready';
   };
 
   // Fonction pour obtenir le nom à afficher
@@ -124,26 +121,44 @@ export const DslCommands = () => {
     return simulationName || 'No file';
   };
 
-  // Afficher les erreurs de démarrage
-  const hasError = !!startError;
+  // Fonction pour obtenir le nom tronqué selon l'écran
+  const getTruncatedName = () => {
+    const name = getDisplayName();
+    // Limiter la longueur pour le header
+    if (name.length > 15) {
+      return name.substring(0, 12) + '...';
+    }
+    return name;
+  };
+
+  // Afficher les erreurs de démarrage et d'arrêt
+  const hasError = !!(startError || stopError);
+  const currentError = startError || stopError;
 
   return (
-    <div className="space-y-2">
-      {/* Affichage des erreurs */}
+    <div className="flex flex-row gap-1">
+      {/* Affichage des erreurs - version compacte */}
       {hasError && (
-        <div className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">
-          <span className="font-medium">Start Error:</span> {startError}
+        <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-xs text-red-700">
+          <span className="font-medium">Error:</span>{' '}
+          <span className="hidden sm:inline">{currentError}</span>
+          <span className="sm:hidden">Check logs</span>
         </div>
       )}
 
       <div
         className={cn(
-          'flex items-center gap-2 rounded-lg p-2 transition-all duration-200',
-          isRunning && 'border-2 border-green-500/30 bg-green-500/10',
-          hasError && 'border-2 border-red-500/30 bg-red-500/10',
+          'flex items-center gap-1 rounded border px-2 py-1 transition-all duration-200',
+          'min-w-0 max-w-full', // Contraintes de taille
+          isRunning && 'border-green-500/40 bg-green-500/5',
+          isPaused &&
+            providerIsRunning &&
+            'border-yellow-500/40 bg-yellow-500/5',
+          hasError && 'border-red-500/40 bg-red-500/5',
+          !isRunning && !isPaused && !hasError && 'border-border bg-background',
         )}
       >
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0">
           {/* Play/Pause Button */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -151,7 +166,7 @@ export const DslCommands = () => {
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  'h-8 w-8 p-0 transition-all duration-200',
+                  'h-5 w-5 p-0 transition-all duration-200',
                   (!isReady || !servicesHealthy) &&
                     'cursor-not-allowed opacity-50',
                 )}
@@ -160,12 +175,12 @@ export const DslCommands = () => {
               >
                 {isRunning ? (
                   <Pause
-                    size={16}
+                    size={14}
                     className="text-yellow-600 transition-colors hover:text-yellow-700"
                   />
                 ) : (
                   <Play
-                    size={16}
+                    size={14}
                     className={cn(
                       'transition-colors',
                       isReady &&
@@ -179,9 +194,9 @@ export const DslCommands = () => {
             <TooltipContent>
               <p>
                 {!isReady
-                  ? 'Simulation not ready'
+                  ? 'Not ready'
                   : !servicesHealthy
-                    ? 'Services not healthy'
+                    ? 'Services down'
                     : isRunning
                       ? 'Pause'
                       : isPaused
@@ -198,12 +213,12 @@ export const DslCommands = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 transition-all duration-200"
+                  className="h-7 w-7 p-0 transition-all duration-200"
                   onClick={handleStop}
                   disabled={isLoading}
                 >
                   <Square
-                    size={14}
+                    size={13}
                     className="text-red-600 transition-colors hover:text-red-700"
                   />
                 </Button>
@@ -216,30 +231,36 @@ export const DslCommands = () => {
         </div>
 
         {/* Simulation Info */}
-        <div className="ml-2 flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={cn(
-              'text-xs font-medium transition-colors',
-              getStateColor(),
-              !servicesHealthy && 'border-red-200 text-red-600',
-            )}
-          >
-            {getStateText()}
-          </Badge>
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          {/* État avec point coloré */}
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <div 
+              className={cn(
+                'h-2 w-2 rounded-full',
+                !providerIsRunning && 'bg-gray-400',
+                isPaused && providerIsRunning && 'bg-yellow-500',
+                isRunning && 'bg-green-500',
+                !servicesHealthy && 'bg-red-500'
+              )}
+            />
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              {getStateText()}
+            </span>
+          </div>
 
-          <div className="flex items-center gap-1">
-            <FileText size={14} />
-            <span className="max-w-48 truncate text-sm">
+          {/* Nom du fichier */}
+          <div className="flex items-center gap-1 min-w-0">
+            <FileText size={12} className="flex-shrink-0 text-muted-foreground" />
+            <span className="text-xs truncate min-w-0 max-w-[120px]">
               {getDisplayName()}
             </span>
           </div>
-        </div>
 
-        {/* Loading indicator */}
-        {isLoading && (
-          <div className="border-primary ml-1 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-        )}
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent flex-shrink-0" />
+          )}
+        </div>
       </div>
     </div>
   );

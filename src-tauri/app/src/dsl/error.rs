@@ -14,6 +14,21 @@ pub enum Error {
 
     #[error("Failed to read file '{0}': {1}")]
     FileReadError(String, std::io::Error),
+
+    #[error(transparent)]
+    JsonError(#[from] serde_json::Error),
+
+    #[error(transparent)]
+    RequestError(#[from] async_nats::client::RequestError),
+
+    #[error("Timeout waiting for response: {0}")]
+    TimeoutError(String),
+
+    #[error("Invalid response format: {0}")]
+    InvalidResponseError(String),
+
+    #[error("Operation failed: {0}")]
+    OperationError(String),
 }
 
 impl Serialize for Error {
