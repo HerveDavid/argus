@@ -1,5 +1,5 @@
 import { Atom } from '@effect-atom/atom-react';
-import { Effect, Layer } from 'effect';
+import { Effect, Layer, Logger } from 'effect';
 
 import { Metadata } from '../types/metadata.type';
 
@@ -10,7 +10,7 @@ import { Channel } from '@tauri-apps/api/core';
 import { DiagramEvent } from '@/types/diagram-event';
 
 const runtimeAtom = Atom.runtime(
-  Layer.mergeAll(PowsyblClient.Default, EcsClient.Default),
+  Layer.mergeAll(PowsyblClient.Default, EcsClient.Default, Logger.pretty),
 );
 
 export const loadSldMetadata = Atom.family((elementId: string) =>
@@ -55,6 +55,11 @@ export const addChannelFeeders = Atom.family(
         const ecsClient = yield* EcsClient;
 
         yield* ecsClient.add_subscription({ elementId, channel });
+        yield* Effect.log(`Add channel: ${elementId} ${channel}`);
+
+        console.log('cou');
+
+        yield* Effect.sync(() => console.log(`Add channel: ${elementId}`));
 
         return {
           channel,
