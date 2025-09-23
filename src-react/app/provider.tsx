@@ -25,6 +25,7 @@ import { RegistryProvider } from '@effect-rx/rx-react';
 import { InitProvider } from './providers/init.provider';
 import { ModeClient } from '@/services/common/mode-client';
 import { DslProvider } from '@/features/dsl-editor/provider/dsl.provider';
+import { GameMasterClient } from '@/services/common/game-master-client2';
 
 const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -59,6 +60,7 @@ const InnerProviders: React.FC<{ children: React.ReactNode }> = ({
           TaskClient.Default,
           FeederClient.Default,
           ModeClient.Default,
+          GameMasterClient.Default,
           Logger.minimumLogLevel(LogLevel.Debug),
         ).pipe(
           Layer.provide(Logger.pretty),

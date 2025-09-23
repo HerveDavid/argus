@@ -9,6 +9,31 @@ use super::utils;
 use tauri::State;
 
 #[tauri::command(rename_all = "snake_case")]
+pub async fn set_gamemaster_url(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+    url: String,
+) -> Result<GameMasterUrlResponse> {
+    println!("=== set_gamemaster_url appelée avec: {}", url);
+    
+    println!("=== Tentative d'acquisition du verrou...");
+    let mut state = gamemaster_state.lock().await;
+    println!("=== Verrou acquis!");
+    
+    let result = state.set_url(url);
+    println!("=== Résultat: {:?}", result);
+    
+    result
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn get_gamemaster_url(
+    gamemaster_state: State<'_, tokio::sync::Mutex<GameMasterState>>,
+) -> Result<GameMasterStatus> {
+    let state = gamemaster_state.lock().await;
+    Ok(state.get_url())
+}
+
+#[tauri::command(rename_all = "snake_case")]
 pub async fn get_game_master_outputs(
     session_state: State<'_, tokio::sync::Mutex<SessionState>>,
     metadata: SldMetadata,

@@ -157,6 +157,8 @@ pub fn run() {
             scada::commands::unsubscribe_all_scada_feeders,
             scada::commands::get_scada_outputs,
             // GameMaster
+            game_master::commands::set_gamemaster_url,
+            game_master::commands::get_gamemaster_url,
             game_master::commands::get_game_master_outputs,
             game_master::commands::init_game_master_scenario,
             game_master::commands::trainer_update_system_state_command,

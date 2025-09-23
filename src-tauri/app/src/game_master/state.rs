@@ -3,9 +3,9 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
-const ADDRESS: &str = "http://localhost:8000";
+const DEFAULT_ADDRESS: &str = "http://localhost:8000";
 
-// API Models
+// API Models (unchanged)
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SimulationConfig {
     #[serde(rename = "simulationName")]
@@ -109,6 +109,19 @@ pub enum ClusterTarget {
     Dynamic(serde_json::Value),
 }
 
+// Response structs for URL management
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GameMasterUrlResponse {
+    pub url: String,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct GameMasterStatus {
+    pub url: String,
+    pub is_default: bool,
+}
+
 pub struct GameMasterState {
     client: Client,
     base_url: String,
@@ -119,10 +132,43 @@ impl GameMasterState {
         let client = Client::new();
         Ok(tokio::sync::Mutex::new(Self {
             client,
-            base_url: ADDRESS.to_string(),
+            base_url: DEFAULT_ADDRESS.to_string(),
         }))
     }
 
+    // URL management methods
+    pub fn set_url(&mut self, url: String) -> Result<GameMasterUrlResponse> {
+        self.validate_url(&url)?;
+        self.base_url = url.clone();
+
+        Ok(GameMasterUrlResponse {
+            url: url.clone(),
+            message: format!("GameMaster URL set to {}", url),
+        })
+    }
+
+    pub fn get_url(&self) -> GameMasterStatus {
+        GameMasterStatus {
+            url: self.base_url.clone(),
+            is_default: self.base_url == DEFAULT_ADDRESS,
+        }
+    }
+
+    fn validate_url(&self, url: &str) -> Result<()> {
+        if url.trim().is_empty() {
+            return Err(Error::InvalidAddress("URL cannot be empty".to_string()));
+        }
+
+        if !url.starts_with("http://") && !url.starts_with("https://") {
+            return Err(Error::InvalidAddress(
+                "URL must start with 'http://' or 'https://'".to_string(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    // Private HTTP methods (unchanged)
     async fn get<T>(&self, endpoint: &str) -> Result<T>
     where
         T: for<'de> Deserialize<'de>,
@@ -296,7 +342,35 @@ impl GameMasterState {
         Ok(data)
     }
 
-    // TRAINER endpoints (existing ones remain the same)
+    async fn put_multipart<T>(&self, endpoint: &str, form: reqwest::multipart::Form) -> Result<T>
+    where
+        T: for<'de> serde::Deserialize<'de>,
+    {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.trim_start_matches('/')
+        );
+
+        let response = self.client.put(&url).multipart(form).send().await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            return Err(Error::HttpError {
+                status: status.as_u16(),
+                message: format!("PUT multipart request failed for {}", endpoint),
+            });
+        }
+
+        let data = response
+            .json::<T>()
+            .await
+            .map_err(|e| Error::JsonDeserialization(e.to_string()))?;
+
+        Ok(data)
+    }
+
+    // TRAINER endpoints (unchanged)
     pub async fn init_scenario(
         &self,
         dsl_file_content: Vec<u8>,
@@ -323,7 +397,6 @@ impl GameMasterState {
         self.post_multipart("trainer/init", form).await
     }
 
-    // NEW TRAINER METHODS:
     pub async fn list_saved_simulations(&self) -> Result<serde_json::Value> {
         self.get("trainer/dsl/simulations").await
     }
@@ -353,34 +426,6 @@ impl GameMasterState {
     pub async fn delete_dsl(&self, simulation_name: String) -> Result<serde_json::Value> {
         let endpoint = format!("trainer/dsl/{}", simulation_name);
         self.delete(&endpoint).await
-    }
-
-    async fn put_multipart<T>(&self, endpoint: &str, form: reqwest::multipart::Form) -> Result<T>
-    where
-        T: for<'de> serde::Deserialize<'de>,
-    {
-        let url = format!(
-            "{}/{}",
-            self.base_url.trim_end_matches('/'),
-            endpoint.trim_start_matches('/')
-        );
-
-        let response = self.client.put(&url).multipart(form).send().await?;
-
-        let status = response.status();
-        if !status.is_success() {
-            return Err(Error::HttpError {
-                status: status.as_u16(),
-                message: format!("PUT multipart request failed for {}", endpoint),
-            });
-        }
-
-        let data = response
-            .json::<T>()
-            .await
-            .map_err(|e| Error::JsonDeserialization(e.to_string()))?;
-
-        Ok(data)
     }
 
     pub async fn trainer_update_system_state(
@@ -437,7 +482,7 @@ impl GameMasterState {
         Ok(text)
     }
 
-    // SIMULATOR CONTROL endpoints (existing ones remain the same)
+    // SIMULATOR CONTROL endpoints (unchanged)
     pub async fn simulator_control(&self, input: &AggregateInput) -> Result<AggregateOutput> {
         self.post("sim/simulatorcontrol", input).await
     }
@@ -453,7 +498,7 @@ impl GameMasterState {
         self.post("sim/simulatorcontrol_v2", input).await
     }
 
-    // USER CONTROL endpoints (existing ones remain the same)
+    // USER CONTROL endpoints (unchanged)
     pub async fn user_control(&self, control: &ControlInput) -> Result<serde_json::Value> {
         self.put("user/control", control).await
     }
@@ -496,12 +541,11 @@ impl GameMasterState {
         self.get("user/controls").await
     }
 
-    // NEW USER CONTROL METHOD:
     pub async fn user_status(&self) -> Result<serde_json::Value> {
         self.get("user/status").await
     }
 
-    // IIDM CONTROL endpoints (existing ones remain the same)
+    // IIDM CONTROL endpoints (unchanged)
     pub async fn upload_iidm_file(
         &self,
         file_content: Vec<u8>,
@@ -531,7 +575,7 @@ impl GameMasterState {
         self.get(&endpoint).await
     }
 
-    // EVENT STORE endpoints (existing ones remain the same)
+    // EVENT STORE endpoints (unchanged)
     pub async fn list_events(
         &self,
         status: Option<&str>,
@@ -580,7 +624,6 @@ impl GameMasterState {
         self.get("queue/summary").await
     }
 
-    // NEW ATOMIC UPDATE METHOD:
     pub async fn enqueue_next_step_dsl(&self, dsl: String) -> Result<serde_json::Value> {
         let mut form = reqwest::multipart::Form::new();
         form = form.text("dsl", dsl);

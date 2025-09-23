@@ -28,6 +28,15 @@ import {
 } from './types';
 
 interface GameMasterService {
+  readonly setGameMasterUrl: (
+    url: string,
+  ) => Effect.Effect<{ url: string; message: string }, GameMasterError>;
+
+  readonly getGameMasterUrl: () => Effect.Effect<
+    { url: string; is_default: boolean },
+    GameMasterError
+  >;
+
   readonly initScenario: (
     request: InitScenarioRequest,
   ) => Effect.Effect<SimulationConfig, GameMasterError>;
@@ -188,6 +197,29 @@ export class GameMasterClient extends Effect.Service<GameMasterClient>()(
     dependencies: [],
     effect: Effect.gen(function* () {
       return {
+        setGameMasterUrl: (
+          url: string,
+        ): Effect.Effect<{ url: string; message: string }, GameMasterError> =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<{ url: string; message: string }>('set_gamemaster_url', {
+                url,
+              }),
+            catch: parseError,
+          }),
+
+        getGameMasterUrl: (): Effect.Effect<
+          { url: string; is_default: boolean },
+          GameMasterError
+        > =>
+          Effect.tryPromise({
+            try: () =>
+              invoke<{ url: string; is_default: boolean }>(
+                'get_gamemaster_url',
+              ),
+            catch: parseError,
+          }),
+
         initScenario: ({
           dsl_file_content,
           simulation_name,

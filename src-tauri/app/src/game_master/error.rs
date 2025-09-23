@@ -105,6 +105,9 @@ pub enum Error {
 
     #[error("Text parsing error: {0}")]
     TextParsingError(String),
+
+    #[error("Address invalid error: {0}")]
+    InvalidAddress(String)
 }
 
 impl Serialize for Error {
