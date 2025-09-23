@@ -32,11 +32,19 @@ export const updateFeeder = (
     return false;
   }
 
-  const formattedValue = parseFloat(value.toFixed(4));
+  // Affichage conditionnel basé sur la valeur
+  let displayText: string;
+  if (value === 0) {
+    displayText = '*****';
+  } else {
+    const formattedValue = parseFloat(value.toFixed(4));
+    displayText = formattedValue.toString();
+  }
+
   console.log(
-    `📝 updateFeeder - Mise à jour texte ID ${id}: ${formattedValue}`,
+    `📝 updateFeeder - Mise à jour texte ID ${id}: ${displayText} (valeur: ${value})`,
   );
-  textElement.text(formattedValue.toString());
+  textElement.text(displayText);
 
   // Mise à jour des classes
   let classUpdate = '';
@@ -130,12 +138,19 @@ export const updateFeedersBatch = (
       return;
     }
 
-    // Mise à jour de la valeur
-    const formattedValue = parseFloat(value.toFixed(4));
+    // Affichage conditionnel basé sur la valeur
+    let displayText: string;
+    if (value === 0) {
+      displayText = '*****';
+    } else {
+      const formattedValue = parseFloat(value.toFixed(4));
+      displayText = formattedValue.toString();
+    }
+
     console.log(
-      `📝 updateFeedersBatch - Mise à jour texte ID ${id}: ${formattedValue} (valeur brute: ${value})`,
+      `📝 updateFeedersBatch - Mise à jour texte ID ${id}: ${displayText} (valeur brute: ${value})`,
     );
-    textElement.text(formattedValue.toString());
+    textElement.text(displayText);
 
     // Mise à jour des classes de manière optimisée
     const isOut = value >= 1e-4;

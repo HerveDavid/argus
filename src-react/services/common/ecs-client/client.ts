@@ -12,6 +12,7 @@ export class EcsClient extends Effect.Service<EcsClient>()(
       const channels = yield* Ref.make(
         HashMap.empty<string, Channel<DiagramEvent>>(),
       );
+
       return {
         // Config
         switch_mode: (mode: AppMode) =>
@@ -32,105 +33,88 @@ export class EcsClient extends Effect.Service<EcsClient>()(
           channel: Channel<DiagramEvent>;
         }) =>
           Effect.gen(function* () {
+            // Stocker le channel
             yield* Ref.update(channels, (map) =>
               HashMap.set(map, elementId, channel),
             );
 
-            return yield* Ref.get(channels).pipe(
-              Effect.flatMap((channelMap) => {
-                const maybeStoredChannel = HashMap.get(channelMap, elementId);
-
-                // Vérification explicite de l'Option
-                if (Option.isNone(maybeStoredChannel)) {
-                  return Effect.fail(
-                    new EcsError({
-                      message: `Channel not found for element: ${elementId}`,
-                    }),
-                  );
-                }
-
-                const storedChannel = maybeStoredChannel.value;
-
-                return Effect.tryPromise({
-                  try: () =>
-                    invoke('add_subscription', {
-                      element_id: elementId,
-                      channel: storedChannel,
-                    }),
-                  catch: (error) =>
-                    new EcsError({
-                      message:
-                        error instanceof Error ? error.message : String(error),
-                    }),
-                });
-              }),
-            );
+            // Appeler directement invoke avec le channel fourni
+            return yield* Effect.tryPromise({
+              try: () =>
+                invoke('add_subscription', {
+                  element_id: elementId,
+                  channel: channel, // Utiliser directement le channel fourni
+                }),
+              catch: (error) =>
+                new EcsError({
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                }),
+            });
           }),
-        // add_subscription: ({
-        //   elementId,
-        //   channel,
-        // }: {
-        //   elementId: string;
-        //   channel: Channel<DiagramEvent>;
-        // }) => {
 
-        //   Effect.gen(function* () {
-        //     yield* Ref.update(channels, (map) => HashMap.set(map, elementId, channel))
-        //   })
-
-        //   return Effect.tryPromise({
-        //     try: () => {
-        //       return invoke('add_subscription', {
-        //         element_id: elementId,
-        //         channel,
-        //       });
-        //     },
-        //     catch: (error) =>
-        //       new EcsError({
-        //         message: error instanceof Error ? error.message : String(error),
-        //       }),
-        //   })
-        // },
         remove_subscription: ({ elementId }: { elementId: string }) =>
-          Ref.get(channels).pipe(
-            Effect.flatMap((channelMap) => {
-              const channelExists = HashMap.get(channelMap, elementId);
+          Effect.gen(function* () {
+            const channelMap = yield* Ref.get(channels);
+            const maybeChannel = HashMap.get(channelMap, elementId);
 
-              if (!channelExists) {
-                return Effect.fail(
-                  new EcsError({
-                    message: `No subscription found for element: ${elementId}`,
-                  }),
-                );
-              }
+            // ✅ Vérification correcte d'Option
+            if (Option.isNone(maybeChannel)) {
+              return yield* Effect.fail(
+                new EcsError({
+                  message: `No subscription found for element: ${elementId}`,
+                }),
+              );
+            }
 
-              return Effect.gen(function* () {
-                yield* Ref.update(channels, (map) =>
-                  HashMap.remove(map, elementId),
-                );
-                yield* Effect.tryPromise({
-                  try: () =>
-                    invoke('remove_subscription', { element_id: elementId }),
-                  catch: (error) =>
-                    new EcsError({
-                      message:
-                        error instanceof Error ? error.message : String(error),
-                    }),
-                });
-              });
-            }),
-          ),
-        // remove_subscription: ({ elementId }: { elementId: string }) =>
-        //   Effect.tryPromise({
-        //     try: () =>
-        //       invoke('remove_subscription', {
-        //         element_id: elementId,
-        //       }),
-        //     catch: (error) =>
-        //       new EcsError({
-        //         message: error instanceof Error ? error.message : String(error),
-        //       }),
-        //   }),
+            // Supprimer de notre map locale
+            yield* Ref.update(channels, (map) =>
+              HashMap.remove(map, elementId),
+            );
+
+            // Appeler l'API Tauri
+            return yield* Effect.tryPromise({
+              try: () =>
+                invoke('remove_subscription', { element_id: elementId }),
+              catch: (error) =>
+                new EcsError({
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                }),
+            });
+          }),
+
+        // ✅ Nouvelle méthode pour récupérer un channel sans le supprimer
+        get_subscription_channel: ({ elementId }: { elementId: string }) =>
+          Effect.gen(function* () {
+            const channelMap = yield* Ref.get(channels);
+            const maybeChannel = HashMap.get(channelMap, elementId);
+
+            if (Option.isNone(maybeChannel)) {
+              return yield* Effect.fail(
+                new EcsError({
+                  message: `No subscription found for element: ${elementId}`,
+                }),
+              );
+            }
+
+            return maybeChannel.value;
+          }),
+
+        // ✅ Méthode pour lister tous les channels actifs
+        list_active_subscriptions: () =>
+          Effect.gen(function* () {
+            const channelMap = yield* Ref.get(channels);
+            return HashMap.keySet(channelMap);
+          }),
+
+        // ✅ Méthode pour vérifier si une subscription existe
+        has_subscription: ({ elementId }: { elementId: string }) =>
+          Effect.gen(function* () {
+            const channelMap = yield* Ref.get(channels);
+            const maybeChannel = HashMap.get(channelMap, elementId);
+            return Option.isSome(maybeChannel);
+          }),
       } as const;
     }),
   },

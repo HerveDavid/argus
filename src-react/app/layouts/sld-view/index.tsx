@@ -10,6 +10,8 @@ import { useSelectedItemStore } from '@/stores/window-header.store';
 
 import { RightSidebar, useRightSidebarStore } from './right-sidebar';
 import { SingleLineDiagram } from '@/features/diagram';
+import { Sld } from '@/features/single-line-diagram';
+
 import { SldTools } from './components/sld-tools';
 
 export interface SldViewProps {
@@ -50,6 +52,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
           <ResizablePanel order={0} className="flex-1 overflow-hidden">
             <div className="from-background/10 to-foreground/7 h-full bg-gradient-to-br">
               <SingleLineDiagram elementId={id} />
+              {/* <Sld id={id} /> */}
             </div>
           </ResizablePanel>
           <ResizableHandle withHandle={true} />
@@ -66,6 +69,7 @@ export const SldView: React.FC<IDockviewPanelProps<SldViewProps>> = ({
         <div className="flex flex-1 overflow-hidden">
           <div className="from-background/10 to-foreground/7 flex-1 overflow-hidden bg-gradient-to-br">
             <SingleLineDiagram elementId={id} />
+            {/* <Sld id={id} /> */}
           </div>
           <RightSidebar id={id} />
         </div>

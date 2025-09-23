@@ -54,25 +54,61 @@ export const addChannelFeeders = Atom.family(
       Effect.fn(function* () {
         const ecsClient = yield* EcsClient;
 
+        // Vérifier si une subscription existe déjà
+        const hasSubscription = yield* ecsClient.has_subscription({
+          elementId,
+        });
+
+        if (hasSubscription) {
+          yield* Effect.log(`Channel already exists for: ${elementId}`);
+          const existingChannel = yield* ecsClient.get_subscription_channel({
+            elementId,
+          });
+          return { channel: existingChannel, isNew: false } as const;
+        }
+
+        // Créer une nouvelle subscription
         yield* ecsClient.add_subscription({ elementId, channel });
-        yield* Effect.log(`Add channel: ${elementId} ${channel}`);
+        yield* Effect.log(`Add channel: ${elementId}`);
 
-        console.log('cou');
-
-        yield* Effect.sync(() => console.log(`Add channel: ${elementId}`));
-
-        return {
-          channel,
-        } as const;
+        return { channel, isNew: true } as const;
       }),
     ),
 );
 
-export const unloadSldMetadata = Atom.family((elementId: string) =>
-  runtimeAtom.fn(
-    Effect.fn(function* () {
-      const ecsClient = yield* EcsClient;
-      yield* ecsClient.remove_subscription({ elementId });
-    }),
-  ),
+export const removeChannelFeeders = Atom.family(
+  ({ elementId }: { elementId: string }) =>
+    runtimeAtom.fn(
+      Effect.fn(function* () {
+        const ecsClient = yield* EcsClient;
+        yield* ecsClient.remove_subscription({ elementId });
+      }),
+    ),
+);
+
+export const getChannelFeeders = Atom.family(
+  ({ elementId }: { elementId: string }) =>
+    runtimeAtom.fn(
+      Effect.fn(function* () {
+        const ecsClient = yield* EcsClient;
+
+        // Vérifier si une subscription existe déjà
+        const hasSubscription = yield* ecsClient.has_subscription({
+          elementId,
+        });
+
+        if (hasSubscription) {
+          // Récupérer le channel existant
+          const existingChannel = yield* ecsClient.get_subscription_channel({
+            elementId,
+          });
+          yield* Effect.log(`Channel found for: ${elementId}`);
+          return { channel: existingChannel, isNew: false } as const;
+        }
+
+        return yield* Effect.fail(
+          new Error(`No channel found for element: ${elementId}`),
+        );
+      }),
+    ),
 );
