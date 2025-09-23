@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FolderOpen, File, FolderPlus, Plus, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { open as openDialog } from '@tauri-apps/plugin-dialog';
@@ -89,6 +89,44 @@ export const DslExplorer: React.FC = () => {
       }
     },
     [convertToFileNode],
+  );
+
+  // Fonction pour charger le dossier racine depuis le currentPath
+  const loadRootFolder = useCallback(
+    async (folderPath: string) => {
+      try {
+        setIsLoading(true);
+        console.log('Loading root folder:', folderPath);
+
+        const folderName =
+          folderPath.split('/').pop() ||
+          folderPath.split('\\').pop() ||
+          'Unknown';
+
+        const children = await readDirectory(folderPath);
+
+        const rootNode: FileNode = {
+          id: folderPath,
+          name: folderName,
+          type: 'folder',
+          path: folderPath,
+          parent: '',
+          children: children,
+        };
+
+        console.log('Created root node from currentPath:', rootNode);
+
+        setFiles([rootNode]);
+        // Auto-expand le dossier racine
+        const newExpanded = new Set([rootNode.id]);
+        useDslExplorerStore.getState().setExpandedFolders(newExpanded);
+      } catch (error) {
+        console.error('Error loading root folder:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [readDirectory, setFiles],
   );
 
   const openFolder = useCallback(async () => {
@@ -321,6 +359,19 @@ export const DslExplorer: React.FC = () => {
     setEditingNode(null);
     setEditingValue('');
   }, []);
+
+  // Effect pour charger automatiquement les fichiers si currentPath existe et files est vide
+  useEffect(() => {
+    if (
+      currentPath &&
+      currentPath !== 'No folder selected' &&
+      files.length === 0 &&
+      !isLoading
+    ) {
+      console.log('Auto-loading folder from currentPath:', currentPath);
+      loadRootFolder(currentPath);
+    }
+  }, [currentPath, files.length, isLoading, loadRootFolder]);
 
   return (
     <div className="flex h-full flex-col">
