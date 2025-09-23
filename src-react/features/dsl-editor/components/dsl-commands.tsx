@@ -6,14 +6,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 import { useDsl, useStopDsl } from '../provider/dsl.provider';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-
-type SimulationState = 'idle' | 'running' | 'paused';
+import { useAtomSet } from '@effect-atom/atom-react';
 
 export const DslCommands = () => {
+
   const {
     simulationName,
     simulationStatus,
@@ -149,7 +148,7 @@ export const DslCommands = () => {
       <div
         className={cn(
           'flex items-center gap-1 rounded border px-2 py-1 transition-all duration-200',
-          'min-w-0 max-w-full', // Contraintes de taille
+          'max-w-full min-w-0', // Contraintes de taille
           isRunning && 'border-green-500/40 bg-green-500/5',
           isPaused &&
             providerIsRunning &&
@@ -158,7 +157,7 @@ export const DslCommands = () => {
           !isRunning && !isPaused && !hasError && 'border-border bg-background',
         )}
       >
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex flex-shrink-0 items-center gap-1">
           {/* Play/Pause Button */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -231,34 +230,37 @@ export const DslCommands = () => {
         </div>
 
         {/* Simulation Info */}
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
           {/* État avec point coloré */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <div 
+          <div className="flex flex-shrink-0 items-center gap-1">
+            <div
               className={cn(
                 'h-2 w-2 rounded-full',
                 !providerIsRunning && 'bg-gray-400',
                 isPaused && providerIsRunning && 'bg-yellow-500',
                 isRunning && 'bg-green-500',
-                !servicesHealthy && 'bg-red-500'
+                !servicesHealthy && 'bg-red-500',
               )}
             />
-            <span className="text-xs text-muted-foreground hidden sm:inline">
+            <span className="text-muted-foreground hidden text-xs sm:inline">
               {getStateText()}
             </span>
           </div>
 
           {/* Nom du fichier */}
-          <div className="flex items-center gap-1 min-w-0">
-            <FileText size={12} className="flex-shrink-0 text-muted-foreground" />
-            <span className="text-xs truncate min-w-0 max-w-[120px]">
+          <div className="flex min-w-0 items-center gap-1">
+            <FileText
+              size={12}
+              className="text-muted-foreground flex-shrink-0"
+            />
+            <span className="max-w-[120px] min-w-0 truncate text-xs">
               {getDisplayName()}
             </span>
           </div>
 
           {/* Loading indicator */}
           {isLoading && (
-            <div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent flex-shrink-0" />
+            <div className="border-primary h-3 w-3 flex-shrink-0 animate-spin rounded-full border-2 border-t-transparent" />
           )}
         </div>
       </div>

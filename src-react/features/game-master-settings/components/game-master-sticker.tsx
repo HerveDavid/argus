@@ -13,9 +13,13 @@ import {
   AlertCircle,
   Link2Off,
 } from 'lucide-react';
+import { useAtomSet } from '@effect-atom/atom-react';
+import { setUrlAtom } from '@/features/dsl-editor/services/game-master';
 
 export const GameMasterSticker = () => {
-  const { url, isLoading, error, setUrl, clearError } = useGameMasterStore();
+  const setUrl = useAtomSet(setUrlAtom, { mode: 'promise' });
+
+  const { url, isLoading, error, clearError } = useGameMasterStore();
   const [editUrl, setEditUrl] = useState('');
 
   // Initialiser avec l'URL par défaut
@@ -29,7 +33,7 @@ export const GameMasterSticker = () => {
 
   const handleSaveUrl = async () => {
     if (editUrl.trim()) {
-      await setUrl(editUrl.trim());
+      await setUrl({ url: editUrl.trim() });
     }
   };
 
