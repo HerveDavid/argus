@@ -1,40 +1,41 @@
-import { Effect } from 'effect';
+import * as Cause from 'effect/Cause';
+import * as Effect from 'effect/Effect';
+import type * as Option from 'effect/Option';
 import { toast } from 'sonner';
 
-interface ToastOptions {
-  readonly success?: {
-    readonly title?: (result: any) => string;
-    readonly description?: (result: any) => string | undefined;
-    readonly duration?: number;
-  };
-  readonly error?: {
-    readonly title?: (error: any) => string;
-    readonly description?: (error: any) => string | undefined;
-    readonly duration?: number;
-  };
-}
+type ToastOptions<A, E, Args extends ReadonlyArray<unknown>> = {
+  onWaiting: string | ((...args: Args) => string);
+  onSuccess: string | ((a: A, ...args: Args) => string);
+  onFailure: string | ((error: Option.Option<E>, ...args: Args) => string);
+};
 
-export const withToast = <A, E, R>(
-  effect: Effect.Effect<A, E, R>,
-  options: ToastOptions = {},
+export const withToast = <A, E, Args extends ReadonlyArray<unknown>, R>(
+  options: ToastOptions<A, E, Args>,
 ) =>
-  effect.pipe(
-    Effect.tap((result) =>
-      Effect.sync(() => {
-        const description = options.success?.description?.(result);
-        toast.success(options.success?.title?.(result) ?? 'Success!', {
-          description: description || undefined,
-          duration: options.success?.duration ?? 3000,
-        });
+  Effect.fnUntraced(function* (self: Effect.Effect<A, E, R>, ...args: Args) {
+    const toastId = toast.loading(
+      typeof options.onWaiting === 'string'
+        ? options.onWaiting
+        : options.onWaiting(...args),
+    );
+    return yield* self.pipe(
+      Effect.tap((a) => {
+        toast.success(
+          typeof options.onSuccess === 'string'
+            ? options.onSuccess
+            : options.onSuccess(a, ...args),
+          { id: toastId },
+        );
       }),
-    ),
-    Effect.tapError((error) =>
-      Effect.sync(() => {
-        const description = options.error?.description?.(error);
-        toast.error(options.error?.title?.(error) ?? 'Error', {
-          description: description || undefined,
-          duration: options.error?.duration ?? 5000,
-        });
-      }),
-    ),
-  );
+      Effect.tapErrorCause((cause) =>
+        Effect.sync(() => {
+          toast.error(
+            typeof options.onFailure === 'string'
+              ? options.onFailure
+              : options.onFailure(Cause.failureOption(cause), ...args),
+            { id: toastId },
+          );
+        }),
+      ),
+    );
+  });

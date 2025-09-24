@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useGameMasterStore } from '../stores/game-master.store';
 import {
   HoverCard,
   HoverCardContent,
@@ -14,39 +13,59 @@ import {
   Link2Off,
 } from 'lucide-react';
 import { useAtomSet } from '@effect-atom/atom-react';
-import { setUrlAtom } from '@/features/dsl-editor/services/game-master';
+import { setUrlAtom, getUrlAtom } from '../services/game-master';
 
 export const GameMasterSticker = () => {
   const setUrl = useAtomSet(setUrlAtom, { mode: 'promise' });
+  const getUrl = useAtomSet(getUrlAtom, { mode: 'promise' });
 
-  const { url, isLoading, error, clearError } = useGameMasterStore();
-  const [editUrl, setEditUrl] = useState('');
+  const [editUrl, setEditUrl] = useState('http://localhost:8000');
+  const [currentUrl, setCurrentUrl] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Initialiser avec l'URL par défaut
+  // Charger l'URL au montage
   useEffect(() => {
-    if (url) {
-      setEditUrl(url);
-    } else {
-      setEditUrl('http://localhost:8000');
-    }
-  }, [url]);
+    const loadUrl = async () => {
+      try {
+        const { url } = await getUrl();
+        if (url) {
+          setCurrentUrl(url);
+          setEditUrl(url);
+        }
+      } catch (err) {
+        console.error('Error loading URL:', err);
+      }
+    };
+    loadUrl();
+  }, [getUrl]);
 
   const handleSaveUrl = async () => {
-    if (editUrl.trim()) {
+    if (!editUrl.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
       await setUrl({ url: editUrl.trim() });
+      setCurrentUrl(editUrl.trim());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to set URL');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const getStatusColor = () => {
     if (isLoading) return 'bg-amber-500';
-    if (url && !error) return 'bg-green-500';
+    if (currentUrl && !error) return 'bg-green-500';
     if (error) return 'bg-destructive';
     return 'bg-muted';
   };
 
   const getStatusText = () => {
     if (isLoading) return 'Setting...';
-    if (url && !error) return 'Connected';
+    if (currentUrl && !error) return 'Connected';
     if (error) return 'Error';
     return 'Not configured';
   };
@@ -55,7 +74,7 @@ export const GameMasterSticker = () => {
     if (isLoading) {
       return <Loader2 className="h-4 w-4 animate-spin" />;
     }
-    if (url && !error) {
+    if (currentUrl && !error) {
       return <Link className="h-4 w-4" />;
     }
     if (error) {
@@ -89,12 +108,12 @@ export const GameMasterSticker = () => {
           <hr className="border-border" />
 
           {/* Current URL Display */}
-          {url && (
+          {currentUrl && (
             <div className="space-y-2">
               <div className="flex flex-col gap-1">
                 <span className="text-sm font-medium">Current URL:</span>
                 <span className="text-primary bg-muted rounded p-2 font-mono text-xs break-all">
-                  {url}
+                  {currentUrl}
                 </span>
               </div>
             </div>
@@ -105,9 +124,9 @@ export const GameMasterSticker = () => {
             <div className="bg-destructive/10 border-destructive/20 flex items-start gap-2 rounded-md border p-3">
               <AlertCircle className="text-destructive mt-0.5 h-4 w-4" />
               <div className="flex-1">
-                <p className="text-destructive text-sm">{error.message}</p>
+                <p className="text-destructive text-sm">{error}</p>
                 <button
-                  onClick={clearError}
+                  onClick={() => setError(null)}
                   className="text-destructive/80 hover:text-destructive mt-1 text-xs underline"
                 >
                   Clear error
@@ -158,12 +177,6 @@ export const GameMasterSticker = () => {
               </>
             )}
           </button>
-
-          {/* Info text */}
-          <p className="text-muted-foreground text-center text-xs">
-            Enter the GameMaster server URL and click "Set URL" to configure the
-            connection.
-          </p>
         </div>
       </HoverCardContent>
     </HoverCard>
