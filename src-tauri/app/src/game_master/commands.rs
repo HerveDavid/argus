@@ -1,12 +1,124 @@
 use crate::entities::sld_metadata::SldMetadata;
+use crate::nats::state::NatsState;
+use crate::powsybl::entities::SQLQueryRequest;
 use crate::sessions::state::SessionState;
 
 use super::entities::ScadaOutput;
-use super::error::Result;
+use super::error::{Error, Result};
 use super::state::*;
 use super::utils;
 
+use log::{debug, warn};
 use tauri::State;
+
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameMasterOutput {
+    pub id: String,
+    pub dynawo_id: String,
+    pub model: String,
+    pub variable: String,
+    #[serde(default)]
+    pub model_lib: Option<String>,
+    pub equipment_id: String,
+    pub kind: String,
+    pub voltage_level: String,
+    pub substation: String,
+    pub graphical_id: String,
+    pub iidm_class: String,
+    pub topic: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameMasterOutputResponse {
+    pub success: bool,
+    pub data: Option<Vec<GameMasterOutput>>,
+    pub error: Option<String>,
+    pub row_count: Option<i32>,
+    pub columns: Option<Vec<String>>,
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn send_command_breaker_gm(
+    session_state: State<'_, tokio::sync::Mutex<SessionState>>,
+    nats_state: State<'_, tokio::sync::Mutex<NatsState>>,
+    graphical_id: String,
+    value: f64,
+) -> Result<()> {
+    let sql_query = SQLQueryRequest {
+        query: "SELECT * FROM game_master_outputs WHERE graphical_id = ?".to_string(),
+        parameters: Some(vec![serde_json::Value::String(graphical_id.clone())]),
+        limit: Some(1), // On n'a besoin que d'un seul résultat
+    };
+
+    let session = session_state.lock().await;
+    let query_response = session
+        .post::<GameMasterOutputResponse, SQLQueryRequest>("powsybl/query", &sql_query)
+        .await
+        .map_err(|e| {
+            eprintln!(
+                "Failed to query database for graphical_id {}: {}",
+                graphical_id, e
+            );
+            Error::DatabaseError(format!("Database query failed: {}", e))
+        })?;
+
+    // Vérifier si la requête a réussi
+    if !query_response.success {
+        return Err(Error::DatabaseError(
+            query_response
+                .error
+                .unwrap_or_else(|| "Unknown database error".to_string()),
+        ));
+    }
+
+    // Extraire l'equipment_id depuis les résultats avec le type spécifique
+    let game_master_output = query_response
+        .data
+        .as_ref()
+        .and_then(|data| data.first())
+        .ok_or_else(|| Error::EquipmentNotFound(graphical_id.clone()))?;
+
+    let equipment_id = &game_master_output.equipment_id;
+    log::debug!(
+        "Found equipment_id: {} for graphical_id: {}",
+        equipment_id,
+        graphical_id
+    );
+
+    // Créer la commande JSON avec l'equipment_id comme clé
+    let command = serde_json::json!({
+        equipment_id: value
+    });
+
+    // Obtenir le client NATS
+    let nats_guard = nats_state.lock().await;
+    let client = nats_guard
+        .try_client()
+        .map_err(|_| Error::ClientNotInitialized)?;
+
+    let command_str = serde_json::to_string(&command).map_err(|e| {
+        log::error!("Failed to serialize command: {}", e);
+        Error::SerializationError(e)
+    })?;
+
+    // Utiliser le topic depuis game_master_output si disponible, sinon une valeur par défaut
+    let topic = format!("{}Control", game_master_output.topic);
+    log::debug!("Publishing command to topic: {}", topic);
+
+    // Publier la commande
+    match client.publish(topic, command_str.into()).await {
+        Ok(_) => {
+            log::info!("Command successfully published to broker");
+            Ok(())
+        }
+        Err(err) => {
+            log::error!("Failed to publish command to broker: {}", err);
+            Err(Error::NatsPublishError(err.to_string()))
+        }
+    }
+}
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn set_gamemaster_url(
@@ -14,14 +126,14 @@ pub async fn set_gamemaster_url(
     url: String,
 ) -> Result<GameMasterUrlResponse> {
     println!("=== set_gamemaster_url appelée avec: {}", url);
-    
+
     println!("=== Tentative d'acquisition du verrou...");
     let mut state = gamemaster_state.lock().await;
     println!("=== Verrou acquis!");
-    
+
     let result = state.set_url(url);
     println!("=== Résultat: {:?}", result);
-    
+
     result
 }
 

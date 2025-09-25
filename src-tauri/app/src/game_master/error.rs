@@ -107,7 +107,69 @@ pub enum Error {
     TextParsingError(String),
 
     #[error("Address invalid error: {0}")]
-    InvalidAddress(String)
+    InvalidAddress(String),
+
+    #[error("Database query failed: {0}")]
+    DatabaseError(String),
+
+    #[error("Database connection not available")]
+    DatabaseConnectionError,
+
+    #[error("Transaction failed: {0}")]
+    TransactionError(String),
+
+    // Erreurs de validation
+    #[error("Validation error: {0}")]
+    ValidationError(String),
+
+    #[error("Equipment ID not found for graphical_id: {0}")]
+    EquipmentNotFound(String),
+
+    #[error("Invalid graphical_id format: {0}")]
+    InvalidGraphicalId(String),
+
+    #[error("Invalid command value: {0}")]
+    InvalidCommandValue(f64),
+
+    // Erreurs GameMaster spécifiques
+    #[error("GameMaster URL not configured")]
+    GameMasterUrlNotSet,
+
+    #[error("GameMaster service unavailable: {0}")]
+    GameMasterUnavailable(String),
+
+    #[error("GameMaster authentication failed")]
+    GameMasterAuthError,
+
+    #[error("Scenario initialization failed: {0}")]
+    ScenarioInitError(String),
+
+    #[error("Simulation state error: {0}")]
+    SimulationStateError(String),
+
+    // Erreurs NATS/Messaging
+    #[error("NATS publish error: {0}")]
+    NatsPublishError(String),
+
+    #[error("Topic not configured: {0}")]
+    TopicNotConfigured(String),
+
+    #[error("Message serialization failed: {0}")]
+    MessageSerializationError(String),
+
+    // Erreurs de verrous/concurrence
+    #[error("Failed to acquire lock: timeout")]
+    LockTimeout,
+
+    #[error("State lock poisoned")]
+    LockPoisoned,
+
+    // Erreurs de configuration
+    #[error("Configuration not found: {0}")]
+    ConfigurationNotFound(String),
+
+    #[error("Invalid configuration: {0}")]
+    InvalidConfiguration(String),
 }
 
 impl Serialize for Error {

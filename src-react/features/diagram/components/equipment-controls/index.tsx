@@ -17,6 +17,7 @@ import { ContextMenu, ContextMenuContent } from '@/components/ui/context-menu';
 import { EquipmentMenu } from './equipment-menu';
 import { useDiagram } from '../../providers/diagram.provider';
 import { useBreakerToggle } from '@/features/single-line-diagram/features/diagram-visualization';
+import { invoke } from '@tauri-apps/api/core';
 
 interface EquipmentControlsProps {
   children: React.ReactNode;
@@ -132,8 +133,15 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     }
   };
 
-  const handleToggleBreaker = (breakerId: string, isClosed: boolean) => {
-    toggleBreaker(breakerId, isClosed);
+  const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
+    const value = isClosed ? 1.0 : 0.0; // Ajouter la valeur basée sur l'état
+
+    await invoke('send_command_breaker_gm', {
+      graphical_id: breakerId,
+      value,
+    }).finally(() => {
+      toggleBreaker(breakerId, isClosed);
+    });
   };
 
   return (
