@@ -15,6 +15,8 @@ import { SldMetadata } from '@/types/sld-metadata';
 import { Attribute } from '../../types/attribute.type';
 import { ContextMenu, ContextMenuContent } from '@/components/ui/context-menu';
 import { EquipmentMenu } from './equipment-menu';
+import { useDiagram } from '../../providers/diagram.provider';
+import { useBreakerToggle } from '@/features/single-line-diagram/features/diagram-visualization';
 
 interface EquipmentControlsProps {
   children: React.ReactNode;
@@ -26,6 +28,8 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   targetElement,
 }) => {
   // Hooks
+  const { svgRef } = useDiagram();
+  const { toggleBreaker } = useBreakerToggle(svgRef);
   const { metadata: metadataResult } = useMetadata();
 
   // States
@@ -128,12 +132,19 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
     }
   };
 
+  const handleToggleBreaker = (breakerId: string, isClosed: boolean) => {
+    toggleBreaker(breakerId, isClosed);
+  };
+
   return (
     <ContextMenu onOpenChange={handleContextMenuOpenChange}>
       <ContextMenuTrigger>{children}</ContextMenuTrigger>
       {elementInfo && (
         <ContextMenuContent>
-          <EquipmentMenu elementInfo={elementInfo} />
+          <EquipmentMenu
+            elementInfo={elementInfo}
+            onToggleBreaker={handleToggleBreaker}
+          />
         </ContextMenuContent>
       )}
     </ContextMenu>
