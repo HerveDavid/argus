@@ -75,7 +75,7 @@ fn spawner_game_master_output(
     client: &Res<PowsyblClient>,
 ) -> Result<()> {
     let body = json!({
-      "query": "SELECT * FROM game_master_outputs WHERE topic = ? AND NULLIF(graphical_id, '') IS NOT NULL",
+      "query": "SELECT * FROM game_master_outputs WHERE (substation = ?1 OR voltage_level = ?1) AND NULLIF(graphical_id, '') IS NOT NULL",
       "parameters": [element_id]
     });
 

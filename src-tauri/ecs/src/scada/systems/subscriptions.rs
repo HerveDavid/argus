@@ -33,7 +33,7 @@ fn spawner_scada_output(
     client: &Res<PowsyblClient>,
 ) -> Result<()> {
     let body = json!({
-      "query": "SELECT * FROM scada_outputs WHERE topic = ? AND NULLIF(graphical_id, '') IS NOT NULL",
+      "query": "SELECT s.* FROM scada_outputs s INNER JOIN game_master_outputs g ON s.dynawo_id = g.dynawo_id WHERE (g.substation = ?1 OR g.voltage_level = ?1) AND NULLIF(s.graphical_id, '') IS NOT NULL",
       "parameters": [element_id]
     });
 
