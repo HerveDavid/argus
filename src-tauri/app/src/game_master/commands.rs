@@ -104,7 +104,7 @@ pub async fn send_command_breaker_gm(
     })?;
 
     // Utiliser le topic depuis game_master_output si disponible, sinon une valeur par défaut
-    let topic = format!("{}Control", game_master_output.topic);
+    let topic = format!("GameMasterControl");
     log::debug!("Publishing command to topic: {}", topic);
 
     // Publier la commande
