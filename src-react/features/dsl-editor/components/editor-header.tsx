@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { EllipsisVertical, Bug, Upload, CheckCircle } from 'lucide-react';
+import { EllipsisVertical, Bug, Upload, CheckCircle, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -15,6 +15,7 @@ import {
   useDslEditor,
   IidmArtifact,
 } from '../provider/dsl-editor.provider';
+import { useDsl } from '../provider/dsl.provider';
 import { ArtifactSelect } from './artifact-select';
 
 interface HeaderProps {
@@ -28,12 +29,23 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
 
   const { dslState, initDslFile, setArtifactId, isLoading } = useDslEditor();
 
-  // Gérer l'initialisation DSL
-  const handleInitialize = useCallback(async () => {
+  // Hook pour le démarrage DSL
+  const {
+    isReady,
+    startDslFile,
+    isStarting,
+    startError,
+    servicesHealthy,
+    isRunning,
+  } = useDsl();
+
+  // Gérer l'initialisation ET le démarrage DSL
+  const handleInitializeAndStart = useCallback(async () => {
     setIsInitializing(true);
     setSimulationConfig(null);
 
     try {
+      // Vérifications préalables
       if (dslState.dsl_file_content.length === 0) {
         throw new Error('No DSL file loaded. Please load a file first.');
       }
@@ -42,6 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
         throw new Error('Please select an artifact first.');
       }
 
+      // Étape 1: Initialisation
+      console.log('Initializing DSL file...');
       const config = await initDslFile();
       setSimulationConfig(config);
 
@@ -50,8 +64,37 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
       );
 
       console.log('Simulation initialized:', config);
+
+      // Petite pause pour laisser le temps à l'état de se mettre à jour
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Étape 2: Démarrage
+      if (isReady && servicesHealthy && !isRunning) {
+        console.log('Starting DSL simulation...');
+        await startDslFile();
+
+        toast.success(
+          `Simulation "${config.simulationName}" started successfully`,
+        );
+      } else {
+        console.warn('Cannot start simulation:', {
+          isReady,
+          servicesHealthy,
+          isRunning,
+        });
+
+        if (!servicesHealthy) {
+          toast.warning(
+            'Services are not healthy. Initialization completed, but simulation not started.',
+          );
+        } else if (isRunning) {
+          toast.info('Simulation is already running.');
+        } else if (!isReady) {
+          toast.warning('System not ready. Please try starting manually.');
+        }
+      }
     } catch (err) {
-      console.error('Initialization error:', err);
+      console.error('Initialization/Start error:', err);
 
       if (err instanceof DslEditorError) {
         toast.error(`[${err.code}] ${err.message}`);
@@ -63,7 +106,14 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
     } finally {
       setIsInitializing(false);
     }
-  }, [dslState, initDslFile]);
+  }, [
+    dslState,
+    initDslFile,
+    startDslFile,
+    isReady,
+    servicesHealthy,
+    isRunning,
+  ]);
 
   // Gérer la sélection d'artefact
   const handleArtifactSelected = useCallback(
@@ -90,10 +140,25 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
         variant: 'secondary' as const,
       };
     }
-    if (simulationConfig) {
-      return { status: 'ready', label: 'Ready', variant: 'default' as const };
+    if (isRunning) {
+      return {
+        status: 'running',
+        label: 'Running',
+        variant: 'default' as const,
+      };
     }
-    return { status: 'loaded', label: 'Loaded', variant: 'outline' as const };
+    if (simulationConfig) {
+      return {
+        status: 'ready',
+        label: 'Ready',
+        variant: 'outline' as const,
+      };
+    }
+    return {
+      status: 'loaded',
+      label: 'Loaded',
+      variant: 'outline' as const,
+    };
   };
 
   const systemStatus = getSystemStatus();
@@ -101,7 +166,44 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
     dslState.dsl_file_content.length > 0 &&
     dslState.artifact_id.trim() !== '' &&
     !isLoading &&
-    !isInitializing;
+    !isInitializing &&
+    !isStarting;
+
+  // Déterminer l'icône et le texte du bouton
+  const getButtonContent = () => {
+    if (isInitializing || isStarting) {
+      return {
+        icon: Play,
+        text: 'Initializing...',
+        className: 'animate-pulse',
+      };
+    }
+
+    if (!simulationConfig) {
+      return {
+        icon: Play,
+        text: 'Initialize & Start',
+        className: '',
+      };
+    }
+
+    if (isRunning) {
+      return {
+        icon: CheckCircle,
+        text: 'Running',
+        className: '',
+      };
+    }
+
+    return {
+      icon: Play,
+      text: 'Start',
+      className: '',
+    };
+  };
+
+  const buttonContent = getButtonContent();
+  const ButtonIcon = buttonContent.icon;
 
   return (
     <TooltipProvider>
@@ -176,27 +278,41 @@ export const Header: React.FC<HeaderProps> = ({ filepath }) => {
                   variant={canInitialize ? 'default' : 'ghost'}
                   size="sm"
                   className="h-8 w-8 p-0"
-                  onClick={handleInitialize}
+                  onClick={handleInitializeAndStart}
                   disabled={!canInitialize}
                 >
-                  <Upload
-                    size={16}
-                    className={isInitializing ? 'animate-pulse' : ''}
-                  />
+                  <ButtonIcon size={16} className={buttonContent.className} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
                 <div className="text-center">
-                  <p className="font-medium">Initialize DSL Scenario</p>
+                  <p className="font-medium">
+                    {!simulationConfig
+                      ? 'Initialize & Start DSL Scenario'
+                      : isRunning
+                        ? 'Simulation Running'
+                        : 'Start DSL Scenario'}
+                  </p>
                   <p className="text-muted-foreground mt-1 text-xs">
                     {!canInitialize
                       ? dslState.dsl_file_content.length === 0
                         ? 'Load a DSL file first'
                         : !dslState.artifact_id.trim().split('-')[0]
                           ? 'Select an artifact first'
-                          : 'Initializing...'
-                      : 'Ready to initialize'}
+                          : isInitializing || isStarting
+                            ? 'Processing...'
+                            : 'Not ready'
+                      : !simulationConfig
+                        ? 'Will initialize and start the simulation'
+                        : isRunning
+                          ? 'Simulation is currently running'
+                          : 'Ready to start'}
                   </p>
+                  {startError && (
+                    <p className="mt-1 text-xs text-red-500">
+                      Error: {startError}
+                    </p>
+                  )}
                 </div>
               </TooltipContent>
             </Tooltip>

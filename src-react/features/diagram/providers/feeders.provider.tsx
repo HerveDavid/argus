@@ -60,18 +60,20 @@ export const FeedersProvider = ({
   );
 
   React.useEffect(() => {
+    let cancelled = false;
+
     if (isInitialized) {
       console.log('About to add channel for elementId:', elementId);
 
       // addChannel retourne maintenant une Promise<Exit<...>>
       addChannel()
         .then((exit) => {
+          if (cancelled) return;
           console.log('AddChannel result:', exit);
           if (Exit.isSuccess(exit)) {
             console.log('Channel added successfully:', exit.value);
           } else {
             console.error('Error adding channel:', exit.toJSON());
-            // Ou pour plus de détails:
             console.error('Error details:', exit.cause);
           }
         })
@@ -81,6 +83,7 @@ export const FeedersProvider = ({
     }
 
     return () => {
+      cancelled = true;
       removeChannel().then(console.log).catch(console.error);
     };
   }, [isInitialized, elementId]);

@@ -611,14 +611,14 @@ export const grafcetMachine = createMachine(
         });
       }),
 
-      saveFile: fromPromise(async ({ _input }) => {
+      saveFile: fromPromise(async ({}) => {
         // Logique de sauvegarde
         return new Promise((resolve) => {
           setTimeout(() => resolve('File saved successfully'), 1000);
         });
       }),
 
-      exportFile: fromPromise(async ({ _input }) => {
+      exportFile: fromPromise(async ({}) => {
         // Logique d'export
         return new Promise((resolve) => {
           setTimeout(() => resolve('File exported successfully'), 1000);

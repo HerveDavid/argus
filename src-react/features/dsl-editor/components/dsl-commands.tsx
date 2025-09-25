@@ -9,10 +9,8 @@ import {
 import { useDsl, useStopDsl } from '../provider/dsl.provider';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import { useAtomSet } from '@effect-atom/atom-react';
 
 export const DslCommands = () => {
-
   const {
     simulationName,
     simulationStatus,
