@@ -83,7 +83,7 @@ pub async fn send_command_breaker_scada(
         .and_then(|data| data.first())
         .ok_or_else(|| Error::EquipmentNotFound(graphical_id.clone()))?;
 
-    let equipment_id = &game_master_output.equipment_id;
+    let equipment_id = &game_master_output.dynawo_id;
     log::debug!(
         "Found equipment_id: {} for graphical_id: {}",
         equipment_id,

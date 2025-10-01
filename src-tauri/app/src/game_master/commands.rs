@@ -49,7 +49,7 @@ pub async fn send_command_breaker_gm(
     let sql_query = SQLQueryRequest {
         query: "SELECT * FROM game_master_outputs WHERE graphical_id = ?".to_string(),
         parameters: Some(vec![serde_json::Value::String(graphical_id.clone())]),
-        limit: Some(1), // On n'a besoin que d'un seul résultat
+        limit: Some(1),
     };
 
     let session = session_state.lock().await;
@@ -80,7 +80,7 @@ pub async fn send_command_breaker_gm(
         .and_then(|data| data.first())
         .ok_or_else(|| Error::EquipmentNotFound(graphical_id.clone()))?;
 
-    let equipment_id = &game_master_output.equipment_id;
+    let equipment_id = &game_master_output.dynawo_id;
     log::debug!(
         "Found equipment_id: {} for graphical_id: {}",
         equipment_id,
