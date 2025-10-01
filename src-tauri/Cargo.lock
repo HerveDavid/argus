@@ -2174,6 +2174,7 @@ dependencies = [
  "async-nats 0.42.0",
  "bevy",
  "futures",
+ "log",
  "reqwest",
  "serde",
  "serde_json",

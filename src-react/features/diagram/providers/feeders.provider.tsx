@@ -58,7 +58,7 @@ const useChannelSubscription = (
     return () => {
       channelRef.current = null;
     };
-  }, [elementId, isInitialized, channelVersion]);
+  }, [elementId, isInitialized, svgRef, channelVersion]);
 
   const recreateChannel = React.useCallback(() => {
     setChannelVersion((v) => v + 1);
@@ -85,9 +85,18 @@ export const FeedersProvider = ({
     'idle' | 'subscribing' | 'subscribed' | 'unsubscribing'
   >('idle');
   const visibilityObserverRef = React.useRef<IntersectionObserver | null>(null);
+  const pendingSubscribeRef = React.useRef<Promise<void> | null>(null);
+  const isMountedRef = React.useRef(true);
 
   const unsubscribe = React.useCallback(async (targetElementId: string) => {
-    if (subscriptionStateRef.current === 'unsubscribing') {
+    if (
+      subscriptionStateRef.current === 'unsubscribing' ||
+      subscriptionStateRef.current === 'subscribing'
+    ) {
+      return;
+    }
+
+    if (subscriptionStateRef.current !== 'subscribed') {
       return;
     }
 
@@ -97,82 +106,141 @@ export const FeedersProvider = ({
       await invoke('remove_subscription', {
         element_id: targetElementId,
       });
-      if (subscriptionIdRef.current === targetElementId) {
-        subscriptionIdRef.current = null;
+      if (isMountedRef.current) {
+        if (subscriptionIdRef.current === targetElementId) {
+          subscriptionIdRef.current = null;
+        }
+        subscriptionStateRef.current = 'idle';
+        console.log('Unsubscribed: ' + targetElementId);
       }
-      subscriptionStateRef.current = 'idle';
-      console.log('Unsubscribed: ' + targetElementId);
     } catch (error) {
       console.error('Error removing subscription:', error);
-      subscriptionStateRef.current = 'idle';
+      if (isMountedRef.current) {
+        subscriptionStateRef.current = 'idle';
+      }
       throw error;
     }
   }, []);
 
   const subscribe = React.useCallback(async () => {
+    if (!isMountedRef.current || !isInitialized) {
+      return;
+    }
+
     if (
-      !channelRef.current ||
-      !isInitialized ||
-      subscriptionStateRef.current !== 'idle'
+      subscriptionStateRef.current === 'subscribing' ||
+      subscriptionStateRef.current === 'subscribed'
     ) {
       return;
     }
 
     const currentChannel = channelRef.current;
-    const currentElementId = elementId;
-    subscriptionStateRef.current = 'subscribing';
-
-    try {
-      await invoke('add_subscription', {
-        element_id: currentElementId,
-        channel: currentChannel,
-      });
-      subscriptionIdRef.current = currentElementId;
-      subscriptionStateRef.current = 'subscribed';
-      console.log('Subscribed: ' + elementId);
-    } catch (error) {
-      console.error('Error adding subscription:', error);
-      subscriptionStateRef.current = 'idle';
-      throw error;
-    }
-  }, [channelRef.current, elementId, isInitialized]);
-
-  const reconnect = React.useCallback(async () => {
-    if (subscriptionIdRef.current) {
-      await unsubscribe(subscriptionIdRef.current);
-    }
-    recreateChannel();
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    await subscribe();
-  }, [unsubscribe, subscribe, recreateChannel]);
-
-  React.useEffect(() => {
-    if (!channelRef.current || !isInitialized) {
+    if (!currentChannel) {
       return;
     }
 
-    subscribe();
+    const currentElementId = elementId;
+    subscriptionStateRef.current = 'subscribing';
+
+    const subscribePromise = (async () => {
+      try {
+        await invoke('add_subscription', {
+          element_id: currentElementId,
+          channel: currentChannel,
+        });
+        if (isMountedRef.current) {
+          subscriptionIdRef.current = currentElementId;
+          subscriptionStateRef.current = 'subscribed';
+          console.log('Subscribed: ' + currentElementId);
+        }
+      } catch (error) {
+        console.error('Error adding subscription:', error);
+        if (isMountedRef.current) {
+          subscriptionStateRef.current = 'idle';
+        }
+        throw error;
+      } finally {
+        if (isMountedRef.current) {
+          pendingSubscribeRef.current = null;
+        }
+      }
+    })();
+
+    pendingSubscribeRef.current = subscribePromise;
+    return subscribePromise;
+  }, [channelRef, elementId, isInitialized]);
+
+  const reconnect = React.useCallback(async () => {
+    if (pendingSubscribeRef.current) {
+      await pendingSubscribeRef.current;
+    }
+
+    if (subscriptionIdRef.current) {
+      await unsubscribe(subscriptionIdRef.current);
+    }
+
+    recreateChannel();
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    if (isMountedRef.current) {
+      await subscribe();
+    }
+  }, [unsubscribe, subscribe, recreateChannel]);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
 
     return () => {
-      const currentElementId = subscriptionIdRef.current;
-      if (currentElementId) {
-        unsubscribe(currentElementId);
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!isInitialized || !channelRef.current) {
+      return;
+    }
+
+    const currentElementId = elementId;
+    let cleanupExecuted = false;
+
+    const performSubscription = async () => {
+      if (
+        subscriptionIdRef.current &&
+        subscriptionIdRef.current !== currentElementId
+      ) {
+        await unsubscribe(subscriptionIdRef.current);
+      }
+
+      if (isMountedRef.current && !cleanupExecuted) {
+        await subscribe();
       }
     };
-  }, [channelRef.current, elementId, isInitialized, subscribe, unsubscribe]);
+
+    performSubscription();
+
+    return () => {
+      cleanupExecuted = true;
+      const currentSub = subscriptionIdRef.current;
+      if (currentSub) {
+        unsubscribe(currentSub);
+      }
+    };
+  }, [elementId, isInitialized]);
 
   React.useEffect(() => {
     if (!svgRef.current || !isInitialized) return;
 
     const observerCallback: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0) {
-          if (
-            subscriptionStateRef.current === 'idle' &&
-            !subscriptionIdRef.current
-          ) {
-            subscribe();
-          }
+        if (
+          entry.isIntersecting &&
+          entry.intersectionRatio > 0 &&
+          subscriptionStateRef.current === 'idle' &&
+          !subscriptionIdRef.current &&
+          isMountedRef.current
+        ) {
+          subscribe();
         }
       });
     };
@@ -189,14 +257,14 @@ export const FeedersProvider = ({
       observer.disconnect();
       visibilityObserverRef.current = null;
     };
-  }, [svgRef.current, isInitialized, subscribe]);
+  }, [svgRef, isInitialized, subscribe]);
 
   const contextValue = React.useMemo(
     () => ({
       channel: channelRef,
       reconnect,
     }),
-    [reconnect],
+    [channelRef, reconnect],
   );
 
   return (

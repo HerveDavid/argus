@@ -39,11 +39,12 @@ impl Plugin for GameMasterPlugin {
             Update,
             (
                 (
-                    subscriptions::spawn_game_master_subscription,
-                    subscriptions::time,
                     subscriptions::spawn_game_master_output,
+                    subscriptions::spawn_game_master_subscription,
                 )
+                    .chain()
                     .in_set(GameMasterSet::Subscription),
+                (subscriptions::time,).in_set(GameMasterSet::Subscription),
                 (inputs::nats_receiver_to_events, inputs::nats_to_game_master)
                     .chain()
                     .in_set(GameMasterSet::Input),

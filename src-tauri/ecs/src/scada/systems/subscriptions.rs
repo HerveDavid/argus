@@ -1,5 +1,7 @@
 use bevy::prelude::*;
+use log::{error, info, warn};
 use serde_json::json;
+use std::collections::HashSet;
 
 use crate::scada::{
     components::{ScadaOutputResponse, ScadaSubscription},
@@ -20,8 +22,10 @@ pub fn spawn_scada_output(
     for event in events.read() {
         let SubscriptionEvent(element_id, entity, ..) = event;
 
+        info!("Spawning SCADA outputs for element_id: {}", element_id);
+
         if let Err(err) = spawner_scada_output(element_id, entity, &mut commands, &client) {
-            eprintln!("Error scada output: {}", err);
+            error!("Error spawning SCADA output for {}: {}", element_id, err);
         }
     }
 }
@@ -38,37 +42,79 @@ fn spawner_scada_output(
     });
 
     let response: ScadaOutputResponse = client.post("powsybl/query", &body)?;
+
+    info!(
+        "Found {} SCADA outputs for element_id: {}",
+        response.outputs.len(),
+        element_id
+    );
+
     for output in response.outputs {
-        commands.spawn((output, ChildOf(entity.clone())));
+        info!(
+            "Spawning ScadaOutput - dynawo_id: {}, graphical_id: {}, topic: {}, parent: {:?}",
+            output.dynawo_id, output.graphical_id, output.topic, entity
+        );
+        commands.entity(*entity).with_children(|parent| {
+            parent.spawn(output);
+        });
     }
 
     Ok(())
 }
 
 pub fn spawn_scada_subscription(
-    mut events: EventReader<SubscriptionEvent>,
     mut commands: Commands,
     config: Res<ScadaConfig>,
     nats: Res<NatsClient>,
+    subscriptions: Query<(Entity, &Children), With<crate::subscriber::components::Subscription>>,
+    new_outputs: Query<
+        &crate::scada::components::ScadaOutput,
+        Added<crate::scada::components::ScadaOutput>,
+    >,
 ) {
-    for event in events.read() {
-        let SubscriptionEvent(element_id, entity, ..) = event;
+    for (parent_entity, children) in subscriptions.iter() {
+        let mut topics = HashSet::new();
 
-        let topic = format!("{}.{}", config.topic, element_id.replace(".", "_")); // Sanitize substation_id before use as topic ('.' is a delimiter in NATS)
-        let (sender, receiver) = tokio::sync::mpsc::unbounded_channel::<NatsEvent>();
+        for child in children.iter() {
+            if let Ok(output) = new_outputs.get(child) {
+                topics.insert(output.topic.clone());
+            }
+        }
 
-        let topic_to_listener = topic.clone();
-        let listener = nats
-            .create_listener_task(topic_to_listener, sender)
-            .unwrap();
+        if topics.is_empty() {
+            continue;
+        }
 
-        commands.spawn((
-            ScadaSubscription {
-                topic,
-                receiver,
-                listener,
-            },
-            ChildOf(entity.clone()),
-        ));
+        info!(
+            "Creating NATS subscriptions for parent entity {:?} with topics: {:?}",
+            parent_entity, topics
+        );
+
+        for topic_name in topics {
+            let full_topic = format!("{}.{}", config.topic, topic_name);
+            info!("Creating NATS subscription for topic: {}", full_topic);
+
+            let (sender, receiver) = tokio::sync::mpsc::unbounded_channel::<NatsEvent>();
+
+            let topic_to_listener = full_topic.clone();
+            match nats.create_listener_task(topic_to_listener.clone(), sender) {
+                Ok(listener) => {
+                    info!("Successfully created listener for topic: {}", full_topic);
+                    commands.entity(parent_entity).with_children(|parent| {
+                        parent.spawn(ScadaSubscription {
+                            topic: full_topic.clone(),
+                            receiver,
+                            listener,
+                        });
+                    });
+                }
+                Err(err) => {
+                    error!(
+                        "Failed to create listener for topic {}: {}",
+                        full_topic, err
+                    );
+                }
+            }
+        }
     }
 }

@@ -80,6 +80,7 @@ pub async fn send_command_breaker_gm(
         .and_then(|data| data.first())
         .ok_or_else(|| Error::EquipmentNotFound(graphical_id.clone()))?;
 
+    // TODO: use iidm_id instead of dynawo_id
     let equipment_id = &game_master_output.dynawo_id;
     log::debug!(
         "Found equipment_id: {} for graphical_id: {}",

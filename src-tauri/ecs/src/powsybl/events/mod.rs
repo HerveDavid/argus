@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-#[derive(Event)]
+#[derive(Debug, Event)]
 pub struct UpdateFeederEvent {
     pub id: String,
     pub value: f64,

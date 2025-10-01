@@ -35,9 +35,10 @@ impl Plugin for ScadaPlugin {
             Update,
             (
                 (
-                    subscriptions::spawn_scada_subscription,
                     subscriptions::spawn_scada_output,
+                    subscriptions::spawn_scada_subscription,
                 )
+                    .chain()
                     .in_set(ScadaSet::Subscription),
                 (inputs::nats_receiver_to_events, inputs::nats_to_scada)
                     .chain()
