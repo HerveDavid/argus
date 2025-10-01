@@ -53,6 +53,15 @@ pub enum Error {
 
     #[error("Outputs are empty")]
     OutputsEmpty,
+
+    #[error("Database query failed: {0}")]
+    DatabaseError(String),
+
+    #[error("Equipment ID not found for graphical_id: {0}")]
+    EquipmentNotFound(String),
+
+    #[error("NATS publish error: {0}")]
+    NatsPublishError(String),
 }
 
 impl Serialize for Error {

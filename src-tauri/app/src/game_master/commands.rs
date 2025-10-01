@@ -108,9 +108,12 @@ pub async fn send_command_breaker_gm(
     log::debug!("Publishing command to topic: {}", topic);
 
     // Publier la commande
-    match client.publish(topic, command_str.into()).await {
+    match client.publish(topic, command_str.clone().into()).await {
         Ok(_) => {
-            log::info!("Command successfully published to broker");
+            log::info!(
+                "Command successfully published to broker: {}",
+                &command_str
+            );
             Ok(())
         }
         Err(err) => {

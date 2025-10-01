@@ -135,13 +135,17 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
 
   const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
     const value = isClosed ? 1.0 : 0.0; // Ajouter la valeur basée sur l'état
-
+    console.log('value: ' + value);
     await invoke('send_command_breaker_gm', {
       graphical_id: breakerId,
       value,
-    }).finally(() => {
-      toggleBreaker(breakerId, isClosed);
-    });
+    })
+      .finally(() => {
+        toggleBreaker(breakerId, isClosed);
+      })
+      .finally(() => {
+        console.log('done');
+      });
   };
 
   return (

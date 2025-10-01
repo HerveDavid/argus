@@ -12,6 +12,7 @@ mod settings;
 mod tasks;
 mod utils;
 
+use log::Level;
 use tauri::Manager;
 
 const SIDECARS: [&str; 2] = ["powsybl", "powsybl-crdt"];
@@ -19,7 +20,7 @@ const SIDECARS: [&str; 2] = ["powsybl", "powsybl-crdt"];
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     std::env::set_var("SQLX_LOGGING", "false");
-    std::env::set_var("RUST_LOG", "info,async_nats=warn,sqlx=warn");
+    std::env::set_var("RUST_LOG", "off,info,async_nats=off,sqlx=warn");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_window_state::Builder::new().build())
@@ -28,7 +29,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(
             tauri_plugin_log::Builder::new()
-                .filter(|metadata| !metadata.target().starts_with("sqlx"))
+                .filter(|metadata| !metadata.target().starts_with("sqlx") && metadata.level() != Level::Trace)
                 .build(),
         )
         .plugin(tauri_plugin_opener::init())
@@ -151,6 +152,7 @@ pub fn run() {
             powsybl::commands::update_switch,
             powsybl::commands::update_load,
             // Scada
+            scada::commands::send_command_breaker_scada,
             scada::commands::subscribe_scada_feeders,
             scada::commands::subscribe_single_scada_feeder,
             scada::commands::unsubscribe_scada_feeders,

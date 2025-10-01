@@ -30,9 +30,9 @@ export const ElementContextMenu: React.FC<ElementContextMenuProps> = ({
   const isTransformer = elementTypePredicates.isTransformerElement(elementInfo);
 
   // 🎯 Type-safe node casting
-  const switchNode = isSwitchNode(elementInfo.node) ? elementInfo.node : null;
-  const feederNode = isFeederNode(elementInfo.node) ? elementInfo.node : null;
-  const busbarNode = isBusbarNode(elementInfo.node) ? elementInfo.node : null;
+  const switchNode = isSwitchNode(elementInfo.nodeInfo) ? elementInfo.nodeInfo : null;
+  const feederNode = isFeederNode(elementInfo.nodeInfo) ? elementInfo.nodeInfo : null;
+  const busbarNode = isBusbarNode(elementInfo.nodeInfo) ? elementInfo.nodeInfo : null;
 
   return (
     <ContextMenuContent className="w-64">
@@ -114,7 +114,7 @@ export const ElementContextMenu: React.FC<ElementContextMenuProps> = ({
             ❓ Unknown Component
           </div>
           <div className="text-gray-600">
-            Type: {elementInfo.node?.componentType || 'Undefined'}
+            Type: {elementInfo.nodeInfo?.componentType || 'Undefined'}
           </div>
         </div>
       )}
