@@ -18,7 +18,6 @@ export const DslExplorer: React.FC = () => {
     files,
     expandedFolders,
     currentPath,
-    recentFolders,
     setFiles,
     addFiles,
     toggleFolder: toggleFolderStore,
@@ -27,6 +26,7 @@ export const DslExplorer: React.FC = () => {
     updateNodeName,
     updateNodeChildren,
     addNode: addNodeToStore,
+    setExpandedFolders,
   } = useDslExplorerStore();
 
   const convertToFileNode = useCallback(
@@ -117,16 +117,21 @@ export const DslExplorer: React.FC = () => {
         console.log('Created root node from currentPath:', rootNode);
 
         setFiles([rootNode]);
-        // Auto-expand le dossier racine
-        const newExpanded = new Set([rootNode.id]);
-        useDslExplorerStore.getState().setExpandedFolders(newExpanded);
+
+        // Auto-expand le dossier racine en utilisant toggleFolderStore
+        // pour s'assurer que l'état est correctement géré
+        const newExpanded = new Set(expandedFolders);
+        newExpanded.add(rootNode.id);
+        setExpandedFolders(newExpanded);
+
+        console.log('Expanded folders after load:', newExpanded);
       } catch (error) {
         console.error('Error loading root folder:', error);
       } finally {
         setIsLoading(false);
       }
     },
-    [readDirectory, setFiles],
+    [readDirectory, setFiles, setExpandedFolders, expandedFolders],
   );
 
   const openFolder = useCallback(async () => {
@@ -162,9 +167,10 @@ export const DslExplorer: React.FC = () => {
         console.log('Created root node:', newNode);
 
         setFiles([newNode]);
+
         // Auto-expand le dossier racine
         const newExpanded = new Set([newNode.id]);
-        useDslExplorerStore.getState().setExpandedFolders(newExpanded);
+        setExpandedFolders(newExpanded);
         setCurrentPath(folderPath);
       }
     } catch (error) {
@@ -172,7 +178,7 @@ export const DslExplorer: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [readDirectory, setFiles, setCurrentPath]);
+  }, [readDirectory, setFiles, setCurrentPath, setExpandedFolders]);
 
   const openFiles = useCallback(async () => {
     try {

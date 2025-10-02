@@ -164,7 +164,7 @@ export const Header = () => {
           &nbsp;
         </div>
         <div
-          className="relative flex flex justify-center"
+          className="relative flex justify-center"
           onMouseDown={stopPropagation}
         >
           <CenterMenu />

@@ -40,6 +40,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   const [elementInfo, setElementInfo] = useState<ElementInfo>();
   const [_, setAttributes] = useState<Attribute[]>([]);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Effects
   useEffect(() => {
@@ -125,7 +126,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
         setAttributes([]);
       }
     }
-  }, [targetElement, metadata, contextMenuOpen]);
+  }, [targetElement, metadata, contextMenuOpen, refreshTrigger]);
 
   const handleContextMenuOpenChange = (open: boolean) => {
     setContextMenuOpen(open);
@@ -136,7 +137,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   };
 
   const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
-    const value = isClosed ? 1.0 : 0.0; // Ajouter la valeur basée sur l'état
+    const value = isClosed ? 1.0 : 0.0;
     console.log('value: ' + value);
 
     switch (currentMode) {
@@ -150,10 +151,12 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
           })
           .finally(() => {
             console.log('Command GM break launch');
+            // Refresh the equipment menu to reflect the new breaker state
+            setRefreshTrigger((prev) => prev + 1);
           });
         break;
       case 'Scada':
-         await invoke('send_command_breaker_scada', {
+        await invoke('send_command_breaker_scada', {
           graphical_id: breakerId,
           value,
         })
@@ -162,6 +165,8 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
           })
           .finally(() => {
             console.log('Command SCADA break launch');
+            // Refresh the equipment menu to reflect the new breaker state
+            setRefreshTrigger((prev) => prev + 1);
           });
         break;
     }
