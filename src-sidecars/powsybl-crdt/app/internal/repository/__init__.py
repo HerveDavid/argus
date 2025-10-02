@@ -55,6 +55,7 @@ class RepositoryManager:
                     # Récupérer les données JSON depuis la configuration
                     game_master_outputs_data = None
                     scada_outputs_data = None
+                    scada_inputs_data = None
 
                     if hasattr(config_fsm.config, 'game_master_outputs'):
                         game_master_outputs_data = config_fsm.config.game_master_outputs.outputs_data
@@ -63,14 +64,14 @@ class RepositoryManager:
                         scada_outputs_data = config_fsm.config.scada_outputs.outputs_data
 
                     if hasattr(config_fsm.config, 'scada_inputs'):
-                        scada_outputs_data = config_fsm.config.scada_inputs.inputs_data
+                        scada_inputs_data = config_fsm.config.scada_inputs.inputs_data
 
                     # Créer le repository avec les données JSON
                     self._repository = Repository(
                         network,
                         game_master_outputs_data=game_master_outputs_data,
                         scada_outputs_data=scada_outputs_data,
-                        scada_inputs_data=scada_outputs_data
+                        scada_inputs_data=scada_inputs_data
                     )
                     self._repository.initialize_all_repositories()
 

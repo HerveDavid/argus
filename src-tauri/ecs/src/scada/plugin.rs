@@ -35,8 +35,8 @@ impl Plugin for ScadaPlugin {
             Update,
             (
                 (
-                    subscriptions::spawn_scada_output,
                     subscriptions::spawn_scada_subscription,
+                    subscriptions::spawn_scada_output,
                 )
                     .chain()
                     .in_set(ScadaSet::Subscription),
