@@ -67,7 +67,7 @@ async def get_tables(
         "phase_tab_changer_steps", "phase_tab_changers", "ratio_tab_changer_steps",
         "ratio_tab_changers", "reactive_capability_curve_points",
         "shunt_compensators", "static_var_compensators", "switches",
-        "terminals", "vsc_converter_stations", "tie_lines", "game_master_outputs", "scada_outputs"
+        "terminals", "vsc_converter_stations", "tie_lines", "game_master_outputs", "scada_outputs", "scada_inputs"
     ]
 
     for repo_name in repository_names:

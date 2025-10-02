@@ -8,6 +8,7 @@ import toml
 from .config_game_master_output import ConfigGameMasterOutput
 from .config_network import ConfigNetwork
 from .config_scada_output import ConfigScadaOutput
+from .config_scada_input import ConfigScadaInput
 
 try:
     from fastapi import UploadFile as FastAPIUploadFile
@@ -37,6 +38,8 @@ class ConfigLoader:
         self.network = ConfigNetwork(self, self.logger, self.base_directory)
         self.game_master_outputs = ConfigGameMasterOutput(self, self.logger, self.base_directory)
         self.scada_outputs = ConfigScadaOutput(self, self.logger, self.base_directory)
+        self.scada_inputs = ConfigScadaInput(self, self.logger, self.base_directory)
+
 
     def set_base_directory(self, directory: Union[str, Path]):
         """Permet de définir le répertoire de base après initialisation."""
@@ -105,6 +108,11 @@ class ConfigLoader:
                 self.scada_outputs.extract_outputs_info()
             except Exception as e:
                 self.logger.warning(f"Could not extract scada outputs info: {e}")
+
+            try:
+                self.scada_inputs.extract_inputs_info()
+            except Exception as e:
+                self.logger.warning(f"Could not extract scada inputs info: {e}")
 
             return self.config
 

@@ -35,6 +35,7 @@ from .phase_tab_changers.repository import PhaseTapChangersRepository
 from .ratio_tab_changer_steps.repository import RatioTapChangerStepsRepository
 from .ratio_tab_changers.repository import RatioTapChangersRepository
 from .reactive_capability_curve_points.repository import ReactiveCapabilityCurvePointsRepository
+from .scada_inputs.repository import ScadaInputsRepository
 from .scada_outputs.repository import ScadaOutputsRepository
 from .shunt_compensators.repository import ShuntCompensatorsRepository
 from .static_var_compensators.repository import StaticVarCompensatorsRepository
@@ -55,10 +56,12 @@ class Repository:
             self,
             network_source: Union[str, Path, pn.Network],
             game_master_outputs_data: Optional[List[dict]] = None,
-            scada_outputs_data: Optional[List[dict]] = None
+            scada_outputs_data: Optional[List[dict]] = None,
+            scada_inputs_data: Optional[List[dict]] = None,
     ):
         self._game_master_outputs_data = game_master_outputs_data or []
         self._scada_outputs_data = scada_outputs_data or []
+        self._scada_inputs_data = scada_inputs_data or []
 
         self._setup_network(network_source)
         self._setup_database()
@@ -126,6 +129,13 @@ class Repository:
                 "scada_outputs",
                 ScadaOutputsRepository,
                 self._scada_outputs_data
+            )
+
+        if self._scada_inputs_data:
+            self._repo_manager.register_custom_repository(
+                "scada_inputs",
+                ScadaInputsRepository,
+                self._scada_inputs_data
             )
 
         logger.info("Repositories configured")
