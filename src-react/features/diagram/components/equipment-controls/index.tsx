@@ -18,6 +18,7 @@ import { EquipmentMenu } from './equipment-menu';
 import { useDiagram } from '../../providers/diagram.provider';
 import { useBreakerToggle } from '@/features/single-line-diagram/features/diagram-visualization';
 import { invoke } from '@tauri-apps/api/core';
+import { useMode } from '@/hooks/use-mode';
 
 interface EquipmentControlsProps {
   children: React.ReactNode;
@@ -29,6 +30,7 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   targetElement,
 }) => {
   // Hooks
+  const { currentMode } = useMode();
   const { svgRef } = useDiagram();
   const { toggleBreaker } = useBreakerToggle(svgRef);
   const { metadata: metadataResult } = useMetadata();
@@ -136,16 +138,33 @@ export const EquipmentControls: React.FC<EquipmentControlsProps> = ({
   const handleToggleBreaker = async (breakerId: string, isClosed: boolean) => {
     const value = isClosed ? 1.0 : 0.0; // Ajouter la valeur basée sur l'état
     console.log('value: ' + value);
-    await invoke('send_command_breaker_gm', {
-      graphical_id: breakerId,
-      value,
-    })
-      .finally(() => {
-        toggleBreaker(breakerId, isClosed);
-      })
-      .finally(() => {
-        console.log('done');
-      });
+
+    switch (currentMode) {
+      case 'GameMaster':
+        await invoke('send_command_breaker_gm', {
+          graphical_id: breakerId,
+          value,
+        })
+          .finally(() => {
+            toggleBreaker(breakerId, isClosed);
+          })
+          .finally(() => {
+            console.log('Command GM break launch');
+          });
+        break;
+      case 'Scada':
+         await invoke('send_command_breaker_scada', {
+          graphical_id: breakerId,
+          value,
+        })
+          .finally(() => {
+            toggleBreaker(breakerId, isClosed);
+          })
+          .finally(() => {
+            console.log('Command SCADA break launch');
+          });
+        break;
+    }
   };
 
   return (
