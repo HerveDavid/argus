@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use log::{error, info, warn};
+use log::{error, info};
 use serde_json::json;
-use std::collections::HashSet;
 
 use crate::scada::{
     components::{ScadaOutputResponse, ScadaSubscription},
@@ -37,7 +36,7 @@ fn spawner_scada_output(
     client: &Res<PowsyblClient>,
 ) -> Result<()> {
     let body = json!({
-      "query": "SELECT s.* FROM scada_outputs s INNER JOIN game_master_outputs g ON s.dynawo_id = g.dynawo_id WHERE (g.substation = ?1 OR g.voltage_level = ?1) AND NULLIF(s.graphical_id, '') IS NOT NULL",
+      "query": "SELECT s.*, CASE WHEN g.voltage_level = ?1 THEN g.voltage_level WHEN g.substation = ?1 THEN g.substation END as topic FROM scada_outputs s INNER JOIN game_master_outputs g ON s.dynawo_id = g.dynawo_id WHERE (g.substation = ?1 OR g.voltage_level = ?1) AND NULLIF(s.graphical_id, '') IS NOT NULL",
       "parameters": [element_id]
     });
 
@@ -66,36 +65,44 @@ pub fn spawn_scada_subscription(
     mut commands: Commands,
     config: Res<ScadaConfig>,
     nats: Res<NatsClient>,
-    subscriptions: Query<Entity, (With<crate::subscriber::components::Subscription>, Without<ScadaSubscription>)>,
+    subscriptions: Query<
+        Entity,
+        (
+            With<crate::subscriber::components::Subscription>,
+            Without<ScadaSubscription>,
+        ),
+    >,
 ) {
-    // Only create one subscription per parent entity, using a wildcard to catch all topics
+    let wildcard_topic = format!("{}.>", config.topic);
+
+    // Create a subscription for each parent entity
     for parent_entity in subscriptions.iter() {
         info!(
-            "Creating wildcard NATS subscription for parent entity {:?}",
-            parent_entity
+            "Creating NATS subscription for entity {:?} with topic: {}",
+            parent_entity, wildcard_topic
         );
-
-        // Use wildcard to subscribe to all topics under the config prefix
-        let wildcard_topic = format!("{}.*", config.topic);
-        info!("Creating NATS subscription for wildcard topic: {}", wildcard_topic);
 
         let (sender, receiver) = tokio::sync::mpsc::unbounded_channel::<NatsEvent>();
 
         match nats.create_listener_task(wildcard_topic.clone(), sender) {
             Ok(listener) => {
-                info!("Successfully created listener for wildcard topic: {}", wildcard_topic);
-                commands.entity(parent_entity).with_children(|parent| {
-                    parent.spawn(ScadaSubscription {
-                        topic: wildcard_topic.clone(),
-                        receiver,
-                        listener,
-                    });
+                info!(
+                    "Successfully created listener for topic: {} on entity {:?}",
+                    wildcard_topic, parent_entity
+                );
+                
+                // Add the ScadaSubscription component directly to the parent entity
+                // This prevents the infinite loop by making the entity no longer match the query
+                commands.entity(parent_entity).insert(ScadaSubscription {
+                    topic: wildcard_topic.clone(),
+                    receiver,
+                    listener,
                 });
             }
             Err(err) => {
                 error!(
-                    "Failed to create listener for wildcard topic {}: {}",
-                    wildcard_topic, err
+                    "Failed to create listener for topic {} on entity {:?}: {}",
+                    wildcard_topic, parent_entity, err
                 );
             }
         }

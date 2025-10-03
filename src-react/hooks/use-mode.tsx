@@ -1,10 +1,18 @@
 import { useMachine } from '@xstate/react';
-import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useMemo,
+  useEffect,
+} from 'react';
 import { Actor, StateFrom } from 'xstate';
 
 import { modeMachine } from '@/services/scada/machine';
 import { AppMode } from '@/types/mode';
 import { ModeError } from '@/services/common/mode-client';
+import { invoke } from '@tauri-apps/api/core';
+
 type ModeActor = Actor<typeof modeMachine>;
 type ModeState = StateFrom<typeof modeMachine>;
 
@@ -37,6 +45,22 @@ interface ModeProviderProps {
 
 export const ModeProvider: React.FC<ModeProviderProps> = ({ children }) => {
   const [state, send, actor] = useMachine(modeMachine);
+
+  useEffect(() => {
+    const mountCurrentMode = async () => {
+      const { currentMode, isTransitioning } = state.context;
+
+      // Wait for initialization to complete
+      if (!state.matches('INITIALIZING') && !isTransitioning && currentMode) {
+        console.log('Mounting mode:', currentMode);
+
+        // Invoke ECS mode switch
+        await invoke('switch_mode_ecs', { mode: currentMode });
+      }
+    };
+
+    mountCurrentMode();
+  }, [state.matches('INITIALIZING'), state.context.isTransitioning]);
 
   const contextValue: ModeContextValue = useMemo(
     () => ({

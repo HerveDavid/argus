@@ -84,15 +84,16 @@ pub fn spawn_game_master_subscription(
         // Create one subscription per unique topic, only if it doesn't exist
         for topic_name in topics {
             let full_topic = format!("{}.{}", config.topic, topic_name.replace(".", "_"));
+            
 
-            // Skip if subscription already exists
-            if existing_topics.contains(&full_topic) {
-                log::info!(
-                    "Subscription already exists for topic: {}, skipping",
-                    full_topic
-                );
-                continue;
-            }
+            // // Skip if subscription already exists
+            // if existing_topics.contains(&full_topic) {
+            //     log::info!(
+            //         "Subscription already exists for topic: {}, skipping",
+            //         full_topic
+            //     );
+            //     continue;
+            // }
 
             let (sender, receiver) = tokio::sync::mpsc::unbounded_channel::<NatsEvent>();
 
